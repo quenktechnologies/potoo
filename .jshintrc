@@ -1,0 +1,16 @@
+{
+  "asi":"false",
+    "curly": false,
+    "eqeqeq": true,
+    "immed": true,
+    "latedef": true,
+    "newcap": true,
+    "noarg": true,
+    "sub": true,
+    "undef": false,
+    "unused": false,
+    "boss": true,
+    "eqnull": true,
+    "node": true,
+    "esnext":true
+}
