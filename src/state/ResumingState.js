@@ -20,10 +20,14 @@ class ResumingState extends RefState {
         this._countdown = new Ticker(
             this._context.children().length,
             (message, from) => (message === Signal.Resumed) && (this._context.isChild(from)),
-            (message, from) => this._context.system().deadLetters().tell(message, from, this._context.self()),
-            () => this._context.dispatcher().executeOnResume());
+            (message, from) => this._context.system().deadLetters().tell(message, from),
+            () => this._context.dispatcher().execute(
+                concern => concern.onResume(),
+                () => this._context.self().setState(new RunningState(this._context))));
 
-        this._context.children().forEach(child => child.self().tell(Signal.Resume, this._context.self()));
+        this._context.children().
+        forEach(child =>
+            child.self().tell(Signal.Resume, this._context.self()));
 
     }
 

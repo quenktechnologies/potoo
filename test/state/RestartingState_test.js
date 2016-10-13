@@ -98,11 +98,11 @@ describe('RestartingState', function() {
 
             state.sync();
             state.tell(Signal.Restarted, context.Children[0].Self);
-            must(context.dispatcher().calls.executeOnRestart).be(0);
+            must(context.dispatcher().Concern.calls.onRestart).be(0);
             state.tell(Signal.Restarted, context.Children[1].Self);
-            must(context.dispatcher().calls.executeOnRestart).be(0);
+            must(context.dispatcher().Concern.calls.onRestart).be(0);
             state.tell(Signal.Restarted, context.Children[2].Self);
-            must(context.dispatcher().calls.executeOnRestart).be(1);
+            must(context.dispatcher().Concern.calls.onRestart).be(1);
 
         });
 
@@ -112,7 +112,7 @@ describe('RestartingState', function() {
 
         it('should discard other messages', function() {
 
-                    state.sync();
+            state.sync();
             state.tell('something', state);
             must(context.system().deadLetterCount.length).be(1);
 

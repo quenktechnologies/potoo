@@ -8,15 +8,7 @@ class Dispatcher extends Mailbox.EnqueueListener {
 
     executeChildError() {}
 
-    executeRegeneration() {}
-
-    executeOnPause() {}
-
-    executeOnResume() {}
-
-    executeOnRestart() {}
-
-    executeOnStop() {}
+    execute() {}
 
 }
 

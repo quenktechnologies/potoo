@@ -19,7 +19,7 @@ class Address {
 
     }
 
-    static fromString(uri) {
+    static fromString(uri = '') {
 
         uri = beof({ uri }).string().value;
 
@@ -57,6 +57,16 @@ class Address {
 
         beof({ uri }).string();
         return startsWith(uri, this.uri.href);
+
+    }
+
+    /**
+     * isRemote tells if this is indeed a remote address
+     * @returns {boolean}
+     */
+    isRemote() {
+
+        return (this.uri.protocol);
 
     }
 

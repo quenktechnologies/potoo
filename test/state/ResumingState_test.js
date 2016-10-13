@@ -98,11 +98,11 @@ describe('ResumingState', function() {
 
             state.sync();
             state.tell(Signal.Resumed, context.Children[0].Self);
-            must(context.dispatcher().calls.executeOnResume).be(0);
+            must(context.dispatcher().Concern.calls.onResume).be(0);
             state.tell(Signal.Resumed, context.Children[1].Self);
-            must(context.dispatcher().calls.executeOnResume).be(0);
+            must(context.dispatcher().Concern.calls.onResume).be(0);
             state.tell(Signal.Resumed, context.Children[2].Self);
-            must(context.dispatcher().calls.executeOnResume).be(1);
+            must(context.dispatcher().Concern.calls.onResume).be(1);
 
         });
 

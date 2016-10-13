@@ -1,6 +1,7 @@
 import events from 'events';
 import Promise from 'bluebird';
 import beof from 'beof';
+import Signal from './state/Signal';
 import Guardian from './Guardian';
 
 /**
@@ -26,13 +27,19 @@ class IsomorphicSystem {
      */
     static create(name) {
 
-        return new IsomorhpicSystem();
+        return new IsomorphicSystem();
 
     }
 
     deadLetters() {
 
         return this._root.deadLetters;
+
+    }
+
+    peer(instance, config) {
+
+        this._root.peer(instance, config);
 
     }
 
@@ -50,8 +57,7 @@ class IsomorphicSystem {
 
     shutdown(reason) {
 
-        this._app.tell(Signal.Stop, this._root);
-        this._sys.tell(Signal.Stop, this._root);
+       // this._root.app.tell(Signal.Stop, this._root);
 
         //@todo -> actually wait until app and sys finished shutting down
         //perhaps this is better done in the root/Guardian?
@@ -59,12 +65,10 @@ class IsomorphicSystem {
         setTimeout(() => {
 
             this._root = null;
-            this._app = null;
-            this._sys = null;
-            this._dl = null;
             this._events = null;
 
-            console.log(reason);
+            if (reason)
+                throw reason;
 
         }, 1000);
 

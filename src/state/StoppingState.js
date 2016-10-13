@@ -21,9 +21,13 @@ class StoppingState extends RefState {
             this._context.children().length,
             (message, from) => (message === Signal.Stopped) && (this._context.isChild(from)),
             (message, from) => this._context.system().deadLetters().tell(message, from),
-            () => this._context.dispatcher().executeOnStop());
+            () => this._context.dispatcher().execute(
+                concern => concern.onStop(),
+                () => this._context.self().setState(new StoppedState(this._context))));
 
-        this._context.children().forEach(child => child.self().tell(Signal.Stop, this._context.self()));
+        this._context.children().
+        forEach(child =>
+            child.self().tell(Signal.Stop, this._context.self()));
 
     }
 

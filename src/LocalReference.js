@@ -76,10 +76,23 @@ class LocalReference {
             this.setState(this._state.stop());
         else if (message === Signal.Resume)
             this.setState(this._state.resume());
-         else
+        else
             this._state.tell(message, from);
 
 
+
+    }
+
+
+    toJSON() {
+
+        return this.toString();
+
+    }
+
+    toString() {
+
+        return this.path();
 
     }
 

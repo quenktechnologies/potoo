@@ -1,10 +1,14 @@
 import beof from 'beof';
+import Address from './Address';
 import AppConcern from './AppConcern';
 import ConcernFactory from './ConcernFactory';
 import ChildContext from './ChildContext';
 import NullReference from './NullReference';
 import Defaults from './Defaults';
 import DeadLetters from './DeadLetters';
+import Monitor from './remote/Monitor';
+import Peer from './remote/Peer';
+import RemoteReference from './remote/RemoteReference';
 
 /**
  * Guardian
@@ -14,8 +18,9 @@ class Guardian {
     constructor(system) {
 
         this.deadLetters = new DeadLetters(system);
-        this.sys = new ChildContext('/sys', this, new Defaults(context => new AppConcern()), system);
-        this.app = new ChildContext('/app', this, new Defaults(context => new AppConcern()), system);
+        this.app = new ChildContext('/app', this, new Defaults(context => new AppConcern(context)), system);
+        this.peers = [];
+        this._system = system;
 
     }
 
@@ -81,7 +86,25 @@ class Guardian {
 
     select(path) {
 
+        var addr = Address.fromString(path);
+        var peer = null;
+
+        if (addr.isRemote()) {
+
+            this.peers.forEach(p => {
+
+                if (p.handles(addr))
+                    peer = p;
+
+            });
+
+        }
+
+        if (peer !== null)
+            return new RemoteReference(path, peer);
+
         return new NullReference(path, this.deadLetters);
+
 
     }
 
@@ -115,41 +138,18 @@ class Guardian {
 
     }
 
-    executeOnReceive() {
+    peer(instance, config) {
 
-        throw new ReferenceError('executeOnReceive(): is not implemented!');
+        beof({ instance }).interface(Peer);
+        beof({ config }).optional().object();
 
-    }
+        var monitor = new Monitor(instance, this._system, config);
 
-    executeOnStart() {
-
-        throw new ReferenceError('executeOnStart(): is not implemented!');
-
-    }
-
-    executeOnPause() {
-
-        throw new ReferenceError('executeOnPause(): is not implemented!');
+        monitor.associate();
+        this.peers.push(instance);
 
     }
 
-    executeOnResume() {
-
-        throw new ReferenceError('executeOnResume(): is not implemented!');
-
-    }
-
-    executeOnRestart() {
-
-        throw new ReferenceError('executeOnRestart(): is not implemented!');
-
-    }
-
-    executeOnStop() {
-
-        throw new ReferenceError('executeOnStop(): is not implemented!');
-
-    }
 
 }
 

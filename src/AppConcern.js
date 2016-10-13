@@ -12,7 +12,7 @@ class AppConcern {
 
     constructor(context) {
 
-        beof({context}).interface(Context);
+        beof({ context }).interface(Context);
 
         this.context = context;
 

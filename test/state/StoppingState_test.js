@@ -98,11 +98,11 @@ describe('StoppingState', function() {
 
             state.sync();
             state.tell(Signal.Stopped, context.Children[0].Self);
-            must(context.dispatcher().calls.executeOnStop).be(0);
+            must(context.dispatcher().Concern.calls.onStop).be(0);
             state.tell(Signal.Stopped, context.Children[1].Self);
-            must(context.dispatcher().calls.executeOnStop).be(0);
+            must(context.dispatcher().Concern.calls.onStop).be(0);
             state.tell(Signal.Stopped, context.Children[2].Self);
-            must(context.dispatcher().calls.executeOnStop).be(1);
+            must(context.dispatcher().Concern.calls.onStop).be(1);
 
         });
 

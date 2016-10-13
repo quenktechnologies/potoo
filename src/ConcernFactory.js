@@ -7,7 +7,6 @@ class ConcernFactory {
 
     /**
      * dispatcher provides the disptacher for the Concern.
-     * @param {ConcernFactory} factory
      * @param {Context} context
      * @returns {Dispatcher}
      */

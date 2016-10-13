@@ -21,9 +21,13 @@ class PausingState extends RefState {
             this._context.children().length,
             (message, from) => (message === Signal.Paused) && (this._context.isChild(from)),
             (message, from) => this._context.system().deadLetters().tell(message, from),
-            () => this._context.dispatcher().executeOnPause());
+            () => this._context.dispatcher().execute(
+                concern => concern.onPause(),
+                () => this._context.self().setState(new PausedState(this._context))));
 
-        this._context.children().forEach(child => child.self().tell(Signal.Pause, this._context.self()));
+        this._context.children().
+        forEach(child =>
+            child.self().tell(Signal.Pause, this._context.self()));
 
     }
 

@@ -99,11 +99,11 @@ describe('PausingState', function() {
 
             state.sync();
             state.tell(Signal.Paused, context.Children[0].Self);
-            must(context.dispatcher().calls.executeOnPause).be(0);
+            must(context.dispatcher().Concern.calls.onPause).be(0);
             state.tell(Signal.Paused, context.Children[1].Self);
-            must(context.dispatcher().calls.executeOnPause).be(0);
+            must(context.dispatcher().Concern.calls.onPause).be(0);
             state.tell(Signal.Paused, context.Children[2].Self);
-            must(context.dispatcher().calls.executeOnPause).be(1);
+            must(context.dispatcher().Concern.calls.onPause).be(1);
 
         });
 

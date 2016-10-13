@@ -28,7 +28,7 @@ class ChildContext {
 
         this._path = path;
         this._parent = parent;
-        this._dispatcher = factory.dispatcher(factory, this);
+        this._dispatcher = factory.dispatcher(this);
         this._mailbox = factory.mailbox(this._dispatcher);
         this._ref = factory.reference(this);
         this._system = system;

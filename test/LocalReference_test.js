@@ -33,7 +33,7 @@ describe('LocalReference', function() {
         it('should pause', function() {
 
             ref.tell(Signal.Pause);
-            must(context.Dispatcher.calls.executeOnPause).be(1);
+            must(context.Dispatcher.calls.execute).be(1);
 
         });
 
@@ -44,10 +44,9 @@ describe('LocalReference', function() {
         it('should resume the Concern', function() {
 
             ref.tell(Signal.Pause);
-            must(context.Dispatcher.calls.executeOnResume).be(0);
+            must(context.Dispatcher.calls.execute).be(0);
             ref.tell(Signal.Resume);
-            console.log(ref._state);
-            must(context.Dispatcher.calls.executeOnResume).be(1);
+            must(context.Dispatcher.calls.execute).be(1);
 
         });
 
@@ -55,11 +54,11 @@ describe('LocalReference', function() {
         it('should resume only if paused', function() {
 
             ref.tell(Signal.Resume);
-            must(context.Dispatcher.calls.executeOnResume).be(0);
+            must(context.Dispatcher.calls.executee).be(0);
             ref.tell(Signal.Restart);
-            must(context.Dispatcher.calls.executeOnResume).be(0);
+            must(context.Dispatcher.calls.execute).be(0);
             ref.tell(Signal.Stop);
-            must(context.Dispatcher.calls.executeOnResume).be(0);
+            must(context.Dispatcher.calls.execute).be(0);
 
         });
 

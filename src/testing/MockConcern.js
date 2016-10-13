@@ -1,24 +1,30 @@
-
 /**
  * MockConcern
  */
 class MockConcern {
 
-  constructor() {
+    constructor() {
 
-  }
+        this.calls = {
+            onStart: 0,
+            onRestart: 0,
+            onStop: 0,
+            onPause: 0,
+            onResume: 0
+        };
 
-    onStart() {}
+    }
 
-    onPause() {}
+    onStart() {this.calls.onStart++; }
 
-    onResume() {}
+    onPause() { this.calls.onPause++;}
 
-    onRestart() {}
+    onResume() { this.calls.onResume++;}
 
-  onStop(){}
+    onRestart() { this.calls.onRestart++;}
+
+    onStop() { this.calls.onStop++;}
 
 }
 
 export default MockConcern
-

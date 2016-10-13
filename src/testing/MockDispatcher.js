@@ -1,4 +1,5 @@
 import Promise from 'bluebird';
+import MockConcern from './MockConcern';
 
 /**
  * MockDispatcher
@@ -8,6 +9,7 @@ class MockDispatcher {
     constructor() {
 
         this.calls = {
+            execute: 0,
             executeOnStart: 0,
             executeOnRestart: 0,
             executeOnStop: 0,
@@ -15,10 +17,19 @@ class MockDispatcher {
             executeOnResume: 0
         };
 
+        this.Concern = new MockConcern();
+
     }
 
     onEnqueue(mailbox) {
 
+
+    }
+
+    execute(cb, success) {
+
+        return Promise.try(()=>cb(this.Concern)).
+        then(success);
 
     }
 

@@ -4,6 +4,21 @@ import SimpleMailbox from './SimpleMailbox';
 import RunningState from '../state/RunningState';
 import PausedState from '../state/PausedState';
 import StoppedState from '../state/StoppedState';
+import Context from '../Context';
+import ConcernFactory from '../ConcernFactory';
+
+//IE support
+if (Function.prototype.name === undefined && Object.defineProperty !== undefined) {
+    Object.defineProperty(Function.prototype, 'name', {
+
+        get: function() {
+            var funcNameRegex = /function\s([^(]{1,})\(/;
+            var results = (funcNameRegex).exec((this).toString());
+            return (results && results.length > 1) ? results[1].trim() : "";
+        },
+        set: function(value) {}
+    });
+}
 
 const keyify = function(msg) {
 
@@ -31,6 +46,9 @@ const keyify = function(msg) {
 class SimpleDispatcher {
 
     constructor(factory, context) {
+
+        beof({ factory }).interface(ConcernFactory);
+        beof({ context }).interface(Context);
 
         this._mailboxes = {};
         this._factory = factory;
@@ -75,7 +93,11 @@ class SimpleDispatcher {
                 return Promise.resolve(action);
 
         }).
-        catch(e => this.executeChildError(e, next.from));
+        catch(e => {
+            this.executeChildError(e, next.from);
+        }).
+        then(() => this._busy = false).
+            then(()=>this._next(box));
 
     }
 
@@ -101,12 +123,18 @@ class SimpleDispatcher {
 
     }
 
-    executeRegeneration() {
+    execute(action, success) {
 
-        this._concern = this._factory.create(this._context);
-        Promise.resolve(this._concern.onStart()).
-        then(() => this._context.self().setState(new RunningState(this._context))).
-        catch(e => this._context.parent().dispatcher().executeChildError(e, this._concern));
+        beof({ action }).function();
+        beof({ success }).function();
+
+        var concern = this._concern;
+
+        Promise.try(function do_execute() {
+            action(concern);
+        }).
+        then(success).
+        catch(e => this.executeChildError(e, this._context.self()));
 
     }
 

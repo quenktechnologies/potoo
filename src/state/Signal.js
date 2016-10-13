@@ -5,22 +5,11 @@ import beof from 'beof';
  */
 class Signal {
 
-    constructor(path) {
+    toJSON() {
 
-        beof({ path }).optional().string();
-        this._path = path;
-
-    }
-
-    toString() {
-
-        return JSON.stringify({
-
-            path: this._path || '',
-            type: 'Signal',
-            signal: this.constructor.name
-
-        });
+        return {
+            name: this.constructor.name
+        };
 
     }
 
@@ -49,14 +38,17 @@ class Stop extends Signal {}
 
 class Stopped extends Signal {}
 
-Signal.Start = Start;
-Signal.Running = Running;
-Signal.Pause = Pause;
-Signal.Resume = Resume;
-Signal.Resumed = Resumed;
-Signal.Restart = Restart;
-Signal.Restarted = Restarted;
-Signal.Stop = Stop;
-Signal.Stopped = Stopped;
+class Closed extends Signal {}
+
+Signal.Start = new Start();
+Signal.Running = new Running();
+Signal.Pause = new Pause();
+Signal.Resume = new Resume();
+Signal.Resumed = new Resumed();
+Signal.Restart = new Restart();
+Signal.Restarted = new Restarted();
+Signal.Stop = new Stop();
+Signal.Stopped = new Stopped();
+Signal.Closed = new Closed();
 
 export default Signal

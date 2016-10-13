@@ -1,12 +1,12 @@
 /**
- * Context represents the context a Concern is created in.
+ * RefFactory  represents the context a Concern is created in.
  * With a Context you can:
  * * Create Concerns
  * * Listen to events via subscribe()
  * * more
  * @interface
  */
-class Context {
+class RefFactory {
 
     /**
      * select a Concern based on it's path
@@ -28,4 +28,4 @@ class Context {
 
 }
 
-export default Context;
+export default RefFactory;
