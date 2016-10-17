@@ -76,6 +76,15 @@ class Context extends RefFactory {
 
     }
 
+    /**
+     * concernOf creates a new child concern.
+     * @param {ConcernFactory} factory
+     * @param {string} name
+     */
+    concernOf() {
+
+    }
+
 }
 
 export default Context;

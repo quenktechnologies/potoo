@@ -97,7 +97,7 @@ class SimpleDispatcher {
             this.executeChildError(e, next.from);
         }).
         then(() => this._busy = false).
-            then(()=>this._next(box));
+        then(() => this._next(box));
 
     }
 
@@ -141,7 +141,7 @@ class SimpleDispatcher {
     executeOnStart() {
 
         Promise.resolve(this._concern.onStart()).
-        then(this._context.self().setState(new RunningState(this._context))).
+        then(()=>this._context.self().setState(new RunningState(this._context))).
         catch(e => this._context.parent().dispatcher().executeChildError(e, this._concern));
 
     }
@@ -150,7 +150,7 @@ class SimpleDispatcher {
 
         this._pause = true;
         Promise.resolve(this._concern.onPause()).
-        then(this._context.self().setState(new PausedState(this._context))).
+        then(()=>this._context.self().setState(new PausedState(this._context))).
         catch(e => this._context.parent().dispatcher().executeChildError(e, this._concern));
 
     }
@@ -176,7 +176,7 @@ class SimpleDispatcher {
     executeOnStop() {
 
         Promise.resolve(this._concern.onStop()).
-        then(this._context.self().setState(new StoppedState(this._context))).
+        then(()=>this._context.self().setState(new StoppedState(this._context))).
         catch(e => this._context.parent().dispatcher().executeChildError(e, this._concern));
 
     }
