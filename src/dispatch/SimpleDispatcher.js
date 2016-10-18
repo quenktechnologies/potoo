@@ -4,6 +4,7 @@ import SimpleMailbox from './SimpleMailbox';
 import RunningState from '../state/RunningState';
 import PausedState from '../state/PausedState';
 import StoppedState from '../state/StoppedState';
+import Signal from '../state/Signal';
 import Context from '../Context';
 import Reference from '../Reference';
 import ConcernFactory from '../ConcernFactory';
@@ -117,7 +118,7 @@ class SimpleDispatcher {
         var sig = strategy.decide(e);
 
         if (!(sig instanceof Signal))
-            return this.parent().dispatcher().executeChildError(e, child);
+            return this._context.parent().dispatcher().executeChildError(e, child);
 
         return Promise.resolve(() => strategy.apply(sig, child, this._context));
 
