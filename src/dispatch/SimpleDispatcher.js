@@ -5,6 +5,7 @@ import RunningState from '../state/RunningState';
 import PausedState from '../state/PausedState';
 import StoppedState from '../state/StoppedState';
 import Context from '../Context';
+import Reference from '../Reference';
 import ConcernFactory from '../ConcernFactory';
 
 //IE support
@@ -141,8 +142,8 @@ class SimpleDispatcher {
     executeOnStart() {
 
         Promise.resolve(this._concern.onStart()).
-        then(()=>this._context.self().setState(new RunningState(this._context))).
-        catch(e => this._context.parent().dispatcher().executeChildError(e, this._concern));
+        then(() => this._context.self().setState(new RunningState(this._context))).
+        catch(e => this._context.parent().dispatcher().executeChildError(e, this._context.self()));
 
     }
 
@@ -150,8 +151,8 @@ class SimpleDispatcher {
 
         this._pause = true;
         Promise.resolve(this._concern.onPause()).
-        then(()=>this._context.self().setState(new PausedState(this._context))).
-        catch(e => this._context.parent().dispatcher().executeChildError(e, this._concern));
+        then(() => this._context.self().setState(new PausedState(this._context))).
+        catch(e => this._context.parent().dispatcher().executeChildError(e, this._context.self()));
 
     }
 
@@ -160,7 +161,7 @@ class SimpleDispatcher {
         this._pause = false;
         Promise.resolve(this._concern.onResume()).
         then(() => this._context.self().setState(new RunningState(this._context))).
-        catch(e => this._context.parent().dispatcher().executeChildError(e, this._concern));
+        catch(e => this._context.parent().dispatcher().executeChildError(e, this._context.self()));
 
     }
 
@@ -169,15 +170,15 @@ class SimpleDispatcher {
         Promise.resolve(this._concern.onRestart()).
         then(() => this._concern = this._factory.create(this._context)).
         then(() => this._context.self().setState(new RunningState(this._context))).
-        catch(e => this._context.parent().dispatcher().executeChildError(e, this._concern));
+        catch(e => this._context.parent().dispatcher().executeChildError(e, this._context.self()));
 
     }
 
     executeOnStop() {
 
         Promise.resolve(this._concern.onStop()).
-        then(()=>this._context.self().setState(new StoppedState(this._context))).
-        catch(e => this._context.parent().dispatcher().executeChildError(e, this._concern));
+        then(() => this._context.self().setState(new StoppedState(this._context))).
+        catch(e => this._context.parent().dispatcher().executeChildError(e, this._context.self()));
 
     }
 
