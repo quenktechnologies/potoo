@@ -28,11 +28,13 @@ class ChildContext {
 
         this._path = path;
         this._parent = parent;
-        this._dispatcher = factory.dispatcher(this);
-        this._mailbox = factory.mailbox(this._dispatcher);
-        this._ref = factory.reference(this);
         this._system = system;
         this._children = [];
+
+        //The order these are called in is important
+        this._ref = factory.reference(this);
+        this._dispatcher = factory.dispatcher(this);
+        this._mailbox = factory.mailbox(this._dispatcher);
 
         this._dispatcher.executeOnStart();
 
