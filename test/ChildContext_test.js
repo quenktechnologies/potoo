@@ -52,7 +52,7 @@ describe('ChildContext', function() {
 
         });
 
-        it('should return a NullReference if it could not be resolved', function() {
+        xit('should return a NullReference if it could not be resolved', function() {
 
             context = new ChildContext(
                 '/app/main',
@@ -66,5 +66,29 @@ describe('ChildContext', function() {
         });
 
     });
+
+    describe('ChildContext#isChild', function() {
+
+        it('must work', function() {
+
+            var one = context.concernOf(new Testing.ConcernFactory(), 'one');
+            var two = context.concernOf(new Testing.ConcernFactory(), 'two');
+            var three = context.concernOf(new Testing.ConcernFactory(), 'three');
+
+            must(context.isChild(one)).be(true);
+            must(context.isChild(two)).be(true);
+            must(context.isChild(three)).be(true);
+
+        });
+
+        it('must not go crazy if child is this context', function() {
+
+            must(context.isChild(context)).be(false);
+
+        });
+
+
+    });
+
 
 });
