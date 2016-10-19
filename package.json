@@ -23,6 +23,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "babel-plugin-transform-export-extensions": "^6.8.0",
+    "beof": "^0.1.1",
     "es6-error": "^3.1.0",
     "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git"
   }

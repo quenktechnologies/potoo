@@ -1,4 +1,5 @@
 import beof from 'beof';
+import Promise from 'bluebird';
 import Context from '../Context';
 import Reference from '../Reference';
 
@@ -57,6 +58,13 @@ class RefState {
         beof({ from }).interface(Reference);
 
         this._context.system().deadLetters().tell(message, from);
+
+    }
+
+    ask(message, from) {
+
+        this.tell(message, from);
+        return Promise.resolve();
 
     }
 

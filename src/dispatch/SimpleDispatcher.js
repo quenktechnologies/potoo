@@ -92,14 +92,17 @@ class SimpleDispatcher {
                 action = actions;
 
             if (typeof action === 'function')
-                return Promise.resolve(action);
+                return Promise.try(action);
 
         }).
-        catch(e => {
-            this.executeChildError(e, next.from);
-        }).
-        then(() => this._busy = false).
-        then(() => this._next(box));
+        then(value => (next.done) ? next.done(value) : value).
+        catch(e => (next.reject) ? next.reject(e) : this.executeChildError(e, next.from)).
+        finally(() => {
+
+            this._busy = false;
+            this._next(box);
+
+        });
 
     }
 

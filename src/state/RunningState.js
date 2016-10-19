@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import RefState from './RefState';
 import Signal from './Signal';
 import PausingState from './PausingState';
@@ -35,8 +36,18 @@ class RunningState extends RefState {
 
     tell(message, from) {
 
-        if (!(message instanceof Signal))
-            this._context.mailbox().enqueue({ message, from });
+        this._context.mailbox().enqueue({ message, from });
+
+    }
+
+    ask(message, from) {
+
+        return new Promise(function(resolve, reject) {
+
+            this._context.mailbox().enqueue({ message, from, resolve, reject });
+
+        });
+
 
     }
 

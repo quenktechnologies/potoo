@@ -18,7 +18,12 @@ class Guardian {
     constructor(system) {
 
         this.deadLetters = new DeadLetters(system);
-        this.app = new ChildContext('/app', this, new Defaults(context => new AppConcern(context)), system);
+
+        this.app = new ChildContext('/app',
+            this,
+            new Defaults(context => new AppConcern(context)),
+            system);
+
         this.peers = [];
         this._system = system;
 

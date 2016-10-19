@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import RefState from './RefState';
 import Signal from './Signal';
 import RestartingState from './RestartingState';
@@ -35,7 +36,14 @@ class PausedState extends RefState {
 
     tell(message, from) {
 
-        this._context.mailbox().enqueue({message, from});
+        this._context.mailbox().enqueue({ message, from });
+
+    }
+
+    ask(message, from) {
+
+        this.tell(message, from);
+        return Promise.resolve();
 
     }
 

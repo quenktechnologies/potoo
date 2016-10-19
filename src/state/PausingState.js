@@ -37,6 +37,13 @@ class PausingState extends RefState {
 
     }
 
+    ask(message, from) {
+
+        this.tell(message, from);
+        return Promise.resolve();
+
+    }
+
 }
 
 export default PausingState
