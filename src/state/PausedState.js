@@ -1,4 +1,5 @@
 import RefState from './RefState';
+import Signal from './Signal';
 import RestartingState from './RestartingState';
 import ResumingState from './ResumingState';
 import StoppingState from './StoppingState';
