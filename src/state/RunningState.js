@@ -35,7 +35,8 @@ class RunningState extends RefState {
 
     tell(message, from) {
 
-        this._context.mailbox().enqueue({ message, from });
+        if (!(message instanceof Signal))
+            this._context.mailbox().enqueue({ message, from });
 
     }
 
