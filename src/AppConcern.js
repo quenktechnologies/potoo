@@ -15,6 +15,7 @@ class AppConcern {
         beof({ context }).interface(Context);
 
         this.context = context;
+        this.self = context.self();
 
     }
 
