@@ -62,6 +62,7 @@ class SimpleDispatcher {
     _next(box) {
 
         var next;
+        var concern = this._concern;
 
         if (this._busy)
             return;
@@ -77,8 +78,11 @@ class SimpleDispatcher {
 
         }
 
-        Promise.resolve(this._concern.onReceive(next.message, next.from)).
-        then(actions => {
+        Promise.try(function() {
+
+            return concern.onReceive(next.message, next.from);
+
+        }).then(actions => {
 
             var action = null;
 
@@ -86,7 +90,7 @@ class SimpleDispatcher {
                 return null;
 
             else if (typeof actions === 'object')
-                action = actions[keyify(msg)];
+                action = actions[keyify(next.message)];
 
             else if (typeof actions === 'function')
                 action = actions;
@@ -123,7 +127,7 @@ class SimpleDispatcher {
         if (!(sig instanceof Signal))
             return this._context.parent().dispatcher().executeChildError(e, child);
 
-        return Promise.resolve(() => strategy.apply(sig, child, this._context));
+        return Promise.try(() => strategy.apply(sig, child, this._context));
 
 
     }
@@ -145,7 +149,7 @@ class SimpleDispatcher {
 
     executeOnStart() {
 
-        Promise.resolve(this._concern.onStart()).
+        Promise.try(this._concern.onStart()).
         then(() => this._context.self().setState(new RunningState(this._context))).
         catch(e => this._context.parent().dispatcher().executeChildError(e, this._context.self()));
 
@@ -154,7 +158,7 @@ class SimpleDispatcher {
     executeOnPause(cb) {
 
         this._pause = true;
-        Promise.resolve(this._concern.onPause()).
+        Promise.try(this._concern.onPause()).
         then(() => this._context.self().setState(new PausedState(this._context))).
         catch(e => this._context.parent().dispatcher().executeChildError(e, this._context.self()));
 
@@ -163,7 +167,7 @@ class SimpleDispatcher {
     executeOnResume() {
 
         this._pause = false;
-        Promise.resolve(this._concern.onResume()).
+        Promise.try(this._concern.onResume()).
         then(() => this._context.self().setState(new RunningState(this._context))).
         catch(e => this._context.parent().dispatcher().executeChildError(e, this._context.self()));
 
@@ -171,7 +175,7 @@ class SimpleDispatcher {
 
     executeOnRestart() {
 
-        Promise.resolve(this._concern.onRestart()).
+        Promise.try(this._concern.onRestart()).
         then(() => this._concern = this._factory.create(this._context)).
         then(() => this._context.self().setState(new RunningState(this._context))).
         catch(e => this._context.parent().dispatcher().executeChildError(e, this._context.self()));
@@ -180,7 +184,7 @@ class SimpleDispatcher {
 
     executeOnStop() {
 
-        Promise.resolve(this._concern.onStop()).
+        Promise.try(this._concern.onStop()).
         then(() => this._context.self().setState(new StoppedState(this._context))).
         catch(e => this._context.parent().dispatcher().executeChildError(e, this._context.self()));
 
