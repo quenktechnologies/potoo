@@ -100,7 +100,9 @@ class SimpleDispatcher {
 
         }).
         then(value => (next.done) ? next.done(value) : value).
-        catch(e => (next.reject) ? next.reject(e) : this.executeChildError(e, next.from)).
+        catch(e => (next.reject) ?
+            next.reject(e) :
+            this.executeChildError(e, next.from || this._context.select('/'))).
         finally(() => {
 
             this._busy = false;
