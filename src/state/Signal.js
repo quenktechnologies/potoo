@@ -13,6 +13,12 @@ class Signal {
 
     }
 
+    toString() {
+
+        return JSON.stringify(this);
+
+    }
+
 }
 
 /**
