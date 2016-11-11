@@ -30,7 +30,7 @@ class NullReference {
 
     tell(message, from) {
 
-        this._deadLetters.tell(message, from);
+        this._deadLetters.tell({ to: this._path, message }, from);
 
     }
 

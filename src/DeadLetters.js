@@ -16,7 +16,7 @@ class DeadLetters {
 
     tell(message, from) {
 
-        this._system.emit('bounce', message, from);
+        this._system.emit('bounce', message.message, from, message.to);
 
     }
 
