@@ -79,7 +79,24 @@ class LocalReference {
         else
             this._state.tell(message, from);
 
+    }
 
+    ask(message, from) {
+
+        beof({ from }).optional().interface(Reference);
+
+        if (message === Signal.Restart)
+            this.setState(this._state.restart());
+        else if (message === Signal.Pause)
+            this.setState(this._state.pause());
+        else if (message === Signal.Stop)
+            this.setState(this._state.stop());
+        else if (message === Signal.Resume)
+            this.setState(this._state.resume());
+        else
+            return this._state.ask(message, from);
+
+        return Promise.resolve();
 
     }
 

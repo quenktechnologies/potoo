@@ -44,7 +44,16 @@ class Stop extends Signal {}
 
 class Stopped extends Signal {}
 
-class Closed extends Signal {}
+class Closed extends Signal {
+
+    constructor(ref) {
+
+        super();
+        this.ref = ref;
+
+    }
+
+}
 
 Signal.Start = new Start();
 Signal.Running = new Running();

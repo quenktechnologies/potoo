@@ -1,15 +1,15 @@
-
 /**
  * Peer
  */
 class Peer {
 
-    associate(){}
+    associate() {}
 
-    handles(){}
+    handles() {}
 
-    resolve(){}
+    resolve() {}
+
+    disassociate(){}
 
 }
 export default Peer
-

@@ -37,7 +37,6 @@ class StoppingState extends RefState {
 
     }
 
-
     ask(message, from) {
 
         this.tell(message, from);

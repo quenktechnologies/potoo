@@ -96,7 +96,11 @@ class SimpleDispatcher {
                 action = actions;
 
             if (typeof action === 'function')
-                return Promise.try(action);
+                return Promise.try(function() {
+
+                    return action.call(actions, next.message, next.from);
+
+                });
 
         }).
         then(value => (next.done) ? next.done(value) : value).

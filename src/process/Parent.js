@@ -44,6 +44,11 @@ class Parent {
 
     }
 
+    disassociate() {
+
+
+    }
+
     send(message) {
 
         Promise.try(() => process.send(message)).

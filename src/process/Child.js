@@ -66,6 +66,12 @@ class Child {
 
     }
 
+    disassociate() {
+
+        this._child.kill('SIGTERM');
+
+    }
+
     send(message) {
 
         Promise.try(() => this._child.send(message)).

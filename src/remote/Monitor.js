@@ -93,14 +93,11 @@ class Monitor {
         //Needs to be impoved significantly for now this just gives an idea of
         //what could be done.
         //
+        if (this._config['keep_alive'])
+            return this.associate();
 
-        if (this._config['keep_alive']) {
+        this._system.emit('closed');
 
-
-            this.associate();
-
-
-        }
 
     }
 

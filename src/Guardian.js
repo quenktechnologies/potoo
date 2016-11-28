@@ -27,6 +27,9 @@ class Guardian {
         this.peers = [];
         this._system = system;
 
+        process.once('exit', () => this.peers.forEach(p => p.disassociate()));
+        process.once('error', () => this.peers.forEach(p => p.disassociate()));
+
     }
 
     path() {
@@ -85,7 +88,7 @@ class Guardian {
 
     tell(message, from) {
 
-        this.deadLetters.tell(message, from);
+        this.deadLetters.tell({ message }, from);
 
     }
 
