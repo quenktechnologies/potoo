@@ -1,4 +1,3 @@
 {
-  "presets": ["es2015"],
-  "plugins": ["add-module-exports", "transform-export-extensions", "transform-es2015-function-name"]
+  "presets": ["es2015"]
 }
