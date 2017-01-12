@@ -141,6 +141,8 @@ class ChildContext {
 
     }
 
+    stop() {}
+
 }
 
 export default ChildContext
