@@ -1,42 +1,88 @@
 import beof from 'beof';
-import Reference from './Reference';
-import System from './System';
 import Context from './Context';
-import SimpleDispatcher from './dispatch/SimpleDispatcher';
-import SimpleMailbox from './dispatch/SimpleMailbox';
-import RunningState from './state/RunningState';
-import ConcernFactory from './ConcernFactory';
-import Address from './Address';
+import Reference from './Reference';
+import Callable from './Callable';
+import { v4 } from 'node-uuid';
+import { Dispatcher, UnboundedMailbox, SequentialDispatcher, Problem } from './dispatch';
+import { escalate } from './dispatch/strategy';
+
+const noop = () => {};
+const default_mailbox = d => new UnboundedMailbox(d);
+const default_dispatcher = () => new SequentialDispatcher();
+
+/**
+ * LocalReference is a Reference to an Actor in the current address space.
+ * @implements {Reference}
+ */
+export class LocalReference {
+
+    constructor(path, tellFn) {
+
+        beof({ path }).string();
+        beof({ tellFn }).function();
+
+        this._tellFn = tellFn;
+        this._path = path;
+
+    }
+
+    tell(m) {
+
+        this._tellFn(m);
+
+    }
+
+    toJSON() {
+
+        return this.toString();
+
+    }
+
+    toString() {
+
+        return this.path;
+
+    }
+
+}
 
 /**
  * ChildContext is the Context of each self created in this address space.
- * @implements {RefFactory}
+ * @implements {RefFactory}wzrd.in
  * @implements {Context}
  * @param {string} path
  * @param {Context} [parent]
  * @param {ConcernFactory} factory
  * @param {System} system
  */
-class ChildContext {
+export class ChildContext {
 
-    constructor(path, parent, factory, system) {
+    constructor(path, parent, root, { inbox, strategy, dispatch }) {
 
         beof({ path }).string();
-        beof({ parent }).optional().interface(Context);
-        beof({ factory }).interface(ConcernFactory);
-        beof({ system }).interface(System);
+        beof({ parent }).interface(Context);
+        beof({ root }).interface(Reference);
+        beof({ inbox }).object();
+        beof({ strategy }).function();
+        beof({ dispatch }).interface(Dispatcher);
 
+        this._stack = [];
+        this._children = [];
+        this._dispatch = dispatch;
         this._path = path;
         this._parent = parent;
-        this._system = system;
-        this._children = [];
+        this._strategy = strategy;
+        this._root = root;
+        this._inbox = inbox;
+        this._self = new LocalReference(this._path, m => {
 
-        //The order these are called in is important
-        this._ref = factory.reference(this);
-        this._dispatcher = factory.dispatcher(this);
-        this._mailbox = factory.mailbox(this._dispatcher);
+            if (m instanceof Problem) {
+                strategy(m.error, m.context, this);
+            } else {
+                inbox.enqueue(m);
+            }
 
-        this._dispatcher.executeOnStart();
+        });
 
     }
 
@@ -46,65 +92,33 @@ class ChildContext {
 
     }
 
-    self() {
-
-        return this._ref;
-
-    }
-
     parent() {
 
         return this._parent;
 
     }
 
-    isChild(ref) {
+    root() {
 
-        var ret = false;
-
-        this._children.forEach(child => {
-
-            if (child.self() === ref)
-                ret = true;
-
-        });
-
-        return ret;
+        return this._root;
 
     }
 
-    children() {
+    inbox() {
 
-        return this._children.slice();
-
-    }
-
-    mailbox() {
-
-        return this._mailbox;
+        return this._inbox;
 
     }
 
-    dispatcher() {
+    self() {
 
-        return this._dispatcher;
-
-    }
-
-    system() {
-
-        return this._system;
+        return this._self;
 
     }
 
-    concernOf(factory, name) {
+    is(ref) {
 
-        beof({ factory }).interface(ConcernFactory);
-        beof({ name }).string();
-
-        var context = new ChildContext(`${this._path}/${name}`, this, factory, this._system);
-        this._children.push(context);
-        return context.self();
+        return (String(ref) === this._path);
 
     }
 
@@ -112,23 +126,27 @@ class ChildContext {
 
         beof({ path }).string();
 
-        var address = Address.fromString(path);
-        var childs = this.children();
-        var parent = this.parent();
+        if (path === this._path)
+            return this.self();
+
+        if (!path.startsWith(this._path))
+            return this._parent.select(path);
+
+        var childs = this._children.map(c => c.context);
 
         var next = child => {
 
-            var ref;
-
             if (!child) {
 
-                return parent.select(address.toString());
+                //@todo
+                //should return a null reference
+                return { tell() {} };
 
-            } else if (address.is(child.path())) {
+            } else if (child.path() === path) {
 
                 return child.self();
 
-            } else if (address.isBelow(child.path())) {
+            } else if (path.startsWith(child.path())) {
 
                 return child.select(path);
 
@@ -141,7 +159,43 @@ class ChildContext {
 
     }
 
-    stop() {}
+    spawn({
+            mailbox = default_mailbox,
+            strategy = escalate,
+            dispatcher = default_dispatcher,
+            start
+        },
+        name = v4()) {
+
+        beof({ mailbox }).function();
+        beof({ strategy }).function();
+        beof({ dispatcher }).function();
+        beof({ name }).string();
+        beof({ start }).interface(Callable);
+
+        var slash = (this._path === '/') ? '' : '/';
+        var path = `${this._path}${slash}${name}`;
+        var dispatch = dispatcher(this._self);
+        var inbox = mailbox(dispatch);
+        var context = new ChildContext(path, this, this._root, { inbox, dispatch, strategy });
+        var self = context.self();
+
+        this._children.push({ path, inbox, context, start, strategy });
+        start.call(context);
+        self.tell('started');
+
+        return self;
+
+    }
+
+    receive(behaviour, time) {
+
+        beof({ behaviour }).function();
+        beof({ time }).optional().number();
+
+        return this._dispatch.schedule(behaviour, this, time);
+
+    }
 
 }
 

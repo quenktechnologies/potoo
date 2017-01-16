@@ -1,73 +1,79 @@
 import must from 'must';
-import ChildContext from '../src/ChildContext';
-import LocalReference from '../src/LocalReference';
-import NullReference from '../src/NullReference';
-import Testing from '../src/testing/Testing';
+import sinon from 'sinon';
+import { Context, Reference } from 'potoo-lib';
+import { Mailbox, Dispatcher } from 'potoo-lib/dispatch';
+import { ChildContext, LocalReference } from 'potoo-lib/ChildContext';
 
-var context;
+var context, inbox, root, parent, strategy, child, dispatch;
+var throwit = e => { throw e; };
+var start = () => {};
 
 describe('ChildContext', function() {
 
     beforeEach(function() {
 
-        context = new ChildContext(
-            '/app/main',
-            new Testing.ChildContext(),
-            new Testing.ConcernFactory(),
-            new Testing.System());
+        inbox = sinon.createStubInstance(Mailbox);
+        root = sinon.createStubInstance(Reference);
+        parent = sinon.createStubInstance(Context);
+        parent.error = throwit;
+        parent.select = () => { throw 'meta human'; };
+        child = sinon.createStubInstance(Context);
+        dispatch = sinon.createStubInstance(Dispatcher);
+
+        context = new ChildContext('/', parent, root, { inbox, strategy: throwit, dispatch, start });
 
     });
 
-    describe('ChildContext#path', function() {
+    describe('path', function() {
 
         it('must default to /main', function() {
 
-            must(context.path()).be('/app/main');
+            must(context.path()).be('/');
 
         });
 
     });
 
-    describe('ChildContext#concernOf', function() {
+    describe('spawn', function() {
 
-        it('must provide a LocalReference', function() {
+        it('must produce an actor reference', function() {
 
-            must(context.concernOf(new Testing.ConcernFactory(), 'users')).instanceOf(Testing.MockReference);
+            must(context.spawn({ start })).be.instanceOf(LocalReference);
 
         });
 
     });
 
-    describe('ChildContext#select', function() {
+    describe('select', function() {
 
         it('must select existing References', function() {
 
-            var one = context.concernOf(new Testing.ConcernFactory(), 'one');
-            var two = context.concernOf(new Testing.ConcernFactory(), 'two');
-            var three = context.concernOf(new Testing.ConcernFactory(), 'three');
+            var one, two, three;
 
-            must(context.select('/app/main/one')).be(one);
-            must(context.select('/app/main/two')).be(two);
-            must(context.select('/app/main/three')).be(three);
+            one = context.spawn({
 
-        });
+                start: function() {
 
-        xit('should return a NullReference if it could not be resolved', function() {
+                    two = this.spawn({
+                        start: function() {
 
-            context = new ChildContext(
-                '/app/main',
-                null,
-                new Testing.ConcernFactory(),
-                new Testing.System());
+                            three = this.spawn({ start }, 'three')
 
-            must(context.select('ssh://user@remote/path/to/concern')).
-            be.instanceOf(NullReference);
+                        }
+                    }, 'two')
+
+                }
+            }, 'one');
+
+            must(context.select('/one')).eql(one);
+            must(context.select('/one/two')).eql(two);
+            must(context.select('/one/two/three')).eql(three);
 
         });
 
     });
 
-    describe('ChildContext#isChild', function() {
+    xdescribe('ChildContext#isChild', function() {
 
         it('must work', function() {
 
@@ -89,6 +95,5 @@ describe('ChildContext', function() {
 
 
     });
-
 
 });

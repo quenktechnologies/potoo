@@ -3,7 +3,7 @@
  * are stored for Concerns before they are processed.
  * @interface
  */
-class Mailbox {
+export class Mailbox {
 
     /**
      * enqueue puts a message into the queue and alerts the
@@ -28,23 +28,4 @@ class Mailbox {
 
 }
 
-/**
- * MailboxListener is the interface of classes interested in reacting to
- * enqueue events on the Mailbox.
- * @interface
- */
-class EnqueueListener {
-
-    /**
-     * onEnqueue is called when a new item has been enqueued by
-     * the Mailbox.
-     * @param {Mailbox} mailbox
-     */
-    onEnqueue() {
-
-    }
-
-}
-
-Mailbox.EnqueueListener = EnqueueListener;
 export default Mailbox

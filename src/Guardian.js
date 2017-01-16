@@ -1,40 +1,31 @@
 import beof from 'beof';
-import Address from './Address';
-import AppConcern from './AppConcern';
-import ConcernFactory from './ConcernFactory';
+import Promise from 'bluebird';
 import ChildContext from './ChildContext';
-import NullReference from './NullReference';
-import Defaults from './Defaults';
-import DeadLetters from './DeadLetters';
-import Monitor from './remote/Monitor';
-import Peer from './remote/Peer';
-import RemoteReference from './remote/RemoteReference';
+import System from './System';
+
+const strategy = e => { throw e; }
 
 /**
  * Guardian
+ * @implements {Context}
+ * @implements {Reference}
+ * @implements {Mailbox}
+ * @implements {Dispatcher}
  */
-class Guardian {
+export class Guardian {
 
     constructor(system) {
 
-        this.deadLetters = new DeadLetters(system);
+        beof({ system }).interface(System);
 
-        this.app = new ChildContext('/app',
-            this,
-            new Defaults(context => new AppConcern(context)),
-            system);
-
-        this.peers = [];
         this._system = system;
-
-        process.once('exit', () => this.peers.forEach(p => p.disassociate()));
-        process.once('error', () => this.peers.forEach(p => p.disassociate()));
+        this._tree = new ChildContext('', this, this, { inbox: this, strategy, dispatch: this });
 
     }
 
     path() {
 
-        return '/';
+        return '';
 
     }
 
@@ -46,118 +37,69 @@ class Guardian {
 
     parent() {
 
-        return null;
+        return this;
 
     }
 
-    isChild(ref) {
-
-        return ([this.app.self(), this.sys.self()].indexOf(ref) > -1);
-
-    }
-
-    children() {
-
-        return [this.app.self(), this.sys.self()];
-
-    }
-
-    mailbox() {
+    root() {
 
         return this;
 
     }
 
-    dispatcher() {
+    inbox() {
 
         return this;
-
-    }
-
-    watch(ref) {
-
-        throw new ReferenceError('watch(): is not implemented!');
-
-    }
-
-    unwatch(ref) {
-
-        throw new ReferenceError('unwatch(): is not implemented!');
-
-    }
-
-    tell(message, from) {
-
-        this.deadLetters.tell({ message }, from);
 
     }
 
     select(path) {
 
-        var addr = Address.fromString(path);
-        var peer = null;
-
-        if (addr.isRemote()) {
-
-            this.peers.forEach(p => {
-
-                if (p.handles(addr))
-                    peer = p;
-
-            });
-
-        }
-
-        if (peer !== null)
-            return new RemoteReference(path, peer);
-
-        return new NullReference(path, this.deadLetters);
-
+        return this;
 
     }
 
-    concernOf(factory, name) {
+    spawn(spec, name) {
 
-        throw new ReferenceError('concernOf(): is not implemented!');
-
-    }
-
-    system() {
-
-        return this._system;
+        return this._tree.spawn(spec, name);
 
     }
 
-    enqueue(msg) {
+    receive(cb) {
 
-        throw new TypeError('Cannot enqueue to \'/\'');
+        return Promise.try(() => cb(null));
+
+    }
+
+    tell(message) {
+
+        this._system.publish(message);
+
+    }
+
+    enqueue() {
+
+        throw new Error('enqueue is not supported');
 
     }
 
     dequeue() {
 
-        throw new TypeError('Cannot dequeue \'/\'');
+        throw new Error('dequeue is not supported');
 
     }
 
-    executeChildError(e, child) {
+    schedule() {
 
-        throw e;
-
-    }
-
-    peer(instance, config) {
-
-        beof({ instance }).interface(Peer);
-        beof({ config }).optional().object();
-
-        var monitor = new Monitor(instance, this._system, config);
-
-        monitor.associate();
-        this.peers.push(instance);
+        throw new Error('schedule is not supported');
 
     }
 
+    dispatch() {
+
+        throw new Error('dispatch is not supported');
+
+    }
 
 }
 

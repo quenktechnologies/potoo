@@ -1,91 +1,68 @@
-import events from 'events';
-import Promise from 'bluebird';
 import beof from 'beof';
-import Signal from './state/Signal';
+import Promise from 'bluebird';
 import Guardian from './Guardian';
 
 /**
  * IsomorphicSystem represents a collection of related Concerns that share a parent Context.
- * Use them to create to represent the root of a tree your application will
+ * Use them to create to represent the guardian of a tree your application will
  * branch into.
- * @param {Context} parent
- * @implements {Context}
+ * @implements {System}
  */
 class IsomorphicSystem {
 
     constructor() {
 
-        this._events = new events.EventEmitter();
-        this._root = new Guardian(this);
+        this._subs = [];
+        this._guardian = new Guardian(this);
 
     }
 
     /**
      * create a new IsomorphicSystem
-     * @param {string} name
      * @returns {IsomorphicSystem}
      */
-    static create(name) {
+    static create() {
 
         return new IsomorphicSystem();
 
     }
 
-    deadLetters() {
-
-        return this._root.deadLetters;
-
-    }
-
-    peer(instance, config) {
-
-        this._root.peer(instance, config);
-
-    }
-
     select(path) {
 
-        return this._root.app.select(path);
+        return this._guardian.select(path);
 
     }
 
-    concernOf(factory, name) {
+    spawn(spec, name) {
 
-        return this._root.app.concernOf(factory, name);
-
-    }
-
-    shutdown(reason) {
-
-       // this._root.app.tell(Signal.Stop, this._root);
-
-        //@todo -> actually wait until app and sys finished shutting down
-        //perhaps this is better done in the root/Guardian?
-        //
-        setTimeout(() => {
-
-            this._root = null;
-            this._events = null;
-
-            if (reason)
-                throw reason;
-
-        }, 1000);
+        return this._guardian.spawn(spec, name);
 
     }
 
-    on() {
+    subscribe(f) {
 
-        this._events.on.apply(this._events, arguments);
+        this._subs.push(f);
+        return this;
 
     }
 
-    emit() {
+    unsubscribe(f) {
 
-        this._events.emit.apply(this._events, arguments);
+        var i = this._subs.indexOf(f);
+
+        if (i > 0)
+            this._subs.splice(i, 1);
+
+        return this;
+
+    }
+
+    publish(evt) {
+
+        this._subs.forEach(s => s.call(this, event));
 
     }
 
 }
 
-export default IsomorphicSystem;
+export default IsomorphicSystem

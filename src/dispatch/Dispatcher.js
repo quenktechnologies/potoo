@@ -1,14 +1,26 @@
-import Mailbox from './Mailbox';
-
 /**
- * Dispatcher provides an API for handling the actual delivery of messages.
- * @param {ConcernFactory} factory`
+ * Dispatcher is the interface ChildContext expects to handle receive execution.
+ *
+ * Dispatchers are notified when a message or receive is added to the respective queue.
+ * @interface
  */
-class Dispatcher extends Mailbox.EnqueueListener {
+class Dispatcher  {
 
-    executeChildError() {}
+    /**
+     * schedule a receive for future execution
+     * @param {Callable} receive
+     * @param {Context} context
+     */
+    schedule() {
 
-    execute() {}
+    }
+
+    /**
+     * dispatch this dispatcher.
+     */
+    dispatch() {
+
+    }
 
 }
 

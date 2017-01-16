@@ -1,14 +1,10 @@
-import RefFactory from './RefFactory';
-
 /**
- * Context represents the context a Concern is created in.
- * With a Context you can:
- * * Create Concerns
- * * Listen to events via subscribe()
- * * more
+ * Context acts as a private mini-system for each actor allowing additional
+ * spawning and interaction with the rest of the system.
+ *
  * @interface
  */
-class Context extends RefFactory {
+export class Context {
 
     /**
      * path returns the path to this context
@@ -19,72 +15,73 @@ class Context extends RefFactory {
     }
 
     /**
-     * self returns the Reference for this Context
+     * self returns a Reference for the actor.
      * @returns {Reference}
      */
     self() {
 
     }
 
-    /**
-     * isChild tells us if ref is a child of this Context
-     * @param {Reference} ref
-     * @returns {boolean}
-     */
-    isChild(ref) {
-
-    }
-
-    /**
-     * children returns an array of all this Context's children
-     * @returns {array<Reference>}
-     */
-    children() {
-
-    }
-
-    /**
-     * parent returns the parent Context for this Context or
-     * null if none exists.
-     * @returns {Context}
-     */
     parent() {
 
     }
 
     /**
-     * mailbox returns this Context's Mailbox.
+     * root returns the root of all actors in the system.
+     * Used internally only to handle messages, logging etc.
+     * @return {Reference}
+     */
+    root() {
+
+    }
+
+    /**
+     * inbox returns the mailbox for the context's actor.
      * @returns {Mailbox}
      */
-    mailbox() {
+    inbox() {
 
     }
 
     /**
-     * dispatcher returns this Context's Dispatcher
-     * @returns {Dispatcher}
+     * select an actor Reference given a path.
+     *
+     * An un-registered path yields an actor that drops messages automatically.
+     * @param {string} path
      */
-    dispatcher() {
+    select() {
 
     }
 
     /**
-     * system returns the System this Context belongs to.
-     * @returns {System}
-     */
-    system() {
-
-    }
-
-    /**
-     * concernOf creates a new child concern.
-     * @param {ConcernFactory} factory
+     * spawn a child actor.
+     * @param {ChildSpec} spec
      * @param {string} name
+     * @return {Reference}
      */
-    concernOf() {
+    spawn() {
+
+    }
+
+    /**
+     * receive the next message for this Context's actor.
+     *
+     * The behaviour passed can call receive again to change
+     * how the next message is handled. Once a message has been received,
+     * the current behaviour is discarded and messages will continue to buffer
+     * until the next receive call or an error occurs.
+     *
+     * If time is specified, the Promise returned form receive is rejected and
+     * is NOT intercepted by the error handling stratgy. Use the catch() method
+     * of the returned Promise to react to timeout errors.
+     * @param {function} behaviour
+     * @param {number} [time] - Time to wait for execution.
+     * @returns {Promise<*>}
+     */
+    receive() {
 
     }
 
 }
 
-export default Context;
+export default Context
