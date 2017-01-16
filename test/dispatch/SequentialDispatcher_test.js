@@ -4,7 +4,7 @@ import Promise from 'bluebird';
 import { Context, Reference } from 'potoo-lib';
 import { SequentialDispatcher, Mailbox } from 'potoo-lib/dispatch';
 
-var dispatcher, context, inbox, message, parent;
+var dispatcher, context,  message, parent;
 
 describe('SequentialDispatcher', function() {
 
@@ -12,16 +12,13 @@ describe('SequentialDispatcher', function() {
 
         message = 'hello';
         context = sinon.createStubInstance(Context);
-        inbox = sinon.createStubInstance(Mailbox);
         root = sinon.createStubInstance(Reference);
 
         parent = sinon.createStubInstance(Reference);
         parent.tell = p => { throw p.error; };
 
-        context.inbox.returns(inbox);
         context.root.returns(root);
 
-        inbox.dequeue.returns(message);
 
     });
 

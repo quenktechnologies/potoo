@@ -176,12 +176,12 @@ export class ChildContext {
 
     }
 
-    receive(behaviour, time) {
+    receive(next, time) {
 
-        beof({ behaviour }).function();
+        beof({ next }).function();
         beof({ time }).optional().number();
 
-        return this._dispatch.ask(behaviour, this, time);
+        return this._dispatch.ask({receive:next, context:this, time});
 
     }
 

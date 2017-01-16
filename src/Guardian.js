@@ -2,6 +2,7 @@ import beof from 'beof';
 import Promise from 'bluebird';
 import ChildContext from './ChildContext';
 import System from './System';
+import DroppedMessage from './dispatch/DroppedMessage';
 
 const strategy = e => { throw e; }
 
@@ -19,7 +20,7 @@ export class Guardian {
         beof({ system }).interface(System);
 
         this._system = system;
-        this._tree = new ChildContext('', this, this, { strategy, dispatch: this });
+        this.tree = new ChildContext('/', this, this, { strategy, dispatch: this });
 
     }
 
@@ -49,13 +50,13 @@ export class Guardian {
 
     select(path) {
 
-        return this;
+        return { tell: m => this.tell(new DroppedMessage({ message: m, to: path })) };
 
     }
 
     spawn(spec, name) {
 
-        return this._tree.spawn(spec, name);
+        return this.tree.spawn(spec, name);
 
     }
 

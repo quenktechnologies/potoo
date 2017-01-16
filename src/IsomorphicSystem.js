@@ -1,6 +1,8 @@
 import beof from 'beof';
 import Promise from 'bluebird';
 import Guardian from './Guardian';
+import { DroppedMessage, UnhandledMessage } from './dispatch';
+import { or, insof, ok } from './funcs';
 
 /**
  * IsomorphicSystem represents a collection of related Concerns that share a parent Context.
@@ -10,15 +12,25 @@ import Guardian from './Guardian';
  */
 class IsomorphicSystem {
 
-    constructor() {
+    constructor(options = { log: { level: 4 } }) {
 
-        this._subs = [];
+        var { log } = options;
+
+        this._subs = [
+            or(insof(DroppedMessage, ok((log.level <= 4), m =>
+                    console.warn(`DroppedMessage: to ${m.to} message: ${m.message}.`))),
+
+                insof(UnhandledMessage, ok((log.level <= 4), m =>
+                    console.warn(`UnhandledMessage: to ${m.to} message: ${m.message}.`))))
+
+        ];
         this._guardian = new Guardian(this);
 
     }
 
     /**
      * create a new IsomorphicSystem
+     * @param {object} options
      * @returns {IsomorphicSystem}
      */
     static create() {
@@ -29,7 +41,7 @@ class IsomorphicSystem {
 
     select(path) {
 
-        return this._guardian.select(path);
+        return this._guardian.tree.select(path);
 
     }
 
@@ -59,7 +71,7 @@ class IsomorphicSystem {
 
     publish(evt) {
 
-        this._subs.forEach(s => s.call(this, event));
+        this._subs.forEach(s => s.call(this, evt));
 
     }
 

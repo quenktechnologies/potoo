@@ -1,6 +1,7 @@
 import beof from 'beof';
 import Promise from 'bluebird';
 import Context from '../Context';
+import Callable from '../Callable';
 import Problem from './Problem';
 import Frame from './Frame';
 import UnhandledMessage from './UnhandledMessage';
@@ -60,6 +61,7 @@ class Executor {
     }
 
     tell(m) {
+
         return this.receive(m);
 
     }
@@ -89,6 +91,7 @@ export class SequentialDispatcher {
                 var { receive, context, resolve, reject } = stack.shift();
                 var message = messages.shift();
 
+                console.log('message ',messages.length, this._stack.length);
                 this._executor.tell(new Frame({ message, receive, context, resolve, reject }));
                 return this.next(messages, stack, executor);
 
@@ -120,6 +123,10 @@ export class SequentialDispatcher {
 
 
     ask({ receive, context, time = 0 }) {
+
+        beof({ receive }).interface(Callable);
+        beof({ context }).interface(Context);
+        beof({ time }).optional().number();
 
         var p = new Promise((resolve, reject) => {
             this._stack.push({ receive, context, resolve, reject, promise: this });

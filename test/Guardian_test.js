@@ -16,16 +16,6 @@ describe('Guardian', function() {
 
     });
 
-    describe('select', function() {
-
-        it('should return itself', function() {
-
-            must(guardian.select('/naps')).be(guardian);
-
-        });
-
-    });
-
     describe('spawn', function() {
 
         it('should create a new actor reference', function() {
@@ -36,11 +26,11 @@ describe('Guardian', function() {
 
     });
 
-    describe('tell', function() {
+    describe('select().tell()', function() {
 
         it('must drop messages', function() {
 
-            guardian.tell('a message');
+            guardian.select('/naps').tell('a message');
             must(system.publish.called).be(true);
 
         });

@@ -14,8 +14,9 @@ describe('The IsomorphicSystem', function() {
     it('should allow for a basic 3 node setup', function(done) {
 
         var buffer = [];
+
         var start = function() {
-            this.receive(m => m);
+            this.receive(m => console.log(m));
             this.receive(m => {
                 buffer.push(m)
             });
@@ -25,9 +26,9 @@ describe('The IsomorphicSystem', function() {
         system.spawn({ start }, 'two');
         system.spawn({ start }, 'three');
 
-        system.select('one').tell('well');
-        system.select('two').tell('hello');
-        system.select('three').tell('pretty lady');
+        system.select('/one').tell('well');
+        system.select('/two').tell('hello');
+        system.select('/three').tell('pretty lady');
 
         setTimeout(() => {
             must(buffer.join(' ')).be('well hello pretty lady');
