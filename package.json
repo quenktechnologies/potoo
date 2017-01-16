@@ -1,6 +1,6 @@
 {
   "name": "potoo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An actor model library for JavaScript.",
   "main": "lib",
   "scripts": {
