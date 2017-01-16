@@ -3,12 +3,11 @@ import Context from './Context';
 import Reference from './Reference';
 import Callable from './Callable';
 import { v4 } from 'node-uuid';
-import { Dispatcher, UnboundedMailbox, SequentialDispatcher, Problem } from './dispatch';
+import { SequentialDispatcher, Problem } from './dispatch';
 import { escalate } from './dispatch/strategy';
 
 const noop = () => {};
-const default_mailbox = d => new UnboundedMailbox(d);
-const default_dispatcher = () => new SequentialDispatcher();
+const default_dispatcher = (p) => new SequentialDispatcher(p);
 
 /**
  * LocalReference is a Reference to an Actor in the current address space.
@@ -57,14 +56,13 @@ export class LocalReference {
  */
 export class ChildContext {
 
-    constructor(path, parent, root, { inbox, strategy, dispatch }) {
+    constructor(path, parent, root, { strategy, dispatch }) {
 
         beof({ path }).string();
         beof({ parent }).interface(Context);
         beof({ root }).interface(Reference);
-        beof({ inbox }).object();
         beof({ strategy }).function();
-        beof({ dispatch }).interface(Dispatcher);
+        beof({ dispatch }).interface(Reference);
 
         this._stack = [];
         this._children = [];
@@ -73,13 +71,12 @@ export class ChildContext {
         this._parent = parent;
         this._strategy = strategy;
         this._root = root;
-        this._inbox = inbox;
         this._self = new LocalReference(this._path, m => {
 
             if (m instanceof Problem) {
                 strategy(m.error, m.context, this);
             } else {
-                inbox.enqueue(m);
+                dispatch.tell(m);
             }
 
         });
@@ -101,12 +98,6 @@ export class ChildContext {
     root() {
 
         return this._root;
-
-    }
-
-    inbox() {
-
-        return this._inbox;
 
     }
 
@@ -160,14 +151,12 @@ export class ChildContext {
     }
 
     spawn({
-            mailbox = default_mailbox,
             strategy = escalate,
             dispatcher = default_dispatcher,
             start
         },
         name = v4()) {
 
-        beof({ mailbox }).function();
         beof({ strategy }).function();
         beof({ dispatcher }).function();
         beof({ name }).string();
@@ -176,11 +165,10 @@ export class ChildContext {
         var slash = (this._path === '/') ? '' : '/';
         var path = `${this._path}${slash}${name}`;
         var dispatch = dispatcher(this._self);
-        var inbox = mailbox(dispatch);
-        var context = new ChildContext(path, this, this._root, { inbox, dispatch, strategy });
+        var context = new ChildContext(path, this, this._root, { dispatch, strategy });
         var self = context.self();
 
-        this._children.push({ path, inbox, context, start, strategy });
+        this._children.push({ path, context, start, strategy });
         start.call(context);
         self.tell('started');
 
@@ -193,7 +181,7 @@ export class ChildContext {
         beof({ behaviour }).function();
         beof({ time }).optional().number();
 
-        return this._dispatch.schedule(behaviour, this, time);
+        return this._dispatch.ask(behaviour, this, time);
 
     }
 

@@ -19,7 +19,7 @@ export class Guardian {
         beof({ system }).interface(System);
 
         this._system = system;
-        this._tree = new ChildContext('', this, this, { inbox: this, strategy, dispatch: this });
+        this._tree = new ChildContext('', this, this, { strategy, dispatch: this });
 
     }
 
@@ -47,12 +47,6 @@ export class Guardian {
 
     }
 
-    inbox() {
-
-        return this;
-
-    }
-
     select(path) {
 
         return this;
@@ -74,30 +68,6 @@ export class Guardian {
     tell(message) {
 
         this._system.publish(message);
-
-    }
-
-    enqueue() {
-
-        throw new Error('enqueue is not supported');
-
-    }
-
-    dequeue() {
-
-        throw new Error('dequeue is not supported');
-
-    }
-
-    schedule() {
-
-        throw new Error('schedule is not supported');
-
-    }
-
-    dispatch() {
-
-        throw new Error('dispatch is not supported');
 
     }
 

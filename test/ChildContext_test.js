@@ -1,10 +1,9 @@
 import must from 'must';
 import sinon from 'sinon';
 import { Context, Reference } from 'potoo-lib';
-import { Mailbox, Dispatcher } from 'potoo-lib/dispatch';
 import { ChildContext, LocalReference } from 'potoo-lib/ChildContext';
 
-var context, inbox, root, parent, strategy, child, dispatch;
+var context, root, parent, strategy, child, dispatch;
 var throwit = e => { throw e; };
 var start = () => {};
 
@@ -12,15 +11,14 @@ describe('ChildContext', function() {
 
     beforeEach(function() {
 
-        inbox = sinon.createStubInstance(Mailbox);
         root = sinon.createStubInstance(Reference);
         parent = sinon.createStubInstance(Context);
         parent.error = throwit;
         parent.select = () => { throw 'meta human'; };
         child = sinon.createStubInstance(Context);
-        dispatch = sinon.createStubInstance(Dispatcher);
+        dispatch = sinon.createStubInstance(Reference);
 
-        context = new ChildContext('/', parent, root, { inbox, strategy: throwit, dispatch, start });
+        context = new ChildContext('/', parent, root, { strategy: throwit, dispatch, start });
 
     });
 

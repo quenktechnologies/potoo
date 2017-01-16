@@ -36,14 +36,6 @@ export class Context {
     }
 
     /**
-     * inbox returns the mailbox for the context's actor.
-     * @returns {Mailbox}
-     */
-    inbox() {
-
-    }
-
-    /**
      * select an actor Reference given a path.
      *
      * An un-registered path yields an actor that drops messages automatically.
