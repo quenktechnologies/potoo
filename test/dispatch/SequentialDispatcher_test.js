@@ -31,9 +31,11 @@ describe('SequentialDispatcher', function() {
 
     });
 
-    it('should resolve scheduled promises with the value of the receive function', function() {
+    it('should resolve ask\'d promises with the value of the receive function', function() {
 
-        return dispatcher.schedule(m => m, context).
+        setTimeout(() => dispatcher.tell(message), 200);
+
+        return dispatcher.ask({ receive: m => m, context }).
         then(result => must(result).be(message));
 
     });
@@ -44,13 +46,19 @@ describe('SequentialDispatcher', function() {
         var two = sinon.spy();
         var three = sinon.spy();
 
-        return dispatcher.schedule(one, context).
-        then(() => dispatcher.dispatch()).
-        then(() => dispatcher.dispatch()).
-        then(() => dispatcher.schedule(two, context)).
-        then(() => dispatcher.dispatch()).
-        then(() => dispatcher.dispatch()).
-        then(() => dispatcher.schedule(three, context)).
+        setTimeout(() => dispatcher.tell(message), 100);
+        setTimeout(() => dispatcher.tell(message), 200);
+        setTimeout(() => dispatcher.tell(message), 300);
+        setTimeout(() => dispatcher.tell(message), 100);
+        setTimeout(() => dispatcher.tell(message), 200);
+        setTimeout(() => dispatcher.tell(message), 300);
+
+        return Promise.all([
+            dispatcher.ask({ receive: one, context }),
+            dispatcher.ask({ receive: two, context }),
+            dispatcher.ask({ receive: three, context })
+        ]).
+        then(() => new Promise(r => setTimeout(r, 600))).
         then(() => {
 
             must(one.callCount).be(1);
@@ -67,9 +75,7 @@ describe('SequentialDispatcher', function() {
 
         var threw = false;
 
-        inbox.dequeue = () => Promise.resolve(null);
-
-        return dispatcher.schedule(m => m, context, 5000).
+        return dispatcher.ask({ receive: m => m, context, time: 3000 }).
         catch(e => {
             must(e).be.instanceOf(Error);
             threw = true;
