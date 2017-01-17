@@ -2,7 +2,7 @@ import beof from 'beof';
 import Context from './Context';
 import Reference from './Reference';
 import Callable from './Callable';
-import { v4 } from 'node-uuid';
+import { v4 } from 'uuid';
 import { SequentialDispatcher, Problem } from './dispatch';
 import { escalate } from './dispatch/strategy';
 
@@ -181,7 +181,7 @@ export class ChildContext {
         beof({ next }).function();
         beof({ time }).optional().number();
 
-        return this._dispatch.ask({receive:next, context:this, time});
+        return this._dispatch.ask({ receive: next, context: this, time });
 
     }
 

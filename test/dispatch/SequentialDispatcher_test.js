@@ -4,7 +4,7 @@ import Promise from 'bluebird';
 import { Context, Reference } from 'potoo-lib';
 import { SequentialDispatcher, Mailbox } from 'potoo-lib/dispatch';
 
-var dispatcher, context,  message, parent;
+var dispatcher, context, message, parent;
 
 describe('SequentialDispatcher', function() {
 
@@ -81,5 +81,28 @@ describe('SequentialDispatcher', function() {
 
     });
 
+    it('should not deadlock if the receive promise is returned', function() {
+
+        dispatcher.tell(message);
+
+        var blocks = [];
+
+        var receive = m => {
+
+            blocks.push(m);
+
+            if (blocks.length < 10) {
+                dispatcher.tell(message);
+                return dispatcher.ask({ receive, context });
+            }
+
+            return 'done';
+
+        };
+
+        return dispatcher.ask({ receive, context, time: 5000 }).
+        then(m =>  must(blocks.length > 9).be(true) );
+
+    });
 
 });

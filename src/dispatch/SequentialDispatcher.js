@@ -23,48 +23,58 @@ class Executor {
     ready(frames, parent) {
 
         var exec = ({ message, receive, context, resolve, reject }) => {
+
             this.receive = this.busy(frames, parent);
 
-            return Promise.try(() => receive.call(context, message)).
-            then(result => {
+            return Promise.try(() => {
 
-                if (result == null)
-                    context.root().tell(new UnhandledMessage({
-                        message,
-                        to: context.path()
-                    }));
+                    var result = receive.call(context, message);
+
+                    if (result == null) {
+
+                        context.root().tell(new UnhandledMessage({
+                            message,
+                            to: context.path()
+                        }));
+
+                    } else if (typeof result.then === 'function') {
+
+                        //The result is a promise/Thenable and we don't want
+                        //to wait until it finished to process the next frame.
+                        this.receive = this.ready(frames, parent);
+
+                    }
+
 
                 return result;
 
             }).
-            then(result => resolve(result)).
-            catch(error => {
+        then(result => resolve(result)).
+        catch(error => {
 
-                //Reject the waiting receive then pass the error to parent.
-                reject(error);
-                parent.tell(new Problem({ context, error }));
+            reject(error);
+            parent.tell(new Problem({ context, error }));
 
+        }).finally(() => {
 
-            }).finally(() => {
+            if (frames.length > 0)
+                return exec(frames.shift());
 
-                if (frames.length > 0)
-                    return exec(frames.shift());
+            this.receive = this.ready(frames, parent);
 
-                this.receive = this.ready(frames, parent);
-
-            });
-
-        }
-
-        return exec;
+        });
 
     }
 
-    tell(m) {
+    return exec;
 
-        return this.receive(m);
+}
 
-    }
+tell(m) {
+
+    return this.receive(m);
+
+}
 
 }
 
@@ -85,42 +95,27 @@ export class SequentialDispatcher {
 
     next(messages, stack, executor) {
 
-        if (messages.length > 0)
-            if (stack.length > 0) {
+        setTimeout(() => {
+            if (messages.length > 0)
+                if (stack.length > 0) {
 
-                var { receive, context, resolve, reject } = stack.shift();
-                var message = messages.shift();
+                    var { receive, context, resolve, reject } = stack.shift();
+                    var message = messages.shift();
 
-                console.log('message ',messages.length, this._stack.length);
-                this._executor.tell(new Frame({ message, receive, context, resolve, reject }));
-                return this.next(messages, stack, executor);
+                    this._executor.tell(new Frame({ message, receive, context, resolve, reject }));
+                    return this.next(messages, stack, executor);
 
-            }
+                }
+        }, 0);
 
     }
 
     tell(m) {
 
         this._messages.push(m);
-
         this.next(this._messages, this._stack, this._executor);
 
-        /*
-        while (this._stack.length > 0) {
-
-            var message = this._messages.shift();
-
-            if (message != null) {
-
-                var { receive, context, resolve, reject } = this._stack.shift();
-                this._executor.tell(new Frame({ message, receive, context, resolve, reject }));
-
-            }
-
-        }*/
-
     }
-
 
     ask({ receive, context, time = 0 }) {
 
@@ -129,10 +124,11 @@ export class SequentialDispatcher {
         beof({ time }).optional().number();
 
         var p = new Promise((resolve, reject) => {
-            this._stack.push({ receive, context, resolve, reject, promise: this });
+            this._stack.push({ receive, context, resolve, reject })
         });
 
         this.next(this._messages, this._stack, this._executor);
+
         return (time > 0) ? p.timeout(time) : p;
 
     }
