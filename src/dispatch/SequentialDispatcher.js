@@ -3,78 +3,87 @@ import Promise from 'bluebird';
 import Context from '../Context';
 import Callable from '../Callable';
 import Problem from './Problem';
-import Frame from './Frame';
+import Message from './Message';
 import UnhandledMessage from './UnhandledMessage';
+
+class Retry extends Message {}
 
 class Executor {
 
-    constructor(parent) {
+    constructor(parent, dispatch) {
 
-        this.receive = this.ready([], parent);
-
-    }
-
-    busy(frames, parent) {
-
-        return m => frames.push(m);
+        this.receive = this.ready([], [], parent, dispatch);
 
     }
 
-    ready(frames, parent) {
+    busy(messages, frames, parent, dispatch) {
 
-        var exec = ({ message, receive, context, resolve, reject }) => {
+        return ({ message, next }) => {
 
-            this.receive = this.busy(frames, parent);
+            messages.push(message);
+            frames.push(next);
+
+        };
+
+    }
+
+    ready(messages, frames, parent, dispatch) {
+
+        var exec = ({ message, next: { receive, context, resolve, reject } }) => {
+
+            this.receive = this.busy(messages, frames, parent, dispatch);
 
             return Promise.try(() => {
 
-                    var result = receive.call(context, message);
+                var result = receive.call(context, message);
 
-                    if (result == null) {
+                if (result == null) {
 
-                        context.root().tell(new UnhandledMessage({
-                            message,
-                            to: context.path()
-                        }));
+                    context.root().tell(new UnhandledMessage({
+                        message,
+                        to: context.path()
+                    }))
 
-                    } else if (typeof result.then === 'function') {
+                    frames.unshift({ receive, context, resolve, reject });
+                    dispatch.tell(new Retry({ message: messages.pop() }));
 
-                        //The result is a promise/Thenable and we don't want
-                        //to wait until it finished to process the next frame.
-                        this.receive = this.ready(frames, parent);
+                } else {
 
-                    }
+                    //The result is a promise/Thenable and we don't want
+                    //to wait until it finished to process the next frame.
+                    if (typeof result.then === 'function')
+                        this.receive = this.ready(messages, frames, parent, dispatch);
 
+                    resolve(result);
 
-                return result;
+                }
 
             }).
-        then(result => resolve(result)).
-        catch(error => {
+            catch(error => {
 
-            reject(error);
-            parent.tell(new Problem({ context, error }));
+                reject(error);
+                parent.tell(new Problem({ context, error }));
 
-        }).finally(() => {
+            }).finally(() => {
 
-            if (frames.length > 0)
-                return exec(frames.shift());
+                if (frames.length > 0)
+                    return exec({ message: messages.shift(), next: frames.shift() });
 
-            this.receive = this.ready(frames, parent);
+                this.receive = this.ready(messages, frames, parent, dispatch);
 
-        });
+            });
+
+        }
+
+        return exec;
 
     }
 
-    return exec;
+    tell(m) {
 
-}
+        return this.receive(m);
 
-tell(m) {
-
-    return this.receive(m);
-
-}
+    }
 
 }
 
@@ -89,7 +98,7 @@ export class SequentialDispatcher {
         this._stack = [];
         this._order = [];
         this._messages = [];
-        this._executor = new Executor(parent);
+        this._executor = new Executor(parent, this);
 
     }
 
@@ -99,10 +108,10 @@ export class SequentialDispatcher {
             if (messages.length > 0)
                 if (stack.length > 0) {
 
-                    var { receive, context, resolve, reject } = stack.shift();
+                    var next = stack.shift();
                     var message = messages.shift();
 
-                    this._executor.tell(new Frame({ message, receive, context, resolve, reject }));
+                    this._executor.tell({ message, next });
                     return this.next(messages, stack, executor);
 
                 }
@@ -112,7 +121,11 @@ export class SequentialDispatcher {
 
     tell(m) {
 
-        this._messages.push(m);
+        if (m instanceof Retry)
+            this._messages.unshift(m);
+        else
+            this._messages.push(m);
+
         this.next(this._messages, this._stack, this._executor);
 
     }

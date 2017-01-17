@@ -39,30 +39,22 @@ describe('SequentialDispatcher', function() {
 
     it('should dispatch sequentially', function() {
 
-        var one = sinon.spy();
-        var two = sinon.spy();
-        var three = sinon.spy();
+        var buffer = [];
+        var receive = (m) => x => buffer.push(m);
 
-        setTimeout(() => dispatcher.tell(message), 100);
-        setTimeout(() => dispatcher.tell(message), 200);
-        setTimeout(() => dispatcher.tell(message), 300);
         setTimeout(() => dispatcher.tell(message), 100);
         setTimeout(() => dispatcher.tell(message), 200);
         setTimeout(() => dispatcher.tell(message), 300);
 
         return Promise.all([
-            dispatcher.ask({ receive: one, context }),
-            dispatcher.ask({ receive: two, context }),
-            dispatcher.ask({ receive: three, context })
+            dispatcher.ask({ receive: receive('one'), context }),
+            dispatcher.ask({ receive: receive('two'), context }),
+            dispatcher.ask({ receive: receive('three'), context })
         ]).
         then(() => new Promise(r => setTimeout(r, 600))).
         then(() => {
 
-            must(one.callCount).be(1);
-            must(two.callCount).be(1);
-            must(three.callCount).be(1);
-            must(one.calledBefore(two)).be(true);
-            must(two.calledBefore(three)).be(true);
+            must(buffer.join(',')).be('one,two,three');
 
         });
 
@@ -101,7 +93,29 @@ describe('SequentialDispatcher', function() {
         };
 
         return dispatcher.ask({ receive, context, time: 5000 }).
-        then(m =>  must(blocks.length > 9).be(true) );
+        then(m => must(blocks.length > 9).be(true));
+
+    });
+
+    it('should not remove a behaviour if it returns null or undefiend', function() {
+
+        var count = 0;
+        var success = false;
+        var receive = m => {
+
+            count++;
+
+            if (count === 10)
+                return success = true;
+
+        };
+        var make = i => setTimeout(() => dispatcher.tell(message), 5 * (1 + i));
+
+        for (var i = 0; i < 10; i++)
+            make(i);
+
+        return dispatcher.ask({ receive, context }).
+        then(() => must(success).be(true));
 
     });
 
