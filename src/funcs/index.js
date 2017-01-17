@@ -196,7 +196,7 @@ export class Required {
 
         }, value);
 
-        return (value == null)? value: this._f(value);
+        return (value == null) ? value : this._f(value);
 
     }
 
@@ -227,3 +227,5 @@ export function ok(check, f) {
     return function(v) { return check ? f(v) : null };
 
 }
+
+export const OK = true;
