@@ -52,6 +52,34 @@ describe('funcs', function() {
 
     });
 
+    describe('Required', function() {
+
+        it('should not execute if the spec fails', function() {
+
+            var check = { name: true, age: false };
+            var value = { name: 'Halesh', age: 44 };
+            var f = d => 'success';
+
+            func = new funcs.Required(check, f);
+            must(func.call(null, value)).be(null);
+            must(funcs.required(check, f)(value)).be(null);
+
+        });
+
+        it('should execute if the check succeeds', function() {
+
+            var check = { name: true, age: false , gender:true};
+            var value = { name: 'Halesh', age: 44 };
+            var f = d => 'success';
+
+            func = new funcs.Required(check, f);
+            must(func.call(null, value)).be(null);
+            must(funcs.required(check, f)(value)).be(null);
+
+        });
+
+    });
+
     describe('ok', function() {
 
         it('should work', function() {
@@ -62,8 +90,6 @@ describe('funcs', function() {
         });
 
     });
-
-
 
 
 });

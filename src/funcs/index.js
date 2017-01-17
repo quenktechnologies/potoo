@@ -160,10 +160,67 @@ export function is(value, f) {
 }
 
 /**
+ * Required executes its function when an object has the required keys.
+ * @param {object} keys
+ * @param {Callable} f
+ */
+export class Required {
+
+    constructor(keys, f) {
+
+        beof({ keys }).object();
+        beof({ f }).function();
+
+        this._keys = keys;
+        this._f = f;
+
+    }
+
+    call(value) {
+
+        var keys = this._keys;
+
+        value = Object.keys(keys).reduce((prev, key) => {
+
+            if ((prev == null) || (typeof value !== 'object'))
+                return null;
+
+            if (keys[key])
+                if (value.hasOwnProperty(key))
+                    return value;
+
+            if (!value.hasOwnProperty(key))
+                return value;
+
+            return null;
+
+        }, value);
+
+        return (value == null)? value: this._f(value);
+
+    }
+
+}
+
+/**
+ * required requires the value to posses a set of keys.
+ * @param {object} keys
+ * @param {Callable} f
+ * @returns {Callable}
+ */
+export function required(value, f) {
+
+    var c = new Required(value, f);
+    return function(v) { return c.call(this, v); }
+
+}
+
+/**
  * ok accepts a boolean value to decide whether or not to excute its
  * Callable.
  * @param {boolean} check
  * @param {Callable} f
+ * @return {Callbale}
  */
 export function ok(check, f) {
 
