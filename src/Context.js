@@ -36,6 +36,14 @@ export class Context {
     }
 
     /**
+     * none returns an actor reference that is effectively a noop.
+     * @returns {Reference}
+     */
+    none() {
+
+    }
+
+    /**
      * select an actor Reference given a path.
      *
      * An un-registered path yields an actor that drops messages automatically.
