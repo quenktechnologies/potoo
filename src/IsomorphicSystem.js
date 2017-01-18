@@ -1,8 +1,24 @@
 import beof from 'beof';
 import Promise from 'bluebird';
 import Guardian from './Guardian';
-import { DroppedMessage, UnhandledMessage } from './dispatch';
+import { DroppedMessage, UnhandledMessage, Problem } from './dispatch';
 import { or, insof, ok } from './funcs';
+
+export const log_filter = log =>
+
+    or(insof(DroppedMessage, ok((log.level <= 4), m =>
+            console.warn(`DroppedMessage: to ${m.to} message: ${m.message}.`))),
+
+        insof(UnhandledMessage, ok((log.level <= 4), m =>
+            console.warn(`UnhandledMessage: to ${m.to} message: ${m.message}.`))),
+
+        insof(Problem, ({ path, error }) => {
+
+            throw new Error(
+                `Uncaught error at actor '${path}'!\n` +
+                `System will crash now! \n ${error.stack}`)
+
+        }))
 
 /**
  * IsomorphicSystem represents a collection of related Concerns that share a parent Context.
@@ -16,14 +32,7 @@ class IsomorphicSystem {
 
         var { log } = options;
 
-        this._subs = [
-            or(insof(DroppedMessage, ok((log.level <= 4), m =>
-                    console.warn(`DroppedMessage: to ${m.to} message: ${m.message}.`))),
-
-                insof(UnhandledMessage, ok((log.level <= 4), m =>
-                    console.warn(`UnhandledMessage: to ${m.to} message: ${m.message}.`))))
-
-        ];
+        this._subs = [log_filter(log)];
         this._guardian = new Guardian(this);
 
     }
