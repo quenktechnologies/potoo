@@ -48,6 +48,12 @@ export class Guardian {
 
     }
 
+    none() {
+
+        return this.self();
+
+    }
+
     select(path) {
 
         return { tell: m => this.tell(new DroppedMessage({ message: m, to: path })) };
