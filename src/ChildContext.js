@@ -101,6 +101,12 @@ export class ChildContext {
 
     }
 
+    none() {
+
+        return this._root.self();
+
+    }
+
     self() {
 
         return this._self;
@@ -169,7 +175,7 @@ export class ChildContext {
         var self = context.self();
 
         this._children.push({ path, context, start, strategy });
-        start.call(context);
+        start.call(context, context);
         self.tell('started');
 
         return self;
