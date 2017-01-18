@@ -1,5 +1,7 @@
 import beof from 'beof';
 
+export const OK = true;
+
 /**
  * This module provides some Callables that make
  * filtering messages less onerous.
@@ -228,4 +230,41 @@ export function ok(check, f) {
 
 }
 
-export const OK = true;
+
+
+/**
+ * Equals executes its function if the value is strictly equal to its check.
+ * @param {*} check
+ * @param {Callable} f
+ * @implements {Callable}
+ */
+export class Equals {
+
+    constructor(check, f) {
+
+        beof({ f }).function();
+
+        this._check = check;
+        this._f = f;
+
+    }
+
+    call(context, value) {
+
+        return (value === this._check) ? this._f(value) : null;
+
+    }
+
+}
+
+/**
+ * eql
+ * @param {*} check
+ * @param {Callable} f
+ */
+export function eql(check, f) {
+
+    var c = new Equals(check, f);
+    return function(v) { return c.call(this, v); }
+
+}
