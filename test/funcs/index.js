@@ -68,13 +68,13 @@ describe('funcs', function() {
 
         it('should execute if the check succeeds', function() {
 
-            var check = { name: true, age: false , gender:true};
-            var value = { name: 'Halesh', age: 44 };
+            var check = { name: true, age: false, gender: true };
+            var value = { name: 'Halesh', gender: 'm' };
             var f = d => 'success';
 
             func = new funcs.Required(check, f);
-            must(func.call(null, value)).be(null);
-            must(funcs.required(check, f)(value)).be(null);
+            must(func.call(null, value)).be('success');
+            must(funcs.required(check, f)(value)).be('success');
 
         });
 

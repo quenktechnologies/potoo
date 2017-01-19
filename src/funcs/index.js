@@ -178,21 +178,26 @@ export class Required {
 
     }
 
-    call(value) {
+    call(context, value) {
 
         var keys = this._keys;
 
+        if (typeof value !== 'object') return null;
+
         value = Object.keys(keys).reduce((prev, key) => {
+            console.log('previous va ', prev);
+            if (prev == null) return prev;
 
-            if ((prev == null) || (typeof value !== 'object'))
-                return null;
+            if (keys[key]) {
 
-            if (keys[key])
-                if (value.hasOwnProperty(key))
-                    return value;
+                if (prev.hasOwnProperty(key))
+                    return prev;
 
-            if (!value.hasOwnProperty(key))
-                return value;
+            } else {
+
+                if (!value.hasOwnProperty(key))
+                    return prev;
+            }
 
             return null;
 
