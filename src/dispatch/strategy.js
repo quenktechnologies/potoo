@@ -1,3 +1,5 @@
+import beof from 'beof';
+import Context from '../Context';
 
 //@todo add one_for_one, one_for_all, etc. also
 //provide way so notices of errors can still be publish
@@ -5,12 +7,16 @@
 
 /**
  * escalate passes the error to the parent context.
- * @param {Error} e
- * @param {Context} child
+ * @param {Error} error
+ * @param {Conxtext} child
  * @param {Context} parent
  */
-export function escalate(e, child, context) {
+export const escalate = (error, child, parent) => {
 
-    return parent.error(e);
+    beof({ error }).instance(Error);
+    beof({ child }).interface(Context);
+    beof({ parent }).interface(Context);
+
+    return parent.parent().tell(error);
 
 }

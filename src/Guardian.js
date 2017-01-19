@@ -3,8 +3,7 @@ import Promise from 'bluebird';
 import ChildContext from './ChildContext';
 import System from './System';
 import DroppedMessage from './dispatch/DroppedMessage';
-
-const strategy = e => { throw e; }
+import { escalate } from './dispatch/strategy';
 
 /**
  * Guardian
@@ -20,13 +19,13 @@ export class Guardian {
         beof({ system }).interface(System);
 
         this._system = system;
-        this.tree = new ChildContext('/', this, this, { strategy, dispatch: this });
+        this.tree = new ChildContext('/', this, this, { strategy: escalate, dispatch: this });
 
     }
 
     path() {
 
-        return '';
+        return '/';
 
     }
 
@@ -73,6 +72,9 @@ export class Guardian {
     }
 
     tell(message) {
+
+        if (message instanceof Error)
+            throw message;
 
         this._system.publish(message);
 

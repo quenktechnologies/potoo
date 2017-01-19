@@ -1,4 +1,5 @@
 import beof from 'beof';
+import Promise from 'bluebird';
 import Context from './Context';
 import Reference from './Reference';
 import Callable from './Callable';
@@ -47,7 +48,7 @@ export class LocalReference {
 
 /**
  * ChildContext is the Context of each self created in this address space.
- * @implements {RefFactory}wzrd.in
+ * @implements {RefFactory}
  * @implements {Context}
  * @param {string} path
  * @param {Context} [parent]
@@ -73,10 +74,17 @@ export class ChildContext {
         this._root = root;
         this._self = new LocalReference(this._path, m => {
 
-            if (m instanceof Problem) {
-                strategy(m.error, m.context, this);
+            if (m instanceof Error) {
+
+                if (m instanceof Problem)
+                    strategy(m.error, m.context, this);
+                else
+                    this.parent().tell(m);
+
             } else {
+
                 dispatch.tell(m);
+
             }
 
         });
@@ -91,7 +99,7 @@ export class ChildContext {
 
     parent() {
 
-        return this._parent;
+        return this._parent.self();
 
     }
 
@@ -175,8 +183,11 @@ export class ChildContext {
         var self = context.self();
 
         this._children.push({ path, context, start, strategy });
-        start.call(context, context);
-        self.tell('started');
+
+        Promise.try(() => start.call(context, context)).
+        then(() => self.tell('started')).
+        catch(error =>
+            this._strategy(new Problem(error, context), context, this));
 
         return self;
 

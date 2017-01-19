@@ -10,15 +10,7 @@ export const log_filter = log =>
             console.warn(`DroppedMessage: to ${m.to} message: ${m.message}.`))),
 
         insof(UnhandledMessage, ok((log.level <= 4), m =>
-            console.warn(`UnhandledMessage: to ${m.to} message: ${m.message}.`))),
-
-        insof(Problem, ({ path, error }) => {
-
-            throw new Error(
-                `Uncaught error at actor '${path}'!\n` +
-                `System will crash now! \n ${error.stack}`)
-
-        }))
+            console.warn(`UnhandledMessage: to ${m.to} message: ${m.message}.`))))
 
 /**
  * IsomorphicSystem represents a collection of related Concerns that share a parent Context.

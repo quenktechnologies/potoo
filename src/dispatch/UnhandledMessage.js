@@ -1,4 +1,3 @@
-
 import Message from './Message';
 
 /**
@@ -8,9 +7,6 @@ import Message from './Message';
  * @property {Reference} to
  * @property {*} Message
  */
-export class UnhandledMessage {
-
-
-}
+export class UnhandledMessage extends Message {}
 
 export default UnhandledMessage

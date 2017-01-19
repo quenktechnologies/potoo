@@ -5,87 +5,80 @@ import Callable from '../Callable';
 import Problem from './Problem';
 import Message from './Message';
 import UnhandledMessage from './UnhandledMessage';
+import { or, insof, required, OK } from '../funcs';
 
-class Retry extends Message {}
+class Frame extends Message {}
+class Envelope extends Message {}
+class Behaviour extends Message {}
 
-class Executor {
+const gt0 = (messages, frames) =>
+    (messages.length > 0) && (frames.length > 0);
 
-    constructor(parent, dispatch) {
+const exec = ({ messages, frames, self }) => {
 
-        this.receive = this.ready([], [], parent, dispatch);
+    let message = messages.shift();
+    let { receive, context, resolve, reject } = frames.shift();
 
-    }
+    self.tell(new Behaviour({ become: busy(messages, frames, self) }));
 
-    busy(messages, frames, parent, dispatch) {
+   Promise.try(() => {
 
-        return ({ message, next }) => {
+        let result = receive.call(context, message);
 
-            messages.push(message);
-            frames.push(next);
+        if (result == null) {
 
-        };
+            context.root().tell(new UnhandledMessage({
+                message,
+                to: context.path()
+            }))
 
-    }
+            frames.unshift(new Frame({ receive, context, resolve, reject }));
 
-    ready(messages, frames, parent, dispatch) {
+        } else {
 
-        var exec = ({ message, next: { receive, context, resolve, reject } }) => {
+            //The result is a promise/Thenable and we don't want
+            //to wait until it finished to process the next frame.
+            if (typeof result.then === 'function')
+                self.tell(new Behaviour({ become: ready(messages, frames, self) }));
 
-            this.receive = this.busy(messages, frames, parent, dispatch);
-
-            return Promise.try(() => {
-
-                var result = receive.call(context, message);
-
-                if (result == null) {
-
-                    context.root().tell(new UnhandledMessage({
-                        message,
-                        to: context.path()
-                    }))
-
-                    frames.unshift({ receive, context, resolve, reject });
-                    dispatch.tell(new Retry({ message: messages.pop() }));
-
-                } else {
-
-                    //The result is a promise/Thenable and we don't want
-                    //to wait until it finished to process the next frame.
-                    if (typeof result.then === 'function')
-                        this.receive = this.ready(messages, frames, parent, dispatch);
-
-                    resolve(result);
-
-                }
-
-            }).
-            catch(error => {
-
-                reject(error);
-                parent.tell(new Problem({ context, error }));
-
-            }).finally(() => {
-
-                if (frames.length > 0)
-                    return exec({ message: messages.shift(), next: frames.shift() });
-
-                this.receive = this.ready(messages, frames, parent, dispatch);
-
-            });
+            resolve(result);
 
         }
 
-        return exec;
+    }).catch(error => {
 
-    }
+        reject(error);
+        context.parent().tell(new Problem(error, context, message));
 
-    tell(m) {
+    }).finally(() => {
 
-        return this.receive(m);
+        if (messages.length > 0)
+            if (frames.length > 0)
+                return exec({ messages, frames, self });
 
-    }
+        return self.tell(new Behaviour({ become: ready(messages, frames, self) }))
 
-}
+    });
+
+    return null;
+
+};
+
+const busy = (messages, frames, self) =>
+    or(insof(Frame, f => frames.push(f)),
+        insof(Envelope, env => messages.push(env.message)));
+
+const ready = (messages, frames, self) =>
+    or(
+        insof(Frame, frame =>
+            (frames.push(frame), (gt0(messages, frames)) ?
+                exec({ messages, frames, self }) : OK)),
+
+        insof(
+            Envelope, env =>
+            (messages.push(env.message), (gt0(messages, frames)) ?
+                exec({ messages, frames, self }) : OK)))
+
 
 /**
  * SequentialDispatcher executes receives in the order they are scheduled in the same
@@ -98,35 +91,16 @@ export class SequentialDispatcher {
         this._stack = [];
         this._order = [];
         this._messages = [];
-        this._executor = new Executor(parent, this);
+        this._executor = ready([], [], this);
 
     }
 
-    next(messages, stack, executor) {
+    tell(message) {
 
-        setTimeout(() => {
-            if (messages.length > 0)
-                if (stack.length > 0) {
+        if (message instanceof Behaviour)
+            return this._executor = message.become;
 
-                    var next = stack.shift();
-                    var message = messages.shift();
-
-                    this._executor.tell({ message, next });
-                    return this.next(messages, stack, executor);
-
-                }
-        }, 0);
-
-    }
-
-    tell(m) {
-
-        if (m instanceof Retry)
-            this._messages.unshift(m);
-        else
-            this._messages.push(m);
-
-        this.next(this._messages, this._stack, this._executor);
+        this._executor(new Envelope({ message }));
 
     }
 
@@ -136,11 +110,8 @@ export class SequentialDispatcher {
         beof({ context }).interface(Context);
         beof({ time }).optional().number();
 
-        var p = new Promise((resolve, reject) => {
-            this._stack.push({ receive, context, resolve, reject })
-        });
-
-        this.next(this._messages, this._stack, this._executor);
+        var p = new Promise((resolve, reject) =>
+            this._executor(new Frame({ receive, context, resolve, reject })));
 
         return (time > 0) ? p.timeout(time) : p;
 

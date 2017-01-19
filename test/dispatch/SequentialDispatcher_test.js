@@ -18,13 +18,14 @@ describe('SequentialDispatcher', function() {
         parent.tell = p => { throw p.error; };
 
         context.root.returns(root);
+        context.parent.returns(parent);
 
 
     });
 
     beforeEach(function() {
 
-        dispatcher = new SequentialDispatcher(parent);
+        dispatcher = new SequentialDispatcher();
 
     });
 
