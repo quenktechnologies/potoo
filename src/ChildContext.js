@@ -143,9 +143,7 @@ export class ChildContext {
 
             if (!child) {
 
-                //@todo
-                //should return a null reference
-                return { tell() {} };
+                return this._root;
 
             } else if (child.path() === path) {
 
@@ -165,19 +163,19 @@ export class ChildContext {
     }
 
     spawn({
-            strategy = escalate,
-            dispatcher = default_dispatcher,
-            start
-        },
-        name = v4()) {
+        id = v4(),
+        strategy = escalate,
+        dispatcher = default_dispatcher,
+        start
+    }) {
 
         beof({ strategy }).function();
         beof({ dispatcher }).function();
-        beof({ name }).string();
+        beof({ id }).string();
         beof({ start }).interface(Callable);
 
         var slash = (this._path === '/') ? '' : '/';
-        var path = `${this._path}${slash}${name}`;
+        var path = `${this._path}${slash}${id}`;
         var dispatch = dispatcher(this._self);
         var context = new ChildContext(path, this, this._root, { dispatch, strategy });
         var self = context.self();

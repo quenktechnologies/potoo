@@ -185,7 +185,7 @@ export class Required {
         if (typeof value !== 'object') return null;
 
         value = Object.keys(keys).reduce((prev, key) => {
-            console.log('previous va ', prev);
+
             if (prev == null) return prev;
 
             if (keys[key]) {

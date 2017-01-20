@@ -15,16 +15,12 @@ describe('The IsomorphicSystem', function() {
 
         var buffer = [];
 
-        var start = function() {
-            this.receive(m => console.log(m));
-            this.receive(m => {
-                buffer.push(m)
-            });
-        };
+        var start = c =>
+            c.receive(m => (m === 'started') ? null : buffer.push(m));
 
-        system.spawn({ start }, 'one');
-        system.spawn({ start }, 'two');
-        system.spawn({ start }, 'three');
+        system.spawn({ id: 'one', start });
+        system.spawn({ id: 'two', start });
+        system.spawn({ id: 'three', start });
 
         system.select('/one').tell('well');
         system.select('/two').tell('hello');

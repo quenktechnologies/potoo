@@ -50,47 +50,26 @@ describe('ChildContext', function() {
 
             one = context.spawn({
 
+                id: 'one',
                 start: function() {
 
                     two = this.spawn({
+                        id: 'two',
                         start: function() {
 
-                            three = this.spawn({ start }, 'three')
+                            three = this.spawn({ id: 'three', start })
 
                         }
-                    }, 'two')
+                    })
 
                 }
-            }, 'one');
+            });
 
             must(context.select('/one')).eql(one);
             must(context.select('/one/two')).eql(two);
             must(context.select('/one/two/three')).eql(three);
 
         });
-
-    });
-
-    xdescribe('ChildContext#isChild', function() {
-
-        it('must work', function() {
-
-            var one = context.concernOf(new Testing.ConcernFactory(), 'one');
-            var two = context.concernOf(new Testing.ConcernFactory(), 'two');
-            var three = context.concernOf(new Testing.ConcernFactory(), 'three');
-
-            must(context.isChild(one)).be(true);
-            must(context.isChild(two)).be(true);
-            must(context.isChild(three)).be(true);
-
-        });
-
-        it('must not go crazy if child is this context', function() {
-
-            must(context.isChild(context)).be(false);
-
-        });
-
 
     });
 

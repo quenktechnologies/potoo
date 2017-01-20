@@ -6,7 +6,7 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha --opts mocha.opts test",
     "build": "rm -R lib; mkdir -p lib; ./node_modules/.bin/babel -D src -s inline -d lib",
-    "build-test": "rm -R lib/test; mkdir -p lib; ./node_modules/.bin/babel -D test -s inline -d lib/test"
+    "build-perf": "rm -R lib/perf; mkdir -p lib; ./node_modules/.bin/babel -D perf -s inline -d lib/perf"
   },
   "devDependencies": {
     "babel-cli": "^6.14.0",
