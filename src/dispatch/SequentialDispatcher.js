@@ -4,44 +4,44 @@ import Context from '../Context';
 import Callable from '../Callable';
 import Problem from './Problem';
 import Message from './Message';
-import UnhandledMessage from './UnhandledMessage';
+import Envelope from './Envelope';
 import { or, insof, required, OK } from '../funcs';
+import { ReceiveEvent, MessageEvent, MessageUnhandledEvent, MessageHandledEvent } from './events';
+import Reference from '../Reference';
 
 class Frame extends Message {}
-class Envelope extends Message {}
 class Behaviour extends Message {}
 
 const gt0 = (messages, frames) =>
     (messages.length > 0) && (frames.length > 0);
 
-const exec = ({ messages, frames, self }) => {
+const exec = ({ messages, frames, self, root }) => {
 
-    let message = messages.shift();
+    let { message } = messages.shift();
     let { receive, context, resolve, reject } = frames.shift();
 
-    self.tell(new Behaviour({ become: busy(messages, frames, self) }));
+    self.tell(new Behaviour({ become: busy(messages, frames, self, root) }));
 
-   Promise.try(() => {
+    Promise.try(() => {
 
         let result = receive.call(context, message);
 
         if (result == null) {
 
-            context.root().tell(new UnhandledMessage({
-                message,
-                to: context.path()
-            }))
-
             frames.unshift(new Frame({ receive, context, resolve, reject }));
+
+            root.tell(new MessageUnhandledEvent({ message, path: context.path() }));
 
         } else {
 
-            //The result is a promise/Thenable and we don't want
+            //The result is a Promise/Thenable and we don't want
             //to wait until it finished to process the next frame.
             if (typeof result.then === 'function')
-                self.tell(new Behaviour({ become: ready(messages, frames, self) }));
+                self.tell(new Behaviour({ become: ready(messages, frames, self, root) }));
 
             resolve(result);
+
+            root.tell(new MessageHandledEvent({ path: context.path(), message }));
 
         }
 
@@ -54,9 +54,9 @@ const exec = ({ messages, frames, self }) => {
 
         if (messages.length > 0)
             if (frames.length > 0)
-                return exec({ messages, frames, self });
+                return exec({ messages, frames, self, root });
 
-        return self.tell(new Behaviour({ become: ready(messages, frames, self) }))
+        return self.tell(new Behaviour({ become: ready(messages, frames, self, root) }))
 
     });
 
@@ -64,20 +64,21 @@ const exec = ({ messages, frames, self }) => {
 
 };
 
-const busy = (messages, frames, self) =>
-    or(insof(Frame, f => frames.push(f)),
-        insof(Envelope, env => messages.push(env.message)));
+const busy = (messages, frames, self, root) =>
+    or(insof(Frame, frame =>
+            (frames.push(frame), root.tell(new ReceiveEvent({ path: frame.context.path() })))),
+        insof(Envelope, env => (messages.push(env), root.tell(new MessageEvent(env)))));
 
-const ready = (messages, frames, self) =>
+const ready = (messages, frames, self, root) =>
     or(
         insof(Frame, frame =>
             (frames.push(frame), (gt0(messages, frames)) ?
-                exec({ messages, frames, self }) : OK)),
+                exec({ messages, frames, self, root }) : OK,
+                root.tell(new ReceiveEvent({ path: frame.context.path() })))),
 
-        insof(
-            Envelope, env =>
-            (messages.push(env.message), (gt0(messages, frames)) ?
-                exec({ messages, frames, self }) : OK)))
+        insof(Envelope, env =>
+            (messages.push(env), (gt0(messages, frames)) ?
+                exec({ messages, frames, self, root }) : OK, root.tell(new MessageEvent(env)))))
 
 
 /**
@@ -86,12 +87,14 @@ const ready = (messages, frames, self) =>
  */
 export class SequentialDispatcher {
 
-    constructor(parent, context) {
+    constructor(root) {
+
+        beof({ root }).interface(Reference);
 
         this._stack = [];
         this._order = [];
         this._messages = [];
-        this._executor = ready([], [], this);
+        this._executor = ready([], [], this, root);
 
     }
 
@@ -100,7 +103,7 @@ export class SequentialDispatcher {
         if (message instanceof Behaviour)
             return this._executor = message.become;
 
-        this._executor(new Envelope({ message }));
+        this._executor(message);
 
     }
 

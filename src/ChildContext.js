@@ -4,7 +4,8 @@ import Context from './Context';
 import Reference from './Reference';
 import Callable from './Callable';
 import { v4 } from 'uuid';
-import { SequentialDispatcher, Problem } from './dispatch';
+import { SequentialDispatcher, Problem, Envelope } from './dispatch';
+import { SelectMissEvent, SelectHitEvent } from './dispatch/events';
 import { escalate } from './dispatch/strategy';
 
 const noop = () => {};
@@ -72,18 +73,19 @@ export class ChildContext {
         this._parent = parent;
         this._strategy = strategy;
         this._root = root;
-        this._self = new LocalReference(this._path, m => {
+        this._self = new LocalReference(path, message => {
 
-            if (m instanceof Error) {
+            if (message instanceof Error) {
 
-                if (m instanceof Problem)
-                    strategy(m.error, m.context, this);
+                if (message instanceof Problem)
+                    strategy(message.error, message.context, this);
                 else
-                    this.parent().tell(m);
+                    throw message; //should never happen
+                //this.parent().tell(message);
 
             } else {
 
-                dispatch.tell(m);
+                dispatch.tell(new Envelope({ path, message }));
 
             }
 
@@ -132,10 +134,16 @@ export class ChildContext {
         beof({ path }).string();
 
         if (path === this._path)
-            return this.self();
+            return (
+                this._root.tell(new SelectHitEvent({ requested: path, from: this._path })),
+                this.self()
+            );
 
         if (!path.startsWith(this._path))
-            return this._parent.select(path);
+            return (
+                this._root.tell(new SelectMissEvent({ requested: path, from: this._path })),
+                this._parent.select(path)
+            );
 
         var childs = this._children.map(c => c.context);
 
@@ -176,7 +184,7 @@ export class ChildContext {
 
         var slash = (this._path === '/') ? '' : '/';
         var path = `${this._path}${slash}${id}`;
-        var dispatch = dispatcher(this._self);
+        var dispatch = dispatcher(this._root);
         var context = new ChildContext(path, this, this._root, { dispatch, strategy });
         var self = context.self();
 

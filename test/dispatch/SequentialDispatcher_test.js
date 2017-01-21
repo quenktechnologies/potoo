@@ -2,9 +2,10 @@ import must from 'must';
 import sinon from 'sinon';
 import Promise from 'bluebird';
 import { Context, Reference } from 'potoo-lib';
-import { SequentialDispatcher, Mailbox } from 'potoo-lib/dispatch';
+import { SequentialDispatcher, Mailbox, Envelope } from 'potoo-lib/dispatch';
+import { Event, ReceiveEvent } from 'potoo-lib/dispatch/events';
 
-var dispatcher, context, message, parent;
+var dispatcher, context, message, parent, root;
 
 describe('SequentialDispatcher', function() {
 
@@ -20,18 +21,17 @@ describe('SequentialDispatcher', function() {
         context.root.returns(root);
         context.parent.returns(parent);
 
-
     });
 
     beforeEach(function() {
 
-        dispatcher = new SequentialDispatcher();
+        dispatcher = new SequentialDispatcher(root);
 
     });
 
     it('should resolve ask\'d promises with the value of the receive function', function() {
 
-        setTimeout(() => dispatcher.tell(message), 200);
+        setTimeout(() => dispatcher.tell(new Envelope({ message })), 200);
 
         return dispatcher.ask({ receive: m => m, context }).
         then(result => must(result).be(message));
@@ -43,17 +43,16 @@ describe('SequentialDispatcher', function() {
         var buffer = [];
         var receive = (m) => x => buffer.push(m);
 
-        setTimeout(() => dispatcher.tell(message), 100);
-        setTimeout(() => dispatcher.tell(message), 200);
-        setTimeout(() => dispatcher.tell(message), 300);
+        setTimeout(() => dispatcher.tell(new Envelope({ message })), 100);
+        setTimeout(() => dispatcher.tell(new Envelope({ message })), 200);
+        setTimeout(() => dispatcher.tell(new Envelope({ message })), 300);
 
         return Promise.all([
             dispatcher.ask({ receive: receive('one'), context }),
             dispatcher.ask({ receive: receive('two'), context }),
             dispatcher.ask({ receive: receive('three'), context })
         ]).
-        then(() => new Promise(r => setTimeout(r, 600))).
-        then(() => {
+        then(() => new Promise(r => setTimeout(r, 600))).then(() => {
 
             must(buffer.join(',')).be('one,two,three');
 
@@ -76,7 +75,7 @@ describe('SequentialDispatcher', function() {
 
     it('should not deadlock if the receive promise is returned', function() {
 
-        dispatcher.tell(message);
+        dispatcher.tell(new Envelope({ message }));
 
         var blocks = [];
 
@@ -85,7 +84,7 @@ describe('SequentialDispatcher', function() {
             blocks.push(m);
 
             if (blocks.length < 10) {
-                dispatcher.tell(message);
+                dispatcher.tell(new Envelope({ message }));
                 return dispatcher.ask({ receive, context });
             }
 
@@ -110,13 +109,39 @@ describe('SequentialDispatcher', function() {
                 return success = true;
 
         };
-        var make = i => setTimeout(() => dispatcher.tell(message), 5 * (1 + i));
+        var make = i => setTimeout(() => dispatcher.tell(new Envelope({ message })), 5 * (1 + i));
 
         for (var i = 0; i < 10; i++)
             make(i);
 
         return dispatcher.ask({ receive, context }).
         then(() => must(success).be(true));
+
+    });
+
+    it('should generate events', function() {
+
+        var receive = m => (m === message) ? true : null;
+        var ok = false;
+        var events = [];
+
+        root.tell = e => {
+
+            if (e instanceof Event)
+                events.push(e.constructor.name);
+
+        }
+
+        dispatcher.tell(new Envelope({ message: new Date() }));
+        dispatcher.tell(new Envelope({ message }));
+
+        return dispatcher.ask({ receive, context }).
+        then(() => must(events).eql(['MessageEvent',
+            'MessageEvent',
+            'MessageUnhandledEvent',
+            'ReceiveEvent', //@todo: investigate: this should really occur before MessageUnhandledEvent
+            'MessageHandledEvent',
+        ]));
 
     });
 

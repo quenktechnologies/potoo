@@ -2,7 +2,7 @@ import beof from 'beof';
 import Promise from 'bluebird';
 import ChildContext from './ChildContext';
 import System from './System';
-import DroppedMessage from './dispatch/DroppedMessage';
+import {MessageDroppedEvent, SelectFailedEvent} from './dispatch/events';
 import { escalate } from './dispatch/strategy';
 
 /**
@@ -55,7 +55,8 @@ export class Guardian {
 
     select(path) {
 
-        return { tell: m => this.tell(new DroppedMessage({ message: m, to: path })) };
+        this.tell(new SelectFailedEvent({path}));
+        return { tell: m => this.tell(new MessageDroppedEvent({ message: m, to: path })) };
 
     }
 

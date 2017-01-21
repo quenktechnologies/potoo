@@ -1,16 +1,103 @@
 import beof from 'beof';
 import Promise from 'bluebird';
 import Guardian from './Guardian';
-import { DroppedMessage, UnhandledMessage, Problem } from './dispatch';
+import { Problem } from './dispatch';
+import * as events from './dispatch/events';
 import { or, insof, ok } from './funcs';
 
-export const log_filter = log =>
+export const LOG_LEVEL_ERROR = 3;
+export const LOG_LEVEL_WARN = 4;
+export const LOG_LEVEL_INFO = 5;
+export const LOG_LEVEL_DEBUG = 7;
 
-    or(insof(DroppedMessage, ok((log.level <= 4), m =>
-            console.warn(`DroppedMessage: to ${m.to} message: ${m.message}.`))),
+class Logger {
 
-        insof(UnhandledMessage, ok((log.level <= 4), m =>
-            console.warn(`UnhandledMessage: to ${m.to} message: ${m.message}.`))))
+    constructor(logger, level) {
+
+        this._logger = logger;
+        this._level = level;
+
+    }
+
+    log(level, message) {
+
+        if (level <= this._level)
+            switch (level) {
+
+                case LOG_LEVEL_INFO:
+                    this._logger.info(message);
+                    break;
+
+                case LOG_LEVEL_WARN:
+                    this._logger.warn(message);
+                    break;
+
+                case LOG_LEVEL_ERROR:
+                    this._logger.error(message);
+                    break;
+
+                default:
+                    this._logger.log(message);
+
+            }
+
+    }
+
+    info(message) {
+
+        this.log(LOG_LEVEL_INFO, message);
+
+    }
+
+    warn(message) {
+
+        this.log(LOG_LEVEL_WARN, message);
+
+    }
+
+    error(message) {
+
+        this.log(LOG_LEVEL_ERROR, message);
+
+    }
+
+}
+
+export const log_filter = (log, level) =>
+
+    or(
+        or(
+            insof(events.SelectFailedEvent, e =>
+                log.warn(`Actor selection for path '${e.path}' failed!`)),
+            or(
+                insof(events.MessageDroppedEvent, e =>
+                    log.warn(`Message sent to actor '${e.path}' was dropped!`, e.message)),
+
+                insof(events.MessageUnhandledEvent, e =>
+                    log.warn(`Message sent to actor '${e.path}' was unhandled !`, e.message)))),
+
+        ok(level >= LOG_LEVEL_INFO,
+        or(
+            insof(events.ReceiveEvent,
+                e => log.info(`Actor '${e.path}' began receiving`)),
+            or(
+                insof(events.MessageEvent,
+                    e => log.info(`Message sent to '${e.path}' mailbox.`, e.message)),
+
+                or(
+                    insof(events.SelectHitEvent,
+                        e => log.info(`
+                        Actor '${e.from}'
+                        provided a reference to '${e.requested}'
+                        `)),
+
+                    or(
+                        insof(events.SelectMissEvent,
+                            e => log.info(`Actor '${e.from}' ` +
+                                `did not provide a reference to '${e.requested}'`)),
+
+                        insof(events.MessageHandledEvent,
+                            e => log.info(`Actor '${e.path}' consumed message.`, e.message))))))))
 
 /**
  * IsomorphicSystem represents a collection of related Concerns that share a parent Context.
@@ -20,12 +107,13 @@ export const log_filter = log =>
  */
 class IsomorphicSystem {
 
-    constructor(options = { log: { level: 4 } }) {
+    constructor({ log_level = LOG_LEVEL_ERROR, logger = console, subscribers = [] } = {}) {
 
-        var { log } = options;
-
-        this._subs = [log_filter(log)];
+        this._subs = subscribers;
         this._guardian = new Guardian(this);
+
+        if (log_level > LOG_LEVEL_ERROR)
+            this._subs.push(log_filter(logger, log_level));
 
     }
 
@@ -54,7 +142,7 @@ class IsomorphicSystem {
 
     subscribe(f) {
 
-        this._subs.push(f);
+        this._subs.unshift(f);
         return this;
 
     }
