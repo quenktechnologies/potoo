@@ -49,7 +49,7 @@ export class Guardian {
 
     none() {
 
-        return this.self();
+        return { tell: m => this.tell(new MessageDroppedEvent({ message: m, to: '<none>' })) };
 
     }
 

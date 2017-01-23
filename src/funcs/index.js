@@ -93,7 +93,9 @@ export class Type {
 
     constructor(type, f) {
 
-        beof({ type }).string();
+        if (typeof type !== 'function')
+            beof({ type }).string();
+
         beof({ f }).function();
 
         this._type = type;
@@ -103,7 +105,9 @@ export class Type {
 
     call(context, value) {
 
-        return (typeof value === this._type) ? this._f(value) : null;
+        return (this._type instanceof Function) ?
+            (value instanceof this._type) ? this._f(value) : null :
+            (typeof value === this._type) ? this._f(value) : null;
 
     }
 
@@ -271,5 +275,16 @@ export function eql(check, f) {
 
     var c = new Equals(check, f);
     return function(v) { return c.call(this, v); }
+
+}
+
+/**
+ * and
+ * @param {Callable} left
+ * @param {Callable} right
+ */
+export function and(left, right) {
+
+    return function and_call(v) { return (left(v) == null) ? v : right(v) };
 
 }
