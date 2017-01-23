@@ -63,7 +63,7 @@ export class ChildContext {
         beof({ path }).string();
         beof({ parent }).interface(Context);
         beof({ root }).interface(Reference);
-        beof({ strategy }).function();
+        beof({ strategy }).interface(Callable);
         beof({ dispatch }).interface(Reference);
 
         this._stack = [];
@@ -201,7 +201,7 @@ export class ChildContext {
 
     receive(next, time) {
 
-        beof({ next }).function();
+        beof({ next }).interface(Callable);
         beof({ time }).optional().number();
 
         return this._dispatch.ask({ receive: next, context: this, time });
