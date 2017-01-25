@@ -1,4 +1,5 @@
 import beof from 'beof';
+import Callable from '../Callable';
 
 export const OK = true;
 
@@ -17,8 +18,8 @@ export class InstanceOf {
 
     constructor(predicate, f) {
 
-        beof({ predicate }).function();
-        beof({ f }).function();
+        beof({ predicate }).interface(Callable);
+        beof({ f }).interface(Callable);
 
         this._predicate = predicate;
         this._f = f;
@@ -56,8 +57,8 @@ export class Or {
 
     constructor(left, right) {
 
-        beof({ left }).function();
-        beof({ right }).function();
+        beof({ left }).interface(Callable);
+        beof({ right }).interface(Callable);
 
         this._left = left;
         this._right = right;
@@ -96,7 +97,7 @@ export class Type {
         if (typeof type !== 'function')
             beof({ type }).string();
 
-        beof({ f }).function();
+        beof({ f }).interface(Callable);
 
         this._type = type;
         this._f = f;
@@ -137,7 +138,7 @@ export class Is {
     constructor(value, f) {
 
         beof({ value }).string();
-        beof({ f }).function();
+        beof({ f }).interface(Callable);
 
         this._value = value;
         this._f = f;
@@ -175,7 +176,7 @@ export class Required {
     constructor(keys, f) {
 
         beof({ keys }).object();
-        beof({ f }).function();
+        beof({ f }).interface(Callable);
 
         this._keys = keys;
         this._f = f;
@@ -251,7 +252,7 @@ export class Equals {
 
     constructor(check, f) {
 
-        beof({ f }).function();
+        beof({ f }).interface(Callable);
 
         this._check = check;
         this._f = f;
