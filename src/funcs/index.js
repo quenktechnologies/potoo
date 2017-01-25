@@ -67,7 +67,10 @@ export class Or {
 
     call(context, value) {
 
-        return this._left.call(context, value) || this._right.call(context, value);
+        let ret = this._left.call(context, value);
+
+        return (ret != null) ? ret :
+            this._right.call(context, value);
 
     }
 

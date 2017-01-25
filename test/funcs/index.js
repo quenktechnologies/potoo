@@ -15,9 +15,9 @@ describe('funcs', function() {
 
         it('should execute the right if the left fails', function() {
 
-            func = new funcs.Or(v => false, v => true);
+            func = new funcs.Or(v => null, v => true);
             must(func.call(null, false)).be(true);
-            must(funcs.or(v => false, v => true)(false)).be(true);
+            must(funcs.or(v => null, v => true)(false)).be(true);
 
         });
 
