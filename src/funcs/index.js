@@ -292,3 +292,20 @@ export function and(left, right) {
     return function and_call(v) { return (left(v) == null) ? v : right(v) };
 
 }
+
+/**
+ * any is like or excepts it accepts > 2 arguments
+ * @param {Callables} ...c
+ */
+export function any() {
+
+    let i = arguments.length;
+    let args = [];
+
+    while (i--)
+        args[i] = arguments[i];
+
+    return (context, value) => args.reduce((pre, curr) =>
+        (pre != null) ? pre : curr.call(context, value), null);
+
+}

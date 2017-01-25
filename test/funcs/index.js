@@ -91,5 +91,17 @@ describe('funcs', function() {
 
     });
 
+    describe('any', function() {
+
+
+        it('should work', function() {
+
+            must(funcs.any(() => null, () => null, () => null)(22)).be(null);
+            must(funcs.any(() => null, () => null, x => x)(22)).be(22);
+
+        });
+
+    });
+
 
 });
