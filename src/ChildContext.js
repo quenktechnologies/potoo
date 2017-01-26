@@ -10,6 +10,7 @@ import { escalate } from './dispatch/strategy';
 
 const noop = () => {};
 const default_dispatcher = (p) => new SequentialDispatcher(p);
+const NO_NAME = '<anonymous>';
 
 /**
  * LocalReference is a Reference to an Actor in the current address space.
@@ -199,14 +200,15 @@ export class ChildContext {
 
     }
 
-    receive(next, name, time) {
+    receive(next, time) {
 
         beof({ next }).interface(Callable);
         beof({ time }).optional().number();
 
-        name = name ? name : (typeof next === 'object') ?
+        let name = (typeof next === 'object') ?
             next.constructor.name : next.name;
 
+        name = name ? name : NO_NAME;
         return this._dispatch.ask({ receive: next, context: this, time, name });
 
     }
