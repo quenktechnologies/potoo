@@ -77,14 +77,14 @@ export class Or {
 }
 
 /**
- * Or preforms a logical 'or' between two Callables
+ * or preforms a logical 'or' between two Callables
  * @param {Callable} right
  * @param {Callable} right
  */
 export function or(left, right) {
 
     var c = new Or(left, right);
-    return function(v) { return c.call(this, v); }
+    return function or_call(v) { return c.call(this, v); }
 
 }
 
@@ -125,7 +125,7 @@ export class Type {
 export function type(type, f) {
 
     var c = new Type(type, f);
-    return function(v) { return c.call(this, v); }
+    return function type_call(v) { return c.call(this, v); }
 
 }
 
@@ -165,7 +165,7 @@ export class Is {
 export function is(value, f) {
 
     var c = new Is(value, f);
-    return function(v) { return c.call(this, v); }
+    return function is_call(v) { return c.call(this, v); }
 
 }
 
@@ -226,7 +226,7 @@ export class Required {
 export function required(value, f) {
 
     var c = new Required(value, f);
-    return function(v) { return c.call(this, v); }
+    return function required_call(v) { return c.call(this, v); }
 
 }
 
@@ -239,7 +239,7 @@ export function required(value, f) {
  */
 export function ok(check, f) {
 
-    return function(v) { return check ? f(v) : null };
+    return function ok_call(v) { return check ? f(v) : null };
 
 }
 
@@ -278,7 +278,7 @@ export class Equals {
 export function eql(check, f) {
 
     var c = new Equals(check, f);
-    return function(v) { return c.call(this, v); }
+    return function eql_call(v) { return c.call(this, v); }
 
 }
 
@@ -305,7 +305,9 @@ export function any() {
     while (i--)
         args[i] = arguments[i];
 
-    return (context, value) => args.reduce((pre, curr) =>
-        (pre != null) ? pre : curr.call(context, value), null);
+    let any_call = value => args.reduce((pre, curr) =>
+        (pre != null) ? pre : curr.call(this, value), null);
+
+    return any_call;
 
 }

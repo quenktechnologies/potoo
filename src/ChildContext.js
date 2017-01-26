@@ -199,12 +199,15 @@ export class ChildContext {
 
     }
 
-    receive(next, time) {
+    receive(next, name, time) {
 
         beof({ next }).interface(Callable);
         beof({ time }).optional().number();
 
-        return this._dispatch.ask({ receive: next, context: this, time });
+        name = name ? name : (typeof next === 'object') ?
+            next.constructor.name : next.name;
+
+        return this._dispatch.ask({ receive: next, context: this, time, name });
 
     }
 

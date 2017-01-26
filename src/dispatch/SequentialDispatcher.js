@@ -18,7 +18,7 @@ const gt0 = (messages, frames) =>
 const exec = ({ messages, frames, self, root }) => {
 
     let { message } = messages.shift();
-    let { receive, context, resolve, reject } = frames.shift();
+    let { receive, context, resolve, reject, name } = frames.shift();
 
     self.tell(new Behaviour({ become: busy(messages, frames, self, root) }));
 
@@ -30,7 +30,7 @@ const exec = ({ messages, frames, self, root }) => {
 
             frames.unshift(new Frame({ receive, context, resolve, reject }));
 
-            root.tell(new MessageUnhandledEvent({ message, path: context.path() }));
+            root.tell(new MessageUnhandledEvent({ message, path: context.path(), name }));
 
         } else {
 
@@ -41,7 +41,7 @@ const exec = ({ messages, frames, self, root }) => {
 
             resolve(result);
 
-            root.tell(new MessageHandledEvent({ path: context.path(), message }));
+            root.tell(new MessageHandledEvent({ path: context.path(), message, name }));
 
         }
 
@@ -66,7 +66,8 @@ const exec = ({ messages, frames, self, root }) => {
 
 const busy = (messages, frames, self, root) =>
     or(insof(Frame, frame =>
-            (frames.push(frame), root.tell(new ReceiveEvent({ path: frame.context.path() })))),
+            (frames.push(frame),
+                root.tell(new ReceiveEvent({ name:frame.name, path: frame.context.path(), })))),
         insof(Envelope, env => (messages.push(env), root.tell(new MessageEvent(env)))));
 
 const ready = (messages, frames, self, root) =>
@@ -107,14 +108,14 @@ export class SequentialDispatcher {
 
     }
 
-    ask({ receive, context, time = 0 }) {
+    ask({ receive, context, time = 0, name = '' }) {
 
         beof({ receive }).interface(Callable);
         beof({ context }).interface(Context);
         beof({ time }).optional().number();
 
         var p = new Promise((resolve, reject) =>
-            this._executor(new Frame({ receive, context, resolve, reject })));
+            this._executor(new Frame({ receive, context, resolve, reject, name })));
 
         return (time > 0) ? p.timeout(time) : p;
 

@@ -74,30 +74,32 @@ export const log_filter = (log, level) =>
                     log.warn(`Message sent to actor '${e.path}' was dropped!`, e.message)),
 
                 insof(events.MessageUnhandledEvent, e =>
-                    log.warn(`Message sent to actor '${e.path}' was unhandled !`, e.message)))),
+                    log.warn(`Message sent to actor '${e.path}' was unhandled ` +
+                        `by '${e.name}'!`, e.message)))),
 
         ok(level >= LOG_LEVEL_INFO,
-        or(
-            insof(events.ReceiveEvent,
-                e => log.info(`Actor '${e.path}' began receiving`)),
             or(
-                insof(events.MessageEvent,
-                    e => log.info(`Message sent to '${e.path}' mailbox.`, e.message)),
-
+                insof(events.ReceiveEvent,
+                    e => log.info(`Actor '${e.path}' began receiving with '${e.name}'`)),
                 or(
-                    insof(events.SelectHitEvent,
-                        e => log.info(`
+                    insof(events.MessageEvent,
+                        e => log.info(`Message sent to '${e.path}' mailbox.`, e.message)),
+
+                    or(
+                        insof(events.SelectHitEvent,
+                            e => log.info(`
                         Actor '${e.from}'
                         provided a reference to '${e.requested}'
                         `)),
 
-                    or(
-                        insof(events.SelectMissEvent,
-                            e => log.info(`Actor '${e.from}' ` +
-                                `did not provide a reference to '${e.requested}'`)),
+                        or(
+                            insof(events.SelectMissEvent,
+                                e => log.info(`Actor '${e.from}' ` +
+                                    `did not provide a reference to '${e.requested}'`)),
 
-                        insof(events.MessageHandledEvent,
-                            e => log.info(`Actor '${e.path}' consumed message.`, e.message))))))))
+                            insof(events.MessageHandledEvent,
+                                e => log.info(`Actor '${e.path}' consumed message ` +
+                                    `with '${e.name}'.`, e.message))))))))
 
 /**
  * IsomorphicSystem represents a collection of related Concerns that share a parent Context.
