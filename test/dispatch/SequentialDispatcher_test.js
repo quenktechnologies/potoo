@@ -136,10 +136,11 @@ describe('SequentialDispatcher', function() {
         dispatcher.tell(new Envelope({ message }));
 
         return dispatcher.ask({ receive, context }).
-        then(() => must(events).eql(['MessageEvent',
+        then(() => must(events).eql([
             'MessageEvent',
+            'MessageEvent',
+            'ReceiveEvent',
             'MessageUnhandledEvent',
-            'ReceiveEvent', //@todo: investigate: this should really occur before MessageUnhandledEvent
             'MessageHandledEvent',
         ]));
 

@@ -5,7 +5,7 @@ import Callable from '../Callable';
 import Problem from './Problem';
 import Message from './Message';
 import Envelope from './Envelope';
-import { or, insof, required, OK } from '../funcs';
+import { or, insof, any, type, required, OK } from '../funcs';
 import { ReceiveEvent, MessageEvent, MessageUnhandledEvent, MessageHandledEvent } from './events';
 import Reference from '../Reference';
 
@@ -65,22 +65,28 @@ const exec = ({ messages, frames, self, root }) => {
 };
 
 const busy = (messages, frames, self, root) =>
-    or(insof(Frame, frame =>
+
+    any(
+        type(Frame, frame =>
             (frames.push(frame),
-                root.tell(new ReceiveEvent({ name:frame.name, path: frame.context.path(), })))),
-        insof(Envelope, env => (messages.push(env), root.tell(new MessageEvent(env)))));
+                root.tell(new ReceiveEvent({ name: frame.name, path: frame.context.path() })))),
+
+        type(Envelope, env =>
+            (messages.push(env), root.tell(new MessageEvent(env)))));
+
 
 const ready = (messages, frames, self, root) =>
-    or(
-        insof(Frame, frame =>
-            (frames.push(frame), (gt0(messages, frames)) ?
-                exec({ messages, frames, self, root }) : OK,
-                root.tell(new ReceiveEvent({ path: frame.context.path() })))),
+    any(
+        type(Frame, frame =>
+            (frames.push(frame),
+                root.tell(new ReceiveEvent({ path: frame.context.path() })),
+                (gt0(messages, frames)) ? exec({ messages, frames, self, root }) : OK)),
 
-        insof(Envelope, env =>
-            (messages.push(env), (gt0(messages, frames)) ?
-                exec({ messages, frames, self, root }) : OK, root.tell(new MessageEvent(env)))))
-
+        type(Envelope, env =>
+            (messages.push(env),
+                root.tell(new MessageEvent(env)),
+                (gt0(messages, frames)) ?
+                exec({ messages, frames, self, root }) : OK)));
 
 /**
  * SequentialDispatcher executes receives in the order they are scheduled in the same
