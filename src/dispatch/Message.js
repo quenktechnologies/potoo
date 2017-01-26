@@ -6,7 +6,7 @@
  */
 export class Message {
 
-    constructor(src) {
+    constructor(src = {}) {
 
         Object.keys(src).forEach(k => this[k] = src[k]);
 
