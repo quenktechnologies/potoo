@@ -80,7 +80,7 @@ const ready = (messages, frames, self, root) =>
         type(Frame, frame =>
             (frames.push(frame),
                 root.tell(new ReceiveEvent({ name: frame.name, path: frame.context.path() })),
-                (gt0(messages, frames)) ? exec({ messages, frames, self, root }) : OK)),
+                (gt0(messages, frames)) ? setTimeout(exec({ messages, frames, self, root })) : OK)),
 
         type(Envelope, env =>
             (messages.push(env),
