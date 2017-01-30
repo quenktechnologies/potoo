@@ -20,7 +20,7 @@ describe('Guardian', function() {
 
         it('should create a new actor reference', function() {
 
-            must(guardian.spawn({ start: () => {} })).be.instanceOf(LocalReference);
+            must(guardian.spawn({ start: () => ()=>{} })).be.instanceOf(LocalReference);
 
         });
 

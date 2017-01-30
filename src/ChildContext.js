@@ -191,11 +191,13 @@ export class ChildContext {
 
         this._children.push({ path, context, start, strategy });
 
+        context.receive(start.call(context, context));
+/*
         Promise.try(() => start.call(context, context)).
         then(() => self.tell('started')).
         catch(error =>
             this._strategy(new Problem(error, context), context, this));
-
+*/
         return self;
 
     }

@@ -5,7 +5,8 @@ import { ChildContext, LocalReference } from 'potoo-lib/ChildContext';
 
 var context, root, parent, strategy, child, dispatch;
 var throwit = e => { throw e; };
-var start = () => {};
+var start = () => () => {};
+var noop = () => {};
 
 describe('ChildContext', function() {
 
@@ -58,9 +59,12 @@ describe('ChildContext', function() {
                         start: function() {
 
                             three = this.spawn({ id: 'three', start })
+                            return noop;
 
                         }
                     })
+
+                    return noop;
 
                 }
             });
