@@ -1,0 +1,4 @@
+--recursive
+--growl
+--reporter list
+--timeout 10000
