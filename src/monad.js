@@ -10,6 +10,12 @@ export class Identity {
 
     }
 
+    static of(v) {
+
+        return new Identity(v);
+
+    }
+
     map(f) {
 
         return new Identity(f(this._value));
@@ -35,9 +41,15 @@ export class Identity {
  */
 export class Maybe {
 
+    constructor(v) {
+
+        this.value = v;
+
+    }
+
     static not(v) {
 
-        return v == null ? new Nothing() : new Just(v);
+        return v == null ? new Nothing() : Maybe.of(v);
 
     }
 
@@ -47,12 +59,18 @@ export class Maybe {
 
     }
 
+    map(f) {
+
+        return Maybe.not(f(this.value));
+
+    }
+
 }
 
 /**
  * Nothing
  */
-export class Nothing {
+export class Nothing extends Maybe {
 
     chain() {
 
@@ -83,13 +101,7 @@ export class Nothing {
 /**
  * Just
  */
-export class Just {
-
-    constructor(v) {
-
-        this.value = v;
-
-    }
+export class Just extends Maybe {
 
     chain(f) {
 
@@ -132,6 +144,24 @@ export class Either {
     join() {
 
         return this.chain(x => x);
+
+    }
+
+    left() {
+
+        if (this instanceof Left)
+            return this._value;
+
+        throw new TypeError(`Either#left(): '${this.constructor.name}' is not instance of Left!`);
+
+    }
+
+    right() {
+
+        if (this instanceof Right)
+            return this._value;
+
+        throw new TypeError(`Either#right(): '${this.constructor.name}' is not instance of Right!`);
 
     }
 
@@ -368,6 +398,104 @@ export class IO {
 }
 
 /**
+ * Free
+ */
+export class Free {
+
+    static of(a) {
+
+        return new Return(a)
+
+    }
+
+    static liftF(ftor) {
+
+        return typeof ftor === 'function' ?
+            new Suspend(x => new Return(ftor(x))) :
+            new Suspend(ftor.map(x => new Return(x)))
+    }
+
+    map(f) {
+
+        return this.chain(x => new Return(f(x)));
+
+    }
+
+    ap(f) {
+
+        return this.chain(x => f.map(g => g(x)));
+
+    }
+
+}
+
+export class Suspend extends Free {
+
+    constructor(ftor) {
+
+        super();
+        this.ftor = ftor;
+
+    }
+
+    chain(f) {
+
+        return (typeof this.ftor === 'function') ?
+            new Suspend(x => this.ftor(x).chain(f)) :
+            new Suspend(this.ftor.map(free => free.chain(f)));
+
+    }
+
+    resume() {
+
+        return left(this.ftor);
+
+    }
+
+    go(f) {
+
+        let r = this.resume();
+
+        while (r instanceof Left)
+            r = (f(r.left())).resume();
+
+        return r.right();
+
+    }
+
+}
+
+export class Return extends Free {
+
+    constructor(val) {
+
+        super();
+        this.value = val;
+
+    }
+
+    chain(f) {
+
+        return f(this.value);
+
+    }
+
+    resume() {
+
+        return right(this.value);
+
+    }
+
+    go() {
+
+        return this.value;
+
+    }
+
+}
+
+
+/**
  * identity returns an Identity monad with.
  * @param {*} value
  */
@@ -383,8 +511,6 @@ export function right(value) {
     return new Right(value);
 
 }
-
-
 
 /**
  * left constructs a new Left type.

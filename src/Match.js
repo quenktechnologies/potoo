@@ -1,7 +1,27 @@
-import beof from 'beof';
-
 /**
- * Match provides an api for functional match expressions.
+ * UnMatchedPatternError
+ */
+export function UnMatchedPatternError(pattern) {
+
+    this.message = `Unable to match the pattern ` +
+        `'${ typeof pattern === 'object'? pattern.constructor.name : pattern }'!`;
+
+    this.stack = (new Error(this.message)).stack;
+    this.name = this.constructor.name;
+
+    if (Error.hasOwnProperty('captureStackTrace'))
+        Error.captureStackTrace(this, this.constructor);
+
+
+
+}
+
+UnMatchedPatternError.prototype = Object.create(Error.prototype);
+UnMatchedPatternError.prototype.constructor = UnMatchedPatternError;
+
+export default UnMatchedPatternError
+/**
+ * Match provides a pattern matching api for javascript functions.
  * @abstract
  */
 export class Match {
@@ -23,16 +43,16 @@ export class Match {
     }
 
     /**
-     * end executes the left function if the value was unmatched and returns the result
-     * otherwise does the same with the right function.
-     * @summary (* →  *, * → *) →  Match
+     * end pattern matching and return the result, if nothing matched, an
+     * UnmatchedPatternError will be thrown.
+     * @summary () →  Match
      */
-    end(l, r) {
+    end() {
 
-        beof({ l }).function();
-        beof({ r }).function();
+        if (this instanceof UnMatched)
+            throw new UnMatchedPatternError(this.value);
 
-        return (this instanceof UnMatched) ? l(this.value) : r(this.value);
+        return this.value;
 
     }
 
@@ -73,8 +93,8 @@ export class UnMatched extends Match {
 
             case 'object':
                 return (type == null) ?
-                           (this.value == null) ? new Matched(f(this.value)) : new UnMatched(this)
-                : (this.value === type) ? new Matched(f(this.value)) : new UnMatched(this)
+                    (this.value == null) ? new Matched(f(this.value)) : new UnMatched(this) :
+                    (this.value === type) ? new Matched(f(this.value)) : new UnMatched(this)
 
             default:
                 return new UnMatched(this.value);

@@ -1,5 +1,5 @@
 import must from 'must';
-import { match, UnMatched, Matched } from 'potoo-lib/Match';
+import { match, UnMatched, Matched, UnMatchedPatternError } from 'potoo-lib/Match';
 
 const id = x => x;
 
@@ -47,9 +47,9 @@ describe('UnMatched', function() {
     });
 
 
-    it('should execute the left end', function() {
+    it('should remain UnMatched', function() {
 
-        must(new UnMatched(1).end(id, () => null)).be(1);
+        must(() => new UnMatched(1).end()).throw(UnMatchedPatternError);
 
     });
 
@@ -57,9 +57,9 @@ describe('UnMatched', function() {
 
 describe('Matched', function() {
 
-    it('should execute the right end', function() {
+    it('should remain Matched', function() {
 
-        must(new Matched(1).end(id, x => x * 10)).be(10)
+        must(new Matched(1).end()).be(1);
 
     });
 

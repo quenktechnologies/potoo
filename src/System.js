@@ -1,230 +1,302 @@
-import beof from 'beof';
+import property from 'property-seek';
+import { merge, oreduce } from './util';
+import { type, force, any, or } from './be';
 import { match } from './Match';
-import { IO, left, right } from './monad';
-import { Actor, ActorT } from './Actor';
-import { Spawn, Tell, Kill, Drop, Receive } from './Message';
-import { merge } from './util';
+import { Maybe, Free } from './monad';
+import { Type, copy } from './Type';
+import { ActorT, LocalT, ActorL, ActorContext } from './Actor';
+import * as lens from './lens';
 
 /**
- * Stopped is used to represent the System that has been stopped (killed)
- * it can not be restarted.
- * @property {() →  IO} io
+ * InvalidActorPathError
+ * @param {string} path
  */
-export class Stopped {
+export function InvalidActorPathError(path) {
 
-    constructor(io = IO.of(null)) {
+    this.message = `The path '${path}' is either invalid or in use!`;
+    this.stack = (new Error(this.message)).stack;
+    this.name = this.constructor.name;
 
-        this.io = io;
+    if (Error.hasOwnProperty('captureStackTrace'))
+        Error.captureStackTrace(this, this.constructor);
 
-    }
+}
 
-    spawn() {
+InvalidActorPathError.prototype = Object.create(Error.prototype);
+InvalidActorPathError.prototype.constructor = InvalidActorPathError;
 
-        return this;
+/**
+ * Op
+ */
+export class Op extends Type {
 
-    }
+    map(f) {
 
-    tick() {
-
-        return this;
-
-    }
-
-    tock() {
-
-        return this.io.run();
-
-    }
-
-    start() {
-
-        return this.tick().tock();
+        return match(this)
+            .caseOf(Spawn, () => new Spawn(merge(this, { next: f(this.next) })))
+            .caseOf(Send, () => new Send(merge(this, { next: f(this.next) })))
+            .caseOf(Receive, () => new Receive(merge(this, { next: f(this.next) })))
+            .end();
 
     }
 
 }
 
 /**
- * System implementations are the system part of the actor model¹.
- *
- * A System is effectively a mesh network where any node can
- * communicate with another provided they have an unforgable address for that node
- * (and are allowed to).
- *
- * Previously this was tackled as a class whose reference was shared between the
- * child actors' contexts. Now we still take a simillar approach
- * but instead of being a singleton the System's implementation is influenced by Monads.
- *
- * We also intend to unify actors that run on seperate threads/process with ones on the
- * main loop thus eliminating the need for an environment specific System.
- *
- * ¹ https://en.wikipedia.org/wiki/Actor_model
- * @property {Object<string, Actor>} actors
- * @property {Object<string,Array>} mailboxes
- * @property {Array<Task>} tasks
- * @property {Array<System →  IO<System>>} io
+ * Spawn represents a request to create a new actor by its parent.
  */
-export class System {
+export class Spawn extends Op {
 
-    constructor(actors = {}, mailboxes = { '$': [] }, tasks = [], io = []) {
+    constructor(props) {
 
-        beof({ actors }).object();
-        beof({ mailboxes }).object();
-        beof({ tasks }).array();
-        beof({ io }).array();
+        super(props, {
+            template: type(ActorT),
+            parent: type(String),
+            next: any
+        });
 
-        this.actors = actors;
-        this.mailboxes = mailboxes;
-        this.tasks = tasks;
-        this.io = io;
+    }
+}
+
+/**
+ * Send represents a request to send a message to another actor.
+ * @property {to} string
+ * @property {string} from
+ * @property {*} message
+ */
+export class Send extends Op {
+
+    constructor(props) {
+
+        super(props, {
+            from: type(String),
+            to: type(String),
+            message: any,
+            next: any
+        });
+
+    }
+}
+
+/**
+ * Receive represents a request to receive the latest message
+ */
+export class Receive extends Op {
+
+    constructor(props) {
+
+        super(props, {
+
+            behaviour: type(Function),
+            path: type(String),
+            next: any
+
+        });
+
+    }
+
+}
+
+/**
+ * Drop represents a request to drop a message.
+ * @property {to} string
+ * @property {string} from
+ * @property {*} message
+ */
+export class Drop extends Send {}
+
+/**
+ * exec
+ * @summary { (Free,System) →  System }
+ */
+export const exec = (sys, free) =>
+    free
+    .resume()
+    .cata(x => match(x)
+        .caseOf(Spawn, execSpawn(sys))
+        .caseOf(Send, deliverMessage(sys))
+        .caseOf(Receive, receiveMessage(sys))
+        .end(), y => y)
+
+/**
+ * execSpawn
+ * @param {System} sys
+ * @param {Spawn} request
+ * @return {System}
+ */
+export const execSpawn = sys => ({ parent, template }) => match(template)
+    .caseOf(LocalT, ({ id, start }) =>
+        lens.set(
+            actorCheckedLens(address(parent, id)),
+            new ActorL({
+                parent,
+                path: address(parent, id),
+                ops: start(new ActorContext({ self: address(parent, id), parent })),
+                template
+            }), sys))
+    .end();
+
+/**
+ * deliverMessage
+ * @summary {System →  Send →  System}
+ */
+export const deliverMessage = sys => send =>
+    Maybe
+    .not(sys.actors[send.to])
+    .map(actor => lens.set(actorLens(send.to), actor.accept(send), sys))
+    .orElse(() => sys.accept(send))
+    .just();
+
+/**
+ * receiveMessage
+ * @summary {System →  Receive →  System}
+ */
+export const receiveMessage = sys => receive =>
+    Maybe
+    .not(sys.actors[receive.path])
+    .chain(actor =>
+        Maybe
+        .not(actor.mailbox[0])
+        .map(msg => {
+
+            if (receive.pattern)
+                if (receive.pattern(msg) === false)
+                    return copy(sys, { ops: sys.ops.concat(receive) });
+
+                //@todo error handling on behaviour execution
+            return copy(sys, {
+                ops: sys.ops.concat(receive.behaviour(msg)).filter(x => x)
+            })
+
+        })
+        .orElse(() => copy(sys, { ops: sys.ops.concat(receive) })))
+    .orElse(() => Maybe.of(sys.accept(receive)))
+    .just();
+
+
+/**
+ * drain the ops from an actor
+ * @param {System} sys
+ * @param {Actor} actor
+ * @return {System}
+ * @summary {(Actor,System) →  System}
+ */
+export const drain = (sys, actor) =>
+    copy(sys, {
+        ops: actor.ops ? sys.ops.concat(actor.ops) : sys.ops,
+        actors: merge(sys.actors, {
+            [actor.path]: copy(actor, { ops: null })
+        })
+    });
+
+
+/**
+ * qLens
+ */
+export const qLens = path => (op, sys) => {
+
+    if (sys === undefined) {
+
+        return lens.path(path)
+
+    } else {
+
+        return lens.set(lens.path(path),
+            lens.set(lens.index(lens.TAIL), op, lens.path(path)(sys)), sys);
+
+    }
+
+}
+
+/**
+ * actorLens
+ */
+export const actorLens = path => (actor, sys) => (sys === undefined) ?
+    actor.actors[path] : property(`actors[${path}]`, actor, sys);
+
+/**
+ * actorCheckedLens
+ */
+export const actorCheckedLens = path => (actor, sys) => {
+
+    if (sys === undefined)
+        if (property(`actors[${path}]`, sys) != null)
+            throw new InvalidActorPathError(path);
+
+    return actorLens(path)(actor, sys);
+
+}
+
+/**
+ * address generates an address for a local actor
+ * @summary { (string,string) →  string
+ */
+const address = (p, c) => (p === '') ? c : `${p}/${c}`;
+const opsLens = qLens('ops');
+
+/**
+ * System
+ * @property {Array<Op>} ops
+ */
+export class System extends Type {
+
+    constructor(props) {
+
+        super(props, {
+            ops: or(type(Array), force([])),
+            actors: or(type(Object), force({}))
+        });
 
     }
 
     /**
-     * spawn a new actor.
-     *
-     * The actor will be spawned on the next turn of the event loop.
-     * @summary ActorT →  System
+     * accept a message for the system actor. Usually a dead letter or system command.
+     * @param {Send} message
+     */
+    accept(message) {
+
+        //@todo filter our and log dropped messages
+        console.log('dead message', message);
+        return this;
+
+    }
+
+    /**
+     * spawn a new actor
+     * @param {ActorT} template
+     * @return {System}
      */
     spawn(template) {
 
-        beof({ template }).instance(ActorT);
-
-        return new System(
-            this.actors,
-            this.mailboxes,
-            this.tasks.concat(new Spawn({ parent: '', template })),
-            this.io);
+        return new System(lens.set(opsLens,
+            Free.liftF(new Spawn({ template, parent: '' })), this));
 
     }
 
     /**
-     * tick
-     * @summary System => System
+     * tick acts as the scheduler, scheduling system computations including
+     * those of child actors.
+     * @summary { () →  System}
      */
     tick() {
 
-        return processSysQ(scheduleActors(this)).cata(processUserQ, s => s);
+        return oreduce(this.actors, drain, this);
 
     }
 
-    /**
-     * tock
-     * (performs side effects immediately)
-     * @summary System => (System →  IO<System>) →  null
+    /** tock runs the computations of the actor system.
+     * @summary { System →  Free →  System}
      */
     tock(f) {
 
-        beof({ f }).function();
-
-        return this
-            .io
-            .reduce((io, f) => io.chain(f), IO.of(this))
-            .chain(f)
-            .run();
+        return this.ops.slice().reduce(exec, copy(this, { ops: [] }));
 
     }
 
     start() {
 
-        return this.tick().tock(s => IO.of(() => setTimeout(() => s.start, 0)));
+
 
     }
 
 }
-
-/**
- * scheduleActors
- * @summary System →  System
- */
-export const scheduleActors = s =>
-    Object.keys(s.actors).reduce((s, k) => s.actors[k].schedule(s), s);
-
-/**
- * processSysQ executes a task from the system queue (FIFO)
- * @summary System →  Either<System,System>
- */
-export const processSysQ = s =>
-    ((s.mailboxes.$[0] == null) ? left(s) : right(s.mailboxes.$[0]))
-    .chain(m =>
-        match(m)
-        .caseOf(Kill, kill(s))
-        .end(left, right))
-    .map(s => console.log(s) || copy(s, {
-        mailboxes: merge(s.mailboxes, { $: s.mailboxes.$.slice(1) })
-    }))
-
-/**
- * kill
- * @summary System →  Kill →  Stopped
- */
-export const kill = () => () =>
-    new Stopped(() => console.warn('System is going down!'));
-
-/**
- * processUserQ
- * @summary System →  System
- */
-export const processUserQ = s => s.tasks.reduce((s, t) =>
-    match(t)
-    .caseOf(Spawn, createActor(s))
-    .caseOf(Tell, deliver(s))
-    .end(() => s, s => s), s)
-
-/**
- * createActor
- * @summary System →  Spawn →  System
- */
-export const createActor = s => ({ template, parent }) =>
-    new System(
-        merge(s.actors, {
-
-                [address(parent, template.id)]: template
-                    .start(new Actor(address(parent, template.id)))
-
-            },
-            merge(s.mailboxes, {
-
-                [address(parent, template.id)]: []
-
-            }),
-            s.tasks, s.io));
-
-/**
- * deliver puts messages in their respective mailboxes.
- * @summary System →  Tell →  System
- */
-export const deliver = s => ({ to, from, message }) =>
-    match(s.mailboxes[to])
-    .caseOf(Array, box => copy(s, {
-        mailboxes: merge(s.mailboxes, {
-            [to]: box.concat(message)
-        })
-    }))
-    .caseOf(Function, f => copy(s, { io: s.io.concat(s => f(message, s)) }))
-    .caseOf(null, copy(s, {
-        mailboxes: s.mailboxes.$.concat(new Drop({ to, from, message }))
-    }))
-    .end(s => s, s => s)
-
-/**
- * copy a System replacing desired keys
- * @summary (System, Object) →  System
- */
-export const copy = (s, o) => {
-
-    beof({ s }).instance(System);
-
-    return new System(
-        o.actors || s.actors,
-        o.mailboxes || s.mailboxes,
-        o.tasks || s.tasks,
-        o.io || s.io);
-
-}
-
-/**
- * address forms the address path of an Actor
- * @summary (string,string) →  string
- */
-export const address = (parent, id) => `${parent}/${id}`;
