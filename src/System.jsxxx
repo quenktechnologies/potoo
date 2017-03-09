@@ -1,0 +1,418 @@
+import property from 'property-seek';
+import { v4 } from 'uuid';
+import { merge, oreduce } from './util';
+import { type, force, any, call, or } from './be';
+import { match } from './Match';
+import { Maybe, Free, IO } from './monad';
+import { Type, copy } from './Type';
+import { ActorT, LocalT, ActorL, ActorContext, FutureT, ActorFT, MVar } from './Actor';
+import * as lens from './lens';
+
+/**
+ * InvalidActorPathError
+ * @param {string} path
+ */
+export function InvalidActorPathError(path) {
+
+    this.message = `The path '${path}' is either invalid or in use!`;
+    this.stack = (new Error(this.message)).stack;
+    this.name = this.constructor.name;
+
+    if (Error.hasOwnProperty('captureStackTrace'))
+        Error.captureStackTrace(this, this.constructor);
+
+}
+
+InvalidActorPathError.prototype = Object.create(Error.prototype);
+InvalidActorPathError.prototype.constructor = InvalidActorPathError;
+
+/**
+ * Op
+ */
+export class Op extends Type {
+
+    map(f) {
+
+        return match(this)
+            .caseOf(Spawn, () => new Spawn(merge(this, { next: f(this.next) })))
+            .caseOf(Send, () => new Send(merge(this, { next: f(this.next) })))
+            .caseOf(Receive, () => new Receive(merge(this, { next: f(this.next) })))
+            .caseOf(Drop, () => new Drop(merge(this, { next: f(this.next) })))
+            .caseOf(IOOP, () => new IOOP(merge(this, { next: f(this.next) })))
+            .caseOf(Read, () => new Read(merge(this, { next: f(this.next) })))
+            .end();
+
+    }
+
+}
+
+/**
+ * Spawn represents a request to create a new actor by its parent.
+ */
+export class Spawn extends Op {
+
+    constructor(props) {
+
+        super(props, {
+            id: or(type(String), call(v4)),
+            template: type(ActorT),
+            parent: type(String),
+            next: any
+        });
+
+    }
+}
+
+/**
+ * Send represents a request to send a message to another actor.
+ * @property {to} string
+ * @property {string} from
+ * @property {*} message
+ */
+export class Send extends Op {
+
+    constructor(props) {
+
+        super(props, {
+            id: or(type(String), call(v4)),
+            from: type(String),
+            to: type(String),
+            message: any,
+            next: any
+        });
+
+    }
+}
+
+/**
+ * Stop the system or an actor.
+ * @property {string}
+ */
+export class Stop extends Op {
+
+    constructor(props) {
+
+        super(props, {
+
+            actor: type(String)
+
+        });
+
+    }
+
+}
+
+/**
+ * Receive represents a request to receive the latest message
+ */
+export class Receive extends Op {
+
+    constructor(props) {
+
+        super(props, {
+
+            id: or(type(String), call(v4)),
+            behaviour: type(Function),
+            path: type(String),
+            next: any
+
+        });
+
+    }
+
+}
+
+/**
+ * Read
+ */
+export class Read extends Op {
+
+    constructor(props) {
+
+        super(props, {
+
+            id: call(v4),
+            mvar: type(MVar)
+
+        });
+
+    }
+
+}
+
+/**
+ * IOOP
+ */
+export class IOOP extends Op {
+
+    constructor(props) {
+
+        super(props, { io: type(Function) });
+
+    }
+
+}
+
+/**
+ * Received
+ */
+export class Received extends Receive {}
+
+/**
+ * Rejected
+ */
+export class Rejected extends Receive {}
+
+/**
+ * Fault
+ */
+export class Fault extends Op {
+
+    constructor(props) {
+
+        super(props, { error: type(Error) });
+
+    }
+
+}
+
+/**
+ * Drop represents a request to drop a message.
+ * @property {to} string
+ * @property {string} from
+ * @property {*} message
+ */
+export class Drop extends Send {}
+
+/**
+ * exec
+ * @summary { (System, Free) →  System }
+ */
+export const exec = (sys, free) =>
+    free ?
+    free
+    .resume()
+    .cata(x => exec(match(x)
+        .caseOf(Spawn, execSpawn(sys))
+        .caseOf(Send, execMsgDelivery(sys))
+        .caseOf(Receive, execMsgReceive(sys))
+        .caseOf(Stop, execStopActor(sys))
+        .caseOf(Read,  execRead(sys))
+        .caseOf(IOOP, execIOOP(sys))
+        .end(), x.next), () => sys) : sys;
+/**
+ * execSpawn
+ * @param {System} sys
+ * @param {Spawn} spwn
+ * @return {System}
+ */
+export const execSpawn = sys => spwn => match(spwn.template)
+    .caseOf(LocalT, ({ id, start }) =>
+        lens.set(
+            actorCheckedLens(address(spwn.parent, id)),
+            new ActorL({
+                parent: spwn.parent,
+                path: address(spwn.parent, id),
+                ops: start(new ActorContext({
+                    self: address(spwn.parent, id),
+                    parent: spwn.parent
+                })),
+                template: spwn.template
+            }), sys.accept(spwn)))
+    .caseOf(FutureT, ft =>
+        lens.set(
+            actorCheckedLens(address(spwn.parent, ft.id)),
+            new ActorFT({
+                to: spwn.template.to || spwn.parent,
+                parent: spwn.parent,
+                path: address(spwn.parent, ft.id),
+                future: ft.future
+            }), sys.accept(ft)))
+    .end();
+
+/**
+ * execMsgDelivery
+ * @summary {System →  Send →  System}
+ */
+export const execMsgDelivery = sys => send =>
+    Maybe
+    .not(sys.actors[send.to])
+    .map(actor => lens.set(actorLens(send.to), actor.accept(send), sys.accept(send)))
+    .orElse(() => sys.accept(new Drop(send)))
+    .just();
+
+/**
+ * execMsgReceive
+ * @summary {System →  Receive →  System}
+ */
+export const execMsgReceive = sys => receive =>
+    Maybe
+    .not(sys.accept(receive).actors[receive.path])
+    .chain(actor =>
+
+        Maybe
+        .not(actor.mailbox[0])
+        .map(msg => {
+
+            if (receive.pattern)
+                if (receive.pattern(msg) === false)
+                    return copy(sys, { ops: sys.ops.concat(receive) });
+
+                //@todo error handling on behaviour execution
+            return copy(sys, {
+                ops: sys.accept(new Received(receive)).ops
+                    .concat(receive.behaviour(msg)).filter(x => x)
+            })
+
+        })
+        //@todo avoid bugs caused by not lifting
+        .orElse(() => Maybe.of(copy(sys, { ops: sys.ops.concat(Free.liftF(receive)) }))))
+    .orElse(() => Maybe.of(sys.accept(new Rejected(receive))))
+    .just();
+
+/**
+ * execStopActor
+ * @summary { System → System }
+ */
+export const execStopActor = sys => stop => sys.accept(stop).stop();
+
+/**
+ * execRead
+ */
+export const execRead = sys => r =>
+    sys.accept(r).copy({
+        io: sys.io.concat(s => r.mvar
+            .take()
+            .chain(m => IO.of(m.orElse(() => Maybe.of(r)).just()))
+            .map(Free.liftF)
+            .map(x => { debugger; return s.copy({ ops: s.ops.concat(x) }) }))
+    })
+
+/**
+ * execIOOP
+ *
+ */
+export const execIOOP = sys => ioop =>
+    sys.copy({ io: sys.io.concat(ioop.io) });
+
+/**
+ * qLens
+ */
+export const qLens = path => (op, sys) => {
+
+    if (sys === undefined) {
+
+        return lens.path(path)
+
+    } else {
+
+        return lens.set(lens.path(path),
+            lens.set(lens.index(lens.TAIL), op, lens.path(path)(sys)), sys);
+
+    }
+
+}
+
+/**(m.orElse(() => Maybe.of(r)).just())
+ * actorLens
+ */
+export const actorLens = path => (actor, sys) => (sys === undefined) ?
+    actor.actors[path] : property(`actors[${path}]`, actor, sys);
+
+/**
+ * actorCheckedLens
+ */
+export const actorCheckedLens = path => (actor, sys) => {
+
+    if (sys === undefined)
+        if (property(`actors[${path}]`, sys) != null)
+            throw new InvalidActorPathError(path);
+
+    return actorLens(path)(actor, sys);
+
+}
+
+const nextClock = f =>
+    new IO(() => (process) ? process.nextTick(f) : setTimeout(f, 0))
+    .chain(() => IO.of(null));
+
+/**
+ * address generates an address for a local actor
+ * @summary { (string,string) →  string
+ */
+const address = (p, c) => (p === '') ? c : `${p}/${c}`;
+const opsLens = qLens('ops');
+
+/**
+ * System
+ * @property {Array<Op>} ops
+ */
+export class System extends Type {
+
+    constructor(props) {
+
+        super(props, {
+            ops: or(type(Array), force([])),
+            io: or(type(Array), force([])),
+            actors: or(type(Object), force({})),
+            stopped: or(type(Boolean), force(false))
+        });
+
+    }
+
+    /**
+     * accept a message for the system actor. Usually a dead letter or system command.
+     * @param {Send} message
+     */
+    accept(message) {
+
+        //@todo filter out and log dropped messages
+        console.log(message);
+        return this;
+
+    }
+
+    /**
+     * spawn a new actor
+     * @param {ActorT} template
+     * @return {System}
+     */
+    spawn(template) {
+
+        return new System(lens.set(opsLens,
+            Free.liftF(new Spawn({ template, parent: '' })), this));
+
+    }
+
+    /**
+     * tick acts as the scheduler, scheduling system computations including
+     * those of child actors.
+     * @summary { () →  System}
+     */
+    tick() {
+
+        return oreduce(this.actors, (s, a) => a.drain(s), this);
+
+    }
+
+    /** tock runs the computations of the actor system.
+     * @summary { () →  IO<System>}
+     */
+    tock() {
+
+        return IO.of(this.ops.reduce(exec, this.copy({ ops: [] })))
+            .chain(sys => sys.io.reduce((io, f) => io.chain(f), IO.of(sys.copy({ io: [] }))));
+
+    }
+
+    /**
+     * go
+     * @summary { () => IO<null> }
+     */
+    clock() {
+
+        return this.tick().tock().chain(sys => nextClock(() => sys.clock().run()));
+
+    }
+
+}

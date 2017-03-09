@@ -42,6 +42,12 @@ export class Match {
 
     }
 
+    orElse() {
+
+        return this;
+
+    }
+
     /**
      * end pattern matching and return the result, if nothing matched, an
      * UnmatchedPatternError will be thrown.
@@ -62,20 +68,27 @@ export class Match {
 /**
  * Matched
  */
-export class Matched extends Match {
-
-    caseOf() {
-
-        return this;
-
-    }
-
-}
+export class Matched extends Match {}
 
 /**
  * UnMatched
  */
 export class UnMatched extends Match {
+
+    /**
+     * orElse matches when all other options have been exhausted.
+     * @param {function} f
+     * @return {Matched}
+     * @summary { (*→ *) →  Matched }
+     */
+    orElse(f) {
+
+        if (typeof f !== 'function')
+            throw new TypeError(`orElse(): expected a function got '${typeof f}'`);
+
+        return new Matched(f(this.value));
+
+    }
 
     caseOf(type, f) {
 

@@ -1,10 +1,11 @@
 import property from 'property-seek';
-import { merge, oreduce } from './util';
+import { head, partial } from './util';
 import { type, force, any, or } from './be';
 import { match } from './Match';
-import { Maybe, Free } from './monad';
-import { Type, copy } from './Type';
-import { ActorT, LocalT, ActorL, ActorContext } from './Actor';
+import { Maybe, IO, Free } from './monad';
+import { Type } from './Type';
+import { Actor, ActorS, LocalT, ActorL, ActorSTP, ActorList, next, map, accept, process } from './Actor';
+import * as Op from './Op';
 import * as lens from './lens';
 
 /**
@@ -25,190 +26,7 @@ export function InvalidActorPathError(path) {
 InvalidActorPathError.prototype = Object.create(Error.prototype);
 InvalidActorPathError.prototype.constructor = InvalidActorPathError;
 
-/**
- * Op
- */
-export class Op extends Type {
-
-    map(f) {
-
-        return match(this)
-            .caseOf(Spawn, () => new Spawn(merge(this, { next: f(this.next) })))
-            .caseOf(Send, () => new Send(merge(this, { next: f(this.next) })))
-            .caseOf(Receive, () => new Receive(merge(this, { next: f(this.next) })))
-            .end();
-
-    }
-
-}
-
-/**
- * Spawn represents a request to create a new actor by its parent.
- */
-export class Spawn extends Op {
-
-    constructor(props) {
-
-        super(props, {
-            template: type(ActorT),
-            parent: type(String),
-            next: any
-        });
-
-    }
-}
-
-/**
- * Send represents a request to send a message to another actor.
- * @property {to} string
- * @property {string} from
- * @property {*} message
- */
-export class Send extends Op {
-
-    constructor(props) {
-
-        super(props, {
-            from: type(String),
-            to: type(String),
-            message: any,
-            next: any
-        });
-
-    }
-}
-
-/**
- * Receive represents a request to receive the latest message
- */
-export class Receive extends Op {
-
-    constructor(props) {
-
-        super(props, {
-
-            behaviour: type(Function),
-            path: type(String),
-            next: any
-
-        });
-
-    }
-
-}
-
-/**
- * Drop represents a request to drop a message.
- * @property {to} string
- * @property {string} from
- * @property {*} message
- */
-export class Drop extends Send {}
-
-/**
- * exec
- * @summary { (Free,System) →  System }
- */
-export const exec = (sys, free) =>
-    free
-    .resume()
-    .cata(x => match(x)
-        .caseOf(Spawn, execSpawn(sys))
-        .caseOf(Send, deliverMessage(sys))
-        .caseOf(Receive, receiveMessage(sys))
-        .end(), y => y)
-
-/**
- * execSpawn
- * @param {System} sys
- * @param {Spawn} request
- * @return {System}
- */
-export const execSpawn = sys => ({ parent, template }) => match(template)
-    .caseOf(LocalT, ({ id, start }) =>
-        lens.set(
-            actorCheckedLens(address(parent, id)),
-            new ActorL({
-                parent,
-                path: address(parent, id),
-                ops: start(new ActorContext({ self: address(parent, id), parent })),
-                template
-            }), sys))
-    .end();
-
-/**
- * deliverMessage
- * @summary {System →  Send →  System}
- */
-export const deliverMessage = sys => send =>
-    Maybe
-    .not(sys.actors[send.to])
-    .map(actor => lens.set(actorLens(send.to), actor.accept(send), sys))
-    .orElse(() => sys.accept(send))
-    .just();
-
-/**
- * receiveMessage
- * @summary {System →  Receive →  System}
- */
-export const receiveMessage = sys => receive =>
-    Maybe
-    .not(sys.actors[receive.path])
-    .chain(actor =>
-        Maybe
-        .not(actor.mailbox[0])
-        .map(msg => {
-
-            if (receive.pattern)
-                if (receive.pattern(msg) === false)
-                    return copy(sys, { ops: sys.ops.concat(receive) });
-
-                //@todo error handling on behaviour execution
-            return copy(sys, {
-                ops: sys.ops.concat(receive.behaviour(msg)).filter(x => x)
-            })
-
-        })
-        .orElse(() => copy(sys, { ops: sys.ops.concat(receive) })))
-    .orElse(() => Maybe.of(sys.accept(receive)))
-    .just();
-
-
-/**
- * drain the ops from an actor
- * @param {System} sys
- * @param {Actor} actor
- * @return {System}
- * @summary {(Actor,System) →  System}
- */
-export const drain = (sys, actor) =>
-    copy(sys, {
-        ops: actor.ops ? sys.ops.concat(actor.ops) : sys.ops,
-        actors: merge(sys.actors, {
-            [actor.path]: copy(actor, { ops: null })
-        })
-    });
-
-
-/**
- * qLens
- */
-export const qLens = path => (op, sys) => {
-
-    if (sys === undefined) {
-
-        return lens.path(path)
-
-    } else {
-
-        return lens.set(lens.path(path),
-            lens.set(lens.index(lens.TAIL), op, lens.path(path)(sys)), sys);
-
-    }
-
-}
-
-/**
+/**(m.orElse(() => Maybe.of(r)).just())
  * actorLens
  */
 export const actorLens = path => (actor, sys) => (sys === undefined) ?
@@ -228,11 +46,169 @@ export const actorCheckedLens = path => (actor, sys) => {
 }
 
 /**
+ * exec executes the Op provide an effect as the result
+ * @summary {(Op, Actor) →  Effect}
+ */
+export const exec = (op, a) => match(op)
+    .caseOf(Op.Spawn, execSpawn(a))
+    .caseOf(Op.Send, execSend(a))
+    .caseOf(Op.Receive, execReceive(a))
+    .caseOf(Op.Stop, execStop(a))
+    .caseOf(Op.IOOP, execIOOP(a))
+    .caseOf(Op.NOOP, () => {})
+    .end();
+
+
+/**
+ * execSpawn
+ * @param {Actor} a
+ * @summary {Actor →  Spawn →  Actor}
+ */
+export const execSpawn = a => op =>
+    match(op.template)
+    .caseOf(LocalT, ({ id, start }) => new ActorL({
+        parent: a.path,
+        path: address(a.path, id),
+        ops: start(),
+        template: op.template
+    }))
+    .end();
+
+/**
+ * execSend
+ *@summary {Actor →  Send →  System →  Actor|IO|Drop
+ */
+export const execSend = a => op => s =>
+    Maybe
+    .not(s.actors[op.to])
+    .map(actor => accept(actor, op.message))
+    .orElse(() => Maybe.of(Op.drop(op.to, a.path, op.message)))
+    .extract();
+
+/**
+ * execReceive
+ * @summary {Actor →  Receive →  Actor}
+ */
+export const execReceive = a => op =>
+    Maybe
+    .not(head(a.mailbox))
+    .map(() => process(a, op.behaviour))
+    // .orElse(()=> Maybe.of(repeat(a, op)))
+    .orElse(() => Maybe.of(a))
+    .extract();
+
+/**
+ * execStop
+ * @summary { () →  ActorSTP }
+ */
+export const execStop = () => op => new ActorSTP({ path: op.path });
+
+/**
+ * execIOOP
+ * @summary {(Actor, System) →  IO}
+ */
+export const execIOOP = a => op => op.f(a);
+
+/**
+ * runEffects turns the Ops of an Actor into effects to be applied to the system.
+ * @summary {(Free<Op,null>, Actor, Array<Effect>) →  Array<Effect>}
+ */
+export const runEffects = (f, a, table) =>
+    Maybe
+    .not(f)
+    .map(f =>
+        f.resume()
+        .cata(op =>
+            runEffects(f.next, a, putEffect(exec(a, op), op, a, table)),
+            () => table))
+    .orElse(() => Maybe.of(table))
+    .extract();
+
+/**
+ * putEffect creates a new entry into the effect table.
+ * @summary {(Op,Actor,Effect,Array) →  Array }
+ */
+export const putEffect = (op, actor, effect, table) =>
+    table.concat(new Effect({ op, actor, effect }));
+
+/**
+ *  an actor's effect with the system.
+ * @summary {(Effect,  System) →  System}
+ */
+export const reconcile = (a, s) => match(a)
+    .caseOf(ActorSTP, a => removeActor(a.path, s))
+    .caseOf(Actor, a => putActor(a, s))
+    .caseOf(ActorList, l => l.reduce(reconcile, s))
+    .caseOf(Op.Drop, op => log(op, s.actors[op.from], s))
+    .caseOf(IO, io => s.copy({ io: io.concat(io) }))
+    .caseOf(Function, f => reconcile(s, f(s)))
+    .orElse(() => s)
+    .end();
+
+/**
+ * log an Op to the oplog
+ * @param {Op} op
+ * @param {Actor} actor
+ * @param {System} s
+ * @summary {(Op, Actor, System) →  System}
+ */
+export const log = (op, actor, s) => {
+
+    console.log(actor.path, op);
+    return s;
+
+}
+
+/**
  * address generates an address for a local actor
  * @summary { (string,string) →  string
  */
-const address = (p, c) => (p === '') ? c : `${p}/${c}`;
-const opsLens = qLens('ops');
+export const address = (p, c) => (p === '') ? c : `${p}/${c}`;
+
+/**
+ * putActor
+ * @private
+ * @summary {(Actor, System) → System}
+ */
+export const putActor = (a, s) =>
+    lens.set(actorCheckedLens(a.path), a, s);
+
+/**
+ * removeActor
+ * @private
+ * @summary {(string, System) →  System}
+ */
+export const removeActor = (p, s) => Object.keys(s.actors).reduce((o, k) => {
+
+    if (k === p)
+        return o;
+
+    o[k] = s.actors[k];
+
+    return o;
+
+}, {});
+
+const nextClock = f =>
+    new IO(() => (process) ? process.nextTick(f) : setTimeout(f, 0))
+    .chain(() => IO.of(null));
+
+/**
+ * Effect
+ */
+export class Effect extends Type {
+
+    constructor(props) {
+
+        super(props, {
+            op: type(Op.Op),
+            effect: any,
+            actor: type(Actor)
+        });
+
+    }
+
+}
 
 /**
  * System
@@ -243,21 +219,27 @@ export class System extends Type {
     constructor(props) {
 
         super(props, {
-            ops: or(type(Array), force([])),
-            actors: or(type(Object), force({}))
+            path: force(''),
+            ops: or(type(Free), force(Op.noopF())),
+            io: or(type(Array), force([])),
+            oplog: or(type(Array), force([])),
+            actors: or(type(Object), force({})),
         });
+
+        this.map = partial(map, this);
+        this.reduce = f => Object.keys(this.actors).reduce((s, k)=>f(s, this.actors[k]), this);
 
     }
 
     /**
-     * accept a message for the system actor. Usually a dead letter or system command.
-     * @param {Send} message
+     * drop a message
+     * @param {Send} op
+     * @param {Actor} actor
+     * @summary {Send →  System}
      */
-    accept(message) {
+    drop(op, actor) {
 
-        //@todo filter our and log dropped messages
-        console.log('dead message', message);
-        return this;
+        return log(Op.drop(op.to, op.message), actor, this);
 
     }
 
@@ -268,8 +250,7 @@ export class System extends Type {
      */
     spawn(template) {
 
-        return new System(lens.set(opsLens,
-            Free.liftF(new Spawn({ template, parent: '' })), this));
+        return this.copy({ ops: this.ops.chain(() => Op.spawnF(template)) });
 
     }
 
@@ -280,22 +261,30 @@ export class System extends Type {
      */
     tick() {
 
-        return oreduce(this.actors, drain, this);
+        return this
+            .map(a => runEffects(next(a), a, []))
+            .reduce((s, a) => putActor(a.map(() => null), reconcile(s, a)))
 
     }
 
     /** tock runs the computations of the actor system.
-     * @summary { System →  Free →  System}
+     * @summary { () →  IO<System>}
      */
-    tock(f) {
+    tock() {
 
-        return this.ops.slice().reduce(exec, copy(this, { ops: [] }));
+        return this.io
+            .reduce((io, ion) => io.chain(s =>
+                ion.map(r => reconcile(s, r))), IO.of(this.copy({ io: [] })));
 
     }
 
-    start() {
+    /**
+     * go
+     * @summary { () => IO<null> }
+     */
+    clock() {
 
-
+        return this.tick().tock().chain(s => nextClock(() => s.clock().run()));
 
     }
 

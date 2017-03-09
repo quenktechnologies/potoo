@@ -14,6 +14,14 @@ const merge = (x, y) => Object.assign({}, x, y);
 const basket = () => Object.create(null);
 
 /**
+ * builtins is a set of functions that expand errors into more descriptive
+ * meanings.
+ */
+export const builtins = {
+
+};
+
+/**
  * ListError is a container for all the errors that occured in a list.
  * @param {object} errors
  */
@@ -72,6 +80,10 @@ export const type = C => v =>
     (C === String) ?
     (typeof v === 'string') ?
     right(v) : left(new TypeError(expected('string', v))) :
+
+    (C === Boolean) ?
+    (typeof v === 'boolean') ?
+    right(v) : left(new TypeError(expected('boolean', v))) :
 
     (C === Number) ?
     (typeof v === 'number') ?
@@ -167,6 +179,11 @@ export const defaults = dv => v => (v == null) ? right(dv) : right(v);
  * @summary {* → * → Either<Error, *>}
  */
 export const force = x => () => right(x);
+
+/**
+ * call
+ */
+export const call = f => x => right(f(x));
 
 /**
  * or is a logical or between two Either yielding functions

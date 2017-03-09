@@ -13,11 +13,8 @@ export class Type {
 
         Object
             .keys(checks)
-            .forEach(k => {
-
-                this[k] = hope(k, members[k], checks[k]);
-
-            });
+            .forEach(k =>
+                this[k] = hope(k, members[k], checks[k]));
 
     }
 
@@ -30,6 +27,17 @@ export class Type {
                 o[k] = f(this[k]);
                 return o;
             }, Object.create(null)));
+
+    }
+
+    /**
+     * copy this Type, optionally replacing specified keys.
+     * @param {object} [keys]
+     * @return {Type}
+     */
+    copy(keys) {
+
+        return copy(this, keys);
 
     }
 

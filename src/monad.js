@@ -1,3 +1,14 @@
+const _isFunction = f => {
+
+    if (typeof f !== 'function')
+        throw new TypeError(`Expected function got ` +
+            `(${typeof f}) '${f?f.constructor?f.constructor.name:f:f}'`);
+
+
+    return f;
+
+};
+
 /**
  * Identity
  * @param {*} value
@@ -59,11 +70,12 @@ export class Maybe {
 
     }
 
-    map(f) {
+    orJust(v) {
 
-        return Maybe.not(f(this.value));
+        return this instanceof Nothing ? v : this.value;
 
     }
+
 
 }
 
@@ -71,6 +83,14 @@ export class Maybe {
  * Nothing
  */
 export class Nothing extends Maybe {
+
+
+
+    map() {
+
+        return this;
+
+    }
 
     chain() {
 
@@ -84,7 +104,7 @@ export class Nothing extends Maybe {
 
     }
 
-    just() {
+    extract() {
 
         throw new TypeError('just() is not implemented on Nothing!');
 
@@ -92,7 +112,7 @@ export class Nothing extends Maybe {
 
     cata(l, r) {
 
-        return r();
+        return l();
 
     }
 
@@ -103,19 +123,25 @@ export class Nothing extends Maybe {
  */
 export class Just extends Maybe {
 
+    map(f) {
+
+        return Maybe.not(f(this.value));
+
+    }
+
     chain(f) {
 
-        return this.value == null ? new Nothing() : f(this.value);
+        return f(this.value);
 
     }
 
     orElse(f) {
 
-        return this.value == null ? f() : this;
+        return this;
 
     }
 
-    just() {
+    extract() {
 
         return this.value;
 
@@ -123,7 +149,7 @@ export class Just extends Maybe {
 
     cata(l, r) {
 
-        return this.value == null ? l(this.value) : r(this.value);
+        return r(this.value);
 
     }
 
@@ -268,6 +294,50 @@ export class Reader {
 }
 
 /**
+ * Writer
+ */
+export class Writer {
+
+    constructor(value, log = []) {
+
+        this.value = [value, log];
+
+    }
+
+    static of(v) {
+
+        return new Writer(v);
+
+    }
+
+    map(f) {
+
+        let { v, l } = this.runWriter();
+        let { v1, l2 } = f(v);
+
+        return new Writer(v1, l1.concat(l2));
+
+    }
+
+    chain(f) {
+
+        let { v, l } = this.runWriter();
+        let { v1, l1 } = f(v).runWriter();
+
+        return new Writer(v1, l.concat(l1));
+
+    }
+
+    runWriter() {
+
+        return this.value;
+
+    }
+
+
+}
+
+/**
  * State is a monadic class that we use to hold information that changes
  * during compilation. It keeps the changes insolated from the
  * rest of the process until needed so we can have a 'pure' compilation.
@@ -284,7 +354,7 @@ export class State {
 
     }
 
-    static unit(value) {
+    static of(value) {
 
         return new State(state => ({ value, state }));
 
@@ -311,7 +381,7 @@ export class State {
     static gets(f) {
 
         return State.get().chain(state =>
-            State.unit(f(state)))
+            State.of(f(state)))
 
     }
 
@@ -383,7 +453,9 @@ export class IO {
 
     chain(f) {
 
+        _isFunction(f);
         return new IO(() => f(this.f()).run());
+
     }
 
     ap(io) {
@@ -415,6 +487,7 @@ export class Free {
             new Suspend(ftor.map(x => new Return(x)))
     }
 
+
     map(f) {
 
         return this.chain(x => new Return(f(x)));
@@ -439,6 +512,8 @@ export class Suspend extends Free {
     }
 
     chain(f) {
+
+        _isFunction(f);
 
         return (typeof this.ftor === 'function') ?
             new Suspend(x => this.ftor(x).chain(f)) :
@@ -475,6 +550,8 @@ export class Return extends Free {
     }
 
     chain(f) {
+
+        _isFunction(f);
 
         return f(this.value);
 
@@ -524,4 +601,4 @@ export function left(value) {
 }
 
 export const state = (value) =>
-    State.unit(value);
+    State.of(value);
