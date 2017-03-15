@@ -29,13 +29,13 @@ describe('partial', function() {
         must(partial(one, 2)(2)).be(4);
 
         must(partial(two, 2)).be.function();
-        must(partial(two, 2)(2)).be.function();
-        must(partial(two, 2)(2)(2)).be(8);
+        must(partial(partial(two, 2), 2)).be.function();
+        must(partial(partial(two, 2), 2)(2)).be(8);
 
         must(partial(three, 2)).be.function();
-        must(partial(three, 2)(2)).be.function();
-        must(partial(three, 2)(2)(2)).be.function();
-        must(partial(three, 2)(2)(2)(2)).be(16);
+        must(partial(partial(three, 2), 2)).be.function();
+        must(partial(partial(partial(three, 2), 2), 2)).be.function();
+        must(partial(partial(partial(three, 2),2), 2)(2)).be(16);
 
     });
 

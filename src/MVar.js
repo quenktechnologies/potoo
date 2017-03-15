@@ -25,10 +25,7 @@ export class MVar {
 
 }
 
-
 /**
  * makeEmptyMVar
  */
-export const makeMVar = v => new IO.of(new MVar(v));
-
-
+export const makeMVar = v => new IO.of(()=>new MVar(v));

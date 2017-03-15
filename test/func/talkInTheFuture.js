@@ -1,54 +1,50 @@
 import must from 'must';
+import fs from 'fs';
 import Future from 'fluture';
-import { LocalT, FutureT } from 'potoo-lib/Actor';
-import { System } from 'potoo-lib/System';
+import { IO } from 'potoo-lib/monad';
+import { System, LocalT } from 'potoo-lib/Actor';
+import { tell, future } from 'potoo-lib/Ops';
 
-describe('talk in the future', function() {
+describe('using futures', function() {
 
-    it('should be possible', function(done) {
+    it('should be possible', function(end) {
 
-        let tiktok = s => s.tick().tock();
-
-        let store = (context, list) => m => list.length === 3 ? ende(list) :
-            context.receive(store(context, list.concat(m)));
-
-        let ende = list => {
-
-            must(list).eql(['You', 'Must', 'Learn']);
-            done();
-
-
-        };
+        let _ = new LocalT({ id: '?' });
+        let a = new LocalT({ id: 'A' });
+        let b = new LocalT({ id: 'B' });
+        let c = new LocalT({
+            id: 'C',
+            start: () =>
+                future(() => Future.node(done => fs.readFile(`${__dirname}/afile.txt`, done)))
+                .chain(() => tell('C', 'hello'))
+        });
 
         new System()
-            .spawn(new LocalT({
-                id: 'join',
-                start: context => context
-                    .spawn(new FutureT({
+            .spawn(_)
+            .spawn(a)
+            .spawn(b)
+            .spawn(c)
+            .tick()
+            .chain(sys => sys.tick())
+            .chain(sys =>
+                IO
+                .of()
+                .chain(() => IO.of(setTimeout(() => {
 
-                        to: 'join',
-                        future: Future.node(finish => setTimeout(() => finish(null, 'You')))
+                    sys
+                        .tick()
+                        .chain(sys => sys.tick())
+                        .chain(sys => sys.tick())
+                        .chain(sys => sys.tick())
+                        .chain(sys => sys.tick())
+                        .map(sys => {
+                            must(sys.actors[3].mailbox.length).be(2);
+                            must(sys.actors[3].mailbox.map(v => String(v)).join(' ').trim()).be('hello davis');
+                            return sys;
+                        })
+                        .chain(() => IO.of(end)).run();
 
-                    }))
-                    .chain(() => context.receive(store([])))
-            }))
-            .spawn(new FutureT({
-
-                to: 'join',
-                future: Future.node(finish => setTimeout(() => finish(null, 'Must')))
-
-            }))
-            .spawn(new FutureT({
-
-                to: 'join',
-                future: Future.node(finish => setTimeout(() => finish(null, 'Learn')))
-
-            }))
-            /*  .chain(tiktok)
-              .chain(tiktok)
-              .chain(tiktok)
-              .chain(tiktok)*/
-            .clock()
+                }, 1000))))
             .run();
 
     });

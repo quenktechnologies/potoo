@@ -1,13 +1,33 @@
 import { v4 } from 'uuid';
 import { type, force, call, kind, or } from './be';
 import { Type } from './Type';
-import { Free, IO } from './monad';
-import { IO } from './monad';
-import { omap } from './util';
-import { sendF, ioopF, stopF, noopF, spawnF, receiveF } from './Op';
-import { makeMVar } from 'potoo-lib/MVar';
+import { IO, Free } from './monad';
+import { partial } from './util';
+import { spawn } from './Ops';
 import { MVar } from './MVar';
 import { match } from './Match';
+import { exec } from './Exec';
+
+/**
+ * DuplicateActorIdError
+ */
+export function DuplicateActorIdError(path, id) {
+
+    this.message = `Id '${id}' at path '${path}' is in use!`;
+    this.path = path;
+    this.id = id;
+    this.stack = (new Error(this.message)).stack;
+    this.name = this.constructor.name;
+
+    if (Error.hasOwnProperty('captureStackTrace'))
+        Error.captureStackTrace(this, this.constructor);
+
+}
+
+DuplicateActorIdError.prototype = Object.create(Error.prototype);
+DuplicateActorIdError.prototype.constructor = DuplicateActorIdError;
+
+export default DuplicateActorIdError
 
 /**
  * ActorT is a template for creating actors that run in
@@ -48,9 +68,8 @@ export class FutureT extends ActorT {
     constructor(props) {
 
         super(props, {
-            id: call(v4),
-            to: type(String),
-            future: kind(Future)
+            id: call(() => `future-${v4()}`),
+            mvar: type(MVar)
         });
 
     }
@@ -60,19 +79,36 @@ export class FutureT extends ActorT {
 /**
  * Actor
  */
-export class Actor extends Type {}
+export class Actor extends Type {
+
+    constructor(props, checks) {
+
+        super(props, checks);
+
+        this.fold = partial(fold, this);
+        this.map = partial(map, this);
+
+    }
+
+}
 
 /**
- * ActorS
+ * System
+ * @property {Array<Op>} ops
  */
-export class ActorS extends Actor {
+export class System extends Actor {
 
     constructor(props) {
 
         super(props, {
             path: force(''),
-            ops: or(type(Free), force(null))
+            ops: or(type(Free), force(null)),
+            actors: or(type(Array), force([])),
         });
+
+        this.spawn = t => this.copy({ ops: this.ops ? this.ops.chain(() => spawn(t)) : spawn(t) });
+        this.tick = () => tick(this, IO.of(this.copy({ ops: null })));
+        this.start = () => start(this);
 
     }
 
@@ -87,10 +123,12 @@ export class ActorL extends Actor {
 
         super(props, {
 
+            id: type(String),
             parent: type(String),
             path: type(String),
-            mailbox: or(type(Array), force([])),
             ops: or(type(Free), force(null)),
+            mailbox: or(type(Array), force([])),
+            actors: or(type(Array), force([])),
             template: type(ActorT)
 
         });
@@ -108,10 +146,10 @@ export class ActorFT extends Actor {
     constructor(props) {
 
         super(props, {
-            path: call(v4),
-            to: type(String),
-            abort: type(Function),
-            mvar: type(MVar)
+            path: type(String),
+            ops: or(type(Free), force(null)),
+            mvar: type(MVar),
+            template: type(ActorT)
         });
 
     }
@@ -162,100 +200,85 @@ export class Future {
 }
 
 /**
- * ActorList
+ * replace an actor with a new version.
+ * Returns the parent actor (second arg) updated with the new actor.
+ * If the parent path is the same path as the actor to replace, it is
+ * replaced instead.
+ * No change is made if the actor is not found.
+ * @summary (Actor, Actor) →  Actor
  */
-export class ActorList extends Type {
-
-    constructor(props) {
-
-        super(props, {
-
-            list: type(Array)
-
-        });
-
-    }
-
-}
-
-const _nextActorFT = () => ioopF(a => a.mvar.take()
-    .map(op => op != null ?
-        op.chain(() => stopF(a.path)) :
-        noopF()));
-
-/**
- * next extracts the next Op from an Actor instance
- * @param {Actor} a
- * @summary {Actor →  Free<Op, null>}
- */
-export const next = a => match(a)
-    .caseOf(ActorFT, _nextActorFT)
-    .caseOf(ActorL, a => a.ops ? a.ops : noopF())
-    .caseOf(ActorS, a => a.ops ? a.ops : noopF())
-    .caseOf(ActorSTP, () => noopF())
-    .end();
-
-/**
- * accept allows an Actor to accept the latest message addressed to it.
- * @param {*} m
- * @summary {(Actor,*) →  Actor|IO<Actor>|Drop}
- */
-export const accept = (a, m) => match(a)
-    .caseOf(ActorL, a => a.copy({ mailbox: a.mailbox.concat(m) }))
-    .end();
-
-/**
- * process executes a receive on an ActorL
- * @summary {(ActorL, Behaviour) →  ActorL}
- */
-export const process = (a, b) => a.copy({ mailbox: a.mailbox.slice(1), ops: b(a.mailbox[0]) });
+export const replace = (a, p) =>
+    p.path === a.path ?
+    a : p.map(c => c.path === a.path ? a : c.map(partial(replace, a)));
 
 /**
  * map over an Actor treating it like a Functor
  * @summary {(Actor,Function) →  Actor}
  */
 export const map = (a, f) => match(a)
-    .caseOf(System, s => s.copy({ actors: omap(s.actors, f) }))
-    .caseOf(ActorL, ({ ops, mailbox }) => a.copy(f({ ops, mailbox })))
-            .end();
+    .caseOf(ActorFT, a => a)
+    .caseOf(Actor, a => a.copy({ actors: a.actors.map(f) }))
+    .end();
 
-            /**
-             * future spawns a temporary child actor that listens waits
-             * on the result of a user supplied Future.
-             * @param {Future} ft
-             * @return {Free<SpawnIO,null>}
-             * @summary { Future →  Free<Spawn, null> }
-             */
-            export const future = ft =>
-                ioopF(actor => makeMVar()
-                    .chain(mvar => new IO(() =>
-                            ft.fork(error =>
-                                mvar.put(sendF(actor.path, error)),
-                                message =>
-                                mvar.put(sendF(actor.path, message))))
-                        .map(abort => new ActorFT({ parent: actor.path, to: actor.path, mvar, abort }))))
+/**
+ * get a child actor from its parent using its id
+ * @summary (string,Actor) →  Actor|null
+ */
+export const get = (id, a) => a.fold((p, c) => p ? p : c.id === id ? c : null);
 
-            /**
-             * spawn a new actor instance
-             * @param {ActorT} t
-             * @return {Free<Spawn, null>}
-             * @summary {ActorT →  Free<Spawn, null>}
-             */
-            export const spawn = spawnF;
+/**
+ * put an actor into another making it a child
+ * Returns the parent (child,parent) →  parent
+ * @summary (Actor, Actor) →  Actor
+ */
+export const put = (a, p) => p.copy({ actors: p.actors.concat(a) });
 
-            /**
-             * receive the next message from the mailbox.
-             * @param {Behaviour} b
-             * @return {Free<Receive, null>}
-             * @summary {Behaviour →  Free<Receive, null>}
-             */
-            export const receive = receiveF;
+/**
+ * fold a data structure into an acumulated simpler one
+ * @summary fold :: (Actor, *→ *, *) →  *
+ */
+export const fold = (o, f, accum) => match(o)
+    .caseOf(ActorFT, () => accum)
+    .caseOf(Actor, a => a.actors.reduce(f, accum))
+    .end()
 
-            /**
-             * tell sends a message to an actor address.
-             * @param {string} a
-             * @param {*} m
-             * @return {Free<Send, null>}
-             * @summary {(string, *) →  Free<Receive, null>}
-             */
-            export const tell = sendF;
+/**
+ * accept allows an Actor to accept the latest message addressed to it.
+ * @param {*} m
+ * @summary {*,Actor) →  Actor|IO<Actor>|Drop}
+ */
+export const accept = (m, a) => match(a)
+    .caseOf(ActorL, a => a.copy({ mailbox: a.mailbox.concat(m) }))
+    .end();
+
+/**
+ * select an actor in the system using the specified path.
+ * @summary (string, Actor) →  Actor|null
+ */
+export const select = (p, a) => fold(a, (hit, child) =>
+    (hit ?
+        hit :
+        p === child.path ?
+        child :
+        p.startsWith(child.path) ?
+        select(p, child) : null), null);
+
+export const nextTick = f =>
+    new IO(() => (process) ? process.nextTick(f) : setTimeout(f, 0))
+    .chain(() => IO.of(null));
+
+/**
+ * tick
+ * @summary tick :: (Actor, IO<System>) →  IO<System>
+ */
+export const tick = (a, io) =>
+    exec(a.copy({ ops: null }), a.fold((io, c) => tick(c, io), io), a.ops);
+
+/**
+ * start the system.
+ * Note: start does not actuall start the system but returns an IO class.
+ * @summary start :: System →  IO<null>
+ */
+export const start = s => match(s)
+    .caseOf(System, s => tick(s, IO.of(s)).chain(s => nextTick(() => start(s))))
+    .end();

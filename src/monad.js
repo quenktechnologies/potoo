@@ -72,7 +72,7 @@ export class Maybe {
 
     orJust(v) {
 
-        return this instanceof Nothing ? v : this.value;
+        return this instanceof Nothing ? new Just(v) : this;
 
     }
 
@@ -100,7 +100,7 @@ export class Nothing extends Maybe {
 
     orElse(f) {
 
-        return f();
+        return new Just(f());
 
     }
 
@@ -315,7 +315,7 @@ export class Writer {
         let { v, l } = this.runWriter();
         let { v1, l2 } = f(v);
 
-        return new Writer(v1, l1.concat(l2));
+        return new Writer(v1, l.concat(l2));
 
     }
 
@@ -602,3 +602,5 @@ export function left(value) {
 
 export const state = (value) =>
     State.of(value);
+
+export const liftF = Free.liftF;

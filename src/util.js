@@ -25,6 +25,12 @@ export const pipe = function() {
 }
 
 /**
+ * compose two functions into one.
+ * @summary compose :: (* →  *, * →  *) →  *
+ */
+export const compose = (f, g) => x => f(g(x));
+
+/**
  * fling removes a key from an object
  * @param {string} key
  * @param {object} object
@@ -59,12 +65,12 @@ export const head = list => list[0];
 export const tail = list => list[list.length - 1];
 
 /**
- * partial is a poor man's way of turning a function of arity 1-4 into
- * a function that accepts one argumment. Recognizes a Function.length of 4 max
+ * partial is a poor man's way of turning a function of arity 1-3 into
+ * a function that accepts one argumment. Recognizes a Function.length of 3 max
  * @summary {(Function, *) →  (* →  *)}
  */
 export const partial = (f, a) =>
     f.length === 2 ? b => f(a, b) :
-    f.length === 3 ? b => c => f(a, b, c) :
-    f.length === 4 ? b => c => d => f(a, b, c, d) :
-    f;
+    f.length === 3 ? (b, c) => f(a, b, c) :
+    f.length === 4 ? (b, c, d) => f(a, b, c, d) :
+    (() => { throw new RangeError(`Arity ${f.length} > 4`) })();
