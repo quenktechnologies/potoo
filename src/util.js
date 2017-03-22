@@ -1,3 +1,14 @@
+export const isFunction = f => {
+
+    if (typeof f !== 'function')
+        throw new TypeError(`Expected function got ` +
+            `(${typeof f}) '${f?f.constructor?f.constructor.name:f:f}'`);
+
+
+    return f;
+
+};
+
 /**
  * merge two objects easily
  * @summary (Object, Object) →  Object
@@ -70,7 +81,16 @@ export const tail = list => list[list.length - 1];
  * @summary {(Function, *) →  (* →  *)}
  */
 export const partial = (f, a) =>
+    f.length === 1 ? () => f(a) :
     f.length === 2 ? b => f(a, b) :
     f.length === 3 ? (b, c) => f(a, b, c) :
     f.length === 4 ? (b, c, d) => f(a, b, c, d) :
-    (() => { throw new RangeError(`Arity ${f.length} > 4`) })();
+    (() => { throw new RangeError(`Function ${f} has an arity of ${f.length} (> 4)`) })();
+
+/**
+ * constant given a value, return a function that always returns this value.
+ * @summary constant X →  * →  X
+ *
+ */
+export const constant = x => ()=>x;
+

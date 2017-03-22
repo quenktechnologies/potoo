@@ -5,7 +5,7 @@ import { IO } from './monad';
  */
 export class MVar {
 
-    constructor(value = null) {
+    constructor(value = []) {
 
         this.value = value;
 
@@ -13,19 +13,19 @@ export class MVar {
 
     put(v) {
 
-        this.value = v;
+        this.value.push(v);
 
     }
 
     take() {
 
-        return IO.of(this.value);
+        return IO.of(() => this.value.shift());
 
     }
 
 }
 
 /**
- * makeEmptyMVar
+ * makeMVar
  */
-export const makeMVar = v => new IO.of(()=>new MVar(v));
+export const makeMVar = v => new IO.of(new MVar(v));

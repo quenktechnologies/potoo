@@ -1,13 +1,7 @@
-const _isFunction = f => {
+import { isFunction } from './util';
+import { type, hope } from './be';
 
-    if (typeof f !== 'function')
-        throw new TypeError(`Expected function got ` +
-            `(${typeof f}) '${f?f.constructor?f.constructor.name:f:f}'`);
-
-
-    return f;
-
-};
+const _check = (key, check) => value => hope(key, value, check);
 
 /**
  * Identity
@@ -61,6 +55,12 @@ export class Maybe {
     static not(v) {
 
         return v == null ? new Nothing() : Maybe.of(v);
+
+    }
+
+    static lift(v) {
+
+        return Maybe.not(v);
 
     }
 
@@ -448,12 +448,15 @@ export class IO {
 
     map(f) {
 
+        isFunction(f);
+
         return new IO(() => f(this.f()));
+
     }
 
     chain(f) {
 
-        _isFunction(f);
+        isFunction(f);
         return new IO(() => f(this.f()).run());
 
     }
@@ -490,6 +493,8 @@ export class Free {
 
     map(f) {
 
+        isFunction(f);
+
         return this.chain(x => new Return(f(x)));
 
     }
@@ -513,11 +518,16 @@ export class Suspend extends Free {
 
     chain(f) {
 
-        _isFunction(f);
+        isFunction(f);
 
         return (typeof this.ftor === 'function') ?
-            new Suspend(x => this.ftor(x).chain(f)) :
-            new Suspend(this.ftor.map(free => free.chain(f)));
+            new Suspend(x =>
+                this.ftor(x).chain(f)) :
+            new Suspend(
+                this
+                .ftor
+                .map(_check('free', type(Free)))
+                .map(free => free.chain(f)));
 
     }
 
@@ -551,7 +561,7 @@ export class Return extends Free {
 
     chain(f) {
 
-        _isFunction(f);
+        isFunction(f);
 
         return f(this.value);
 

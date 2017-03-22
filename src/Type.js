@@ -1,5 +1,13 @@
-import { hope } from './be';
 import { merge } from './util';
+
+/**
+ * hope a value passes its test, throws an error if not returns the value otherwise.
+ * @summary hope :: (string, * , * → Either<Error,*>) →  Either<Error,*>
+ */
+export const hope = (t, k, v, test) => test(v).cata(e => {
+    throw new TypeError(`${t}.${k}: \n ${e.stack}`);
+}, x => x);
+
 
 /**
  * Type is a helper class for simulating user type support
@@ -14,7 +22,7 @@ export class Type {
         Object
             .keys(checks)
             .forEach(k =>
-                this[k] = hope(k, members[k], checks[k]));
+                this[k] = hope(this.constructor.name, k, members[k], checks[k]));
 
     }
 

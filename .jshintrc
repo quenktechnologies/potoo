@@ -1,5 +1,5 @@
 {
-  "asi":"false",
+    "asi":"false",
     "curly": false,
     "eqeqeq": true,
     "immed": true,

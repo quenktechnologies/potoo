@@ -1,3 +1,4 @@
+import { isFunction } from './util';
 /**
  * UnMatchedPatternError
  */
@@ -11,8 +12,6 @@ export function UnMatchedPatternError(pattern) {
 
     if (Error.hasOwnProperty('captureStackTrace'))
         Error.captureStackTrace(this, this.constructor);
-
-
 
 }
 
@@ -92,6 +91,8 @@ export class UnMatched extends Match {
 
     caseOf(type, f) {
 
+        isFunction(f);
+
         switch (typeof type) {
 
             case 'string':
@@ -106,8 +107,8 @@ export class UnMatched extends Match {
 
             case 'object':
                 return (type == null) ?
-                    (this.value == null) ? new Matched(f(this.value)) : new UnMatched(this) :
-                    (this.value === type) ? new Matched(f(this.value)) : new UnMatched(this)
+                    (this.value == null) ? new Matched(f(this.value)) : new UnMatched(this.value) :
+                    (this.value === type) ? new Matched(f(this.value)) : new UnMatched(this.value)
 
             default:
                 return new UnMatched(this.value);

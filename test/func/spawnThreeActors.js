@@ -63,7 +63,7 @@ describe('spawning three actors', function() {
             })
             .chain(s => s.tick())
             .chain(s => s.tick())
-            .map(()=>done())
+            .map(() => done())
             .run();
 
     });
