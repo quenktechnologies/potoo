@@ -2,7 +2,8 @@ import { fork } from 'child_process';
 import { v4 } from 'uuid';
 import { type, force, call, or } from './be';
 import { Type } from './Type';
-import { IO, Free, Maybe } from './monad';
+import { IO, Free } from './monad';
+import { fromAny, Maybe } from './fpl/monad/Maybe';
 import { partial } from './util';
 import { spawn, tell, receive as opreceive, raise } from './Ops';
 import { exec } from './Exec';
@@ -402,10 +403,10 @@ export const map = (a, f) => match(a)
     .end();
 
 /**
- * get a child actor from its parent using its id
- * @summary (string,Actor) →  Actor|null
+ * getChild gets a child actor from its parent using its id
+ * @summary (string,Actor) →  Maybe<Actor>
  */
-export const get = (id, a) => a.fold((p, c) => p ? p : c.id === id ? c : null);
+export const getChild = (id, a) => fromAny(a.fold((p, c) => p ? p : c.id === id ? c : null));
 
 /**
  * put an actor into another making it a child

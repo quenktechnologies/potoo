@@ -1,5 +1,20 @@
 import must from 'must';
-import { pipe, partial } from 'potoo-lib/util';
+import { compose, pipe, partial } from 'potoo-lib/fpl/util';
+
+describe('compose', function() {
+
+    it('compose :: (A→ A)... →  (A →  A)', function() {
+
+        let X = x => x * x;
+
+        must(compose(X)(2)).be(4);
+        must(compose(X, X)(2)).be(16);
+        must(compose(X, X, X)(2)).be(256);
+        must(compose(X, X, X, X)(2)).be(65536);
+
+    });
+
+});
 
 describe('pipe', function() {
 
@@ -35,7 +50,7 @@ describe('partial', function() {
         must(partial(three, 2)).be.function();
         must(partial(partial(three, 2), 2)).be.function();
         must(partial(partial(partial(three, 2), 2), 2)).be.function();
-        must(partial(partial(partial(three, 2),2), 2)(2)).be(16);
+        must(partial(partial(partial(three, 2), 2), 2)(2)).be(16);
 
     });
 
