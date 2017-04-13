@@ -1,4 +1,3 @@
-import { Functor } from '../data/Functor';
 import { Monad } from '../monad/Monad';
 import { match } from '../control/Match';
 import { identity } from '../util';
@@ -6,22 +5,32 @@ import { identity } from '../util';
 /**
  * Either monad implementation
  */
-export abstract class Either<L, R> implements Functor<R>, Monad<R> {
+export class Either<L, R> implements Monad<R> {
 
-    l: L;
-    r: R;
-
-    of(v: R): Either<R, R> {
+    of<V>(v: V): Either<any, V> {
 
         return right(v);
 
     }
 
-    map<B>(f: (r: R) => B): Either<L, B> {
+    map<B>(f: (r: R) => B): Either<any, B> | Either<L, B> {
 
         return match(this)
             .caseOf(Left, identity)
-            .caseOf(Right, ({ r }: Right<R>) => right(f(r)))
+            .caseOf(Right, ({ r }) => right(f(r)))
+            .end();
+
+    }
+
+
+    /**
+     * bimap does a map over either side.
+     */
+    bimap<LL, RR>(f: (l: L) => LL, g: (r: R) => RR): Either<any, RR> | Either<LL, any> {
+
+        return match(this)
+            .caseOf(Left, ({ l }) => left(f(l)))
+            .caseOf(Right, ({ r }) => right(g(r)))
             .end();
 
     }
@@ -29,7 +38,7 @@ export abstract class Either<L, R> implements Functor<R>, Monad<R> {
     /**
      * chain
      */
-    chain<A>(f: (R) => Either<L, A>): Either<L, R> {
+    chain<B>(f: (r: R) => Either<L, B>): Either<L, B> {
 
         return match(this)
             .caseOf(Left, identity)
@@ -41,7 +50,7 @@ export abstract class Either<L, R> implements Functor<R>, Monad<R> {
     /**
      * join an inner monad value to the outer.
      */
-    join(): Either<L, R> {
+    join(): R {
 
         return match(this)
             .caseOf(Left, identity)
@@ -53,10 +62,10 @@ export abstract class Either<L, R> implements Functor<R>, Monad<R> {
     /**
      * orElse returns the result of f if the Either is left.
      */
-    orElse<A>(f: (l: L) => A): Either<A, R> {
+    orElse<B>(f: (l: L) => B): Either<L, B> {
 
         return match(this)
-            .caseOf(Left, ({ a }) => f(a))
+            .caseOf(Left, ({ l }) => f(l))
             .caseOf(Right, x => x)
             .end();
 
@@ -65,7 +74,7 @@ export abstract class Either<L, R> implements Functor<R>, Monad<R> {
     /**
      * ap
      */
-    ap<C>(e: Either<L, ((R) => C)>): Either<L, C> {
+    ap<B>(e: Either<L, (r: R) => B>): Either<L, B> {
 
         return match(this)
             .caseOf(Left, identity)
@@ -99,13 +108,14 @@ export abstract class Either<L, R> implements Functor<R>, Monad<R> {
 
     }
 
+
     /**
      * cata
      */
-    cata<A>(f: (l: L) => A, g: (r: R) => A): A {
+    cata<B>(f: (l: L) => B, g: (r: R) => B): B {
 
         return match(this)
-            .caseOf(Left, ({ l }: Left<L>) => f(l))
+            .caseOf(Left, ({ l }) => f(l))
             .caseOf(Right, ({ r }) => g(r))
             .end();
 
@@ -113,30 +123,24 @@ export abstract class Either<L, R> implements Functor<R>, Monad<R> {
 
 }
 
-export class Left<L> extends Either<L, L> {
+export class Left<L, R> extends Either<L, R> {
 
-    constructor(l: L) {
-        super();
-        this.l = l;
-    }
+    constructor(public l: L) { super(); this.l = l; }
 
 }
 
-export class Right<R> extends Either<R, R>  {
+export class Right<L, R> extends Either<L, R>  {
 
-    constructor(r: R) {
-        super();
-        this.r = r;
-    }
+    constructor(public r: R) { super(); this.r = r; }
 
 }
 
 /**
  * left wraps a value on the left side.
  */
-export const left = <A>(v: A): Either<A, A> => new Left(v);
+export const left = <A, B>(v: A) => new Left(v);
 
 /**
  * right wraps a value on the right side.
  */
-export const right = <B>(v: B): Either<B, B> => new Right(v);
+export const right = <A, B>(v: B) => new Right(v);
