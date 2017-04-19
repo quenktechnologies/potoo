@@ -2,8 +2,8 @@
   "name": "potoo",
   "version": "0.2.0",
   "description": "An actor model library for JavaScript.",
-  "main": "index.js",
-  "module": "lib/index.js",
+  "main": "lib/index.js",
+  "files": "lib",
   "scripts": {
     "test": "./node_modules/.bin/mocha --opts mocha.opts test",
     "build": "rm -R lib; mkdir -p lib; ./node_modules/.bin/babel -D src -s inline -d lib",
