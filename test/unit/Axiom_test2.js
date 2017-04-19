@@ -4,7 +4,7 @@ import * as Actor from 'potoo-lib/Actor';
 import * as Instruction from 'potoo-lib/Instruction';
 import * as Free from 'potoo-lib/fpl/monad/Free';
 import * as State from 'potoo-lib/fpl/monad/State';
-import { CoProduct } from 'potoo-lib/fpl/data/CoProduct';
+import { partial } from 'potoo-lib/fpl/util';
 import { Log } from 'potoo-lib/Log';
 import { match } from 'potoo-lib/fpl/control/Match';
 import { mapTest, apiTest } from './helpers';
@@ -77,14 +77,20 @@ describe('execAxiom', function() {
             template: new Actor.LocalT({ id: 'y' })
         }));
 
+        let inter = x => match(x)
+            .caseOf(Instruction.Self, ({ next }) => next(actor))
+            .caseOf(Instruction.Create, ({ next }) => next)
+            .end();
+
         must(fr).be.instanceOf(Free.Free)
 
-        fr.go(ftor => {
+        fr
+            .go(ftor => {
 
-            must(ftor).be.instanceOf(Instruction.Instruction);
-            return ftor.next;
+                must(ftor).be.instanceOf(Instruction.Instruction);
+                return inter(ftor);
 
-        });
+            });
 
     });
 
@@ -96,23 +102,39 @@ describe('execAxiomWithAuditing', function() {
 
         let fr = Axiom.execAxiomWithAuditing(new Axiom.Tell({ to: '/boo', message: 'hi' }));
 
-        let logInterp = ({ level, next }) =>
-            State.modify(b => b.concat('log', level)).chain(() => State.of(next));
+        let interp = f => match(f)
+    .caseOf(Instruction.Self, ({ next }) =>
+            State.modify(b=>b.concat('self')).chain(()=>State.of(next)))
+    .caseOf(Instruction.Deliver, ({ next, to, from }) =>
+            State.modify(b=>b.concat('deliver', to, from))
+        .chain(()=>State.of(next)))
+.caseOf(Log.Log, ({  level, next  }) =>
+                State.modify(b=>b.concat('log', level)).chain(()=>State.of(next)))
+        .end();
 
-        let intInterp = f => match(f)
-            .caseOf(Instruction.Self, ({ next }) =>
-                State.modify(b => b.concat('self')).chain(() => State.of(next(actor))))
-            .caseOf(Instruction.Deliver, ({ next, to, from }) =>
-                State.modify(b => b.concat('deliver', to, from)).chain(() => State.of(next)))
+        let logInter = (box, fr) => match(fr)
+            .caseOf(Free.Suspend, ({ f: { level, next } }) =>
+                logInter(box.concat(level), next))
+            .caseOf(Free.Return, ({ a }) => run(box, a))
             .end();
 
-        let run = f => match(f)
-            .caseOf(CoProduct, () => f.cata(logInterp, intInterp))
-            .caseOf(Free.Return, ({ a }) => State.of(a))
+        let intInter = (box, fr) => match(fr)
+            .caseOf(Free.Suspend, ({ f }) => match(f)
+                .caseOf(Instruction.Self, ({ next }) => intInter(box.concat('self'), next(actor)))
+                .caseOf(Instruction.Deliver, ({ next, to, from }) => intInter(box.concat(to, from), next))
+                .end())
+            .caseOf(Free.Return, ({ a }) => run(box, a))
+            .end();
+
+        let run = (box, fr) => match(fr)
+            .caseOf(Free.Suspend, ({ f }) =>
+                f.cata(partial(logInter, box), partial(intInter, box)))
+            .caseOf(Free.Return, () => box)
             .end();
 
         must(fr).be.instanceOf(Free.Free);
-        must(fr.fold(run).execute([])).eql(['self', 'deliver', '/boo', '/', 'log', 5])
+        console.log(fr.fold(interp));
+       // must(run([], fr)).eql([5, 'self', '/boo', '/']);
 
     });
 

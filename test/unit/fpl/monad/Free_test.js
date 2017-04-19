@@ -1,6 +1,8 @@
 import must from 'must';
 import { Either } from 'potoo-lib/fpl/monad/Either';
 import { Identity } from 'potoo-lib/fpl/monad/Identity';
+import * as Maybe from 'potoo-lib/fpl/monad/Maybe';
+import { match } from 'potoo-lib/fpl/control/Match';
 import * as Free from 'potoo-lib/fpl/monad/Free';
 
 class Func {
@@ -19,7 +21,24 @@ class Func {
 
 }
 
+class Func2 {
+
+    constructor(next) {
+
+        this.next = next;
+
+    }
+
+    map(f) {
+
+        return new Func2(f(this.next));
+
+    }
+
+}
+
 const _makeFunc = next => new Func(next);
+const _makeFunc2 = next => new Func2(next);
 
 describe('Free', function() {
 
@@ -81,7 +100,7 @@ describe('go', function() {
 
     //Tests from :
     // https://github.com/cwmyers/monet.js/blob/master/test/free-spec.js
-    //https://raw.githubusercontent.com/cwmyers/monet.js/b3faf9ddd7341effded44fdfabf6f6976e993554/LICENSE
+    // https://raw.githubusercontent.com/cwmyers/monet.js/b3faf9ddd7341effded44fdfabf6f6976e993554/LICENSE
 
     it('do Ken\'s simple box example', function() {
 
@@ -108,6 +127,88 @@ describe('go', function() {
         }
 
         must(Free.run(g(1))).be(limit)
+    });
+
+});
+
+describe('ap', function() {
+
+    it('Free<F,A> →  Free<F (A → B)> →  Free<F,B>', function() {
+
+        let f1 = Free.liftF(_makeFunc(3));
+        let f2 = new Free.Return(x => x * 2);
+        let f3 = f1.ap(f2);
+
+        must(f3.go(f => f.next)).be(6);
+
+    });
+
+});
+
+describe('apRight', function() {
+
+    it('Free<F,A> →  Free<F,B> →  Free<F,B>', function() {
+
+        let f1 = Free.liftF(_makeFunc('a'));
+        let f2 = Free.liftF(_makeFunc('b'));
+        must(f1.apRight(f2).go(f => f.next)).be('b');
+
+    });
+
+});
+
+describe('hoist', function() {
+
+    it('Free<F<B>> →  (F<A> →  G<A>) →  Free<G<B>>  ', function() {
+
+        let fr = Free.liftF(_makeFunc('b'));
+        let _fr = fr.hoist(({ next }) => _makeFunc2(next));
+
+        must(_fr.go(f => {
+
+            must(f).be.instanceOf(Func2);
+            return f.next;
+        })).be('b');
+
+    });
+
+});
+
+describe('fold', function() {
+
+    it('Free<F<A>> →  (F<X> → M<X>) →  M<A>', function() {
+
+        let fr = Free.liftF(_makeFunc('a'))
+            .chain(() => Free.liftF(_makeFunc2('b')))
+            .chain(() => Free.liftF(_makeFunc('c')));
+
+        let folder = f => match(f)
+            .caseOf(Func, ({ next }) => Maybe.of(next))
+            .caseOf(Func2, ({ next }) => Maybe.of(next))
+            .caseOf(Free.Return, ({ a }) => Maybe.of(a))
+            .end();
+
+        must(fr.fold(folder).a).be('c');
+
+    });
+
+});
+
+describe('reduce', function() {
+
+    it('Free<F<A>> →  ((M<X>, F<X>)→ M<[X, F<X>]>) →  M<A>', function() {
+
+        let fr = Free.liftF(_makeFunc())
+            .chain(() => Free.liftF(_makeFunc2()))
+            .chain(() => Free.liftF(_makeFunc()));
+
+        let reducer = (m, f) => match(f)
+            .caseOf(Func, ({ next }) => m.map(c => [Maybe.of(c + 1), next]))
+            .caseOf(Func2, ({ next }) => m.map(c => [Maybe.of(c + 2), next]))
+            .end();
+
+        must(fr.reduce(reducer, Maybe.of(1)).get()).be(5);
+
     });
 
 });

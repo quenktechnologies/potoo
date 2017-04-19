@@ -8,12 +8,11 @@ export class CoProduct<L extends Functor<A>, R extends Functor<A>, A> implements
 
     constructor(public e: Either<L, R>) { }
 
-    map<LB extends Functor<B>, RB extends Functor<B>, B>
-        (f: (a: A) => B): CoProduct<LB, RB, B> {
+    map<LB extends Functor<B>, RB extends Functor<B>, B>(f: (a: A) => B): CoProduct<LB, RB, B> {
 
-        return new CoProduct<LB, RB, B>(this.cata(
-            (l: L) => new Left(l.map(f)),
-            (r: R) => new Right(r.map(f))));
+        return new CoProduct<LB, RB, B>(this.cata<any>(
+            (l: Functor<A>) => new Left(l.map(f)),
+            (r: Functor<A>) => new Right(r.map(f))));
 
     }
 
@@ -28,9 +27,13 @@ export class CoProduct<L extends Functor<A>, R extends Functor<A>, A> implements
 /**
  * left
  */
-export const left = <L, R>(f: L) => new CoProduct(new Left<L, R>(f));
+export const left = <L extends Functor<A>, R extends Functor<A>, A>(f: L) =>
+    new CoProduct<L, R, A>(new Left<L, R>(f));
 
 /**
  * right
  */
-export const right = <R>(g: Functor<R>) => new CoProduct(new Right(g));
+export const right = <L extends Functor<A>, R extends Functor<A>, A>(f: R) =>
+    new CoProduct<L, R, A>(new Right<L, R>(f));
+
+

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "lib": ["ES2015", "DOM", "ScriptHost"],
+    "module": "commonjs",
+    "target": "es5",
+    "outDir": "lib",
+    "moduleResolution": "node",
+    "allowUnreachableCode": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "sourceMap": true,
+    "declaration": true,
+    "typeRoots": ["node_modules/@types"]
+  }
+
+}

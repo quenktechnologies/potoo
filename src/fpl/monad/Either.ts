@@ -7,17 +7,17 @@ import { identity } from '../util';
  */
 export class Either<L, R> implements Monad<R> {
 
-    of<V>(v: V): Either<any, V> {
+    of(v: R): Either<L, R> {
 
-        return right(v);
+        return new Right<L, R>(v);
 
     }
 
-    map<B>(f: (r: R) => B): Either<any, B> | Either<L, B> {
+    map<B>(f: (r: R) => B): Either<L, B> {
 
         return match(this)
             .caseOf(Left, identity)
-            .caseOf(Right, ({ r }) => right(f(r)))
+            .caseOf(Right, ({ r }) => new Right<L, B>(f(r)))
             .end();
 
     }
@@ -26,11 +26,11 @@ export class Either<L, R> implements Monad<R> {
     /**
      * bimap does a map over either side.
      */
-    bimap<LL, RR>(f: (l: L) => LL, g: (r: R) => RR): Either<any, RR> | Either<LL, any> {
+    bimap<LL, RR>(f: (l: L) => LL, g: (r: R) => RR): Either<LL, RR> {
 
         return match(this)
-            .caseOf(Left, ({ l }) => left(f(l)))
-            .caseOf(Right, ({ r }) => right(g(r)))
+            .caseOf(Left, ({ l }) => left<LL, RR>(f(l)))
+            .caseOf(Right, ({ r }) => right<LL, RR>(g(r)))
             .end();
 
     }
@@ -125,22 +125,22 @@ export class Either<L, R> implements Monad<R> {
 
 export class Left<L, R> extends Either<L, R> {
 
-    constructor(public l: L) { super(); this.l = l; }
+    constructor(public l: L) { super(); }
 
 }
 
 export class Right<L, R> extends Either<L, R>  {
 
-    constructor(public r: R) { super(); this.r = r; }
+    constructor(public r: R) { super(); }
 
 }
 
 /**
  * left wraps a value on the left side.
  */
-export const left = <A, B>(v: A) => new Left(v);
+export const left = <A, B>(v: A) => new Left<A, B>(v);
 
 /**
  * right wraps a value on the right side.
  */
-export const right = <A, B>(v: B) => new Right(v);
+export const right = <A, B>(v: B) => new Right<A, B>(v);

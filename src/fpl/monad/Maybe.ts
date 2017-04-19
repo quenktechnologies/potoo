@@ -7,6 +7,16 @@ import { identity } from '../util';
  */
 export class Maybe<A> implements Monad<A> {
 
+    static map = <A, B>(f: (a: A) => B) => (m: Maybe<A>): Maybe<B> => m.map(f);
+
+    static chain = <A, B>(f: (a: A) => Maybe<B>) => (m: Maybe<A>): Maybe<B> => m.chain(f);
+
+    static get = <A>(m: Maybe<A>): A => m.get();
+
+    static orElse = <A, B>(f: () => Maybe<B>) => (m: Maybe<A>): Maybe<B> => m.orElse(f);
+
+    static orJust = <A, B>(f: () => B) => (m: Maybe<A>): Maybe<B> => m.orJust(f);
+
     /**
      * of wraps the passed value in a Maybe
      */
@@ -122,7 +132,7 @@ export class Just<A> extends Maybe<A> {
 
 export const map = <A, B>(m: Maybe<A>) => (f: (a: A) => B): Maybe<B> => {
 
-    return match(this)
+    return match(m)
         .caseOf(Nothing, identity)
         .caseOf(Just, ({ a }) => new Just(f(a)))
         .end();

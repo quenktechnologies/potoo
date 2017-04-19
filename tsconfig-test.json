@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "lib": ["ES2015", "DOM", "ScriptHost"],
+    "module": "commonjs",
+    "target": "es5",
+    "moduleResolution": "node",
+    "allowUnreachableCode": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "typeRoots":["node_modules/@types"]
+  },
+
+  "exclude": ["test", "node_modules", "lib"]
+}

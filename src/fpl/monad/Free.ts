@@ -1,5 +1,5 @@
-import { compose, constant, identity } from '../util';
-import { left, right, Left, Right, Either } from './Either';
+import { compose, identity } from '../util';
+import { left, right, Left, Either } from './Either';
 import { match } from '../control/Match';
 import { Monad } from './Monad';
 import { Functor } from '../data/Functor';
@@ -70,8 +70,8 @@ export abstract class Free<F, A> implements Monad<A> {
     resume(): Either<F, A> {
 
         return match(this)
-            .caseOf(Suspend, ({ f }) => left(f))
-            .caseOf(Return, ({ a }) => right(a))
+            .caseOf(Suspend, ({ f }) => left<F, A>(f))
+            .caseOf(Return, ({ a }) => right<F, A>(a))
             .end();
 
     }
@@ -145,7 +145,7 @@ export class Suspend<F, A> extends Free<F, A> {
 
 }
 
-export class Return<F, A> extends Free<any, A> {
+export class Return<A> extends Free<any, A> {
 
     a: A;
 
@@ -171,4 +171,4 @@ export const suspend = <A>(f: () => A) => new Suspend(compose(free, f));
 /**
  * liftF lifts a Functor into a Free.
  */
-export const liftF = <F, A>(f: Functor<A>) => new Suspend(f.map(free));
+export const liftF = <F extends Functor<A>, A>(f: F) => new Suspend(f.map(free));
