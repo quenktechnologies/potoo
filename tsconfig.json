@@ -4,6 +4,7 @@
     "lib": ["ES2015", "DOM", "ScriptHost"],
     "module": "commonjs",
     "target": "es5",
+    "rootDir": "src",
     "outDir": "lib",
     "moduleResolution": "node",
     "allowUnreachableCode": true,
@@ -12,6 +13,7 @@
     "sourceMap": true,
     "declaration": true,
     "typeRoots": ["node_modules/@types"]
-  }
+  },
+  "exclude": ["node_modules", "test"]
 
 }
