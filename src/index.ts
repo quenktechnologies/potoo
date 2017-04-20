@@ -348,7 +348,7 @@ export const evalTask = <A>({ to, forkable, next }: Task<Instruction<A>>, a: Act
     safeIO(() => {
         forkable.fork(
             e => evalAxiomChain(raise(e), a, s).run(),
-            m => evalAxiomChain(tell(to === '.' ? a.path : to, m), a, s).run())
+            m => evalAxiomChain(tell(to, m), a, s).run())
         return s;
     }).chain(() => evalAxiomChain(next, a, s))
 
@@ -356,7 +356,7 @@ export const evalTask = <A>({ to, forkable, next }: Task<Instruction<A>>, a: Act
  * evalTell
  */
 export const evalTell = <A>({ to, message, next }: Tell<Instruction<A>>, a: Actor, s: System): IO<System> =>
-    pathToActor(to, s)
+    pathToActor(to === '.' ? a.path : to, s)
         .chain(t => feedActor(message, t, a, s))
         .chain(() => evalAxiomChain(next, a, s));
 
