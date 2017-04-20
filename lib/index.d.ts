@@ -161,6 +161,15 @@ export declare class Effect<R, N> extends Axiom<N> {
     constructor(callable: () => R, next?: (a: any) => N);
 }
 /**
+ * Stream
+ */
+export declare class Stream<P, N> extends Axiom<N> {
+    to: string;
+    source: (f: (p: P) => System) => void;
+    next: N;
+    constructor(to: string, source: (f: (p: P) => System) => void, next?: N);
+}
+/**
  * Receive
  */
 export declare class Receive<N> extends Axiom<N> {
@@ -180,6 +189,10 @@ export declare class Raise<N> extends Axiom<N> {
 export declare class Noop<N> extends Axiom<N> {
 }
 export declare type Instruction<A> = Free<Axiom<any>, A>;
+/**
+ * runAxiomChain
+ */
+export declare const runAxiomChain: <A>(i: Free<Axiom<any>, A>, a: Actor, s: System) => System;
 /**
  * evalAxiomChain translates a chain of axioms into the actual
  * work to be done by the system.
@@ -201,6 +214,10 @@ export declare const evalTell: <A>({to, message, next}: Tell<Free<Axiom<any>, A>
  * evalEffect
  */
 export declare const evalEffect: <R, A>({callable, next}: Effect<R, Free<Axiom<any>, A>>, a: Actor, s: System) => IO<System>;
+/**
+ * evalStream
+ */
+export declare const evalStream: <A, P>({source, to, next}: Stream<P, Free<Axiom<any>, A>>, a: Actor, s: System) => IO<System>;
 /**
  * evalReceive
  */

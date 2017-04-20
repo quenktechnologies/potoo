@@ -193,6 +193,7 @@ export class Axiom<N> implements Functor<N> {
             .caseOf(Task, ({ to, forkable, next }) => new Task(forkable, to, f(next)))
             .caseOf(Tell, ({ to, message, next }) => new Tell(to, message, f(next)))
             .caseOf(Effect, ({ callable, next }) => new Effect(callable, compose(f, next)))
+            .caseOf(Stream, ({ to, source, next }) => new Stream(to, source, f(next)))
             .caseOf(Noop, identity)
             .end();
 
@@ -253,6 +254,19 @@ export class Effect<R, N> extends Axiom<N> {
 }
 
 /**
+ * Stream 
+ */
+export class Stream<P, N> extends Axiom<N> {
+
+    constructor(public to: string, public source: (f: (p: P) => System) => void, public next?: N) {
+
+        super(next);
+
+    }
+
+}
+
+/**
  * Receive
  */
 export class Receive<N> extends Axiom<N> {
@@ -282,6 +296,12 @@ export class Noop<N> extends Axiom<N> { }
 export type Instruction<A> = Free<Axiom<any>, A>;
 
 /**
+ * runAxiomChain 
+ */
+export const runAxiomChain = <A>(i: Instruction<A>, a: Actor, s: System) =>
+    evalAxiomChain(i, a, s).run();
+
+/**
  * evalAxiomChain translates a chain of axioms into the actual
  * work to be done by the system.
  */
@@ -292,6 +312,7 @@ export const evalAxiomChain = <A>(ch: Instruction<A>, a: Actor, s: System): IO<S
             .caseOf(Task, f => s.log(f).chain(() => evalTask(f, a, s)))
             .caseOf(Tell, f => s.log(f).chain(() => evalTell(f, a, s)))
             .caseOf(Effect, f => s.log(f).chain(() => evalEffect(f, a, s)))
+            .caseOf(Stream, f => s.log(f).chain(() => evalStream(f, a, s)))
             .caseOf(Receive, f => s.log(f).chain(() => evalReceive(f, a, s)))
             .caseOf(Raise, ({ error }) => { throw error; })
             .caseOf(Noop, f => s.log(f).chain(() => wrapIO(s)))
@@ -341,6 +362,13 @@ export const evalTell = <A>({ to, message, next }: Tell<Instruction<A>>, a: Acto
  */
 export const evalEffect = <R, A>({ callable, next }: Effect<R, Instruction<A>>, a: Actor, s: System) =>
     safeIO(callable).chain(r => evalAxiomChain(next(r), a, s));
+
+/**
+ * evalStream 
+ */
+export const evalStream = <A, P>({ source, to, next }: Stream<P, Instruction<A>>, a: Actor, s: System) =>
+    safeIO(() => source(p => runAxiomChain(tell(to, p), a, s)))
+        .chain(() => evalAxiomChain(next, a, s));
 
 /**
  * evalReceive
