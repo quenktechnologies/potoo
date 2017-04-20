@@ -156,9 +156,9 @@ export declare class Tell<N> extends Axiom<N> {
  * Effect
  */
 export declare class Effect<R, N> extends Axiom<N> {
-    callable: () => R;
+    runnable: IO<R>;
     next: (a: any) => N;
-    constructor(callable: () => R, next?: (a: any) => N);
+    constructor(runnable: IO<R>, next?: (a: any) => N);
 }
 export interface StreamFunction<P> {
     (f: (p: P) => System): void;
@@ -216,7 +216,7 @@ export declare const evalTell: <A>({to, message, next}: Tell<Free<Axiom<any>, A>
 /**
  * evalEffect
  */
-export declare const evalEffect: <R, A>({callable, next}: Effect<R, Free<Axiom<any>, A>>, a: Actor, s: System) => IO<System>;
+export declare const evalEffect: <R, A>({runnable, next}: Effect<R, Free<Axiom<any>, A>>, a: Actor, s: System) => IO<System>;
 /**
  * evalStream
  */
@@ -331,6 +331,10 @@ export declare const task: (f: Future, to?: string) => Free<Axiom<any>, any>;
  * effect allows a side-effectfull computation to occur.
  */
 export declare const effect: <R>(f: () => R) => Suspend<Functor<Return<{}>>, {}>;
+/**
+ * run an IO operation safely
+ */
+export declare const run: <R>(io: IO<R>) => Suspend<Functor<Return<{}>>, {}>;
 /**
  * stream input into an actor's mailbox
  */

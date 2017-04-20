@@ -192,7 +192,7 @@ export class Axiom<N> implements Functor<N> {
             .caseOf(Spawn, ({ template, next }) => new Spawn(template, f(next)))
             .caseOf(Task, ({ to, forkable, next }) => new Task(forkable, to, f(next)))
             .caseOf(Tell, ({ to, message, next }) => new Tell(to, message, f(next)))
-            .caseOf(Effect, ({ callable, next }) => new Effect(callable, compose(f, next)))
+            .caseOf(Effect, ({ runnable, next }) => new Effect(runnable, compose(f, next)))
             .caseOf(Stream, ({ to, source, next }) => new Stream(to, source, f(next)))
             .caseOf(Noop, identity)
             .end();
@@ -245,7 +245,7 @@ export class Tell<N> extends Axiom<N> {
  */
 export class Effect<R, N> extends Axiom<N> {
 
-    constructor(public callable: () => R, public next: (a: any) => N = identity) {
+    constructor(public runnable: IO<R>, public next: (a: any) => N = identity) {
 
         super(next);
 
@@ -363,8 +363,8 @@ export const evalTell = <A>({ to, message, next }: Tell<Instruction<A>>, a: Acto
 /**
  * evalEffect 
  */
-export const evalEffect = <R, A>({ callable, next }: Effect<R, Instruction<A>>, a: Actor, s: System) =>
-    safeIO(callable).chain(r => evalAxiomChain(next(r), a, s));
+export const evalEffect = <R, A>({ runnable, next }: Effect<R, Instruction<A>>, a: Actor, s: System) =>
+    runnable.chain(r => evalAxiomChain(next(r), a, s));
 
 /**
  * evalStream 
@@ -533,14 +533,18 @@ export const task = (f: Future, to: string = '.'): Instruction<any> =>
 /**
  * effect allows a side-effectfull computation to occur.
  */
-export const effect = <R>(f: () => R) => liftF(new Effect(f));
+export const effect = <R>(f: () => R) => liftF(new Effect(safeIO(f)));
+
+/**
+ * run an IO operation safely 
+ */
+export const run = <R>(io: IO<R>) => liftF(new Effect(io));
 
 /**
  * stream input into an actor's mailbox
  */
 export const stream = <P>(source: StreamFunction<P>, to: string = '.'): Instruction<any> =>
     liftF(new Stream(to, source));
-
 
 /**
  * receive the next message with the passed behaviour

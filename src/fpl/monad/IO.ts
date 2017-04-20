@@ -60,7 +60,3 @@ export const wrapIO = <A>(a: A) => new IO(() => a);
  * safeIO accepts a function that has side effects and wrapIOs it in an IO Monad.
  */
 export const safeIO = <A>(f: () => A) => new IO(f);
-
-
-
-
