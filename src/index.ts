@@ -253,12 +253,15 @@ export class Effect<R, N> extends Axiom<N> {
 
 }
 
+export interface StreamFunction<P> {
+    (f: (p: P) => System): void;
+}
 /**
  * Stream 
  */
 export class Stream<P, N> extends Axiom<N> {
 
-    constructor(public to: string, public source: (f: (p: P) => System) => void, public next?: N) {
+    constructor(public to: string, public source: StreamFunction<P>, public next?: N) {
 
         super(next);
 
@@ -531,6 +534,13 @@ export const task = (f: Future, to: string = '.'): Instruction<any> =>
  * effect allows a side-effectfull computation to occur.
  */
 export const effect = <R>(f: () => R) => liftF(new Effect(f));
+
+/**
+ * stream input into an actor's mailbox
+ */
+export const stream = <P>(source: StreamFunction<P>, to: string = '.'): Instruction<any> =>
+    liftF(new Stream(to, source));
+
 
 /**
  * receive the next message with the passed behaviour

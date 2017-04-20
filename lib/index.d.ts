@@ -160,14 +160,17 @@ export declare class Effect<R, N> extends Axiom<N> {
     next: (a: any) => N;
     constructor(callable: () => R, next?: (a: any) => N);
 }
+export interface StreamFunction<P> {
+    (f: (p: P) => System): void;
+}
 /**
  * Stream
  */
 export declare class Stream<P, N> extends Axiom<N> {
     to: string;
-    source: (f: (p: P) => System) => void;
+    source: StreamFunction<P>;
     next: N;
-    constructor(to: string, source: (f: (p: P) => System) => void, next?: N);
+    constructor(to: string, source: StreamFunction<P>, next?: N);
 }
 /**
  * Receive
@@ -328,6 +331,10 @@ export declare const task: (f: Future, to?: string) => Free<Axiom<any>, any>;
  * effect allows a side-effectfull computation to occur.
  */
 export declare const effect: <R>(f: () => R) => Suspend<Functor<Return<{}>>, {}>;
+/**
+ * stream input into an actor's mailbox
+ */
+export declare const stream: <P>(source: StreamFunction<P>, to?: string) => Free<Axiom<any>, any>;
 /**
  * receive the next message with the passed behaviour
  */
