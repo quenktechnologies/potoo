@@ -302,7 +302,6 @@ export type Instruction<A> = Free<Axiom<any>, A>;
  * runAxiomChain 
  */
 export const runAxiomChain = <A>(i: Instruction<A>, a: Actor, s: System): System =>
-    console.log('running ') ||
     evalAxiomChain(i, a, s).run();
 
 /**
