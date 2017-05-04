@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "src",
-    "lib": ["ES2015", "DOM", "ScriptHost"],
+    "lib": ["ES2015", "DOM"],
     "module": "commonjs",
     "target": "es5",
     "rootDir": "src",

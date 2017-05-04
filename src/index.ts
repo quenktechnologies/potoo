@@ -1,11 +1,11 @@
-import { match } from './fpl/control/Match';
-import { Suspend, Return, liftF } from './fpl/monad/Free';
-import { Maybe, fromAny } from './fpl/monad/Maybe';
-import { IO, safeIO, wrapIO } from './fpl/monad/IO';
-import { Free } from './fpl/monad/Free';
-import { Functor } from './fpl/data/Functor';
-import { identity, compose } from './fpl/util';
-import { SharedBuffer } from './fpl/async/SharedBuffer';
+import { match } from 'afpl/lib/control/Match';
+import { Suspend, Return, liftF } from 'afpl/lib/monad/Free';
+import { Maybe, fromAny } from 'afpl/lib/monad/Maybe';
+import { IO, safeIO, wrapIO } from 'afpl/lib/monad/IO';
+import { Free } from 'afpl/lib/monad/Free';
+import { Functor } from 'afpl/lib/data/Functor';
+import { identity, compose } from 'afpl/lib/util';
+import { SharedBuffer } from 'afpl/lib/async/SharedBuffer';
 
 /**
  * DuplicateActorPathError
@@ -301,7 +301,8 @@ export type Instruction<A> = Free<Axiom<any>, A>;
 /**
  * runAxiomChain 
  */
-export const runAxiomChain = <A>(i: Instruction<A>, a: Actor, s: System) =>
+export const runAxiomChain = <A>(i: Instruction<A>, a: Actor, s: System): System =>
+    console.log('running ') ||
     evalAxiomChain(i, a, s).run();
 
 /**
@@ -363,20 +364,22 @@ export const evalTell = <A>({ to, message, next }: Tell<Instruction<A>>, a: Acto
 /**
  * evalEffect 
  */
-export const evalEffect = <R, A>({ runnable, next }: Effect<R, Instruction<A>>, a: Actor, s: System) =>
-    runnable.chain(r => evalAxiomChain(next(r), a, s));
+export const evalEffect = <R, A>(eff: Effect<R, Instruction<A>>, a: Actor, s: System): IO<System> => {
+    let { runnable, next } = eff;
+    return runnable.chain(r => evalAxiomChain(next(r), a, s));
+};
 
 /**
  * evalStream 
  */
-export const evalStream = <A, P>({ source, to, next }: Stream<P, Instruction<A>>, a: Actor, s: System) =>
+export const evalStream = <A, P>({ source, to, next }: Stream<P, Instruction<A>>, a: Actor, s: System): IO<System> =>
     safeIO(() => source(p => runAxiomChain(tell(to, p), a, s)))
         .chain(() => evalAxiomChain(next, a, s));
 
 /**
  * evalReceive
  */
-export const evalReceive = <A>({ behaviour }: Receive<Instruction<A>>, a: Actor, s: System) =>
+export const evalReceive = <A>({ behaviour }: Receive<Instruction<A>>, a: Actor, s: System): IO<System> =>
     takeMessage(a).chain(mb => consumeOrStore(mb, behaviour, a, s));
 
 /**
@@ -510,7 +513,7 @@ export const putBehaviour = (b: Behaviour, a: Actor): IO<Actor> =>
  * delayIO delays the execution of an IO function
  */
 export const delayIO = <A>(f: () => IO<A>, n = 100): IO<void> =>
-    safeIO(() => void setTimeout(() => f().run(), n));
+    safeIO(() => void setTimeout(() => console.log('delat ') || f().run(), n));
 
 /**
  * spawn a new child actor

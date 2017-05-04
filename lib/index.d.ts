@@ -216,7 +216,7 @@ export declare const evalTell: <A>({to, message, next}: Tell<Free<Axiom<any>, A>
 /**
  * evalEffect
  */
-export declare const evalEffect: <R, A>({runnable, next}: Effect<R, Free<Axiom<any>, A>>, a: Actor, s: System) => IO<System>;
+export declare const evalEffect: <R, A>(eff: Effect<R, Free<Axiom<any>, A>>, a: Actor, s: System) => IO<System>;
 /**
  * evalStream
  */
