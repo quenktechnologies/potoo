@@ -1,13 +1,15 @@
 {
-  "compilerOptions": {
-    "baseUrl": "../src",
-    "lib": ["ES2015", "DOM", "ScriptHost"],
-    "module": "commonjs",
-    "target": "es5",
-    "outDir": "../lib",
-    "moduleResolution": "node",
-    "allowUnreachableCode": true,
-    "sourceMap": true
-  }
+    "compilerOptions": {
+        "lib": ["ES2015", "DOM", "ScriptHost"],
+        "module": "commonjs",
+        "target": "es5",
+        "rootDir": ".",
+        "moduleResolution": "node",
+        "allowUnreachableCode": true,
+        "sourceMap": true,
+        "typeRoots": ["node_modules/@types"],
+        "types": ["mocha", "node"]
+    },
+    "exclude":["node_modules"]
 
 }

@@ -1,9 +1,9 @@
-import { Suspend, Return } from './fpl/monad/Free';
-import { Maybe } from './fpl/monad/Maybe';
-import { IO } from './fpl/monad/IO';
-import { Free } from './fpl/monad/Free';
-import { Functor } from './fpl/data/Functor';
-import { SharedBuffer } from './fpl/async/SharedBuffer';
+import { Suspend, Return } from 'afpl/lib/monad/Free';
+import { Maybe } from 'afpl/lib/monad/Maybe';
+import { IO } from 'afpl/lib/monad/IO';
+import { Free } from 'afpl/lib/monad/Free';
+import { Functor } from 'afpl/lib/data/Functor';
+import { SharedBuffer } from 'afpl/lib/async/SharedBuffer';
 /**
  * DuplicateActorPathError
  */

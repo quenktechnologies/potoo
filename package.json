@@ -3,24 +3,22 @@
   "version": "0.2.5",
   "description": "An actor model library for JavaScript.",
   "main": "lib/index.js",
-  "files": "lib",
+  "files": ["lib"],
   "scripts": {
     "test": "./node_modules/.bin/mocha --opts mocha.opts test",
-    "build": "rm -R lib; mkdir -p lib; ./node_modules/.bin/babel -D src -s inline -d lib",
-    "build-perf": "rm -R lib/perf; mkdir -p lib; ./node_modules/.bin/babel -D perf -s inline -d lib/perf"
+    "clean": "rm -R ./lib/*",
+    "build": "npm run -s clean; mkdir -p lib; cp package.test.json lib/package.json; tsc --project src/tsconfig.json"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.40",
-    "babel-plugin-transform-export-extensions": "^6.22.0",
     "fluture": "^5.0.0",
-    "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git",
     "mocha": "^3.2.0",
     "must": "^0.13.4",
     "potoo-lib": "file:lib",
     "source-map-support": "^0.4.3",
     "ts-node": "^3.0.2"
   },
-  "author": "Quenk Technologies (http://quenk.com)",
+  "author": "Quenk Technologies",
   "license": "Apache-2.0",
   "dependencies": {
     "afpl": "0.0.1"

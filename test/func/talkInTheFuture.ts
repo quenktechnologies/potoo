@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import 'mocha';
 import * as must from 'must/register';
 import { Future } from 'fluture';
-import { LocalT, system } from '../../src';
-import { spawn, task } from '../../src';
+import { LocalT, system } from 'potoo-lib';
+import { spawn, task } from 'potoo-lib';
 
 describe('using futures', function() {
 

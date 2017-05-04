@@ -1,7 +1,7 @@
 import 'mocha';
 import * as must from 'must/register';
-import { LocalT, system } from '../../src';
-import { effect, spawn, tell } from '../../src';
+import { LocalT, system } from 'potoo-lib';
+import { effect, spawn, tell } from 'potoo-lib';
 
 describe('using side effects', function() {
 

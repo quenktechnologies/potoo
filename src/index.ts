@@ -536,7 +536,7 @@ export const task = (f: Future, to: string = '.'): Instruction<any> =>
 /**
  * effect allows a side-effectfull computation to occur.
  */
-export const effect = <R>(f: () => R) => liftF(new Effect(safeIO(f)));
+export const effect = <R>(f: () => R): Instruction<any> => liftF(new Effect(safeIO(f)));
 
 /**
  * run an IO operation safely 

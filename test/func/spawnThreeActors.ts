@@ -1,7 +1,7 @@
 import 'mocha';
 import * as must from 'must/register';
-import { LocalT, ActorL, system } from '../../src';
-import { spawn, tell, receive, finalReceive } from '../../src';
+import { LocalT, ActorL, system } from 'potoo-lib';
+import { spawn, tell, receive, finalReceive } from 'potoo-lib';
 
 describe('spawning three actors', function() {
 
