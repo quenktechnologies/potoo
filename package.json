@@ -1,9 +1,11 @@
 {
   "name": "potoo",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "An actor model library for JavaScript.",
   "main": "lib/index.js",
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "test": "./node_modules/.bin/mocha --opts mocha.opts test",
     "clean": "rm -R ./lib/*",
