@@ -103,6 +103,21 @@ export class Actor {
 export class ActorL extends Actor { }
 
 /**
+ * ActorWT 
+ */
+export class ActorWT<N> extends Actor {
+
+    constructor(
+        public askee: string,
+        public actor: Actor,
+        public next: Getter<N>) {
+
+        super('wt', askee, noop);
+
+    }
+}
+
+/**
  * ActorDOA
  */
 export class ActorDOA extends Actor { }
@@ -192,6 +207,7 @@ export class Axiom<N> implements Functor<N> {
             .caseOf(Spawn, ({ template, next }) => new Spawn(template, f(next)))
             .caseOf(Task, ({ to, forkable, next }) => new Task(forkable, to, f(next)))
             .caseOf(Tell, ({ to, message, next }) => new Tell(to, message, f(next)))
+            .caseOf(Ask, ({ askee, message, next }) => new Ask(askee, message, compose(f, next)))
             .caseOf(Effect, ({ runnable, next }) => new Effect(runnable, compose(f, next)))
             .caseOf(Stream, ({ to, source, next }) => new Stream(to, source, f(next)))
             .caseOf(Noop, identity)
@@ -241,11 +257,24 @@ export class Tell<N> extends Axiom<N> {
 }
 
 /**
+ * Ask 
+ */
+export class Ask<N> extends Axiom<N> {
+
+    constructor(public askee: string, public message: string, public next: Getter<N> = identity) {
+
+        super(next);
+
+    }
+
+}
+
+/**
  * Effect 
  */
 export class Effect<R, N> extends Axiom<N> {
 
-    constructor(public runnable: IO<R>, public next: (a: any) => N = identity) {
+    constructor(public runnable: IO<R>, public next: Getter<N> = identity) {
 
         super(next);
 
@@ -256,6 +285,7 @@ export class Effect<R, N> extends Axiom<N> {
 export interface StreamFunction<P> {
     (f: (p: P) => System): void;
 }
+
 /**
  * Stream 
  */
@@ -314,6 +344,7 @@ export const evalAxiomChain = <A>(ch: Instruction<A>, a: Actor, s: System): IO<S
             .caseOf(Spawn, f => s.log(f).chain(() => evalSpawn(f, a, s)))
             .caseOf(Task, f => s.log(f).chain(() => evalTask(f, a, s)))
             .caseOf(Tell, f => s.log(f).chain(() => evalTell(f, a, s)))
+            .caseOf(Ask, f => s.log(f).chain(() => evalAsk(f, a, s)))
             .caseOf(Effect, f => s.log(f).chain(() => evalEffect(f, a, s)))
             .caseOf(Stream, f => s.log(f).chain(() => evalStream(f, a, s)))
             .caseOf(Receive, f => s.log(f).chain(() => evalReceive(f, a, s)))
@@ -355,10 +386,29 @@ export const evalTask = <A>({ to, forkable, next }: Task<Instruction<A>>, a: Act
 /**
  * evalTell
  */
-export const evalTell = <A>({ to, message, next }: Tell<Instruction<A>>, a: Actor, s: System): IO<System> =>
-    pathToActor(to === '.' ? a.path : to, s)
+export const evalTell = <A>(op: Tell<Instruction<A>>, a: Actor, s: System): IO<System> => {
+
+    let { to, message, next } = op;
+
+    return pathToActor(to, a, s)
         .chain(t => feedActor(message, t, a, s))
         .chain(() => evalAxiomChain(next, a, s));
+
+};
+
+/**
+ * evalAsk 
+ */
+export const evalAsk = <A>(op: Ask<Instruction<A>>, a: Actor, s: System): IO<System> => {
+
+    let { askee, message, next } = op;
+
+    return putActor(a.path, new ActorWT(askee, a, next), s)
+        .chain(s => pathToActor(askee, a, s))
+        .chain(t => feedActor(message, t, a, s))
+        .map(() => s);
+
+};
 
 /**
  * evalEffect 
@@ -423,11 +473,14 @@ export const putActor = (path: string, a: Actor, s: System): IO<System> =>
 /**
  * pathToActor resolves an actor address from the system.
  * If the actor is not found the '?' actor is returned.
- * @param p The path of the actor
- * @param s The System.
+ * @param {string} p The path of the actor
+ * @param {Actor} a The actor making the query
+ * @param {System} s The System.
  */
-export const pathToActor = (p: string, s: System): IO<Actor> =>
-    getActorMaybe(p, s).map(mb => mb.orJust(() => s.actors['?']).get());
+export const pathToActor = (p: string, a: Actor, s: System): IO<Actor> =>
+    p === '.' ?
+        wrapIO(a) : getActorMaybe(p, s)
+            .map(mb => mb.orJust(() => s.actors['?']).get());
 
 /**
  * getActorMaybe is like getActor but wraps the actor in a Maybe.
@@ -448,9 +501,10 @@ export const getActor = (p: string, s: System): IO<Actor> => safeIO(() => s.acto
  * feedActor feeds a message into an actor.
  * The message may be processed immediately or stored for later.
  */
-export const feedActor = <A>(m: A, to: Actor, from: Actor, s: System): IO<Actor> => match(to)
-    .caseOf(ActorDOA, a => feedActorDOA(new DroppedMessage(m, a, from.path), a, s))
-    .caseOf(ActorL, a => feedActorL(m, a, s))
+export const feedActor = <A>(m: A, to: Actor, a: Actor, s: System): IO<Actor> => match(to)
+    .caseOf(ActorDOA, to => feedActorDOA(m, to, a, s))
+    .caseOf(ActorL, to => feedActorL(m, to, a, s))
+    .caseOf(ActorWT, to => feedActorWT(m, to, a, s))
     .end();
 
 /**
@@ -458,16 +512,31 @@ export const feedActor = <A>(m: A, to: Actor, from: Actor, s: System): IO<Actor>
  * @param {DroppedMessage} m 
  * @param {ActorDOA} a 
  */
-export const feedActorDOA = (m: DroppedMessage, a: ActorDOA, s: System): IO<Actor> =>
-    s.log(m).mapIn(a);
+export const feedActorDOA = <A>(m: A, to: Actor, a: ActorDOA, s: System): IO<Actor> =>
+    s.log(new DroppedMessage(m, to, a.path)).mapIn(a);
 
 /**
  * feedActorL
  */
-export const feedActorL = <A>(m: A, a: ActorL, s: System): IO<any> => match(a.behaviour)
-    .caseOf(Function, b => delayIO(() => evalAxiomChain(b(m), a, s)))
-    .orElse(() => storeAuditedMessage(m, a, s))
-    .end();
+export const feedActorL = <A>(m: A, a: ActorL, _from: Actor, s: System): IO<any> =>
+    match(a.behaviour)
+        .caseOf(Function, b => delayIO(() => evalAxiomChain(b(m), a, s)))
+        .orElse(() => storeAuditedMessage(m, a, s))
+        .end();
+
+/**
+ * feedActorWT 
+ */
+export const feedActorWT = <A>(m: A, a: ActorWT<any>, from: Actor, s: System): IO<any> => {
+
+    let { askee, actor, next } = a;
+
+    return (askee === from.path) ?
+        putActor(actor.path, actor, s)
+            .chain(s => delayIO(() => evalAxiomChain(next(m), a, s))) :
+        storeAuditedMessage(m, actor, s);
+
+};
 
 /**
  * takeMessage takes the next message out of an actor's mailbox.
@@ -512,7 +581,7 @@ export const putBehaviour = (b: Behaviour, a: Actor): IO<Actor> =>
  * delayIO delays the execution of an IO function
  */
 export const delayIO = <A>(f: () => IO<A>, n = 100): IO<void> =>
-    safeIO(() => void setTimeout(() => console.log('delat ') || f().run(), n));
+    safeIO(() => void setTimeout(() => f().run(), n));
 
 /**
  * spawn a new child actor
@@ -524,6 +593,9 @@ export const spawn = (template: Template): Instruction<any> => liftF(new Spawn(t
  */
 export const tell = (to: string, message: any): Instruction<any> =>
     liftF(new Tell(to, message));
+
+export const ask = (askee: string, message: any): Instruction<any> =>
+    liftF(new Ask(askee, message));
 
 /**
  * task allows an asynchronous operation to be performed, placing its result in 

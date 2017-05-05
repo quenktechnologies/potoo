@@ -64,6 +64,15 @@ export declare class Actor {
 export declare class ActorL extends Actor {
 }
 /**
+ * ActorWT
+ */
+export declare class ActorWT<N> extends Actor {
+    askee: string;
+    actor: Actor;
+    next: Getter<N>;
+    constructor(askee: string, actor: Actor, next: Getter<N>);
+}
+/**
  * ActorDOA
  */
 export declare class ActorDOA extends Actor {
@@ -153,12 +162,21 @@ export declare class Tell<N> extends Axiom<N> {
     constructor(to: string, message: string, next?: N);
 }
 /**
+ * Ask
+ */
+export declare class Ask<N> extends Axiom<N> {
+    askee: string;
+    message: string;
+    next: Getter<N>;
+    constructor(askee: string, message: string, next?: Getter<N>);
+}
+/**
  * Effect
  */
 export declare class Effect<R, N> extends Axiom<N> {
     runnable: IO<R>;
-    next: (a: any) => N;
-    constructor(runnable: IO<R>, next?: (a: any) => N);
+    next: Getter<N>;
+    constructor(runnable: IO<R>, next?: Getter<N>);
 }
 export interface StreamFunction<P> {
     (f: (p: P) => System): void;
@@ -212,7 +230,11 @@ export declare const evalTask: <A>({to, forkable, next}: Task<Free<Axiom<any>, A
 /**
  * evalTell
  */
-export declare const evalTell: <A>({to, message, next}: Tell<Free<Axiom<any>, A>>, a: Actor, s: System) => IO<System>;
+export declare const evalTell: <A>(op: Tell<Free<Axiom<any>, A>>, a: Actor, s: System) => IO<System>;
+/**
+ * evalAsk
+ */
+export declare const evalAsk: <A>(op: Ask<Free<Axiom<any>, A>>, a: Actor, s: System) => IO<System>;
 /**
  * evalEffect
  */
@@ -252,10 +274,11 @@ export declare const putActor: (path: string, a: Actor, s: System) => IO<System>
 /**
  * pathToActor resolves an actor address from the system.
  * If the actor is not found the '?' actor is returned.
- * @param p The path of the actor
- * @param s The System.
+ * @param {string} p The path of the actor
+ * @param {Actor} a The actor making the query
+ * @param {System} s The System.
  */
-export declare const pathToActor: (p: string, s: System) => IO<Actor>;
+export declare const pathToActor: (p: string, a: Actor, s: System) => IO<Actor>;
 /**
  * getActorMaybe is like getActor but wraps the actor in a Maybe.
  * @param p The path of the actor
@@ -272,17 +295,21 @@ export declare const getActor: (p: string, s: System) => IO<Actor>;
  * feedActor feeds a message into an actor.
  * The message may be processed immediately or stored for later.
  */
-export declare const feedActor: <A>(m: A, to: Actor, from: Actor, s: System) => IO<Actor>;
+export declare const feedActor: <A>(m: A, to: Actor, a: Actor, s: System) => IO<Actor>;
 /**
  * feedActorDOA handles bounced messages
  * @param {DroppedMessage} m
  * @param {ActorDOA} a
  */
-export declare const feedActorDOA: (m: DroppedMessage, a: ActorDOA, s: System) => IO<Actor>;
+export declare const feedActorDOA: <A>(m: A, to: Actor, a: ActorDOA, s: System) => IO<Actor>;
 /**
  * feedActorL
  */
-export declare const feedActorL: <A>(m: A, a: ActorL, s: System) => IO<any>;
+export declare const feedActorL: <A>(m: A, a: ActorL, _from: Actor, s: System) => IO<any>;
+/**
+ * feedActorWT
+ */
+export declare const feedActorWT: <A>(m: A, a: ActorWT<any>, from: Actor, s: System) => IO<any>;
 /**
  * takeMessage takes the next message out of an actor's mailbox.
  */
@@ -322,6 +349,7 @@ export declare const spawn: (template: Template) => Free<Axiom<any>, any>;
  * tell another actor a message
  */
 export declare const tell: (to: string, message: any) => Free<Axiom<any>, any>;
+export declare const ask: (askee: string, message: any) => Free<Axiom<any>, any>;
 /**
  * task allows an asynchronous operation to be performed, placing its result in
  * an actor's mailbox.
@@ -330,7 +358,7 @@ export declare const task: (f: Future, to?: string) => Free<Axiom<any>, any>;
 /**
  * effect allows a side-effectfull computation to occur.
  */
-export declare const effect: <R>(f: () => R) => Suspend<Functor<Return<{}>>, {}>;
+export declare const effect: <R>(f: () => R) => Free<Axiom<any>, any>;
 /**
  * run an IO operation safely
  */
