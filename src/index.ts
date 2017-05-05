@@ -533,7 +533,7 @@ export const feedActorWT = <A>(m: A, a: ActorWT<any>, from: Actor, s: System): I
 
     return (askee === from.path) ?
         putActor(actor.path, actor, s)
-            .chain(s => delayIO(() => evalAxiomChain(next(m), a, s))) :
+            .chain(s => delayIO(() => evalAxiomChain(next(m), actor, s))) :
         storeAuditedMessage(m, actor, s);
 
 };

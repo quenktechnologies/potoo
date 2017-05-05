@@ -25,11 +25,11 @@ describe('using ask semantics', function() {
             start: () =>
                 ask('serverA', { sender: 'client', message: 'start' })
                     .chain(message => ask('serverB', { sender: 'client', message }))
-                    .chain(message => ask('serverA', { sender: 'client', message }))
                     .chain(msg => {
 
-                        console.log(`I got the deets peeeeeeeeeps ${msg}`);
+                        must(msg).be('start->A->B');
                         return noop();
+
                     })
 
         });
@@ -45,7 +45,6 @@ describe('using ask semantics', function() {
             .start()
             .map(s => setTimeout(() => done(), 1000))
             .run();
-
 
     });
 
