@@ -210,6 +210,7 @@ export class Axiom<N> implements Functor<N> {
             .caseOf(Ask, ({ askee, message, next }) => new Ask(askee, message, compose(f, next)))
             .caseOf(Effect, ({ runnable, next }) => new Effect(runnable, compose(f, next)))
             .caseOf(Stream, ({ to, source, next }) => new Stream(to, source, f(next)))
+            .caseOf(CPS, identity)
             .caseOf(Noop, identity)
             .end();
 
@@ -312,6 +313,23 @@ export class Receive<N> extends Axiom<N> {
 
 }
 
+export interface CPSFunction {
+    <A>(f: (i: Instruction<A>) => void): void;
+}
+
+/**
+ * CPS 
+ */
+export class CPS<N> extends Axiom<N> {
+
+    constructor(public cont: CPSFunction) {
+
+        super();
+
+    }
+
+}
+
 /**
  * Raise
  */
@@ -348,6 +366,7 @@ export const evalAxiomChain = <A>(ch: Instruction<A>, a: Actor, s: System): IO<S
             .caseOf(Effect, f => s.log(f).chain(() => evalEffect(f, a, s)))
             .caseOf(Stream, f => s.log(f).chain(() => evalStream(f, a, s)))
             .caseOf(Receive, f => s.log(f).chain(() => evalReceive(f, a, s)))
+            .caseOf(CPS, f => s.log(f).chain(() => evalCPS(f, a, s)))
             .caseOf(Raise, ({ error }) => { throw error; })
             .caseOf(Noop, f => s.log(f).chain(() => wrapIO(s)))
             .end())
@@ -430,6 +449,12 @@ export const evalStream = <A, P>({ source, to, next }: Stream<P, Instruction<A>>
  */
 export const evalReceive = <A>({ behaviour }: Receive<Instruction<A>>, a: Actor, s: System): IO<System> =>
     takeMessage(a).chain(mb => consumeOrStore(mb, behaviour, a, s));
+
+/**
+ * evalCPS 
+ */
+export const evalCPS = <A>({ cont }: CPS<A>, a: Actor, s: System): IO<System> =>
+    safeIO(() => cont(chain => runAxiomChain(chain, a, s))).map(() => s)
 
 /**
 * raiseDup 
@@ -624,6 +649,15 @@ export const stream = <P>(source: StreamFunction<P>, to: string = '.'): Instruct
  * receive the next message with the passed behaviour
  */
 export const receive = (behaviour: Behaviour): Instruction<any> => liftF(new Receive(behaviour));
+
+/**
+ * cps is helpfull when interacting with typical node callback based apis
+ * 
+ * The evaluation of the instructions the actor wants executed is delayed
+ * until the passed callback is invoked.
+ * 
+ */
+export const cps = (f: CPSFunction): Instruction<any> => liftF(new CPS(f));
 
 /**
  * finalReceive receives the next message and effectively puts the actor into

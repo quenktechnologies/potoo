@@ -197,6 +197,16 @@ export declare class Receive<N> extends Axiom<N> {
     behaviour: Behaviour;
     constructor(behaviour: Behaviour);
 }
+export interface CPSFunction {
+    <A>(f: (i: Instruction<A>) => void): void;
+}
+/**
+ * CPS
+ */
+export declare class CPS<N> extends Axiom<N> {
+    cont: CPSFunction;
+    constructor(cont: CPSFunction);
+}
 /**
  * Raise
  */
@@ -247,6 +257,10 @@ export declare const evalStream: <A, P>({source, to, next}: Stream<P, Free<Axiom
  * evalReceive
  */
 export declare const evalReceive: <A>({behaviour}: Receive<Free<Axiom<any>, A>>, a: Actor, s: System) => IO<System>;
+/**
+ * evalCPS
+ */
+export declare const evalCPS: <A>({cont}: CPS<A>, a: Actor, s: System) => IO<System>;
 /**
 * raiseDup
 */
@@ -371,6 +385,14 @@ export declare const stream: <P>(source: StreamFunction<P>, to?: string) => Free
  * receive the next message with the passed behaviour
  */
 export declare const receive: (behaviour: Behaviour) => Free<Axiom<any>, any>;
+/**
+ * cps is helpfull when interacting with typical node callback based apis
+ *
+ * The evaluation of the instructions the actor wants executed is delayed
+ * until the passed callback is invoked.
+ *
+ */
+export declare const cps: (f: CPSFunction) => Free<Axiom<any>, any>;
 /**
  * finalReceive receives the next message and effectively puts the actor into
  * an idle state.
