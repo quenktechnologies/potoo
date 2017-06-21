@@ -7,9 +7,10 @@
     "lib"
   ],
   "scripts": {
-    "test": "./node_modules/.bin/mocha --opts mocha.opts test",
+    "test": "./node_modules/.bin/mocha --opts mocha.opts test/func",
     "clean": "rm -R ./lib/*",
-    "build": "npm run -s clean; mkdir -p lib; cp package.test.json lib/package.json; tsc --project src/tsconfig.json"
+    "build:lib": "rm -R lib/*; tsc --project src/tsconfig.json",
+    "prep:test": "npm run build:lib; rm -R ./node_modules/potoo; mkdir -p node_modules/potoo; cp -R lib node_modules/potoo; cp package.json node_modules/potoo/package.json"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.40",
