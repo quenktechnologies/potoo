@@ -9,7 +9,9 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha --opts mocha.opts test/func",
     "clean": "rm -R ./lib/*",
+    "examples": "npm run -s build:examples && ./node_modules/.bin/browserify --debug -o examples/examples.js examples/index.js",
     "build:lib": "rm -R lib/*; tsc --project src/tsconfig.json",
+    "build:examples": "tsc examples/index.ts",
     "prep:test": "npm run build:lib; rm -R ./node_modules/potoo; mkdir -p node_modules/potoo; cp -R lib node_modules/potoo; cp package.json node_modules/potoo/package.json"
   },
   "devDependencies": {
@@ -17,9 +19,11 @@
     "fluture": "^5.0.0",
     "mocha": "^3.2.0",
     "must": "^0.13.4",
-    "potoo-lib": "file:lib",
     "source-map-support": "^0.4.3",
-    "ts-node": "^3.0.2"
+    "ts-node": "^3.0.2",
+    "babel-cli": "^6.24.0",
+    "babel-preset-es2015": "^6.24.0",
+    "browserify": "^14.1.0"
   },
   "author": "Quenk Technologies",
   "license": "Apache-2.0",

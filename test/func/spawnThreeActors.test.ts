@@ -2,6 +2,7 @@ import 'mocha';
 import * as must from 'must/register';
 import { System } from 'potoo/lib/System';
 import { LocalActor, Template } from 'potoo/lib/LocalActor';
+import { MatchAny } from 'potoo/lib/Behaviour';
 import { LocalContext } from 'potoo/lib/LocalContext';
 
 class A1 extends LocalActor { }

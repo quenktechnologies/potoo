@@ -56,6 +56,11 @@ export declare class ReceiveStartedEvent extends ASEvent {
     path: string;
     constructor(path: string);
 }
+/**
+ * SelectStartedEvent
+ */
+export declare class SelectStartedEvent extends ReceiveStartedEvent {
+}
 export interface Configuration {
     log: LoggingPolicy;
 }
@@ -90,6 +95,10 @@ export declare class LoggingLogic {
      * receiveStarted
      */
     receiveStarted(path: string): void;
+    /**
+     * selectStarted
+     */
+    selectStarted(path: string): void;
 }
 /**
  * System is a system of actors.

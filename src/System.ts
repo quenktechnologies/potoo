@@ -70,6 +70,13 @@ export class ReceiveStartedEvent extends ASEvent {
 
 }
 
+/**
+ * SelectStartedEvent 
+ */
+export class SelectStartedEvent extends ReceiveStartedEvent { }
+
+
+
 export interface Configuration { log: LoggingPolicy }
 
 export interface LoggingPolicy {
@@ -139,6 +146,16 @@ export class LoggingLogic {
 
         if (this.policy.level >= INFO)
             this.policy.logger.info(new ReceiveStartedEvent(path));
+
+    }
+
+    /**
+     * selectStarted 
+     */
+    selectStarted(path: string) {
+
+        if (this.policy.level >= INFO)
+            this.policy.logger.info(new SelectStartedEvent(path));
 
     }
 

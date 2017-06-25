@@ -9,8 +9,7 @@ class ServerA extends LocalActor {
 
     run() {
 
-        this.receive(({ sender, message }) =>
-            this.tell(sender, `${message}->A`));
+        this.receive(({ sender, message }) => this.tell(sender, `${message}->A`));
 
     }
 
