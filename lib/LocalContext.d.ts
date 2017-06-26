@@ -19,12 +19,8 @@ export declare class LocalContext extends Context {
     isClearing: boolean;
     constructor(path: string, actorFn: (c: LocalContext) => LocalActor, system: System, behaviour?: Behaviour, mailbox?: Message<any>[], isClearing?: boolean);
     _clear(): boolean;
-    /**
-     * setBehaviour changes the behaviour of the context.
-     *
-     * If a behaviour is already set, this method throws an Error
-     */
-    setBehaviour(b: Behaviour): LocalContext;
+    _set(b: Behaviour): LocalContext;
+    discard<M>(m: Message<M>): void;
     spawn(t: Template): string;
     tell<M>(ref: string, m: M): void;
     ask<M, A>(ref: string, m: M): Promise<A>;

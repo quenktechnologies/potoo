@@ -32,6 +32,10 @@ export declare class LocalActor {
      */
     run(): void;
     /**
+     * self returns the address of this actor.
+     */
+    self(): string;
+    /**
      * spawn a new child actor using the passed template.
      */
     spawn(t: Template): string;
