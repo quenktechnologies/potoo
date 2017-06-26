@@ -28,6 +28,7 @@
   "author": "Quenk Technologies",
   "license": "Apache-2.0",
   "dependencies": {
-    "afpl": "0.0.1"
+    "afpl": "0.0.1",
+    "bluebird": "^3.5.0"
   }
 }
