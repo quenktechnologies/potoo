@@ -169,7 +169,7 @@ export class LocalContext extends Context {
 
     }
 
-    ask<M, A>(ref: string, m: M): Promise<A> {
+    ask<M>(ref: string, m: M): Promise<M> {
 
         return this.system.askMessage(ref, this.path, m);
 

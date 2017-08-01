@@ -72,7 +72,7 @@ export declare class LocalContext extends Context {
     discard<M>(m: Message<M>): void;
     spawn(t: Template): string;
     tell<M>(ref: string, m: M): void;
-    ask<M, A>(ref: string, m: M): Promise<A>;
+    ask<M>(ref: string, m: M): Promise<M>;
     select<T>(c: Case<T>[]): void;
     receive<M>(f: (m: M) => void): void;
     feed<M>(m: Message<M>): void;
