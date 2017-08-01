@@ -1,11 +1,11 @@
 import * as fs from 'fs';
 import 'mocha';
 import * as must from 'must/register';
-import { System, LocalActor, LocalContext, Case, LocalTemplate as Template } from 'potoo';
+import { System, LocalActor, LocalContext, Case, LocalConf as ActorConf } from 'potoo';
 
-class Selector extends LocalActor {
+class Selector<M> extends LocalActor<M> {
 
-    constructor(public ctx: LocalContext, public done: Function) {
+    constructor(public ctx: LocalContext<M>, public done: Function) {
 
         super(ctx);
 
@@ -40,7 +40,7 @@ describe('select', function() {
 
         System
             .create()
-            .spawn(Template.from('selector', ctx => new Selector(ctx, done)));
+            .spawn(ActorConf.from('selector', ctx => new Selector(ctx, done)));
 
     });
 

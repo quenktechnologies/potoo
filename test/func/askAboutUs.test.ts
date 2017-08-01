@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import 'mocha';
 import * as must from 'must/register';
-import { System, LocalActor, LocalContext, LocalTemplate as Template } from 'potoo';
+import { System, LocalActor, LocalContext, LocalConf as ActorConf } from 'potoo';
 
-class ServerA extends LocalActor {
+class ServerA<M> extends LocalActor<M> {
 
     run() {
 
@@ -13,7 +13,7 @@ class ServerA extends LocalActor {
 
 }
 
-class ServerB extends LocalActor {
+class ServerB<M> extends LocalActor<M> {
 
     run() {
 
@@ -24,7 +24,7 @@ class ServerB extends LocalActor {
 
 }
 
-class Client extends LocalActor {
+class Client<M> extends LocalActor<M> {
 
     constructor(c, public done) {
 
@@ -51,9 +51,9 @@ describe('using ask semantics', function() {
 
         System
             .create()
-            .spawn(Template.from('serverA', ctx => new ServerA(ctx)))
-            .spawn(Template.from('serverB', ctx => new ServerB(ctx)))
-            .spawn(Template.from('client', ctx => new Client(ctx, done)))
+            .spawn(ActorConf.from('serverA', ctx => new ServerA(ctx)))
+            .spawn(ActorConf.from('serverB', ctx => new ServerB(ctx)))
+            .spawn(ActorConf.from('client', ctx => new Client(ctx, done)))
 
     });
 

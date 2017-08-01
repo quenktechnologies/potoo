@@ -38,14 +38,14 @@ export const makeChildPath = (id: string, parent: string): string =>
     ((parent === '/') || (parent === '')) ? `${parent}${id}` : `${parent}/${id}`;
 
 /**
- * Template represents the minimum amount of information required to create
+ * ActorConf represents the minimum amount of information required to create
  * a new actor instance.
  */
-export abstract class Template {
+export abstract class ActorConf<M> {
 
     constructor(public id: string) { }
 
-    abstract create(path: string, s: System): Context
+    abstract create(path: string, s: System): Context<M>
 
 };
 
@@ -55,11 +55,11 @@ export abstract class Template {
  * It stores interesting data as well as provides methods for manipulating
  * the actor's behaviour.
  */
-export abstract class Context {
+export abstract class Context<M> {
 
     constructor(public path: string) { }
 
-    abstract feed<M>(m: Message<M>);
+    abstract feed(m: Message<M>);
 
     abstract start();
 
@@ -70,15 +70,15 @@ export abstract class Context {
  *
  * This actor will drop all incomming messages not from the target.
  */
-export class PendingContext extends Context {
+export class PendingContext<M> extends Context<M>{
 
     constructor(
         public askee: string,
-        public original: Context,
+        public original: Context<M>,
         public resolve: Function,
         public system: System) { super(original.path); }
 
-    feed<M>(m: Message<M>) {
+    feed(m: Message<M>) {
 
         if (m.from !== this.askee) {
 
@@ -102,14 +102,14 @@ export class PendingContext extends Context {
  *
  * It provides methods for putting the actor model axioms to use.
  */
-export class LocalContext extends Context {
+export class LocalContext<M> extends Context<M> {
 
     constructor(
         public path: string,
-        public actorFn: (c: LocalContext) => LocalActor,
+        public actorFn: (c: LocalContext<M>) => LocalActor<M>,
         public system: System,
-        public behaviour: Behaviour = null,
-        public mailbox: Message<any>[] = [],
+        public behaviour: Behaviour<M> = null,
+        public mailbox: Message<M>[] = [],
         public isClearing: boolean = false) { super(path); }
 
     _clear(): boolean {
@@ -140,7 +140,7 @@ export class LocalContext extends Context {
 
     }
 
-    _set(b: Behaviour): LocalContext {
+    _set(b: Behaviour<M>): LocalContext<M> {
 
         if (this.behaviour != null)
             throw new Error(`${this.path} is already receiveing/selecting!`);
@@ -157,7 +157,7 @@ export class LocalContext extends Context {
 
     }
 
-    spawn(t: Template) {
+    spawn(t: ActorConf<M>) {
 
         return this.system.putChild(t, this.path);
 
@@ -175,7 +175,7 @@ export class LocalContext extends Context {
 
     }
 
-    select<T>(c: Case<T>[]) {
+    select(c: Case<M>[]) {
 
         this._set(new MatchCase(c));
         this.system.logging.selectStarted(this.path);
@@ -183,7 +183,7 @@ export class LocalContext extends Context {
 
     }
 
-    receive<M>(f: (m: M) => void) {
+    receive(f: (m: any) => void) {
 
         this._set(new MatchAny(f));
         this.system.logging.receiveStarted(this.path);
@@ -191,7 +191,7 @@ export class LocalContext extends Context {
 
     }
 
-    feed<M>(m: Message<M>) {
+    feed(m: Message<M>) {
 
         setTimeout(() => (this.mailbox.unshift(m), this._clear()), 0);
 
@@ -217,7 +217,7 @@ export interface Handler<T> {
  */
 export class Case<T> {
 
-    constructor(public t: T, public h: Handler<T>) { }
+    constructor(public t: { new (...a): T } | T, public h: Handler<T>) { }
 
     /**
      * matches checks if the supplied type satisfies this Case
@@ -250,33 +250,33 @@ export class Case<T> {
 /**
  * Behaviour of an actor
  */
-export interface Behaviour {
+export interface Behaviour<M> {
 
-    willConsume<M>(m: M): boolean;
-    consume<M>(m: M): void;
+    willConsume<A>(m: A): boolean;
+    consume(m: M): void;
 
 }
 
 /**
  * MatchAny accepts any value.
  */
-export class MatchAny<M> implements Behaviour {
+export class MatchAny<M> implements Behaviour<M> {
 
     constructor(public f: (m: M) => void) { }
 
-    static create<M>(f: (m: M) => void) {
+    static create<A>(f: (m: A) => void) {
 
         return new MatchAny(f);
 
     }
 
-    willConsume(_: M) {
+    willConsume<A>(_: A): boolean {
 
         return true;
 
     }
 
-    consume(m: M) {
+    consume(m: M): void {
 
         this.f(m);
 
@@ -287,17 +287,17 @@ export class MatchAny<M> implements Behaviour {
 /**
  * MatchCase 
  */
-export class MatchCase<T> implements Behaviour {
+export class MatchCase<M> implements Behaviour<M> {
 
-    constructor(public cases: Case<T>[]) { }
+    constructor(public cases: Case<M>[]) { }
 
-    willConsume<M>(m: M) {
+    willConsume<A>(m: A) {
 
         return this.cases.some(c => c.matches(m));
 
     }
 
-    consume(m: T) {
+    consume(m: M) {
 
         this.cases.some(c => c.matches(m) ? (c.apply(m), true) : false);
 
@@ -306,28 +306,28 @@ export class MatchCase<T> implements Behaviour {
 }
 
 /**
- * LocalTemplate is a template for creating a local actor.
+ * LocalConf is a template for creating a local actor.
  * @property {string} id
  * @property {function} start
  */
-export class LocalTemplate extends Template {
+export class LocalConf<M> extends ActorConf<M> {
 
-    constructor(public id: string, public actorFn: (c: LocalContext) => LocalActor) {
+    constructor(public id: string, public actorFn: (c: LocalContext<M>) => LocalActor<M>) {
 
         super(id);
 
     }
 
     /**
-     * from constructs a new Template using the specified parameters.
+     * from constructs a new ActorConf using the specified parameters.
      */
-    static from(id: string, fn: (c: LocalContext) => LocalActor) {
+    static from<M>(id: string, fn: (c: LocalContext<M>) => LocalActor<M>) {
 
-        return new LocalTemplate(id, fn);
+        return new LocalConf(id, fn);
 
     }
 
-    create(path: string, s: System): Context {
+    create(path: string, s: System): Context<M> {
 
         return new LocalContext(path, this.actorFn, s);
 
@@ -341,9 +341,9 @@ export class LocalTemplate extends Template {
  *
  * This is the class client code would typically extend and utilize.
  */
-export class LocalActor {
+export class LocalActor<M> {
 
-    constructor(public context: LocalContext) { }
+    constructor(public context: LocalContext<M>) { }
 
     /**
      * run is called each time the actor is created.
@@ -362,7 +362,7 @@ export class LocalActor {
     /**
      * spawn a new child actor using the passed template.
      */
-    spawn(t: Template) {
+    spawn(t: ActorConf<M>) {
 
         return this.context.spawn(t);
 
@@ -393,7 +393,7 @@ export class LocalActor {
     /**
      * select selectively receives the next message in the mailbox.
      */
-    select<T>(c: Case<T>[]) {
+    select(c: Case<M>[]) {
 
         return this.context.select(c);
 
@@ -403,7 +403,7 @@ export class LocalActor {
      * receive the next message in this actor's mail queue using
      * the provided behaviour.
      */
-    receive<M>(f: (m: M) => void) {
+    receive(f: (m: any) => void) {
 
         return this.context.receive(f);
 
@@ -583,7 +583,7 @@ export class System {
     /**
      * spawn a new top level actor within the system.
      */
-    spawn(t: Template): System {
+    spawn(t: ActorConf<any>): System {
 
         this.putChild(t, this.path);
         return this;
@@ -593,7 +593,7 @@ export class System {
     /**
      * putChild creates a new child actor for a parent within the system.
      */
-    putChild(t: Template, parent: string): string {
+    putChild(t: ActorConf<any>, parent: string): string {
 
         var path = makeChildPath(t.id, parent); //@todo validate actor ids
         var child = t.create(path, this);
@@ -622,7 +622,7 @@ export class System {
     /**
      * putContext replaces an actor's context within the system.
      */
-    putContext(path: string, context: Context) {
+    putContext(path: string, context: Context<any>) {
 
         this.actors[path] = context;
 
