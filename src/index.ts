@@ -284,7 +284,6 @@ export class MatchAny<M> implements Behaviour {
 
 }
 
-
 /**
  * MatchCase 
  */

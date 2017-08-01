@@ -1,9 +1,7 @@
 import * as fs from 'fs';
 import 'mocha';
 import * as must from 'must/register';
-import { System } from 'potoo/lib/System';
-import { LocalActor, Template } from 'potoo/lib/LocalActor';
-import { LocalContext } from 'potoo/lib/LocalContext';
+import { System, LocalActor, LocalContext, LocalTemplate as Template } from 'potoo';
 
 class ServerA extends LocalActor {
 

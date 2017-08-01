@@ -1,10 +1,7 @@
 import * as fs from 'fs';
 import 'mocha';
 import * as must from 'must/register';
-import { System } from 'potoo/lib/System';
-import { LocalActor, Template } from 'potoo/lib/LocalActor';
-import { LocalContext } from 'potoo/lib/LocalContext';
-import { Case } from 'potoo';
+import { System, LocalActor, LocalContext, Case, LocalTemplate as Template } from 'potoo';
 
 class Selector extends LocalActor {
 

@@ -1,9 +1,6 @@
 import 'mocha';
 import * as must from 'must/register';
-import { System } from 'potoo/lib/System';
-import { LocalActor, Template } from 'potoo/lib/LocalActor';
-import { MatchAny } from 'potoo/lib/Behaviour';
-import { LocalContext } from 'potoo/lib/LocalContext';
+import { LocalActor, LocalTemplate as Template, MatchAny, LocalContext, System } from 'potoo';
 
 class A1 extends LocalActor { }
 class A2 extends LocalActor { }
