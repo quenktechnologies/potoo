@@ -16,15 +16,17 @@
     "prep:test": "npm run build:lib; rm -R ./node_modules/potoo; mkdir -p node_modules/potoo; cp -R lib node_modules/potoo; cp package.json node_modules/potoo/package.json"
   },
   "devDependencies": {
+    "@types/bluebird": "^3.5.8",
     "@types/mocha": "^2.2.40",
+    "babel-cli": "^6.24.0",
+    "babel-preset-es2015": "^6.24.0",
+    "browserify": "^14.1.0",
     "fluture": "^5.0.0",
     "mocha": "^3.2.0",
     "must": "^0.13.4",
     "source-map-support": "^0.4.3",
     "ts-node": "^3.0.2",
-    "babel-cli": "^6.24.0",
-    "babel-preset-es2015": "^6.24.0",
-    "browserify": "^14.1.0"
+    "typescript": "^2.4.2"
   },
   "author": "Quenk Technologies",
   "license": "Apache-2.0",

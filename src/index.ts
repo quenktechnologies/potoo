@@ -7,15 +7,18 @@ export const ERROR = 1;
 /**
  * DuplicateActorPathError
  */
-export function DuplicateActorPathError(path) {
+export class DuplicateActorPathError extends Error {
 
-    this.message = `The path '${path}' is already in use!`;
-    this.path = path;
-    this.stack = (new Error(this.message)).stack;
-    this.name = this.constructor.name;
+    constructor(path: string) {
 
-    if (Error.hasOwnProperty('captureStackTrace'))
-        Error.captureStackTrace(this, this.constructor);
+        super(`The path '${path}' is already in use!`);
+
+        this.stack = (new Error(this.message)).stack;
+
+        if (Error.hasOwnProperty('captureStackTrace'))
+            Error.captureStackTrace(this, this.constructor);
+
+    }
 
 }
 
@@ -59,9 +62,9 @@ export abstract class Context<M> {
 
     constructor(public path: string) { }
 
-    abstract feed(m: Message<M>);
+    abstract feed(m: Message<M>): void;
 
-    abstract start();
+    abstract start(): void;
 
 }
 
@@ -75,7 +78,7 @@ export class PendingContext<M> extends Context<M>{
     constructor(
         public askee: string,
         public original: Context<M>,
-        public resolve: Function,
+        public resolve: (m: M) => void,
         public system: System) { super(original.path); }
 
     feed(m: Message<M>) {
@@ -217,7 +220,7 @@ export interface Handler<T> {
  */
 export class Case<T> {
 
-    constructor(public t: { new (...a): T } | T, public h: Handler<T>) { }
+    constructor(public t: { new (...a: any[]): T } | T, public h: Handler<T>) { }
 
     /**
      * matches checks if the supplied type satisfies this Case
@@ -424,9 +427,9 @@ export class ASEvent { }
  */
 export interface Logger {
 
-    info(e: ASEvent);
-    warn(e: ASEvent);
-    error(e: ASEvent);
+    info(e: ASEvent): void;
+    warn(e: ASEvent): void;
+    error(e: ASEvent): void;
 
 }
 
@@ -560,6 +563,12 @@ const defaults = {
     log: { level: WARN, logger: console }
 };
 
+export interface ActorMap {
+
+    [key: string]: Context<any>
+
+}
+
 /**
  * System is a system of actors.
  */
@@ -567,7 +576,7 @@ export class System {
 
     constructor(
         public config: Configuration = defaults,
-        public actors: object = {},
+        public actors: ActorMap = {},
         public logging: LoggingLogic = LoggingLogic.createFrom(config.log),
         public path = '') { }
 
@@ -654,9 +663,9 @@ export class System {
      * askMessage allows an actor to ignore incomming messages unless
      * they have been sent by a specific actor.
      */
-    askMessage<M>(to: string, from: string, m: M) {
+    askMessage<M>(to: string, from: string, m: M): Promise<M> {
 
-        return new Promise(resolve => {
+        return new Promise((resolve: (m: M) => void) => {
 
             this.actors[from] = new PendingContext(to, this.actors[from], resolve, this);
             this.putMessage(to, from, m);

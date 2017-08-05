@@ -5,7 +5,9 @@ export declare const ERROR = 1;
 /**
  * DuplicateActorPathError
  */
-export declare function DuplicateActorPathError(path: any): void;
+export declare class DuplicateActorPathError extends Error {
+    constructor(path: string);
+}
 /**
  * Message is an envelope for user messages.
  */
@@ -37,8 +39,8 @@ export declare abstract class ActorConf<M> {
 export declare abstract class Context<M> {
     path: string;
     constructor(path: string);
-    abstract feed(m: Message<M>): any;
-    abstract start(): any;
+    abstract feed(m: Message<M>): void;
+    abstract start(): void;
 }
 /**
  * PendingContext is used as a placeholder for an actor awaiting a reply.
@@ -48,9 +50,9 @@ export declare abstract class Context<M> {
 export declare class PendingContext<M> extends Context<M> {
     askee: string;
     original: Context<M>;
-    resolve: Function;
+    resolve: (m: M) => void;
     system: System;
-    constructor(askee: string, original: Context<M>, resolve: Function, system: System);
+    constructor(askee: string, original: Context<M>, resolve: (m: M) => void, system: System);
     feed(m: Message<M>): void;
     start(): void;
 }
@@ -87,11 +89,11 @@ export interface Handler<T> {
  */
 export declare class Case<T> {
     t: {
-        new (...a): T;
+        new (...a: any[]): T;
     } | T;
     h: Handler<T>;
     constructor(t: {
-        new (...a): T;
+        new (...a: any[]): T;
     } | T, h: Handler<T>);
     /**
      * matches checks if the supplied type satisfies this Case
@@ -175,7 +177,7 @@ export declare class LocalActor<M> {
      * that is only resolved when the destination sends us
      * a reply.
      */
-    ask<M>(ref: string, m: M): any;
+    ask<M>(ref: string, m: M): Promise<M>;
     /**
      * select selectively receives the next message in the mailbox.
      */
@@ -197,9 +199,9 @@ export declare class ASEvent {
  * by the actor system.
  */
 export interface Logger {
-    info(e: ASEvent): any;
-    warn(e: ASEvent): any;
-    error(e: ASEvent): any;
+    info(e: ASEvent): void;
+    warn(e: ASEvent): void;
+    error(e: ASEvent): void;
 }
 /**
  * ChildSpawnedEvent
@@ -278,15 +280,18 @@ export declare class LoggingLogic {
      */
     selectStarted(path: string): void;
 }
+export interface ActorMap {
+    [key: string]: Context<any>;
+}
 /**
  * System is a system of actors.
  */
 export declare class System {
     config: Configuration;
-    actors: object;
+    actors: ActorMap;
     logging: LoggingLogic;
     path: string;
-    constructor(config?: Configuration, actors?: object, logging?: LoggingLogic, path?: string);
+    constructor(config?: Configuration, actors?: ActorMap, logging?: LoggingLogic, path?: string);
     /**
      * create a new system
      */
@@ -320,6 +325,6 @@ export declare class System {
      * askMessage allows an actor to ignore incomming messages unless
      * they have been sent by a specific actor.
      */
-    askMessage<M>(to: string, from: string, m: M): any;
+    askMessage<M>(to: string, from: string, m: M): Promise<M>;
 }
 export declare const system: (c?: Configuration) => System;
