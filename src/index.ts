@@ -9,6 +9,8 @@ export const ERROR = 1;
  */
 export class DuplicateActorPathError extends Error {
 
+    __proto__: object;
+
     constructor(path: string) {
 
         super(`The path '${path}' is already in use!`);
@@ -17,6 +19,10 @@ export class DuplicateActorPathError extends Error {
 
         if (Error.hasOwnProperty('captureStackTrace'))
             Error.captureStackTrace(this, this.constructor);
+
+        (Object.setPrototypeOf) ?
+            Object.setPrototypeOf(this, DuplicateActorPathError.prototype) :
+            this.__proto__ = DuplicateActorPathError.prototype;
 
     }
 
