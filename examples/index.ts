@@ -1,7 +1,5 @@
-import { System } from 'potoo/lib/System';
-import { LocalActor, Template } from 'potoo/lib/LocalActor';
-import { LocalContext } from 'potoo/lib/LocalContext';
-import { MatchAny } from 'potoo/lib/Behaviour';
+import * as potoo from 'potoo';
+import { Actor } from 'potoo';
 
 const PACE = 5;
 const MAX_PACE = '90%';
@@ -14,13 +12,20 @@ const per2num = (v: string): number => Number(v.split('%')[0]);
 
 const num2per = (v: number): string => `${v}%`;
 
-class Player extends LocalActor {
+class Player extends Actor.Static<KeyboardEvent>{
 
-    constructor(public id: string, public ctx: LocalContext) {
+    receive = new potoo.Case(KeyboardEvent, (e: KeyboardEvent) => {
 
-        super(ctx);
+        if (e.keyCode === 37)
+            this.getPlayer().style.left = this.moveLeft(<HTMLElement>e.target);
+        else if (e.keyCode === 39)
+            this.getPlayer().style.left = this.moveRight(<HTMLElement>e.target);
+        else
+            console.log(`ignored key code ${e.keyCode}`);
 
-    }
+    })
+
+    constructor(s: potoo.System, public id: string) { super(s); }
 
     getEntity(id: string): HTMLElement {
 
@@ -47,29 +52,16 @@ class Player extends LocalActor {
 
     }
 
-    monitorKeys(e) {
-
-        if (e.keyCode === 37)
-            this.getPlayer().style.left = this.moveLeft(e);
-        else if (e.keyCode === 39)
-            this.getPlayer().style.left = this.moveRight(e);
-        else
-            console.log(`ignored key code ${e.keyCode}`);
-
-        this.receive(m => this.monitorKeys(m));
-
-    }
-
     run() {
 
         window.onkeydown = e => this.tell(this.id, e);
-        this.receive(m => this.monitorKeys(m));
 
     }
 
 }
 
-System
+potoo
+    .System
     .create()
-    .spawn(Template.from('player', ctx => new Player('player', ctx)))
-    .spawn(Template.from('clone', ctx => new Player('clone', ctx)));
+    .spawn({ id: 'player', create: s => new Player(s, 'player') })
+    .spawn({ id: 'clone', create: s => new Player(s, 'clone') }); 

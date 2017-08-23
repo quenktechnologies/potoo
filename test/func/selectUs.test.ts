@@ -1,13 +1,13 @@
 import * as fs from 'fs';
 import 'mocha';
 import * as must from 'must/register';
-import { System, LocalActor, LocalContext, Case, LocalConf as ActorConf } from 'potoo';
+import * as potoo from 'potoo';
 
-class Selector<M> extends LocalActor<M> {
+class Selector extends potoo.Actor.Dynamic {
 
-    constructor(public ctx: LocalContext<M>, public done: Function) {
+    constructor(public s: potoo.System, public done: () => void) {
 
-        super(ctx);
+        super(s);
 
     }
 
@@ -16,10 +16,10 @@ class Selector<M> extends LocalActor<M> {
         let bucket = [];
 
         let cases = [
-            new Case('one', () => (bucket.push(1), this.select(cases))),
-            new Case('two', () => (bucket.push(2), this.select(cases))),
-            new Case('three', () => (bucket.push(3), this.select(cases))),
-            new Case('done', () => { must(bucket.join(',')).eql('1,2,3'); this.done(); })
+            new potoo.Case('one', () => (bucket.push(1), this.select(cases))),
+            new potoo.Case('two', () => (bucket.push(2), this.select(cases))),
+            new potoo.Case('three', () => (bucket.push(3), this.select(cases))),
+            new potoo.Case('done', () => { must(bucket.join(',')).eql('1,2,3'); this.done(); })
         ];
 
         this.select(cases);
@@ -38,9 +38,9 @@ describe('select', function() {
 
     it('should be possible', function(done) {
 
-        System
-            .create()
-            .spawn(ActorConf.from('selector', ctx => new Selector(ctx, done)));
+        potoo.System
+            .create({ log: { level: potoo.INFO, logger: console } })
+            .spawn({ id: 'selector', create: s => new Selector(s, done) });
 
     });
 

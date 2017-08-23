@@ -1,26 +1,25 @@
 import 'mocha';
 import * as must from 'must/register';
-import { LocalActor, LocalConf as ActorConf, MatchAny, LocalContext, System } from 'potoo';
+import * as potoo from 'potoo';
 
-class A1<M> extends LocalActor<M> { }
-class A2<M> extends LocalActor<M> { }
+class A1 extends potoo.Actor.Dynamic { }
 
-class A3A<M> extends LocalActor<M> {
+class A2 extends potoo.Actor.Dynamic { }
 
-    run() {
+class A3A extends potoo.Actor.Static<String> {
 
-        this.receive(m => this.tell('a3', `You said : '${m}'`));
-    }
+    receive = new potoo.Case(String, (m: string) => this.tell('a3', `You said : '${m}'`));
 
 }
 
-class A3<M> extends LocalActor<M> {
+class A3 extends potoo.Actor.Static<String> {
+
+    receive = new potoo.Case(String, (m: string) => must(m).be('You said : \'Hello!\''));
 
     run() {
 
-        this.spawn(ActorConf.from('a3a', ctx => new A3A(ctx)));
+        this.spawn({ id: 'a3a', create: s => new A3A(s) });
         this.tell('a3/a3a', 'Hello!');
-        this.receive(m => must(m).be('You said : \'Hello!\''));
 
     }
 
@@ -30,16 +29,17 @@ describe('spawning three actors', function() {
 
     it('should be possible', function(done) {
 
-        let s = System
+        let s = potoo
+            .System
             .create()
-            .spawn(ActorConf.from('a1', ctx => new A1(ctx)))
-            .spawn(ActorConf.from('a2', ctx => new A2(ctx)))
-            .spawn(ActorConf.from('a3', ctx => new A3(ctx)))
+            .spawn({ id: 'a1', create: s => new A1(s) })
+            .spawn({ id: 'a2', create: s => new A2(s) })
+            .spawn({ id: 'a3', create: s => new A3(s) });
 
-        must(s.actors['a1']).be.instanceOf(LocalContext);
-        must(s.actors['a2']).be.instanceOf(LocalContext);
-        must(s.actors['a3']).be.instanceOf(LocalContext);
-        must(s.actors['a3/a3a']).be.instanceOf(LocalContext);
+        must(s.actors['a1']).be.instanceOf(potoo.Actor.Local);
+        must(s.actors['a2']).be.instanceOf(potoo.Actor.Local);
+        must(s.actors['a3']).be.instanceOf(potoo.Actor.Local);
+        must(s.actors['a3/a3a']).be.instanceOf(potoo.Actor.Local);
 
         setTimeout(done, 1000);
 

@@ -10,9 +10,9 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 exports.__esModule = true;
-var System_1 = require("potoo/lib/System");
-var LocalActor_1 = require("potoo/lib/LocalActor");
-var Behaviour_1 = require("potoo/lib/Behaviour");
+require("./br");
+var potoo = require("potoo");
+var potoo_1 = require("potoo");
 var PACE = 5;
 var MAX_PACE = '90%';
 var MIN_PACE = '0%';
@@ -22,10 +22,17 @@ var per2num = function (v) { return Number(v.split('%')[0]); };
 var num2per = function (v) { return v + "%"; };
 var Player = (function (_super) {
     __extends(Player, _super);
-    function Player(id, ctx) {
-        var _this = _super.call(this, ctx) || this;
+    function Player(s, id) {
+        var _this = _super.call(this, s) || this;
         _this.id = id;
-        _this.ctx = ctx;
+        _this.receive = new potoo.Case(KeyboardEvent, function (e) {
+            if (e.keyCode === 37)
+                _this.getPlayer().style.left = _this.moveLeft(e.target);
+            else if (e.keyCode === 39)
+                _this.getPlayer().style.left = _this.moveRight(e.target);
+            else
+                console.log("ignored key code " + e.keyCode);
+        });
         return _this;
     }
     Player.prototype.getEntity = function (id) {
@@ -42,24 +49,15 @@ var Player = (function (_super) {
         return (left(handle) !== MIN_PACE) ?
             handle.style.left = num2per(per2num(left(handle)) - PACE) : null;
     };
-    Player.prototype.monitorKeys = function (e) {
-        var _this = this;
-        if (e.keyCode === 37)
-            this.getPlayer().style.left = this.moveLeft(e);
-        else if (e.keyCode === 39)
-            this.getPlayer().style.left = this.moveRight(e);
-        else
-            console.log("ignored key code " + e.keyCode);
-        this.receive(Behaviour_1.MatchAny.create(function (m) { return _this.monitorKeys(m); }));
-    };
     Player.prototype.run = function () {
         var _this = this;
         window.onkeydown = function (e) { return _this.tell(_this.id, e); };
-        this.receive(Behaviour_1.MatchAny.create(function (m) { return _this.monitorKeys(m); }));
     };
     return Player;
-}(LocalActor_1.LocalActor));
-System_1.System
+}(potoo_1.Actor.Static));
+/*
+potoo
+    .System
     .create()
-    .spawn(LocalActor_1.Template.from('player', function (ctx) { return new Player('player', ctx); }))
-    .spawn(LocalActor_1.Template.from('clone', function (ctx) { return new Player('clone', ctx); }));
+    .spawn({ id: 'player', create: s => new Player(s, 'player') })
+   .spawn({ id: 'clone', create: s => new Player(s, 'clone') }); */

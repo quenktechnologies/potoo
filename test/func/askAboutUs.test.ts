@@ -1,34 +1,36 @@
 import * as fs from 'fs';
 import 'mocha';
 import * as must from 'must/register';
-import { System, LocalActor, LocalContext, LocalConf as ActorConf } from 'potoo';
+import * as potoo from 'potoo';
 
-class ServerA<M> extends LocalActor<M> {
+export interface Block {
 
-    run() {
-
-        this.receive(({ sender, message }) => this.tell(sender, `${message}->A`));
-
-    }
+    sender: string,
+    message: string
 
 }
 
-class ServerB<M> extends LocalActor<M> {
+const block = { sender: String, message: String }
 
-    run() {
+class ServerA extends potoo.Actor.Static<Block> {
 
-        this.receive(({ sender, message }) =>
-            setTimeout(() => this.tell(sender, `${message}->B`), 1000));
-
-    }
+    receive = new potoo.Case(block, ({ sender, message }: Block) =>
+        this.tell(sender, `${message}->A`))
 
 }
 
-class Client<M> extends LocalActor<M> {
+class ServerB extends potoo.Actor.Static<Block> {
 
-    constructor(c, public done) {
+    receive = new potoo.Case(block, ({ sender, message }: Block) =>
+        setTimeout(() => this.tell(sender, `${message}->B`), 1000))
 
-        super(c);
+}
+
+class Client extends potoo.Actor.Dynamic {
+
+    constructor(s: potoo.System, public done: () => void) {
+
+        super(s);
 
     }
 
@@ -49,11 +51,12 @@ describe('using ask semantics', function() {
 
     it('should be possible', function(done) {
 
-        System
-            .create()
-            .spawn(ActorConf.from('serverA', ctx => new ServerA(ctx)))
-            .spawn(ActorConf.from('serverB', ctx => new ServerB(ctx)))
-            .spawn(ActorConf.from('client', ctx => new Client(ctx, done)))
+        potoo
+            .System
+            .create({ log: { level: potoo.INFO, logger: console } })
+            .spawn({ id: 'serverA', create: s => new ServerA(s) })
+            .spawn({ id: 'serverB', create: s => new ServerB(s) })
+            .spawn({ id: 'client', create: s => new Client(s, done) })
 
     });
 
