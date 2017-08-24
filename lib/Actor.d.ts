@@ -113,3 +113,7 @@ export declare class Pending<M> implements Actor {
     accept(m: Message): void;
     run(): void;
 }
+export declare class Parent extends Local {
+    accept(m: Message): void;
+    run(): void;
+}

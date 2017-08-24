@@ -257,3 +257,15 @@ export class Pending<M> implements Actor {
     run() { }
 
 }
+
+export class Parent extends Local {
+
+    accept(m: Message) {
+
+        this.__system.dropMessage(m);
+
+    }
+
+    run() { }
+
+}
