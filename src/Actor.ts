@@ -14,7 +14,7 @@ export type Cases<T>
 export interface Conf {
 
     id: string;
-    create(s: System): Actor
+    create(s: System, ...args: any[]): Actor
 
 }
 

@@ -8,7 +8,7 @@ export declare type Cases<T> = Case<T> | Case<T>[];
  */
 export interface Conf {
     id: string;
-    create(s: System): Actor;
+    create(s: System, ...args: any[]): Actor;
 }
 /**
  * Actor is the interface for actors.

@@ -158,7 +158,7 @@ export class System implements Actor.Actor {
             .reduce((p, k) => (p != null) ? p : (this.actors[k] === a) ? k : null, null);
 
         if (hit == null)
-            throw new Error(`System:Could not look up address of actor! ${a}`)
+            throw new Error(`System:Could not look up address of actor! ${a.constructor}`)
 
         return hit;
 
