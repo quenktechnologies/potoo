@@ -33,7 +33,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@types/bluebird": "^3.5.8",
-    "afpl": "0.0.1",
     "bluebird": "^3.5.0"
   }
 }
