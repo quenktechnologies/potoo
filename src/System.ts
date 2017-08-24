@@ -180,7 +180,7 @@ export class System implements Actor.Actor {
     putChild(t: Actor.Conf, parent: Actor.Actor, args?: any[]): string {
 
         var path = makeChildPath(t.id, this.getPath(parent)); //@todo validate actor ids
-        var child = args ? t.create.apply(null, args.slice().unshift(this)) : t.create(this);
+        var child = args ? t.create.apply(null, [this].concat(args)) : t.create(this);
 
         if (this.actors.hasOwnProperty(path))
             throw new DuplicateActorPathError(path); //@todo use supervision instead
