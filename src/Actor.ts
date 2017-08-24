@@ -166,7 +166,8 @@ export abstract class Static<T> extends Local {
 
         let r = Array.isArray(this.receive) ? this.receive : [this.receive];
 
-        r.some(c => c.match(m.value));
+        if (!r.some(c => c.match(m.value)))
+            this.__system.dropMessage(m);
 
     }
 
