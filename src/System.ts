@@ -167,9 +167,9 @@ export class System implements Actor.Actor {
     /**
      * spawn a new top level actor within the system.
      */
-    spawn(t: Actor.Conf): System {
+    spawn(t: Actor.Conf, args?: any[]): System {
 
-        this.putChild(t, this);
+        this.putChild(t, this, args);
         return this;
 
     }
@@ -177,10 +177,10 @@ export class System implements Actor.Actor {
     /**
      * putChild creates a new child actor for a parent within the system.
      */
-    putChild(t: Actor.Conf, parent: Actor.Actor): string {
-        debugger;
+    putChild(t: Actor.Conf, parent: Actor.Actor, args?: any[]): string {
+
         var path = makeChildPath(t.id, this.getPath(parent)); //@todo validate actor ids
-        var child = t.create(this);
+        var child = args ? t.create.apply(this, args) : t.create(this);
 
         if (this.actors.hasOwnProperty(path))
             throw new DuplicateActorPathError(path); //@todo use supervision instead

@@ -84,11 +84,11 @@ export declare class System implements Actor.Actor {
     /**
      * spawn a new top level actor within the system.
      */
-    spawn(t: Actor.Conf): System;
+    spawn(t: Actor.Conf, args?: any[]): System;
     /**
      * putChild creates a new child actor for a parent within the system.
      */
-    putChild(t: Actor.Conf, parent: Actor.Actor): string;
+    putChild(t: Actor.Conf, parent: Actor.Actor, args?: any[]): string;
     /**
      * dropMessage drops a message.
      */

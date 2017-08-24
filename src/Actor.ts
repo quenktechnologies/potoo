@@ -124,9 +124,9 @@ export abstract class Local implements Actor {
     /**
      * spawn a new child actor.
      */
-    spawn(t: Conf): void {
+    spawn(t: Conf, args?: any[]): void {
 
-        this.__system.putChild(t, this);
+        this.__system.putChild(t, this, args);
 
     }
 
@@ -143,7 +143,7 @@ export abstract class Local implements Actor {
      * ask for a reply from a message sent to an address.
      */
     ask<R>(ref: string, m: any): Promise<R> {
-        debugger;
+
         return this.__system.askMessage(new Message(ref, this.self(), m));
 
     }
