@@ -66,7 +66,7 @@ export declare abstract class Local implements Actor {
     /**
      * spawn a new child actor.
      */
-    spawn(t: Conf, args?: any[]): void;
+    spawn(t: Conf, args?: any[]): string;
     /**
      * tell a message to an actor address.
      */

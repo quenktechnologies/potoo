@@ -124,9 +124,9 @@ export abstract class Local implements Actor {
     /**
      * spawn a new child actor.
      */
-    spawn(t: Conf, args?: any[]): void {
+    spawn(t: Conf, args?: any[]): string {
 
-        this.__system.putChild(t, this, args);
+        return this.__system.putChild(t, this, args);
 
     }
 
