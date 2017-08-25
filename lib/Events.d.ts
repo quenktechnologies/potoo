@@ -3,7 +3,7 @@
  * the system.
  */
 export declare class ASEvent {
-    time: [number, number] | Date;
+    time: number | [number, number] | Date;
 }
 /**
  * ChildSpawnedEvent
