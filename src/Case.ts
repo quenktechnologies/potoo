@@ -70,6 +70,14 @@ export const kinda = (o1: any, o2: any): boolean => {
 }
 
 /**
+ * Cases means either one Case or an array of them.
+ */
+export type Cases<T>
+    = Case<T>
+    | Case<T>[]
+    ;
+
+/**
  * Case allows for the selective matching of patterns
  * for processing messages
  */

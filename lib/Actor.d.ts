@@ -1,7 +1,6 @@
 import * as Promise from 'bluebird';
 import { System } from './System';
-import { Case } from './Case';
-export declare type Cases<T> = Case<T> | Case<T>[];
+import { Case, Cases } from './Case';
 /**
  * Conf represents the minimum amount of information required to create
  * a new actor instance.
