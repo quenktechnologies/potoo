@@ -6,22 +6,22 @@ class A1 extends potoo.Actor.Dynamic { }
 
 class A2 extends potoo.Actor.Dynamic { }
 
-class A3A extends potoo.Actor.Static<String> {
-
-    receive = new potoo.Case(String, (m: string) => this.tell('a3', `You said : '${m}'`));
-
-}
-
 class A3 extends potoo.Actor.Static<String> {
 
     receive = new potoo.Case(String, (m: string) => must(m).be('You said : \'Hello!\''));
 
     run() {
-
         this.spawn({ id: 'a3a', create: s => new A3A(s) });
+        console.log('so no spawning ? ', Object.keys(this.__system.accept));
         this.tell('a3/a3a', 'Hello!');
 
     }
+
+}
+
+class A3A extends potoo.Actor.Static<String> {
+
+    receive = new potoo.Case(String, (m: string) => this.tell('a3', `You said : '${m}'`));
 
 }
 
@@ -39,9 +39,10 @@ describe('spawning three actors', function() {
         must(s.actors['a1']).be.instanceOf(potoo.Actor.Local);
         must(s.actors['a2']).be.instanceOf(potoo.Actor.Local);
         must(s.actors['a3']).be.instanceOf(potoo.Actor.Local);
+      
+      setTimeout(()=>{
         must(s.actors['a3/a3a']).be.instanceOf(potoo.Actor.Local);
-
-        setTimeout(done, 1000);
+        done();}, 100);
 
     });
 
