@@ -228,8 +228,9 @@ export class System implements Actor.Actor {
             this.dropMessage(m);
         } else {
 
-            this.logging.messageSent(m);
-            actor.accept(m);
+            setTimeout(() => {
+                this.logging.messageSent(m); actor.accept(m);
+            }, 0);
 
         }
 
