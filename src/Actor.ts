@@ -161,6 +161,8 @@ export abstract class Static<T> extends Local {
 
         let r = Array.isArray(this.receive) ? this.receive : [this.receive];
 
+      this.__system.logging.messageAccepted(m);
+
         if (!r.some(c => c.match(m.value)))
             this.__system.dropMessage(m);
 
@@ -213,6 +215,7 @@ export abstract class Dynamic extends Local {
 
     accept(m: Message): void {
 
+      this.__system.logging.messageAccepted(m);
         this.__mailbox.push(m);
         this.__consume();
 

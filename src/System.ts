@@ -91,6 +91,16 @@ export class LoggingLogic {
 
     }
 
+  /**
+   * messageAccepted
+   */
+  messageAccepted(m: Actor.Message) {
+
+    if(this.policy.level >= INFO)
+      this.policy.logger.info(new Events.MessageAcceptedEvent(m.to, m.from, m.value));
+
+  }
+
     /**
      * messageReceived 
      */

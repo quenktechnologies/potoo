@@ -27,6 +27,11 @@ export declare class MessageSentEvent<M> extends ASEvent {
 export declare class MessageDroppedEvent<M> extends MessageSentEvent<M> {
 }
 /**
+ * MessageAcceptedEvent
+ */
+export declare class MessageAcceptedEvent<M> extends MessageSentEvent<M> {
+}
+/**
  * MessageReceivedEvent
  */
 export declare class MessageReceivedEvent<M> extends MessageSentEvent<M> {

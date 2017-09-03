@@ -52,6 +52,10 @@ export declare class LoggingLogic {
      */
     messageSent(m: Actor.Message): void;
     /**
+     * messageAccepted
+     */
+    messageAccepted(m: Actor.Message): void;
+    /**
      * messageReceived
      */
     messageReceived(m: Actor.Message): void;
