@@ -11,8 +11,8 @@
     "test": "npm run -s prep:test; ./node_modules/.bin/mocha --opts mocha.opts test/func",
     "clean": "rm -R ./lib/*",
     "examples": "npm run -s prep:test && npm run -s build:examples ; ./node_modules/.bin/browserify --debug -o examples/examples.js examples/index.js",
-    "build:lib": "npm run -s clean; tsc --project src/tsconfig.json",
-    "build:examples": "tsc examples/index.ts",
+    "build": "npm run -s clean; tsc --project src/tsconfig.json",
+    "build:example": "tsc example/index.ts",
     "prep:test": "npm run build:lib; rm -R ./node_modules/potoo; mkdir -p node_modules/potoo; cp -R lib node_modules/potoo; cp package.json node_modules/potoo/package.json"
   },
   "devDependencies": {
