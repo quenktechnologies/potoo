@@ -2,6 +2,10 @@ import * as Promise from 'bluebird';
 import { System } from './System';
 import { Case, Cases } from './Case';
 /**
+ * Address of an actor.
+ */
+export declare type Address = string;
+/**
  * Conf represents the minimum amount of information required to create
  * a new actor instance.
  */
@@ -65,7 +69,7 @@ export declare abstract class Local implements Actor {
     /**
      * spawn a new child actor.
      */
-    spawn(t: Conf, args?: any[]): string;
+    spawn(t: Conf, args?: any[]): Address;
     /**
      * tell a message to an actor address.
      */

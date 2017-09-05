@@ -3,6 +3,11 @@ import { System } from './System';
 import { Case, Cases } from './Case';
 
 /**
+ * Address of an actor.
+ */
+export type Address = string;
+
+/**
  * Conf represents the minimum amount of information required to create
  * a new actor instance.
  */
@@ -119,7 +124,7 @@ export abstract class Local implements Actor {
     /**
      * spawn a new child actor.
      */
-    spawn(t: Conf, args?: any[]): string {
+    spawn(t: Conf, args?: any[]): Address {
 
         return this.__system.putChild(t, this, args);
 
@@ -161,7 +166,7 @@ export abstract class Static<T> extends Local {
 
         let r = Array.isArray(this.receive) ? this.receive : [this.receive];
 
-      this.__system.logging.messageAccepted(m);
+        this.__system.logging.messageAccepted(m);
 
         if (!r.some(c => c.match(m.value)))
             this.__system.dropMessage(m);
@@ -215,7 +220,7 @@ export abstract class Dynamic extends Local {
 
     accept(m: Message): void {
 
-      this.__system.logging.messageAccepted(m);
+        this.__system.logging.messageAccepted(m);
         this.__mailbox.push(m);
         this.__consume();
 
