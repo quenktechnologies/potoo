@@ -31,7 +31,7 @@ export class MessageDroppedEvent<M> extends MessageSentEvent<M>{ }
 /**
  * MessageAcceptedEvent
  */
-export class MessageAcceptedEvent<M> extends MessageSentEvent<M>{}
+export class MessageAcceptedEvent<M> extends MessageSentEvent<M>{ }
 
 /**
  * MessageReceivedEvent 
@@ -51,3 +51,12 @@ export class ReceiveStartedEvent extends ASEvent {
  * SelectStartedEvent 
  */
 export class SelectStartedEvent extends ReceiveStartedEvent { }
+
+/**
+ * ActorRemovedEvent
+ */
+export class ActorRemovedEvent extends ASEvent {
+
+    constructor(public path: string, public code: number) { super(); }
+
+}

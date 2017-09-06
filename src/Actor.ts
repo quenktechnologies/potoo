@@ -144,7 +144,17 @@ export abstract class Local implements Actor {
      */
     ask<R>(ref: string, m: any): Promise<R> {
 
-        return this.__system.askMessage(new Message(ref, this.self(), m));
+        return this.__system.askMessage<R>(new Message(ref, this.self(), m));
+
+    }
+
+    /**
+     * exit allows a local actor to remove itself from the system.
+     * @param {number} reason
+     */
+    exit(reason: number = 0): void {
+
+        return this.__system.removeActor(this, reason);
 
     }
 

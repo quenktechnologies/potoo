@@ -91,15 +91,15 @@ export class LoggingLogic {
 
     }
 
-  /**
-   * messageAccepted
-   */
-  messageAccepted(m: Actor.Message) {
+    /**
+     * messageAccepted
+     */
+    messageAccepted(m: Actor.Message) {
 
-    if(this.policy.level >= INFO)
-      this.policy.logger.info(new Events.MessageAcceptedEvent(m.to, m.from, m.value));
+        if (this.policy.level >= INFO)
+            this.policy.logger.info(new Events.MessageAcceptedEvent(m.to, m.from, m.value));
 
-  }
+    }
 
     /**
      * messageReceived 
@@ -128,6 +128,22 @@ export class LoggingLogic {
 
         if (this.policy.level >= INFO)
             this.policy.logger.info(new Events.SelectStartedEvent(path));
+
+    }
+
+    /**
+     * actorRemoved
+     */
+    actorRemoved(path: string, reason: number) {
+
+        if (reason !== 0) {
+            if (this.policy.level >= ERROR)
+                this.policy.logger.error(new Events.ActorRemovedEvent(path, reason))
+        } else if (this.policy.level >= WARN) {
+
+            this.policy.logger.warn(new Events.ActorRemovedEvent(path, reason))
+
+        }
 
     }
 
@@ -198,7 +214,7 @@ export class System implements Actor.Actor {
         this.actors[path] = child;
         this.logging.childSpawned(path);
 
-      child.run(path);
+        child.run(path);
 
         return path;
 
@@ -258,6 +274,21 @@ export class System implements Actor.Actor {
             this.putMessage(m);
 
         });
+
+    }
+
+    removeActor(actor: Actor.Actor, reason: number): void {
+
+        this.actors = Object
+            .keys(this.actors)
+            .reduce((p: { [key: string]: Actor.Actor }, path) => {
+                if (this.actors[path] === actor)
+                    this.logging.actorRemoved(path, reason);
+                else
+                    p[path] = this.actors[path];
+                return p;
+
+            }, {});
 
     }
 

@@ -67,6 +67,10 @@ export declare class LoggingLogic {
      * selectStarted
      */
     selectStarted(path: string): void;
+    /**
+     * actorRemoved
+     */
+    actorRemoved(path: string, reason: number): void;
 }
 /**
  * System is a system of actors.
@@ -115,6 +119,7 @@ export declare class System implements Actor.Actor {
      * they have been sent by a specific actor.
      */
     askMessage<M>(m: Actor.Message): Promise<M>;
+    removeActor(actor: Actor.Actor, reason: number): void;
     run(): void;
     accept(m: Actor.Message): void;
 }

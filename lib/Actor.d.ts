@@ -78,6 +78,11 @@ export declare abstract class Local implements Actor {
      * ask for a reply from a message sent to an address.
      */
     ask<R>(ref: string, m: any): Promise<R>;
+    /**
+     * exit allows a local actor to remove itself from the system.
+     * @param {number} reason
+     */
+    exit(reason?: number): void;
 }
 /**
  * Static actors do not change their behaviour.
