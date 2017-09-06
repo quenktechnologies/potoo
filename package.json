@@ -1,6 +1,6 @@
 {
   "name": "@quenk/potoo",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "An actor model library for JavaScript.",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
