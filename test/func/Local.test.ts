@@ -22,6 +22,13 @@ class A2 extends potoo.Actor.Static<String> {
 
 }
 
+class A2B extends potoo.Actor.Static<String> {
+
+     receive = new potoo.Case(String, (m: string) => (m === 'exit') ?
+        this.kill('a1') : null);
+
+}
+
 describe('exit()', function() {
 
     it('should work', function(done) {
@@ -38,6 +45,31 @@ describe('exit()', function() {
         setTimeout(() => {
 
             must(s.actors['a2']).eql(undefined);
+            done();
+
+        }, 300);
+
+    });
+
+});
+
+describe('kill()', function() {
+
+    it('should work', function(done) {
+
+        let s = potoo
+            .System
+            .create()
+            .spawn({ id: 'a1', create: s => new A1(s) })
+            .spawn({ id: 'a2', create: s => new A2B(s) })
+
+        must(s.actors['a1']).be.instanceOf(potoo.Actor.Local);
+        must(s.actors['a2']).be.instanceOf(potoo.Actor.Local);
+
+        setTimeout(() => {
+
+            must(s.actors['a2']).be.instanceOf(potoo.Actor.Local);
+            must(s.actors['a1']).eql(undefined);
             done();
 
         }, 300);

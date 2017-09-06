@@ -54,5 +54,6 @@ export declare class SelectStartedEvent extends ReceiveStartedEvent {
 export declare class ActorRemovedEvent extends ASEvent {
     path: string;
     code: number;
-    constructor(path: string, code: number);
+    asker: string;
+    constructor(path: string, code: number, asker: string);
 }

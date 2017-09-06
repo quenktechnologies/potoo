@@ -154,9 +154,20 @@ export abstract class Local implements Actor {
      */
     exit(reason: number = 0): void {
 
-        return this.__system.removeActor(this, reason);
+      let self = this.self();
+
+        return this.__system.removeActor(self, reason, self);
 
     }
+
+  /**
+   * kill forces another actor out of the system
+   */
+  kill(path:string): void {
+
+    return this.__system.removeActor(path, 0, this.self());
+
+  }
 
 }
 

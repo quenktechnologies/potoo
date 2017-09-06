@@ -70,7 +70,7 @@ export declare class LoggingLogic {
     /**
      * actorRemoved
      */
-    actorRemoved(path: string, reason: number): void;
+    actorRemoved(path: string, reason: number, asker: string): void;
 }
 /**
  * System is a system of actors.
@@ -119,7 +119,11 @@ export declare class System implements Actor.Actor {
      * they have been sent by a specific actor.
      */
     askMessage<M>(m: Actor.Message): Promise<M>;
-    removeActor(actor: Actor.Actor, reason: number): void;
+    /**
+     * removeActor removes an actor from the system.
+     * @todo should we require an actor be a child before removing?
+     */
+    removeActor(actor: string, reason: number, asker: string): void;
     run(): void;
     accept(m: Actor.Message): void;
 }

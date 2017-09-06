@@ -57,6 +57,6 @@ export class SelectStartedEvent extends ReceiveStartedEvent { }
  */
 export class ActorRemovedEvent extends ASEvent {
 
-    constructor(public path: string, public code: number) { super(); }
+    constructor(public path: string, public code: number, public asker:string) { super(); }
 
 }

@@ -134,14 +134,14 @@ export class LoggingLogic {
     /**
      * actorRemoved
      */
-    actorRemoved(path: string, reason: number) {
+    actorRemoved(path: string, reason: number, asker: string) {
 
         if (reason !== 0) {
             if (this.policy.level >= ERROR)
-                this.policy.logger.error(new Events.ActorRemovedEvent(path, reason))
+                this.policy.logger.error(new Events.ActorRemovedEvent(path, reason, asker))
         } else if (this.policy.level >= WARN) {
 
-            this.policy.logger.warn(new Events.ActorRemovedEvent(path, reason))
+            this.policy.logger.warn(new Events.ActorRemovedEvent(path, reason, asker))
 
         }
 
@@ -268,7 +268,7 @@ export class System implements Actor.Actor {
      */
     askMessage<M>(m: Actor.Message): Promise<M> {
 
-        return new Promise((resolve, _) => {
+        return new Promise<M>((resolve, _) => {
 
             this.actors[m.from] = new Actor.Pending(m.to, this.actors[m.from], resolve, this);
             this.putMessage(m);
@@ -277,13 +277,17 @@ export class System implements Actor.Actor {
 
     }
 
-    removeActor(actor: Actor.Actor, reason: number): void {
+    /**
+     * removeActor removes an actor from the system.
+     * @todo should we require an actor be a child before removing?
+     */
+    removeActor(actor: string, reason: number, asker: string): void {
 
         this.actors = Object
             .keys(this.actors)
             .reduce((p: { [key: string]: Actor.Actor }, path) => {
-                if (this.actors[path] === actor)
-                    this.logging.actorRemoved(path, reason);
+                if (path === actor)
+                    this.logging.actorRemoved(path, reason, asker);
                 else
                     p[path] = this.actors[path];
                 return p;

@@ -83,6 +83,10 @@ export declare abstract class Local implements Actor {
      * @param {number} reason
      */
     exit(reason?: number): void;
+    /**
+     * kill forces another actor out of the system
+     */
+    kill(path: string): void;
 }
 /**
  * Static actors do not change their behaviour.
