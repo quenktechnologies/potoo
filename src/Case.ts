@@ -112,9 +112,22 @@ export class Case<T> {
                     this._execute(m);
                     return true;
 
+                } else if ((this.type === String)) {
+
+                    return (typeof m === 'string');
+
+                } else if (this.type === Number) {
+
+                    return (typeof m === 'number');
+
+                } else if (this.type === Boolean) {
+
+                    return (typeof m === 'boolean');
+
                 } else {
 
                     return false;
+
                 }
             case 'object':
                 if (kinda(this.type, m)) {
