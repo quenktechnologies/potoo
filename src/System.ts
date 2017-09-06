@@ -198,7 +198,7 @@ export class System implements Actor.Actor {
         this.actors[path] = child;
         this.logging.childSpawned(path);
 
-        setTimeout(() => child.run(path), 0);
+      child.run(path);
 
         return path;
 
