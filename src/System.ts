@@ -112,6 +112,16 @@ export class LoggingLogic {
     }
 
     /**
+     * messageRejected
+     */
+    messageRejected(m: Actor.Message) {
+
+        if (this.policy.level >= WARN)
+            this.policy.logger.warn(new Events.MessageRejectedEvent(m.to, m.from, m.value));
+
+    }
+
+    /**
      * receiveStarted 
      */
     receiveStarted(path: string) {
@@ -286,10 +296,13 @@ export class System implements Actor.Actor {
         this.actors = Object
             .keys(this.actors)
             .reduce((p: { [key: string]: Actor.Actor }, path) => {
-                if (path === actor)
+                if (path === actor) {
+                    this.actors[actor].stop();
                     this.logging.actorRemoved(path, reason, asker);
-                else
+                } else {
                     p[path] = this.actors[path];
+                }
+
                 return p;
 
             }, {});
@@ -297,6 +310,8 @@ export class System implements Actor.Actor {
     }
 
     run() { }
+
+    stop() { }
 
     accept(m: Actor.Message) {
 

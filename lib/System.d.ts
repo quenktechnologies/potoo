@@ -60,6 +60,10 @@ export declare class LoggingLogic {
      */
     messageReceived(m: Actor.Message): void;
     /**
+     * messageRejected
+     */
+    messageRejected(m: Actor.Message): void;
+    /**
      * receiveStarted
      */
     receiveStarted(path: string): void;
@@ -125,5 +129,6 @@ export declare class System implements Actor.Actor {
      */
     removeActor(actor: string, reason: number, asker: string): void;
     run(): void;
+    stop(): void;
     accept(m: Actor.Message): void;
 }

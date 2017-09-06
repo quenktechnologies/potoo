@@ -19,6 +19,7 @@ export interface Conf {
 export interface Actor {
     accept(m: Message): void;
     run(path: string): void;
+    stop(): void;
 }
 /**
  * Message is an envelope for user messages.
@@ -87,6 +88,7 @@ export declare abstract class Local implements Actor {
      * kill forces another actor out of the system
      */
     kill(path: string): void;
+    stop(): void;
 }
 /**
  * Static actors do not change their behaviour.
@@ -124,8 +126,27 @@ export declare class Pending<M> implements Actor {
     constructor(askee: string, original: Actor, resolve: (m: M) => void, system: System);
     accept(m: Message): void;
     run(): void;
+    stop(): void;
 }
 export declare class Parent extends Local {
     accept(m: Message): void;
     run(): void;
+}
+/**
+ * FakeSystem is used to prevent a removed local actor from sending messages.
+ */
+export declare class FakeSystem extends System {
+    s: System;
+    constructor(s: System);
+    putMessage(m: Message): void;
+    /**
+     * askMessage allows an actor to ignore incomming messages unless
+     * they have been sent by a specific actor.
+     */
+    askMessage<M>(m: Message): Promise<M>;
+    /**
+     * removeActor removes an actor from the system.
+     * @todo should we require an actor be a child before removing?
+     */
+    removeActor(_actor: string, _reason: number, asker: string): void;
 }

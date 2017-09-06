@@ -25,6 +25,7 @@ export interface Actor {
 
     accept(m: Message): void;
     run(path: string): void;
+    stop(): void;
 
 }
 
@@ -154,20 +155,26 @@ export abstract class Local implements Actor {
      */
     exit(reason: number = 0): void {
 
-      let self = this.self();
+        let self = this.self();
 
         return this.__system.removeActor(self, reason, self);
 
     }
 
-  /**
-   * kill forces another actor out of the system
-   */
-  kill(path:string): void {
+    /**
+     * kill forces another actor out of the system
+     */
+    kill(path: string): void {
 
-    return this.__system.removeActor(path, 0, this.self());
+        return this.__system.removeActor(path, 0, this.self());
 
-  }
+    }
+
+    stop() {
+    
+      this.__system = new FakeSystem(this.__system);
+    
+    }
 
 }
 
@@ -281,6 +288,8 @@ export class Pending<M> implements Actor {
 
     run() { }
 
+    stop() { }
+
 }
 
 export class Parent extends Local {
@@ -292,5 +301,45 @@ export class Parent extends Local {
     }
 
     run() { }
+
+}
+
+/**
+ * FakeSystem is used to prevent a removed local actor from sending messages.
+ */
+export class FakeSystem extends System {
+
+    constructor(public s: System) {
+
+        super(s.config, s.actors, s.logging, s.path);
+
+    }
+
+    putMessage(m: Message): void {
+
+        this.logging.messageRejected(m);
+
+    }
+
+    /**
+     * askMessage allows an actor to ignore incomming messages unless
+     * they have been sent by a specific actor.
+     */
+    askMessage<M>(m: Message): Promise<M> {
+
+        this.logging.messageRejected(m)
+        return Promise.resolve(undefined);
+
+    }
+
+    /**
+     * removeActor removes an actor from the system.
+     * @todo should we require an actor be a child before removing?
+     */
+    removeActor(_actor: string, _reason: number, asker: string): void {
+
+        console.warn(`Will not remove actor for removed actor ${asker}`);
+
+    }
 
 }
