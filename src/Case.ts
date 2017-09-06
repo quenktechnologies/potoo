@@ -112,20 +112,20 @@ export class Case<T> {
                     this._execute(m);
                     return true;
 
-                } else if ((this.type === String)) {
+                } else if ((this.type === String) && (typeof m === 'string')) {
+                    this._execute(m);
+                    return true;
 
-                    return (typeof m === 'string');
+                } else if ((this.type === Number) && (typeof m === 'number')) {
+                    this._execute(m);
+                    return true;
 
-                } else if (this.type === Number) {
-
-                    return (typeof m === 'number');
-
-                } else if (this.type === Boolean) {
-
-                    return (typeof m === 'boolean');
-
+                } else if ((this.type === Boolean) && (typeof m === 'boolean')) {
+                    this._execute(m);
+                    return true;
                 } else {
 
+                    this._execute(m);
                     return false;
 
                 }
