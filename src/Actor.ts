@@ -8,13 +8,22 @@ import { Case, Cases } from './Case';
 export type Address = string;
 
 /**
+ * ActorFn is a function that produces an actor instance.
+ */
+export interface ActorFn {
+
+    (s: System, ...args: any[]): Actor
+
+}
+
+/**
  * Conf represents the minimum amount of information required to create
  * a new actor instance.
  */
 export interface Conf {
 
     id: string;
-    create(s: System, ...args: any[]): Actor
+    create: ActorFn;
 
 }
 
@@ -171,9 +180,9 @@ export abstract class Local implements Actor {
     }
 
     stop() {
-    
-      this.__system = new FakeSystem(this.__system);
-    
+
+        this.__system = new FakeSystem(this.__system);
+
     }
 
 }
