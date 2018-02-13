@@ -70,6 +70,13 @@ export class PsuedoSystem implements System {
 
     }
 
+    putError(_: actor.Actor, e: Error): PsuedoSystem {
+
+        this.logging.error(e);
+        return this;
+
+    }
+
     log(): log.LogLogic {
 
         return this.logging;

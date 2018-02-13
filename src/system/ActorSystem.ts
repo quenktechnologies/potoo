@@ -189,6 +189,13 @@ export class ActorSystem implements System, actor.Actor {
 
     }
 
+    putError(_src: actor.Actor, e: Error): System {
+
+        this.logging.error(e);
+        return this;
+
+    }
+
     askMessage<M, R>(m: Envelope<M>): Promise<R> {
 
         return new Promise<R>((resolve, _) => {
@@ -205,10 +212,10 @@ export class ActorSystem implements System, actor.Actor {
         this
             .toAddress(parent)
             .chain(paddr => Maybe.fromBoolean((<any>addr).startsWith(paddr)))
-            .orElse(()=>{ 
+            .orElse(() => {
 
-              this.logging.error(new Error(`removeActor(): Actor "${parent}" is not a parent of "${addr}"!`));
-              return Maybe.fromAny(null);
+                this.logging.error(new Error(`removeActor(): Actor "${parent}" is not a parent of "${addr}"!`));
+                return Maybe.fromAny(null);
 
             })
             .map(() => {
