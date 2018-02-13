@@ -1,8 +1,3 @@
-import * as Actor from './Actor';
-import * as Events from './Events';
+import {ActorSystem, Configuration} from './system';
 
-export { Actor }
-export { Case, Cases } from './Case';
-export { DuplicateActorPathError } from './DuplicateActorPathError';
-export { Events }
-export { System, INFO, WARN, ERROR } from './System';
+export const system = (conf?:Configuration)=> ActorSystem.create(conf);
