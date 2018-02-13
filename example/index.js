@@ -10,8 +10,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var sys = require("potoo/system");
-var local = require("potoo/actor/local");
+var sys = require("../lib/system");
+var local = require("../lib/actor/local");
 var PACE = 5;
 var MAX_PACE = '90%';
 var MIN_PACE = '0%';

@@ -1,5 +1,5 @@
-import * as sys from 'potoo/system';
-import * as local from 'potoo/actor/local';
+import * as sys from '../lib/system';
+import * as local from '../lib/actor/local';
 
 const PACE = 5;
 const MAX_PACE = '90%';
