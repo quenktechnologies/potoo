@@ -30,7 +30,7 @@ export abstract class Local implements Actor {
     /**
      * tell a message to an actor address.
      */
-    tell<P>(ref: string, m: P): void {
+    tell<M>(ref: string, m: M): void {
 
         this.__system.putMessage(new Envelope(ref, this.self(), m));
 
@@ -57,10 +57,10 @@ export abstract class Local implements Actor {
     /**
      * exit instructs the system to kill of this actor.
      */
-    exit() : void { 
+    exit(): void {
 
-      this.kill(this.self());
-    
+        this.kill(this.self());
+
     }
 
     terminate(): void {
