@@ -1,9 +1,8 @@
 import 'mocha';
 import * as must from 'must/register';
-import * as potoo from 'potoo';
-import * as local from 'potoo/actor/local';
-import * as system from 'potoo/system';
-import * as log from 'potoo/system/log';
+import * as local from '../lib/actor/local';
+import * as system from '../lib/system';
+import * as log from '../lib/system/log';
 
 class A1 extends local.Dynamic { }
 

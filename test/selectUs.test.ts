@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import 'mocha';
 import * as must from 'must/register';
-import * as potoo from 'potoo';
-import * as local from 'potoo/actor/local';
-import * as system from 'potoo/system';
-import * as log from 'potoo/system/log';
+import * as local from '../lib/actor/local';
+import * as system from '../lib/system';
+import * as log from '../lib/system/log';
 
 class Selector extends local.Dynamic {
 
@@ -42,7 +41,7 @@ describe('select', function() {
     it('should be possible', function(done) {
 
         system
-        .ActorSystem
+            .ActorSystem
             .create({ log: { level: log.INFO, logger: console } })
             .spawn({ id: 'selector', create: s => new Selector(s, done) });
 

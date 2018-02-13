@@ -9,10 +9,9 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-exports.__esModule = true;
-require("./br");
-var potoo = require("potoo");
-var potoo_1 = require("potoo");
+Object.defineProperty(exports, "__esModule", { value: true });
+var sys = require("potoo/system");
+var local = require("potoo/actor/local");
 var PACE = 5;
 var MAX_PACE = '90%';
 var MIN_PACE = '0%';
@@ -20,12 +19,12 @@ var MIN_PACE = '0%';
 var left = function (handle) { return handle.style.left; };
 var per2num = function (v) { return Number(v.split('%')[0]); };
 var num2per = function (v) { return v + "%"; };
-var Player = (function (_super) {
+var Player = /** @class */ (function (_super) {
     __extends(Player, _super);
     function Player(s, id) {
         var _this = _super.call(this, s) || this;
         _this.id = id;
-        _this.receive = new potoo.Case(KeyboardEvent, function (e) {
+        _this.receive = new local.Case(KeyboardEvent, function (e) {
             if (e.keyCode === 37)
                 _this.getPlayer().style.left = _this.moveLeft(e.target);
             else if (e.keyCode === 39)
@@ -54,10 +53,10 @@ var Player = (function (_super) {
         window.onkeydown = function (e) { return _this.tell(_this.id, e); };
     };
     return Player;
-}(potoo_1.Actor.Static));
-/*
-potoo
-    .System
+}(local.Static));
+sys
+    .ActorSystem
     .create()
-    .spawn({ id: 'player', create: s => new Player(s, 'player') })
-   .spawn({ id: 'clone', create: s => new Player(s, 'clone') }); */
+    .spawn({ id: 'player', create: function (s) { return new Player(s, 'player'); } })
+    .spawn({ id: 'clone', create: function (s) { return new Player(s, 'clone'); } });
+//# sourceMappingURL=index.js.map

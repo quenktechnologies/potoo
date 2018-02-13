@@ -1,5 +1,5 @@
-import * as potoo from 'potoo';
-import { Actor } from 'potoo';
+import * as sys from 'potoo/system';
+import * as local from 'potoo/actor/local';
 
 const PACE = 5;
 const MAX_PACE = '90%';
@@ -12,9 +12,9 @@ const per2num = (v: string): number => Number(v.split('%')[0]);
 
 const num2per = (v: number): string => `${v}%`;
 
-class Player extends Actor.Static<KeyboardEvent>{
+class Player extends local.Static<KeyboardEvent>{
 
-    receive = new potoo.Case(KeyboardEvent, (e: KeyboardEvent) => {
+    receive = new local.Case(KeyboardEvent, (e: KeyboardEvent) => {
 
         if (e.keyCode === 37)
             this.getPlayer().style.left = this.moveLeft(<HTMLElement>e.target);
@@ -25,7 +25,7 @@ class Player extends Actor.Static<KeyboardEvent>{
 
     })
 
-    constructor(s: potoo.System, public id: string) { super(s); }
+    constructor(s: sys.System, public id: string) { super(s); }
 
     getEntity(id: string): HTMLElement {
 
@@ -60,8 +60,8 @@ class Player extends Actor.Static<KeyboardEvent>{
 
 }
 
-potoo
-    .System
+sys
+    .ActorSystem
     .create()
     .spawn({ id: 'player', create: s => new Player(s, 'player') })
     .spawn({ id: 'clone', create: s => new Player(s, 'clone') }); 

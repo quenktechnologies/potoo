@@ -1,1 +1,1 @@
-/// <reference path="../src/potoo.d.ts" />
+export {};
