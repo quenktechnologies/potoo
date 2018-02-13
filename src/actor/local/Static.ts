@@ -19,7 +19,7 @@ export abstract class Static<T> extends Local {
 
         this.__system.log().messageAccepted(e);
 
-        if (!r.some(c => c.match(e.value)))
+        if (!r.some(c => c.match(e.message)))
             this.__system.discard(e);
 
     }

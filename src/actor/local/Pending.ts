@@ -29,7 +29,7 @@ export class Pending<M> implements Actor {
                     this
                         .system
                         .putActor(addr, this.original))
-                .map(() => this.resolve(e.value))
+                .map(() => this.resolve(e.message))
                 .get();
 
         }

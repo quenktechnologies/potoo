@@ -96,7 +96,7 @@ export class LogLogic {
     messageDropped<M>(e: Envelope<M>) {
 
         if (this.policy.level >= WARN)
-            this.policy.logger.warn(new event.MessageDroppedEvent(e.to, e.from, e.value));
+            this.policy.logger.warn(new event.MessageDroppedEvent(e.to, e.from, e.message));
 
     }
 
@@ -106,7 +106,7 @@ export class LogLogic {
     messageSent<M>(e: Envelope<M>) {
 
         if (this.policy.level >= INFO)
-            this.policy.logger.info(new event.MessageSentEvent(e.to, e.from, e.value));
+            this.policy.logger.info(new event.MessageSentEvent(e.to, e.from, e.message));
 
     }
 
@@ -116,7 +116,7 @@ export class LogLogic {
     messageAccepted<M>(e: Envelope<M>) {
 
         if (this.policy.level >= INFO)
-            this.policy.logger.info(new event.MessageAcceptedEvent(e.to, e.from, e.value));
+            this.policy.logger.info(new event.MessageAcceptedEvent(e.to, e.from, e.message));
 
     }
 
@@ -126,7 +126,7 @@ export class LogLogic {
     messageReceived<M>(e: Envelope<M>) {
 
         if (this.policy.level >= INFO)
-            this.policy.logger.info(new event.MessageReceivedEvent(e.to, e.from, e.value));
+            this.policy.logger.info(new event.MessageReceivedEvent(e.to, e.from, e.message));
 
     }
 
@@ -136,7 +136,7 @@ export class LogLogic {
     messageRejected<M>(e: Envelope<M>) {
 
         if (this.policy.level >= WARN)
-            this.policy.logger.warn(new event.MessageRejectedEvent(e.to, e.from, e.value));
+            this.policy.logger.warn(new event.MessageRejectedEvent(e.to, e.from, e.message));
 
     }
 

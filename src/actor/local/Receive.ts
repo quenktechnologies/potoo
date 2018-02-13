@@ -10,7 +10,7 @@ export class Receive<T> {
 
     consume<M>(e: Envelope<M>): ConsumeResult {
 
-        if (this.cases.some(c => c.match(e.value))) {
+        if (this.cases.some(c => c.match(e.message))) {
 
             this.system.log().messageReceived(e);
 
