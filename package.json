@@ -9,22 +9,17 @@
   ],
   "scripts": {
     "clean": "rm -R ./lib/*",
-    "test": "./node_modules/.bin/mocha --opts mocha.opts test",
-    "examples": "npm run -s prep:test && npm run -s build:examples; ./node_modules/.bin/browserify --debug -o examples/examples.js examples/index.js",
     "build": "npm run -s clean; tsc --project src/tsconfig.json",
-    "build:example": "tsc example/index.ts"
+    "build:example": "./node_modules/.bin/tsc --project example && ./node_modules/.bin/browserify --debug example/index.js > example/example.js",
+    "test": "./node_modules/.bin/mocha --opts mocha.opts test"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.20",
     "@types/mocha": "^2.2.48",
     "@types/node": "^8.9.3",
-    "babel-cli": "^6.24.0",
-    "babel-preset-es2015": "^6.24.0",
     "browserify": "^14.5.0",
-    "fluture": "^5.0.0",
     "mocha": "^3.5.3",
     "must": "^0.13.4",
-    "source-map-support": "^0.4.18",
     "ts-node": "^3.0.2",
     "typescript": "^2.7.1"
   },
