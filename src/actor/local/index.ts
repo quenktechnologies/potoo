@@ -31,12 +31,10 @@ export interface Behaviour {
 }
 
 /**
- * Cases means either one Case or an array of them.
+ * Cases is a list of Case instances that will be applied to a message
+ * one by one until one matches.
  */
-export type Cases<T>
-    = Case<T>
-    | Case<T>[]
-    ;
+export type Cases<T> = Case<T>[];
 
 export type Matched<T>
     = string

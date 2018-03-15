@@ -1,5 +1,4 @@
 import 'mocha';
-import * as fs from 'fs';
 import * as must from 'must/register';
 import * as local from '../lib/actor/local';
 import * as system from '../lib/system';
@@ -16,15 +15,19 @@ const block = { sender: String, message: String }
 
 class ServerA extends local.Static<Block> {
 
-    receive = new local.Case(block, ({ sender, message }: Block) =>
-        this.tell(sender, `${message}->A`))
+    receive = [
+        new local.Case(block, ({ sender, message }: Block) =>
+            this.tell(sender, `${message}->A`))
+    ]
 
 }
 
 class ServerB extends local.Static<Block> {
 
-    receive = new local.Case(block, ({ sender, message }: Block) =>
-        setTimeout(() => this.tell(sender, `${message}->B`), 1000))
+    receive = [
+        new local.Case(block, ({ sender, message }: Block) =>
+            setTimeout(() => this.tell(sender, `${message}->B`), 1000))
+    ]
 
 }
 
@@ -43,6 +46,8 @@ class Client extends local.Dynamic {
             .then(message => this.ask('serverB', { sender: 'client', message }))
             .then(msg => must(msg).be('start->A->B'))
             .then(this.done);
+
+        return this;
 
     }
 

@@ -2,7 +2,6 @@ import 'mocha';
 import * as must from 'must/register';
 import * as local from '../lib/actor/local';
 import * as system from '../lib/system';
-import * as log from '../lib/system/log';
 
 class A1 extends local.Dynamic { }
 
@@ -10,12 +9,15 @@ class A2 extends local.Dynamic { }
 
 class A3 extends local.Static<String> {
 
-    receive = new local.Case(String, (m: string) => must(m).be('You said : \'Hello!\''));
+    receive = [
+        new local.Case(String, (m: string) => must(m).be('You said : \'Hello!\''))
+    ]
 
     run() {
 
         this.spawn({ id: 'a3a', create: s => new A3A(s) });
         this.tell('a3/a3a', 'Hello!');
+        return this;
 
     }
 
@@ -23,7 +25,9 @@ class A3 extends local.Static<String> {
 
 class A3A extends local.Static<String> {
 
-    receive = new local.Case(String, (m: string) => this.tell('a3', `You said : '${m}'`));
+    receive = [
+        new local.Case(String, (m: string) => this.tell('a3', `You said : '${m}'`))
+    ]
 
 }
 

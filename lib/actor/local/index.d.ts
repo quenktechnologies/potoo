@@ -21,9 +21,10 @@ export interface Behaviour {
     consume<M>(e: Envelope<M>): ConsumeResult;
 }
 /**
- * Cases means either one Case or an array of them.
+ * Cases is a list of Case instances that will be applied to a message
+ * one by one until one matches.
  */
-export declare type Cases<T> = Case<T> | Case<T>[];
+export declare type Cases<T> = Case<T>[];
 export declare type Matched<T> = string | number | boolean | T;
 export interface Handler<T> {
     (t: Matched<T>): void;
