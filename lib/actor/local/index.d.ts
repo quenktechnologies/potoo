@@ -6,7 +6,7 @@ export { Mutable } from './Mutable';
 export { Parent } from './Parent';
 export { Receive } from './Receive';
 export { Select } from './Select';
-export { Static } from './Static';
+export { Immutable } from './Immutable';
 export { Pending } from './Pending';
 /**
  * This module provides some primitives for local actors, that is

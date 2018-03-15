@@ -7,7 +7,7 @@ class A1 extends local.Mutable<void> { }
 
 class A2 extends local.Mutable<void> { }
 
-class A3 extends local.Static<String> {
+class A3 extends local.Immutable<String> {
 
     receive = [
         new local.Case(String, (m: string) => must(m).be('You said : \'Hello!\''))
@@ -23,7 +23,7 @@ class A3 extends local.Static<String> {
 
 }
 
-class A3A extends local.Static<String> {
+class A3A extends local.Immutable<String> {
 
     receive = [
         new local.Case(String, (m: string) => this.tell('a3', `You said : '${m}'`))

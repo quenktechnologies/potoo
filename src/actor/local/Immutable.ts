@@ -2,18 +2,18 @@ import { Envelope } from '../../system';
 import { Local, Cases } from '.';
 
 /**
- * Static actors do not change their behaviour. 
+ * Immutable actors do not change their behaviour. 
  *
  * Once the receive property is provided, all messages will be
  * filtered by it.
  */
-export abstract class Static<T> extends Local {
+export abstract class Immutable<T> extends Local {
 
     abstract receive: Cases<T>
 
-    run(): Static<T> { return this; }
+    run(): Immutable<T> { return this; }
 
-    accept<M>(e: Envelope<M | T>): Static<T> {
+    accept<M>(e: Envelope<M | T>): Immutable<T> {
 
         let r = Array.isArray(this.receive) ? this.receive : [this.receive];
 

@@ -13,7 +13,7 @@ export interface Block {
 
 const block = { sender: String, message: String }
 
-class ServerA extends local.Static<Block> {
+class ServerA extends local.Immutable<Block> {
 
     receive = [
         new local.Case(block, ({ sender, message }: Block) =>
@@ -22,7 +22,7 @@ class ServerA extends local.Static<Block> {
 
 }
 
-class ServerB extends local.Static<Block> {
+class ServerB extends local.Immutable<Block> {
 
     receive = [
         new local.Case(block, ({ sender, message }: Block) =>

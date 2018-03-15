@@ -17,7 +17,7 @@ class A1 extends local.Mutable<string> {
 
 }
 
-class A2 extends local.Static<String> {
+class A2 extends local.Immutable<String> {
 
     receive = [
         new local.Case('exit', (_: string) => this.exit()),
@@ -33,7 +33,7 @@ class A2 extends local.Static<String> {
 
 }
 
-class A2B extends local.Static<String> {
+class A2B extends local.Immutable<String> {
 
     receive = [
         new local.Case('exit', (_: string) => { })
