@@ -36,15 +36,11 @@ export interface Behaviour {
  */
 export type Cases<T> = Case<T>[];
 
-export type Matched<T>
-    = string
-    | number
-    | boolean
-    | T
-    ;
-
+/**
+ * Handler for a Case.
+ */
 export interface Handler<T> {
 
-    (t: Matched<T>): void
+    (t: T): void
 
 }

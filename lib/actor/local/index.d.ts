@@ -25,7 +25,9 @@ export interface Behaviour {
  * one by one until one matches.
  */
 export declare type Cases<T> = Case<T>[];
-export declare type Matched<T> = string | number | boolean | T;
+/**
+ * Handler for a Case.
+ */
 export interface Handler<T> {
-    (t: Matched<T>): void;
+    (t: T): void;
 }
