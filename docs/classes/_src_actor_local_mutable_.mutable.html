@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Dynamic | potoo</title>
+	<title>Mutable | potoo</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,13 +56,13 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_src_actor_local_dynamic_.html">&quot;src/actor/local/Dynamic&quot;</a>
+					<a href="../modules/_src_actor_local_mutable_.html">&quot;src/actor/local/Mutable&quot;</a>
 				</li>
 				<li>
-					<a href="_src_actor_local_dynamic_.dynamic.html">Dynamic</a>
+					<a href="_src_actor_local_mutable_.mutable.html">Mutable</a>
 				</li>
 			</ul>
-			<h1>Class Dynamic&lt;A&gt;</h1>
+			<h1>Class Mutable&lt;A&gt;</h1>
 		</div>
 	</div>
 </header>
@@ -72,8 +72,10 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Dynamic actors buffer messages allowing users to process messages when ready.</p>
+						<p>Mutable can change their behaviour during message processing.</p>
 					</div>
+					<p>This is the Actor to extend when you want a mailbox and selective
+					receives.</p>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-type-parameters">
@@ -81,6 +83,11 @@
 				<ul class="tsd-type-parameters">
 					<li>
 						<h4>A</h4>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>The type of messages expected in the mailbox.</p>
+							</div>
+						</div>
 					</li>
 				</ul>
 			</section>
@@ -91,7 +98,7 @@
 						<a href="_src_actor_local_local_.local.html" class="tsd-signature-type">Local</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">Dynamic</span>
+								<span class="target">Mutable</span>
 							</li>
 						</ul>
 					</li>
@@ -110,32 +117,32 @@
 						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_dynamic_.dynamic.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_mutable_.mutable.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_src_actor_local_dynamic_.dynamic.html#behaviour" class="tsd-kind-icon">behaviour</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_src_actor_local_dynamic_.dynamic.html#mailbox" class="tsd-kind-icon">mailbox</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_dynamic_.dynamic.html#system" class="tsd-kind-icon">system</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_src_actor_local_mutable_.mutable.html#behaviour" class="tsd-kind-icon">behaviour</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_src_actor_local_mutable_.mutable.html#mailbox" class="tsd-kind-icon">mailbox</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_mutable_.mutable.html#system" class="tsd-kind-icon">system</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-overwrite"><a href="_src_actor_local_dynamic_.dynamic.html#accept" class="tsd-kind-icon">accept</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited"><a href="_src_actor_local_dynamic_.dynamic.html#ask" class="tsd-kind-icon">ask</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_src_actor_local_dynamic_.dynamic.html#consume" class="tsd-kind-icon">consume</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_dynamic_.dynamic.html#exit" class="tsd-kind-icon">exit</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_dynamic_.dynamic.html#kill" class="tsd-kind-icon">kill</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="_src_actor_local_dynamic_.dynamic.html#receive" class="tsd-kind-icon">receive</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_src_actor_local_dynamic_.dynamic.html#run" class="tsd-kind-icon">run</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="_src_actor_local_dynamic_.dynamic.html#select" class="tsd-kind-icon">select</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_dynamic_.dynamic.html#self" class="tsd-kind-icon">self</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_dynamic_.dynamic.html#spawn" class="tsd-kind-icon">spawn</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited"><a href="_src_actor_local_dynamic_.dynamic.html#tell" class="tsd-kind-icon">tell</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_dynamic_.dynamic.html#terminate" class="tsd-kind-icon">terminate</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-overwrite"><a href="_src_actor_local_mutable_.mutable.html#accept" class="tsd-kind-icon">accept</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited"><a href="_src_actor_local_mutable_.mutable.html#ask" class="tsd-kind-icon">ask</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_src_actor_local_mutable_.mutable.html#consume" class="tsd-kind-icon">consume</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_mutable_.mutable.html#exit" class="tsd-kind-icon">exit</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_mutable_.mutable.html#kill" class="tsd-kind-icon">kill</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="_src_actor_local_mutable_.mutable.html#receive" class="tsd-kind-icon">receive</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_src_actor_local_mutable_.mutable.html#run" class="tsd-kind-icon">run</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="_src_actor_local_mutable_.mutable.html#select" class="tsd-kind-icon">select</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_mutable_.mutable.html#self" class="tsd-kind-icon">self</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_mutable_.mutable.html#spawn" class="tsd-kind-icon">spawn</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited"><a href="_src_actor_local_mutable_.mutable.html#tell" class="tsd-kind-icon">tell</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_src_actor_local_mutable_.mutable.html#terminate" class="tsd-kind-icon">terminate</a></li>
 							</ul>
 						</section>
 					</div>
@@ -147,14 +154,14 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Dynamic<span class="tsd-signature-symbol">(</span>system<span class="tsd-signature-symbol">: </span><a href="../interfaces/_src_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_actor_local_dynamic_.dynamic.html" class="tsd-signature-type">Dynamic</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Mutable<span class="tsd-signature-symbol">(</span>system<span class="tsd-signature-symbol">: </span><a href="../interfaces/_src_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_actor_local_mutable_.mutable.html" class="tsd-signature-type">Mutable</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Local.ts#L17">src/actor/local/Local.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Local.ts#L17">src/actor/local/Local.ts:17</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -163,7 +170,7 @@
 									<h5>system: <a href="../interfaces/_src_system_index_.system.html" class="tsd-signature-type">System</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_src_actor_local_dynamic_.dynamic.html" class="tsd-signature-type">Dynamic</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_src_actor_local_mutable_.mutable.html" class="tsd-signature-type">Mutable</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -176,7 +183,7 @@
 					<div class="tsd-signature tsd-kind-icon">behaviour<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_src_actor_local_index_.behaviour.html" class="tsd-signature-type">Behaviour</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Dynamic.ts#L12">src/actor/local/Dynamic.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Mutable.ts#L17">src/actor/local/Mutable.ts:17</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -186,7 +193,7 @@
 					<div class="tsd-signature tsd-kind-icon">mailbox<span class="tsd-signature-symbol">:</span> <a href="_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Dynamic.ts#L10">src/actor/local/Dynamic.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Mutable.ts#L15">src/actor/local/Mutable.ts:15</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -197,7 +204,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#system">system</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Local.ts#L19">src/actor/local/Local.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Local.ts#L19">src/actor/local/Local.ts:19</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -208,7 +215,7 @@
 					<a name="accept" class="tsd-anchor"></a>
 					<h3>accept</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">accept&lt;M&gt;<span class="tsd-signature-symbol">(</span>e<span class="tsd-signature-symbol">: </span><a href="_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">M</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_actor_local_dynamic_.dynamic.html" class="tsd-signature-type">Dynamic</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">accept&lt;M&gt;<span class="tsd-signature-symbol">(</span>e<span class="tsd-signature-symbol">: </span><a href="_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">M</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_actor_local_mutable_.mutable.html" class="tsd-signature-type">Mutable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
@@ -216,7 +223,7 @@
 								<p>Implementation of <a href="../interfaces/_src_actor_index_.actor.html">Actor</a>.<a href="../interfaces/_src_actor_index_.actor.html#accept">accept</a></p>
 								<p>Overrides <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#accept">accept</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Dynamic.ts#L53">src/actor/local/Dynamic.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Mutable.ts#L58">src/actor/local/Mutable.ts:58</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -231,7 +238,7 @@
 									<h5>e: <a href="_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">M</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_src_actor_local_dynamic_.dynamic.html" class="tsd-signature-type">Dynamic</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_src_actor_local_mutable_.mutable.html" class="tsd-signature-type">Mutable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -246,7 +253,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#ask">ask</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Local.ts#L43">src/actor/local/Local.ts:43</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Local.ts#L43">src/actor/local/Local.ts:43</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -286,7 +293,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Dynamic.ts#L17">src/actor/local/Dynamic.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Mutable.ts#L22">src/actor/local/Mutable.ts:22</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -306,7 +313,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#exit">exit</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Local.ts#L62">src/actor/local/Local.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Local.ts#L62">src/actor/local/Local.ts:62</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -329,7 +336,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#kill">kill</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Local.ts#L52">src/actor/local/Local.ts:52</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Local.ts#L52">src/actor/local/Local.ts:52</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -351,13 +358,13 @@
 					<a name="receive" class="tsd-anchor"></a>
 					<h3>receive</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">receive&lt;T&gt;<span class="tsd-signature-symbol">(</span>c<span class="tsd-signature-symbol">: </span><a href="../modules/_src_actor_local_index_.html#cases" class="tsd-signature-type">Cases</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_actor_local_dynamic_.dynamic.html" class="tsd-signature-type">Dynamic</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">receive&lt;T&gt;<span class="tsd-signature-symbol">(</span>c<span class="tsd-signature-symbol">: </span><a href="../modules/_src_actor_local_index_.html#cases" class="tsd-signature-type">Cases</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_actor_local_mutable_.mutable.html" class="tsd-signature-type">Mutable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Dynamic.ts#L42">src/actor/local/Dynamic.ts:42</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Mutable.ts#L47">src/actor/local/Mutable.ts:47</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -372,7 +379,7 @@
 									<h5>c: <a href="../modules/_src_actor_local_index_.html#cases" class="tsd-signature-type">Cases</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_src_actor_local_dynamic_.dynamic.html" class="tsd-signature-type">Dynamic</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_src_actor_local_mutable_.mutable.html" class="tsd-signature-type">Mutable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -387,7 +394,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#run">run</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Dynamic.ts#L62">src/actor/local/Dynamic.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Mutable.ts#L67">src/actor/local/Mutable.ts:67</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -398,13 +405,13 @@
 					<a name="select" class="tsd-anchor"></a>
 					<h3>select</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">select&lt;T&gt;<span class="tsd-signature-symbol">(</span>c<span class="tsd-signature-symbol">: </span><a href="../modules/_src_actor_local_index_.html#cases" class="tsd-signature-type">Cases</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_actor_local_dynamic_.dynamic.html" class="tsd-signature-type">Dynamic</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">select&lt;T&gt;<span class="tsd-signature-symbol">(</span>c<span class="tsd-signature-symbol">: </span><a href="../modules/_src_actor_local_index_.html#cases" class="tsd-signature-type">Cases</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_actor_local_mutable_.mutable.html" class="tsd-signature-type">Mutable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Dynamic.ts#L31">src/actor/local/Dynamic.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Mutable.ts#L36">src/actor/local/Mutable.ts:36</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -419,7 +426,7 @@
 									<h5>c: <a href="../modules/_src_actor_local_index_.html#cases" class="tsd-signature-type">Cases</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_src_actor_local_dynamic_.dynamic.html" class="tsd-signature-type">Dynamic</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="_src_actor_local_mutable_.mutable.html" class="tsd-signature-type">Mutable</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">A</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -434,7 +441,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#self">self</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Local.ts#L17">src/actor/local/Local.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Local.ts#L17">src/actor/local/Local.ts:17</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -457,7 +464,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#spawn">spawn</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Local.ts#L24">src/actor/local/Local.ts:24</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Local.ts#L24">src/actor/local/Local.ts:24</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -486,7 +493,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#tell">tell</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Local.ts#L33">src/actor/local/Local.ts:33</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Local.ts#L33">src/actor/local/Local.ts:33</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -525,7 +532,7 @@
 								<p>Implementation of <a href="../interfaces/_src_actor_index_.actor.html">Actor</a>.<a href="../interfaces/_src_actor_index_.actor.html#terminate">terminate</a></p>
 								<p>Inherited from <a href="_src_actor_local_local_.local.html">Local</a>.<a href="_src_actor_local_local_.local.html#terminate">terminate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/75a8313/src/actor/local/Local.ts#L68">src/actor/local/Local.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/f80707a/src/actor/local/Local.ts#L68">src/actor/local/Local.ts:68</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -549,11 +556,11 @@
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_src_actor_local_case_.html">"src/actor/local/<wbr>Case"</a>
 					</li>
-					<li class="current tsd-kind-external-module">
-						<a href="../modules/_src_actor_local_dynamic_.html">"src/actor/local/<wbr>Dynamic"</a>
-					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_src_actor_local_local_.html">"src/actor/local/<wbr>Local"</a>
+					</li>
+					<li class="current tsd-kind-external-module">
+						<a href="../modules/_src_actor_local_mutable_.html">"src/actor/local/<wbr>Mutable"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_src_actor_local_parent_.html">"src/actor/local/<wbr>Parent"</a>
@@ -613,55 +620,55 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_src_actor_local_dynamic_.dynamic.html" class="tsd-kind-icon">Dynamic</a>
+						<a href="_src_actor_local_mutable_.mutable.html" class="tsd-kind-icon">Mutable</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
-								<a href="_src_actor_local_dynamic_.dynamic.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="_src_actor_local_mutable_.mutable.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="_src_actor_local_dynamic_.dynamic.html#behaviour" class="tsd-kind-icon">behaviour</a>
+								<a href="_src_actor_local_mutable_.mutable.html#behaviour" class="tsd-kind-icon">behaviour</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="_src_actor_local_dynamic_.dynamic.html#mailbox" class="tsd-kind-icon">mailbox</a>
+								<a href="_src_actor_local_mutable_.mutable.html#mailbox" class="tsd-kind-icon">mailbox</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="_src_actor_local_dynamic_.dynamic.html#system" class="tsd-kind-icon">system</a>
+								<a href="_src_actor_local_mutable_.mutable.html#system" class="tsd-kind-icon">system</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-overwrite">
-								<a href="_src_actor_local_dynamic_.dynamic.html#accept" class="tsd-kind-icon">accept</a>
+								<a href="_src_actor_local_mutable_.mutable.html#accept" class="tsd-kind-icon">accept</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited">
-								<a href="_src_actor_local_dynamic_.dynamic.html#ask" class="tsd-kind-icon">ask</a>
+								<a href="_src_actor_local_mutable_.mutable.html#ask" class="tsd-kind-icon">ask</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
-								<a href="_src_actor_local_dynamic_.dynamic.html#consume" class="tsd-kind-icon">consume</a>
+								<a href="_src_actor_local_mutable_.mutable.html#consume" class="tsd-kind-icon">consume</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="_src_actor_local_dynamic_.dynamic.html#exit" class="tsd-kind-icon">exit</a>
+								<a href="_src_actor_local_mutable_.mutable.html#exit" class="tsd-kind-icon">exit</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="_src_actor_local_dynamic_.dynamic.html#kill" class="tsd-kind-icon">kill</a>
+								<a href="_src_actor_local_mutable_.mutable.html#kill" class="tsd-kind-icon">kill</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-								<a href="_src_actor_local_dynamic_.dynamic.html#receive" class="tsd-kind-icon">receive</a>
+								<a href="_src_actor_local_mutable_.mutable.html#receive" class="tsd-kind-icon">receive</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-								<a href="_src_actor_local_dynamic_.dynamic.html#run" class="tsd-kind-icon">run</a>
+								<a href="_src_actor_local_mutable_.mutable.html#run" class="tsd-kind-icon">run</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-								<a href="_src_actor_local_dynamic_.dynamic.html#select" class="tsd-kind-icon">select</a>
+								<a href="_src_actor_local_mutable_.mutable.html#select" class="tsd-kind-icon">select</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="_src_actor_local_dynamic_.dynamic.html#self" class="tsd-kind-icon">self</a>
+								<a href="_src_actor_local_mutable_.mutable.html#self" class="tsd-kind-icon">self</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="_src_actor_local_dynamic_.dynamic.html#spawn" class="tsd-kind-icon">spawn</a>
+								<a href="_src_actor_local_mutable_.mutable.html#spawn" class="tsd-kind-icon">spawn</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited">
-								<a href="_src_actor_local_dynamic_.dynamic.html#tell" class="tsd-kind-icon">tell</a>
+								<a href="_src_actor_local_mutable_.mutable.html#tell" class="tsd-kind-icon">tell</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="_src_actor_local_dynamic_.dynamic.html#terminate" class="tsd-kind-icon">terminate</a>
+								<a href="_src_actor_local_mutable_.mutable.html#terminate" class="tsd-kind-icon">terminate</a>
 							</li>
 						</ul>
 					</li>

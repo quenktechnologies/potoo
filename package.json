@@ -11,7 +11,7 @@
     "clean": "rm -R ./lib/*",
     "build": "npm run -s clean; tsc --project src/tsconfig.json",
     "build:example": "./node_modules/.bin/tsc --project example && ./node_modules/.bin/browserify --debug example/index.js > example/example.js",
-    "docs": "./node_modules/.bin/typedoc --out docs --tsconfig src/tsconfig.json",
+    "docs": "./node_modules/.bin/typedoc --out docs --tsconfig src/tsconfig.json && touch docs/.nojekyll",
     "test": "./node_modules/.bin/mocha --opts mocha.opts test"
   },
   "devDependencies": {
