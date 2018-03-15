@@ -14,16 +14,16 @@ export abstract class Local implements Actor {
     /**
      * self retrieves the path of this actor from the system.
      */
-    self = () => this.__system.toAddress(this).get();
+    self = () => this.system.toAddress(this).get();
 
-    constructor(public __system: System) { }
+    constructor(public system: System) { }
 
     /**
      * spawn a new child actor.
      */
     spawn(t: Template): Address {
 
-        return this.__system.putChild(this, t);
+        return this.system.putChild(this, t);
 
     }
 
@@ -32,7 +32,7 @@ export abstract class Local implements Actor {
      */
     tell<M>(ref: string, m: M): Local {
 
-        this.__system.putMessage(new Envelope(ref, this.self(), m));
+        this.system.putMessage(new Envelope(ref, this.self(), m));
         return this;
 
     }
@@ -42,7 +42,7 @@ export abstract class Local implements Actor {
      */
     ask<M, R>(ref: string, m: M): Promise<R> {
 
-        return this.__system.askMessage<M, R>(new Envelope(ref, this.self(), m));
+        return this.system.askMessage<M, R>(new Envelope(ref, this.self(), m));
 
     }
 
@@ -51,7 +51,7 @@ export abstract class Local implements Actor {
      */
     kill(addr: Address): Local {
 
-        this.__system.removeActor(this, addr);
+        this.system.removeActor(this, addr);
         return this;
 
     }
@@ -67,7 +67,7 @@ export abstract class Local implements Actor {
 
     terminate(): void {
 
-        this.__system = new PsuedoSystem(this.__system.log());
+        this.system = new PsuedoSystem(this.system.log());
 
     }
 

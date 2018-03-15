@@ -7,21 +7,24 @@ import { Local, Behaviour, Select, Receive } from '.';
  */
 export abstract class Dynamic extends Local {
 
-    __mailbox: Envelope<any>[] = [];
+    mailbox: Envelope<any>[] = [];
 
-    __behaviour: Behaviour;
+    behaviour: Behaviour;
 
-    __consume(): void {
+    /**
+     * @private
+     */
+    consume(): void {
 
-        if (this.__mailbox.length === 0) return;
+        if (this.mailbox.length === 0) return;
 
-        if (!this.__behaviour) return;
+        if (!this.behaviour) return;
 
-        let m = this.__mailbox.shift();
+        let m = this.mailbox.shift();
 
-        this.__behaviour = this.__behaviour.consume(m);
+        this.behaviour = this.behaviour.consume(m);
 
-        this.__consume();
+        this.consume();
 
     }
 
@@ -29,30 +32,30 @@ export abstract class Dynamic extends Local {
 
         let cases = Array.isArray(c) ? c : [c];
 
-        this.__behaviour = new Select(cases, this.__system);
-        this.__system.log().receiveStarted(this.__system.toAddress(this).get());
-        this.__consume();
-      return this;
+        this.behaviour = new Select(cases, this.system);
+        this.system.log().receiveStarted(this.system.toAddress(this).get());
+        this.consume();
+        return this;
 
     }
 
-    receive<T>(c: Cases<T>) : Dynamic {
+    receive<T>(c: Cases<T>): Dynamic {
 
         let cases = Array.isArray(c) ? c : [c];
 
-        this.__behaviour = new Receive(cases, this.__system);
-        this.__system.log().receiveStarted(this.__system.toAddress(this).get());
-        this.__consume();
-      return this;
+        this.behaviour = new Receive(cases, this.system);
+        this.system.log().receiveStarted(this.system.toAddress(this).get());
+        this.consume();
+        return this;
 
     }
 
     accept<M>(e: Envelope<M>): Dynamic {
 
-        this.__system.log().messageAccepted(e);
-        this.__mailbox.push(e);
-        this.__consume();
-      return this;
+        this.system.log().messageAccepted(e);
+        this.mailbox.push(e);
+        this.consume();
+        return this;
 
     }
 

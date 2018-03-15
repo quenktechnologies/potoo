@@ -5,9 +5,12 @@ import { Local, Behaviour } from '.';
  * Dynamic actors buffer messages allowing users to process messages when ready.
  */
 export declare abstract class Dynamic extends Local {
-    __mailbox: Envelope<any>[];
-    __behaviour: Behaviour;
-    __consume(): void;
+    mailbox: Envelope<any>[];
+    behaviour: Behaviour;
+    /**
+     * @private
+     */
+    consume(): void;
     select<T>(c: Cases<T>): Dynamic;
     receive<T>(c: Cases<T>): Dynamic;
     accept<M>(e: Envelope<M>): Dynamic;

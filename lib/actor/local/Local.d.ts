@@ -5,14 +5,14 @@ import { Actor, Template, Address } from '..';
  * Local are actors that directly exists in the current runtime.
  */
 export declare abstract class Local implements Actor {
-    __system: System;
+    system: System;
     abstract run(path: Address): Local;
     abstract accept<M>(m: Envelope<M>): Local;
     /**
      * self retrieves the path of this actor from the system.
      */
     self: () => string;
-    constructor(__system: System);
+    constructor(system: System);
     /**
      * spawn a new child actor.
      */
