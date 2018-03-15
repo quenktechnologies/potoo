@@ -254,16 +254,17 @@ export class ActorSystem implements System, actor.Actor {
      *
      * It will be discarded.
      */
-    accept<M>(e: Envelope<M>) {
+    accept<M>(e: Envelope<M>) : ActorSystem {
 
         this.discard(e);
+      return this;
 
     }
 
     /**
      * run does nothing.
      */
-    run(): void { }
+    run(): ActorSystem { return this; }
 
     terminate(): void { }
 

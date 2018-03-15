@@ -8,6 +8,6 @@ import { Local, Cases } from '.';
  */
 export declare abstract class Static<T> extends Local {
     abstract receive: Cases<T>;
-    run(): void;
-    accept<M>(e: Envelope<M>): void;
+    run(): Static<T>;
+    accept<M>(e: Envelope<M>): Static<T>;
 }

@@ -11,9 +11,9 @@ export abstract class Static<T> extends Local {
 
     abstract receive: Cases<T>
 
-    run() { }
+    run() : Static<T>  { return this; }
 
-    accept<M>(e: Envelope<M>): void {
+    accept<M>(e: Envelope<M>): Static<T>  {
 
         let r = Array.isArray(this.receive) ? this.receive : [this.receive];
 
@@ -21,6 +21,8 @@ export abstract class Static<T> extends Local {
 
         if (!r.some(c => c.match(e.message)))
             this.__system.discard(e);
+
+      return this;
 
     }
 

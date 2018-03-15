@@ -14,7 +14,7 @@ export class Pending<M> implements Actor {
         public resolve: (m: M) => void,
         public system: System) { }
 
-    accept(e: Envelope<any>) {
+    accept(e: Envelope<any>): Pending<M> {
 
         if (e.from !== this.askee) {
 
@@ -34,9 +34,11 @@ export class Pending<M> implements Actor {
 
         }
 
+        return this;
+
     }
 
-    run() { }
+    run(): Pending<M> { return this; }
 
     terminate() { }
 

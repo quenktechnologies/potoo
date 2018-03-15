@@ -7,9 +7,9 @@ import { Actor, Template, Address } from '..';
  */
 export abstract class Local implements Actor {
 
-    abstract run(): void;
+    abstract run(path: Address): Local;
 
-    abstract accept<M>(m: Envelope<M>): void;
+    abstract accept<M>(m: Envelope<M>): Local;
 
     /**
      * self retrieves the path of this actor from the system.
@@ -30,9 +30,10 @@ export abstract class Local implements Actor {
     /**
      * tell a message to an actor address.
      */
-    tell<M>(ref: string, m: M): void {
+    tell<M>(ref: string, m: M): Local {
 
         this.__system.putMessage(new Envelope(ref, this.self(), m));
+        return this;
 
     }
 
@@ -48,9 +49,10 @@ export abstract class Local implements Actor {
     /**
      * kill another actor.
      */
-    kill(addr: Address): void {
+    kill(addr: Address): Local {
 
         this.__system.removeActor(this, addr);
+        return this;
 
     }
 

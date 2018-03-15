@@ -42,11 +42,11 @@ export interface Actor {
     /**
      * accept a Message destined for this actor.
      */
-    accept<M>(e: Envelope<M>): void;
+    accept<M>(e: Envelope<M>): Actor;
     /**
      * run this actor.
      */
-    run(path: string): void;
+    run(path: string): Actor;
     /**
      * terminate is called by the system when the actor is removed.
      */

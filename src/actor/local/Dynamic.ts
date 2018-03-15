@@ -25,34 +25,37 @@ export abstract class Dynamic extends Local {
 
     }
 
-    select<T>(c: Cases<T>): void {
+    select<T>(c: Cases<T>): Dynamic {
 
         let cases = Array.isArray(c) ? c : [c];
 
         this.__behaviour = new Select(cases, this.__system);
         this.__system.log().receiveStarted(this.__system.toAddress(this).get());
         this.__consume();
+      return this;
 
     }
 
-    receive<T>(c: Cases<T>) {
+    receive<T>(c: Cases<T>) : Dynamic {
 
         let cases = Array.isArray(c) ? c : [c];
 
         this.__behaviour = new Receive(cases, this.__system);
         this.__system.log().receiveStarted(this.__system.toAddress(this).get());
         this.__consume();
+      return this;
 
     }
 
-    accept<M>(e: Envelope<M>): void {
+    accept<M>(e: Envelope<M>): Dynamic {
 
         this.__system.log().messageAccepted(e);
         this.__mailbox.push(e);
         this.__consume();
+      return this;
 
     }
 
-    run() { }
+    run() { return this; }
 
 }

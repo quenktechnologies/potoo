@@ -63,6 +63,12 @@ export interface System {
      */
     putMessage<M>(m: Envelope<M>): System;
     /**
+     * putError puts an error into the system's error handling workflow.
+     * @param {actor.Actor} src - Actor causing the error.
+     * @param {Error} err
+     */
+    putError(src: actor.Actor, err: Error): System;
+    /**
      * askMessage allows an actor to ignore incomming messages unless
      * they have been sent by a specific actor.
      */

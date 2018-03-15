@@ -57,6 +57,7 @@ export declare class ActorSystem implements System, actor.Actor {
     discard<M>(m: Envelope<M>): ActorSystem;
     putActor(path: string, actor: actor.Actor): ActorSystem;
     putMessage<M>(e: Envelope<M>): ActorSystem;
+    putError(_src: actor.Actor, e: Error): System;
     askMessage<M, R>(m: Envelope<M>): Promise<R>;
     removeActor(parent: actor.Actor, addr: actor.Address): ActorSystem;
     log(): log.LogLogic;
@@ -65,10 +66,10 @@ export declare class ActorSystem implements System, actor.Actor {
      *
      * It will be discarded.
      */
-    accept<M>(e: Envelope<M>): void;
+    accept<M>(e: Envelope<M>): ActorSystem;
     /**
      * run does nothing.
      */
-    run(): void;
+    run(): ActorSystem;
     terminate(): void;
 }

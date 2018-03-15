@@ -8,8 +8,8 @@ export declare abstract class Dynamic extends Local {
     __mailbox: Envelope<any>[];
     __behaviour: Behaviour;
     __consume(): void;
-    select<T>(c: Cases<T>): void;
-    receive<T>(c: Cases<T>): void;
-    accept<M>(e: Envelope<M>): void;
-    run(): void;
+    select<T>(c: Cases<T>): Dynamic;
+    receive<T>(c: Cases<T>): Dynamic;
+    accept<M>(e: Envelope<M>): Dynamic;
+    run(): this;
 }

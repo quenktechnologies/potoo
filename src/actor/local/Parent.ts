@@ -6,12 +6,13 @@ import { Local } from '.';
  */
 export class Parent extends Local {
 
-    accept<M>(e: Envelope<M>) {
+    accept<M>(e: Envelope<M>) : Parent {
 
         this.__system.discard(e);
+        return this;
 
     }
 
-    run() { }
+    run() { return this; }
 
 }

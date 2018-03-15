@@ -6,8 +6,8 @@ import { Actor, Template, Address } from '..';
  */
 export declare abstract class Local implements Actor {
     __system: System;
-    abstract run(): void;
-    abstract accept<M>(m: Envelope<M>): void;
+    abstract run(path: Address): Local;
+    abstract accept<M>(m: Envelope<M>): Local;
     /**
      * self retrieves the path of this actor from the system.
      */
@@ -20,7 +20,7 @@ export declare abstract class Local implements Actor {
     /**
      * tell a message to an actor address.
      */
-    tell<P>(ref: string, m: P): void;
+    tell<M>(ref: string, m: M): Local;
     /**
      * ask for a reply from a message sent to an address.
      */
@@ -28,7 +28,7 @@ export declare abstract class Local implements Actor {
     /**
      * kill another actor.
      */
-    kill(addr: Address): void;
+    kill(addr: Address): Local;
     /**
      * exit instructs the system to kill of this actor.
      */

@@ -27,5 +27,6 @@ export declare class PsuedoSystem implements System {
      */
     discard<M>(e: Envelope<M>): PsuedoSystem;
     putActor(_path: string, _actor: actor.Actor): PsuedoSystem;
+    putError(_: actor.Actor, e: Error): PsuedoSystem;
     log(): log.LogLogic;
 }
