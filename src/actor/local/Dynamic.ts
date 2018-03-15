@@ -5,9 +5,9 @@ import { Local, Behaviour, Select, Receive } from '.';
 /**
  * Dynamic actors buffer messages allowing users to process messages when ready.
  */
-export abstract class Dynamic extends Local {
+export abstract class Dynamic<A> extends Local {
 
-    mailbox: Envelope<any>[] = [];
+    mailbox: Envelope<A>[] = [];
 
     behaviour: Behaviour;
 
@@ -28,7 +28,7 @@ export abstract class Dynamic extends Local {
 
     }
 
-    select<T>(c: Cases<T>): Dynamic {
+    select<T>(c: Cases<T>): Dynamic<A> {
 
         let cases = Array.isArray(c) ? c : [c];
 
@@ -39,7 +39,7 @@ export abstract class Dynamic extends Local {
 
     }
 
-    receive<T>(c: Cases<T>): Dynamic {
+    receive<T>(c: Cases<T>): Dynamic<A> {
 
         let cases = Array.isArray(c) ? c : [c];
 
@@ -50,10 +50,10 @@ export abstract class Dynamic extends Local {
 
     }
 
-    accept<M>(e: Envelope<M>): Dynamic {
+    accept<M>(e: Envelope<A | M>): Dynamic<A> {
 
         this.system.log().messageAccepted(e);
-        this.mailbox.push(e);
+        this.mailbox.push(<Envelope<A>>e);
         this.consume();
         return this;
 
