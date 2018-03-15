@@ -1,5 +1,5 @@
 import { Envelope } from '../../system';
-import { Local, Case } from '.';
+import { Local, Cases } from '.';
 
 /**
  * Immutable actors do not change their behaviour. 
@@ -9,7 +9,7 @@ import { Local, Case } from '.';
  */
 export abstract class Immutable<T> extends Local {
 
-    abstract receive: Case<T>[]
+    abstract receive: Cases<T>
 
     run(): Immutable<T> { return this; }
 
