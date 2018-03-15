@@ -27,7 +27,7 @@ export class PsuedoSystem implements System {
 
     }
 
-    askMessage<M, R>(e: Envelope<M>): Promise<R> {
+    askMessage<M, R>(e: Envelope<M>, _ = Infinity): Promise<R> {
 
         this.logging.messageRejected(e)
         return Promise.resolve(undefined);

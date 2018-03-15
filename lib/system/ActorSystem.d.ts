@@ -58,7 +58,7 @@ export declare class ActorSystem implements System, actor.Actor {
     putActor(path: string, actor: actor.Actor): ActorSystem;
     putMessage<M>(e: Envelope<M>): ActorSystem;
     putError(_src: actor.Actor, e: Error): System;
-    askMessage<M, R>(m: Envelope<M>): Promise<R>;
+    askMessage<M, R>(m: Envelope<M>, time?: number): Promise<R>;
     removeActor(parent: actor.Actor, addr: actor.Address): ActorSystem;
     log(): log.LogLogic;
     /**

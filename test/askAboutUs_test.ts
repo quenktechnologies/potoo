@@ -26,7 +26,8 @@ class ServerB extends local.Immutable<Block> {
 
     receive = [
         new local.Case(block, ({ sender, message }: Block) =>
-            setTimeout(() => this.tell(sender, `${message}->B`), 1000))
+            setTimeout(() => this.tell(sender, `${message}->B`), 1000)),
+
     ]
 
 }
@@ -45,6 +46,10 @@ class Client extends local.Mutable<string> {
             .ask('serverA', { sender: 'client', message: 'start' })
             .then(message => this.ask('serverB', { sender: 'client', message }))
             .then(msg => must(msg).be('start->A->B'))
+            .then(() => this
+                .ask('serverB', { sender: 'client', message: 'meh' }, 100)
+                .then(() => { throw new Error('Did not timeout!'); })
+                .catch(e => { must(e.message).not.eql('Did not timeout!'); }))
             .then(this.done);
 
         return this;

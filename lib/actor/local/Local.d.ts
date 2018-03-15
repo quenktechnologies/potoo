@@ -24,7 +24,7 @@ export declare abstract class Local implements Actor {
     /**
      * ask for a reply from a message sent to an address.
      */
-    ask<M, R>(ref: string, m: M): Promise<R>;
+    ask<M, R>(ref: string, m: M, time?: number): Promise<R>;
     /**
      * kill another actor.
      */

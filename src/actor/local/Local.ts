@@ -40,9 +40,9 @@ export abstract class Local implements Actor {
     /**
      * ask for a reply from a message sent to an address.
      */
-    ask<M, R>(ref: string, m: M): Promise<R> {
+    ask<M, R>(ref: string, m: M, time = Infinity): Promise<R> {
 
-        return this.system.askMessage<M, R>(new Envelope(ref, this.self(), m));
+        return this.system.askMessage<M, R>(new Envelope(ref, this.self(), m), time);
 
     }
 

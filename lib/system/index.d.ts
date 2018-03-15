@@ -72,7 +72,7 @@ export interface System {
      * askMessage allows an actor to ignore incomming messages unless
      * they have been sent by a specific actor.
      */
-    askMessage<M, R>(m: Envelope<M>): Promise<R>;
+    askMessage<M, R>(m: Envelope<M>, time?: number): Promise<R>;
     /**
      * removeActor from the system.
      */

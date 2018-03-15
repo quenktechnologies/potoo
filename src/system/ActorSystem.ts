@@ -196,14 +196,18 @@ export class ActorSystem implements System, actor.Actor {
 
     }
 
-    askMessage<M, R>(m: Envelope<M>): Promise<R> {
+    askMessage<M, R>(m: Envelope<M>, time = Infinity): Promise<R> {
 
-        return new Promise<R>((resolve, _) => {
+        //See https://github.com/petkaantonov/bluebird/issues/1200 about Promise.timeout.
+
+        let p = new Promise<R>((resolve, _) => {
 
             this.actors[m.from] = new local.Pending<R>(m.to, this.actors[m.from], resolve, this);
             this.putMessage(m);
 
         });
+
+        return (time !== Infinity) ? p.timeout(time) : p;
 
     }
 

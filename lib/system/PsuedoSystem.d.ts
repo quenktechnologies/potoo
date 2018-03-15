@@ -14,7 +14,7 @@ export declare class PsuedoSystem implements System {
     constructor(logging: log.LogLogic);
     toAddress(_: actor.Actor): Maybe<string>;
     putMessage<M>(e: Envelope<M>): PsuedoSystem;
-    askMessage<M, R>(e: Envelope<M>): Promise<R>;
+    askMessage<M, R>(e: Envelope<M>, _?: number): Promise<R>;
     removeActor(_: actor.Actor, addr: string): PsuedoSystem;
     /**
      * putChild creates a new child actor for a parent within the system.
