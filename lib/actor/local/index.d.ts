@@ -2,7 +2,7 @@ import { Envelope } from '../../system';
 import { Case } from './Case';
 export { Case };
 export { Local } from './Local';
-export { Dynamic } from './Dynamic';
+export { Mutable } from './Mutable';
 export { Parent } from './Parent';
 export { Receive } from './Receive';
 export { Select } from './Select';

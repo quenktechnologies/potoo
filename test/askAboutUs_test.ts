@@ -31,7 +31,7 @@ class ServerB extends local.Static<Block> {
 
 }
 
-class Client extends local.Dynamic {
+class Client extends local.Mutable<string> {
 
     constructor(s: system.System, public done: () => void) {
 

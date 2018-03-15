@@ -3,9 +3,14 @@ import { Cases } from '.';
 import { Local, Behaviour, Select, Receive } from '.';
 
 /**
- * Dynamic actors buffer messages allowing users to process messages when ready.
+ * Mutable can change their behaviour during message processing.
+ *
+ * This is the Actor to extend when you want a mailbox and selective
+ * receives.
+ *
+ * @param <A> The type of messages expected in the mailbox.
  */
-export abstract class Dynamic<A> extends Local {
+export abstract class Mutable<A> extends Local {
 
     mailbox: Envelope<A>[] = [];
 
@@ -28,7 +33,7 @@ export abstract class Dynamic<A> extends Local {
 
     }
 
-    select<T>(c: Cases<T>): Dynamic<A> {
+    select<T>(c: Cases<T>): Mutable<A> {
 
         let cases = Array.isArray(c) ? c : [c];
 
@@ -39,7 +44,7 @@ export abstract class Dynamic<A> extends Local {
 
     }
 
-    receive<T>(c: Cases<T>): Dynamic<A> {
+    receive<T>(c: Cases<T>): Mutable<A> {
 
         let cases = Array.isArray(c) ? c : [c];
 
@@ -50,7 +55,7 @@ export abstract class Dynamic<A> extends Local {
 
     }
 
-    accept<M>(e: Envelope<A | M>): Dynamic<A> {
+    accept<M>(e: Envelope<A | M>): Mutable<A> {
 
         this.system.log().messageAccepted(e);
         this.mailbox.push(<Envelope<A>>e);

@@ -3,7 +3,7 @@ import * as local from '../lib/actor/local';
 import * as system from '../lib/system';
 import * as log from '../lib/system/log';
 
-class Selector extends local.Dynamic {
+class Selector extends local.Mutable<string> {
 
     constructor(public s: system.System, public done: () => void) {
 
