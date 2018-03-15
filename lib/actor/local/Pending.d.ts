@@ -5,13 +5,13 @@ import { System, Envelope } from '../../system';
  *
  * This actor will drop all incomming messages not from the target.
  */
-export declare class Pending<M> implements Actor {
+export declare class Pending<R> implements Actor {
     askee: string;
     original: Actor;
-    resolve: (m: M) => void;
+    resolve: (r: R) => void;
     system: System;
-    constructor(askee: string, original: Actor, resolve: (m: M) => void, system: System);
-    accept(e: Envelope<any>): Pending<M>;
-    run(): Pending<M>;
+    constructor(askee: string, original: Actor, resolve: (r: R) => void, system: System);
+    accept<M>(e: Envelope<M | R>): Pending<R>;
+    run(): Pending<R>;
     terminate(): void;
 }

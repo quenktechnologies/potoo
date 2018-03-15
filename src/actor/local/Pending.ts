@@ -6,15 +6,15 @@ import { System, Envelope } from '../../system';
  *
  * This actor will drop all incomming messages not from the target.
  */
-export class Pending<M> implements Actor {
+export class Pending<R> implements Actor {
 
     constructor(
         public askee: string,
         public original: Actor,
-        public resolve: (m: M) => void,
+        public resolve: (r: R) => void,
         public system: System) { }
 
-    accept(e: Envelope<any>): Pending<M> {
+    accept<M>(e: Envelope<M | R>): Pending<R> {
 
         if (e.from !== this.askee) {
 
@@ -29,7 +29,7 @@ export class Pending<M> implements Actor {
                     this
                         .system
                         .putActor(addr, this.original))
-                .map(() => this.resolve(e.message))
+                .map(() => this.resolve(<R>e.message))
                 .get();
 
         }
@@ -38,7 +38,7 @@ export class Pending<M> implements Actor {
 
     }
 
-    run(): Pending<M> { return this; }
+    run(): Pending<R> { return this; }
 
     terminate() { }
 

@@ -200,7 +200,7 @@ export class ActorSystem implements System, actor.Actor {
 
         return new Promise<R>((resolve, _) => {
 
-            this.actors[m.from] = new local.Pending(m.to, this.actors[m.from], resolve, this);
+            this.actors[m.from] = new local.Pending<R>(m.to, this.actors[m.from], resolve, this);
             this.putMessage(m);
 
         });
@@ -254,10 +254,10 @@ export class ActorSystem implements System, actor.Actor {
      *
      * It will be discarded.
      */
-    accept<M>(e: Envelope<M>) : ActorSystem {
+    accept<M>(e: Envelope<M>): ActorSystem {
 
         this.discard(e);
-      return this;
+        return this;
 
     }
 
