@@ -13,14 +13,14 @@ export abstract class Static<T> extends Local {
 
     run(): Static<T> { return this; }
 
-    accept<M>(e: Envelope<M|T>): Static<T> {
+    accept<M>(e: Envelope<M | T>): Static<T> {
 
         let r = Array.isArray(this.receive) ? this.receive : [this.receive];
 
-        this.__system.log().messageAccepted(e);
+        this.system.log().messageAccepted(e);
 
         if (!r.some(c => c.match(<T>e.message)))
-            this.__system.discard(e);
+            this.system.discard(e);
 
         return this;
 

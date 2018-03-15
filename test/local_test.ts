@@ -1,4 +1,3 @@
-import 'mocha';
 import * as must from 'must/register';
 import * as local from '../lib/actor/local';
 import * as system from '../lib/system';
@@ -11,6 +10,8 @@ class A1 extends local.Dynamic {
             this.tell('a2', 'ready?');
             this.tell('a2', 'exit');
         }, 120);
+
+        return this;
 
     }
 
@@ -25,7 +26,8 @@ class A2 extends local.Static<String> {
 
     run() {
 
-        this.spawn({ id: 'a2b', create: s => new A2B(s) })
+        this.spawn({ id: 'a2b', create: s => new A2B(s) });
+        return this;
 
     }
 
@@ -33,11 +35,14 @@ class A2 extends local.Static<String> {
 
 class A2B extends local.Static<String> {
 
-    receive = new local.Case('exit', (_: string) => { });
+    receive = [
+        new local.Case('exit', (_: string) => { })
+    ]
 
     run() {
 
         this.tell('a2', 'kill');
+        return this;
 
     }
 

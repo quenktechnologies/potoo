@@ -6,9 +6,9 @@ import { Local } from '.';
  */
 export class Parent extends Local {
 
-    accept<M>(e: Envelope<M>) : Parent {
+    accept<M>(e: Envelope<M>): Parent {
 
-        this.__system.discard(e);
+        this.system.discard(e);
         return this;
 
     }

@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-import 'mocha';
 import * as must from 'must/register';
 import * as local from '../lib/actor/local';
 import * as system from '../lib/system';
@@ -31,6 +29,8 @@ class Selector extends local.Dynamic {
         this.tell('selector', 'three');
         this.tell('selector', 6);
         this.tell('selector', 'done');
+
+        return this;
 
     }
 
