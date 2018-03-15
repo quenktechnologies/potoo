@@ -24,9 +24,6 @@ export interface Behaviour {
  * Cases means either one Case or an array of them.
  */
 export declare type Cases<T> = Case<T> | Case<T>[];
-export declare type Candidate<T> = string | number | boolean | object | {
-    new (...args: any[]): T;
-};
 export declare type Matched<T> = string | number | boolean | T;
 export interface Handler<T> {
     (t: Matched<T>): void;

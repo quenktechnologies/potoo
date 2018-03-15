@@ -8,9 +8,9 @@ export class Receive<T> {
 
     constructor(public cases: Case<T>[], public system: System) { }
 
-    consume<M>(e: Envelope<M>): ConsumeResult {
+    consume<M>(e: Envelope<M|T>): ConsumeResult {
 
-        if (this.cases.some(c => c.match(e.message))) {
+        if (this.cases.some(c => c.match(<T>e.message))) {
 
             this.system.log().messageReceived(e);
 

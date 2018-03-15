@@ -8,9 +8,8 @@ export declare class Case<T> {
     type: Pattern;
     handler: Handler<T>;
     constructor(type: Pattern, handler: Handler<T>);
-    _execute(m: any): void;
     /**
      * match checks if the supplied type satisfies this Case
      */
-    match(m: any): boolean;
+    match(m: T): boolean;
 }

@@ -38,14 +38,6 @@ export type Cases<T>
     | Case<T>[]
     ;
 
-export type Candidate<T>
-    = string
-    | number
-    | boolean
-    | object
-    | { new (...args: any[]): T }
-    ;
-
 export type Matched<T>
     = string
     | number

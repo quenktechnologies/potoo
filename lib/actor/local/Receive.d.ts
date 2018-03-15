@@ -7,5 +7,5 @@ export declare class Receive<T> {
     cases: Case<T>[];
     system: System;
     constructor(cases: Case<T>[], system: System);
-    consume<M>(e: Envelope<M>): ConsumeResult;
+    consume<M>(e: Envelope<M | T>): ConsumeResult;
 }

@@ -7,5 +7,5 @@ export declare class Select<T> {
     cases: Case<T>[];
     system: System;
     constructor(cases: Case<T>[], system: System);
-    consume<M>(m: Envelope<M>): ConsumeResult;
+    consume<M>(m: Envelope<M | T>): ConsumeResult;
 }

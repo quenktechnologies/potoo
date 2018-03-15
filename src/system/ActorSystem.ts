@@ -211,7 +211,7 @@ export class ActorSystem implements System, actor.Actor {
 
         this
             .toAddress(parent)
-            .chain(paddr => Maybe.fromBoolean((<any>addr).startsWith(paddr)))
+            .chain(paddr => Maybe.fromBoolean((addr).startsWith(paddr)))
             .orElse(() => {
 
                 this.logging.error(new Error(`removeActor(): Actor "${parent}" is not a parent of "${addr}"!`));
