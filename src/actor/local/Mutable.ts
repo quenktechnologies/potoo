@@ -64,6 +64,10 @@ export abstract class Mutable<A> extends Local {
 
     }
 
-    run() { return this; }
+    run(): Mutable<A> {
+
+        return this;
+
+    }
 
 }
