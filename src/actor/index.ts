@@ -65,3 +65,12 @@ export interface Actor {
     terminate(): void;
 
 }
+
+/**
+ * AddressTable provides a mapping of keys to actor addresses.
+ */
+export interface AddressTable {
+
+    [key: string]: Address
+
+}
