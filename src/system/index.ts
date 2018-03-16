@@ -119,6 +119,7 @@ export const mkChildPath = (seperator: string) => (id: string) => (parent: actor
  */
 export const validateId = (seperator: string) => (id: string) => match<Either<Error, string>>(id)
     .caseOf('$', () => left<Error, string>(new Error(`Actors cannot use '$' as their id!`)))
-    .caseOf(/\//, () => left<Error, string>(new Error(`Actors cannot use '${seperator}' in their id!`)))
-    .orElse(() => right<Error, string>(id))
+    .caseOf(/[\w]+\//, () => left<Error, string>(new Error(`Actors cannot use '${seperator}' in their id!`)))
+    .caseOf(String, () => right<Error, string>(id))
+    .orElse(() => left<Error, string>(new Error(`Invalid value  "${id}" supplied for actor id!`)))
     .end();
