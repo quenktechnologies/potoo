@@ -1,8 +1,10 @@
+import * as Promise from 'bluebird';
 import { Envelope } from '../../system';
 import { Case } from './Case';
+import { Actor, Template, Address } from '..';
 
 export { Case };
-export { Local } from './Local';
+export { Resident } from './Resident';
 export { Mutable } from './Mutable';
 export { Parent } from './Parent';
 export { Receive } from './Receive';
@@ -42,5 +44,42 @@ export type Cases<T> = Case<T>[];
 export interface Handler<T> {
 
     (t: T): void
+
+}
+
+/**
+ * LocalActor is an actor that exists in the current runtime.
+ */
+export interface LocalActor extends Actor {
+
+    /**
+     * self retrieves the path of this actor from the system.
+     */
+  self: ()=>Address;
+
+    /**
+     * spawn a new child actor.
+     */
+    spawn(t: Template): Address;
+
+    /**
+     * tell a message to an actor address.
+     */
+    tell<M>(ref: string, m: M): LocalActor;
+
+    /**
+     * ask for a reply from a message sent to an address.
+     */
+    ask<M, R>(ref: string, m: M, time: number): Promise<R>;
+
+    /**
+     * kill another actor.
+     */
+    kill(addr: Address): LocalActor;
+
+    /**
+     * exit instructs the system to kill of this actor.
+     */
+    exit(): void;
 
 }

@@ -1,64 +1,47 @@
 import * as Promise from 'bluebird';
 import { System, PsuedoSystem, Envelope } from '../../system';
-import { Actor, Template, Address } from '..';
+import { LocalActor } from '.';
+import { Template, Address } from '..';
 
 /**
- * Local are actors that directly exists in the current runtime.
+ * Resident provides a LocalActor impleemntation.
  */
-export abstract class Local implements Actor {
+export abstract class Resident implements LocalActor {
 
-    abstract run(path: Address): Local;
+    abstract run(path: Address): Resident;
 
-    abstract accept<M>(m: Envelope<M>): Local;
+    abstract accept<M>(m: Envelope<M>): Resident;
 
-    /**
-     * self retrieves the path of this actor from the system.
-     */
     self = () => this.system.toAddress(this).get();
 
     constructor(public system: System) { }
 
-    /**
-     * spawn a new child actor.
-     */
     spawn(t: Template): Address {
 
         return this.system.putChild(this, t);
 
     }
 
-    /**
-     * tell a message to an actor address.
-     */
-    tell<M>(ref: string, m: M): Local {
+    tell<M>(ref: string, m: M): Resident {
 
         this.system.putMessage(new Envelope(ref, this.self(), m));
         return this;
 
     }
 
-    /**
-     * ask for a reply from a message sent to an address.
-     */
     ask<M, R>(ref: string, m: M, time = Infinity): Promise<R> {
 
         return this.system.askMessage<M, R>(new Envelope(ref, this.self(), m), time);
 
     }
 
-    /**
-     * kill another actor.
-     */
-    kill(addr: Address): Local {
+    kill(addr: Address): Resident {
 
         this.system.removeActor(this, addr);
         return this;
 
     }
 
-    /**
-     * exit instructs the system to kill of this actor.
-     */
     exit(): void {
 
         this.kill(this.self());

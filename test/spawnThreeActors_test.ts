@@ -42,12 +42,12 @@ describe('spawning three actors', function() {
             .spawn({ id: 'a2', create: s => new A2(s) })
             .spawn({ id: 'a3', create: s => new A3(s) });
 
-        must(s.actors['a1']).be.instanceOf(local.Local);
-        must(s.actors['a2']).be.instanceOf(local.Local);
-        must(s.actors['a3']).be.instanceOf(local.Local);
+        must(s.actors['a1']).be.instanceOf(local.Resident);
+        must(s.actors['a2']).be.instanceOf(local.Resident);
+        must(s.actors['a3']).be.instanceOf(local.Resident);
 
         setTimeout(() => {
-            must(s.actors['a3/a3a']).be.instanceOf(local.Local);
+            must(s.actors['a3/a3a']).be.instanceOf(local.Resident);
             done();
         }, 100);
 

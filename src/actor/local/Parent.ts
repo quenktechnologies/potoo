@@ -1,10 +1,10 @@
 import { Envelope } from '../../system';
-import { Local } from '.';
+import { Resident } from '.';
 
 /**
  * Parent actor only spanws child actors.
  */
-export class Parent extends Local {
+export class Parent extends Resident {
 
     accept<M>(e: Envelope<M>): Parent {
 

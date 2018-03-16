@@ -58,8 +58,8 @@ describe('exit()', function() {
             .spawn({ id: 'a1', create: s => new A1(s) })
             .spawn({ id: 'a2', create: s => new A2(s) })
 
-        must(s.actors['a1']).be.instanceOf(local.Local);
-        must(s.actors['a2']).be.instanceOf(local.Local);
+        must(s.actors['a1']).be.instanceOf(local.Resident);
+        must(s.actors['a2']).be.instanceOf(local.Resident);
 
         setTimeout(() => {
 
@@ -81,12 +81,12 @@ describe('kill()', function() {
             .create()
             .spawn({ id: 'a2', create: s => new A2(s) });
 
-        must(s.actors['a2']).be.instanceOf(local.Local);
-        must(s.actors['a2/a2b']).be.instanceOf(local.Local);
+        must(s.actors['a2']).be.instanceOf(local.Resident);
+        must(s.actors['a2/a2b']).be.instanceOf(local.Resident);
 
         setTimeout(() => {
 
-            must(s.actors['a2']).be.instanceOf(local.Local);
+            must(s.actors['a2']).be.instanceOf(local.Resident);
             must(s.actors['a2/a2b']).eql(undefined);
             done();
 

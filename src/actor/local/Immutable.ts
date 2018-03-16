@@ -1,5 +1,5 @@
 import { Envelope } from '../../system';
-import { Local, Cases } from '.';
+import { Resident, Cases } from '.';
 
 /**
  * Immutable actors do not change their behaviour. 
@@ -7,7 +7,7 @@ import { Local, Cases } from '.';
  * Once the receive property is provided, all messages will be
  * filtered by it.
  */
-export abstract class Immutable<T> extends Local {
+export abstract class Immutable<T> extends Resident {
 
     abstract receive: Cases<T>
 
