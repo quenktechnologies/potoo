@@ -55,7 +55,7 @@ export interface LocalActor extends Actor {
     /**
      * self retrieves the path of this actor from the system.
      */
-  self: ()=>Address;
+    self: () => Address;
 
     /**
      * spawn a new child actor.
@@ -81,5 +81,18 @@ export interface LocalActor extends Actor {
      * exit instructs the system to kill of this actor.
      */
     exit(): void;
+
+}
+
+/**
+ * SelectiveLocalActor provides an API for preforming selective receives.
+ */
+export interface SelectiveLocalActor extends LocalActor {
+
+    /**
+     * select the next message to be processed, applying each Case 
+     * until one matches.
+     */
+    select<T>(c: Cases<T>): SelectiveLocalActor;
 
 }

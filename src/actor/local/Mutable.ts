@@ -1,6 +1,6 @@
 import { Envelope } from '../../system';
 import { Cases } from '.';
-import { Resident, Behaviour, Select, Receive } from '.';
+import { Resident, SelectiveLocalActor, Behaviour, Select, Receive } from '.';
 
 /**
  * Mutable can change their behaviour during message processing.
@@ -10,7 +10,7 @@ import { Resident, Behaviour, Select, Receive } from '.';
  *
  * @param <A> The type of messages expected in the mailbox.
  */
-export abstract class Mutable<A> extends Resident {
+export abstract class Mutable<A> extends Resident implements SelectiveLocalActor {
 
     mailbox: Envelope<A>[] = [];
 

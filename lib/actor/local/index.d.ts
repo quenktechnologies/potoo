@@ -62,3 +62,13 @@ export interface LocalActor extends Actor {
      */
     exit(): void;
 }
+/**
+ * SelectiveLocalActor provides an API for preforming selective receives.
+ */
+export interface SelectiveLocalActor extends LocalActor {
+    /**
+     * select the next message to be processed, applying each Case
+     * until one matches.
+     */
+    select<T>(c: Cases<T>): SelectiveLocalActor;
+}
