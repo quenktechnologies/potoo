@@ -1,6 +1,6 @@
 import * as must from 'must/register';
-import * as local from '../lib/actor/local';
-import * as system from '../lib/system';
+import * as local from '../../lib/actor/local';
+import * as system from '../../lib/system';
 
 class A1 extends local.Mutable<string> {
 

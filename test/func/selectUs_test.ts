@@ -1,7 +1,7 @@
 import * as must from 'must/register';
-import * as local from '../lib/actor/local';
-import * as system from '../lib/system';
-import * as log from '../lib/system/log';
+import * as local from '../../lib/actor/local';
+import * as system from '../../lib/system';
+import * as log from '../../lib/system/log';
 
 class Selector extends local.Mutable<string> {
 
