@@ -42,7 +42,7 @@ export interface Actor {
     /**
      * accept a Message destined for this actor.
      */
-    accept<M>(e: Envelope<M>): Actor;
+    accept(e: Envelope): Actor;
     /**
      * run this actor.
      */

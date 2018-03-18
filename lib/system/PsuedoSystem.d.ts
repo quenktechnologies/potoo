@@ -13,8 +13,8 @@ export declare class PsuedoSystem implements System {
     logging: log.LogLogic;
     constructor(logging: log.LogLogic);
     toAddress(_: actor.Actor): Maybe<string>;
-    putMessage<M>(e: Envelope<M>): PsuedoSystem;
-    askMessage<M, R>(e: Envelope<M>, _?: number): Promise<R>;
+    putMessage(e: Envelope): PsuedoSystem;
+    askMessage<R>(e: Envelope, _?: number): Promise<R>;
     removeActor(_: actor.Actor, addr: string): PsuedoSystem;
     /**
      * putChild creates a new child actor for a parent within the system.
@@ -25,7 +25,7 @@ export declare class PsuedoSystem implements System {
      *
      * An event will be logged to the system log.
      */
-    discard<M>(e: Envelope<M>): PsuedoSystem;
+    discard(e: Envelope): PsuedoSystem;
     putActor(_path: string, _actor: actor.Actor): PsuedoSystem;
     putError(_: actor.Actor, e: Error): PsuedoSystem;
     log(): log.LogLogic;

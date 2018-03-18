@@ -20,14 +20,14 @@ export class PsuedoSystem implements System {
 
     }
 
-    putMessage<M>(e: Envelope<M>): PsuedoSystem {
+    putMessage(e: Envelope): PsuedoSystem {
 
         this.logging.messageRejected(e);
         return this;
 
     }
 
-    askMessage<M, R>(e: Envelope<M>, _ = Infinity): Promise<R> {
+    askMessage< R>(e: Envelope, _ = Infinity): Promise<R> {
 
         this.logging.messageRejected(e)
         return Promise.resolve(undefined);
@@ -56,7 +56,7 @@ export class PsuedoSystem implements System {
      *
      * An event will be logged to the system log.
      */
-    discard<M>(e: Envelope<M>): PsuedoSystem {
+    discard(e: Envelope): PsuedoSystem {
 
         this.logging.messageDropped(e);
         return this;

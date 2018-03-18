@@ -8,7 +8,7 @@ import { Template, Address } from '..';
 export declare abstract class Resident implements LocalActor {
     system: System;
     abstract run(path: Address): Resident;
-    abstract accept<M>(m: Envelope<M>): Resident;
+    abstract accept(m: Envelope): Resident;
     self: () => string;
     constructor(system: System);
     spawn(t: Template): Address;

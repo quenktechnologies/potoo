@@ -1,4 +1,5 @@
 import { Pattern } from '@quenk/kindof';
+import { Message } from '../../system';
 import { Handler } from '.';
 /**
  * Case allows for the selective matching of patterns
@@ -11,5 +12,5 @@ export declare class Case<T> {
     /**
      * match checks if the supplied type satisfies this Case
      */
-    match(m: T): boolean;
+    match(m: Message): boolean;
 }

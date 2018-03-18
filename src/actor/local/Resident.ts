@@ -10,7 +10,7 @@ export abstract class Resident implements LocalActor {
 
     abstract run(path: Address): Resident;
 
-    abstract accept<M>(m: Envelope<M>): Resident;
+    abstract accept(m: Envelope): Resident;
 
     self = () => this.system.toAddress(this).get();
 
@@ -31,7 +31,7 @@ export abstract class Resident implements LocalActor {
 
     ask<M, R>(ref: string, m: M, time = Infinity): Promise<R> {
 
-        return this.system.askMessage<M, R>(new Envelope(ref, this.self(), m), time);
+        return this.system.askMessage<R>(new Envelope(ref, this.self(), m), time);
 
     }
 

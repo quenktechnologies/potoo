@@ -9,5 +9,5 @@ import { Resident, Cases } from '.';
 export declare abstract class Immutable<T> extends Resident {
     abstract receive: Cases<T>;
     run(): Immutable<T>;
-    accept<M>(e: Envelope<M | T>): Immutable<T>;
+    accept(e: Envelope): Immutable<T>;
 }

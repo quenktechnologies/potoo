@@ -9,15 +9,15 @@ import { Resident, SelectiveLocalActor, Behaviour } from '.';
  *
  * @param <A> The type of messages expected in the mailbox.
  */
-export declare abstract class Mutable<A> extends Resident implements SelectiveLocalActor {
-    mailbox: Envelope<A>[];
+export declare abstract class Mutable extends Resident implements SelectiveLocalActor {
+    mailbox: Envelope[];
     behaviour: Behaviour;
     /**
      * @private
      */
     consume(): void;
-    select<T>(c: Cases<T>): Mutable<A>;
-    receive<T>(c: Cases<T>): Mutable<A>;
-    accept<M>(e: Envelope<A | M>): Mutable<A>;
-    run(): Mutable<A>;
+    select<T>(c: Cases<T>): Mutable;
+    receive<T>(c: Cases<T>): Mutable;
+    accept(e: Envelope): Mutable;
+    run(): Mutable;
 }

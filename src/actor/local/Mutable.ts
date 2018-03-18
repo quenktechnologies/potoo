@@ -10,9 +10,9 @@ import { Resident, SelectiveLocalActor, Behaviour, Select, Receive } from '.';
  *
  * @param <A> The type of messages expected in the mailbox.
  */
-export abstract class Mutable<A> extends Resident implements SelectiveLocalActor {
+export abstract class Mutable extends Resident implements SelectiveLocalActor {
 
-    mailbox: Envelope<A>[] = [];
+    mailbox: Envelope[] = [];
 
     behaviour: Behaviour;
 
@@ -33,7 +33,7 @@ export abstract class Mutable<A> extends Resident implements SelectiveLocalActor
 
     }
 
-    select<T>(c: Cases<T>): Mutable<A> {
+    select<T>(c: Cases<T>): Mutable {
 
         let cases = Array.isArray(c) ? c : [c];
 
@@ -44,7 +44,7 @@ export abstract class Mutable<A> extends Resident implements SelectiveLocalActor
 
     }
 
-    receive<T>(c: Cases<T>): Mutable<A> {
+    receive<T>(c: Cases<T>): Mutable {
 
         let cases = Array.isArray(c) ? c : [c];
 
@@ -55,16 +55,16 @@ export abstract class Mutable<A> extends Resident implements SelectiveLocalActor
 
     }
 
-    accept<M>(e: Envelope<A | M>): Mutable<A> {
+    accept(e: Envelope): Mutable {
 
         this.system.log().messageAccepted(e);
-        this.mailbox.push(<Envelope<A>>e);
+        this.mailbox.push(<Envelope>e);
         this.consume();
         return this;
 
     }
 
-    run(): Mutable<A> {
+    run(): Mutable {
 
         return this;
 

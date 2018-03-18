@@ -20,7 +20,7 @@ export declare type ConsumeResult = Behaviour | null;
  * Behaviour of a dynamic actor.
  */
 export interface Behaviour {
-    consume<M>(e: Envelope<M>): ConsumeResult;
+    consume(e: Envelope): ConsumeResult;
 }
 /**
  * Cases is a list of Case instances that will be applied to a message
