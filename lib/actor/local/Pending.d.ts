@@ -11,7 +11,7 @@ export declare class Pending<R> implements Actor {
     resolve: (r: R) => void;
     system: System;
     constructor(askee: string, original: Actor, resolve: (r: R) => void, system: System);
-    accept<M>(e: Envelope<M | R>): Pending<R>;
+    accept(e: Envelope): Pending<R>;
     run(): Pending<R>;
     terminate(): void;
 }

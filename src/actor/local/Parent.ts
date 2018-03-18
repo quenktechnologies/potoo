@@ -6,7 +6,7 @@ import { Resident } from '.';
  */
 export class Parent extends Resident {
 
-    accept<M>(e: Envelope<M>): Parent {
+    accept(e: Envelope): Parent {
 
         this.system.discard(e);
         return this;

@@ -4,6 +4,6 @@ import { Resident } from '.';
  * Parent actor only spanws child actors.
  */
 export declare class Parent extends Resident {
-    accept<M>(e: Envelope<M>): Parent;
+    accept(e: Envelope): Parent;
     run(): this;
 }

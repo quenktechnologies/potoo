@@ -27,6 +27,11 @@ export const DEAD_ADDRESS = '<null>';
 export interface Configuration { log: log.LogPolicy }
 
 /**
+ * Message type.
+ */
+export type Message = any;
+
+/**
  * ActorTable is a table of actor addresses pointing 
  * to their respective actor.
  */
@@ -58,7 +63,7 @@ export interface System {
      *
      * An event will be logged to the system log.
      */
-    discard<M>(m: Envelope<M>): System;
+    discard(m: Envelope): System;
 
     /**
      * putActor replaces an actor's context within the system.
@@ -73,7 +78,7 @@ export interface System {
      * depending on the target actor's state at the time. 
      * If the target actor does not exist, the message is dropped.
      */
-    putMessage<M>(m: Envelope<M>): System;
+    putMessage(m: Envelope): System;
 
     /**
      * putError puts an error into the system's error handling workflow.
@@ -86,7 +91,7 @@ export interface System {
      * askMessage allows an actor to ignore incomming messages unless
      * they have been sent by a specific actor.
      */
-    askMessage<M, R>(m: Envelope<M>, time?: number): Promise<R>;
+    askMessage<R>(m: Envelope, time?: number): Promise<R>;
 
     /**
      * removeActor from the system.

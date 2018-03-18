@@ -14,7 +14,7 @@ export class Pending<R> implements Actor {
         public resolve: (r: R) => void,
         public system: System) { }
 
-    accept<M>(e: Envelope<M | R>): Pending<R> {
+    accept(e: Envelope): Pending<R> {
 
         if (e.from !== this.askee) {
 

@@ -8,7 +8,7 @@ export class Select<T> {
 
     constructor(public cases: Case<T>[], public system: System) { }
 
-    consume<M>(m: Envelope<M|T>): ConsumeResult {
+    consume(m: Envelope): ConsumeResult {
 
         if (this.cases.some(c => c.match(<T>m.message))) {
 

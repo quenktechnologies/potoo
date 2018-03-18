@@ -62,23 +62,23 @@ export declare class LogLogic {
     /**
      * messageDropped
      */
-    messageDropped<M>(e: Envelope<M>): void;
+    messageDropped(e: Envelope): void;
     /**
      * messageSent
      */
-    messageSent<M>(e: Envelope<M>): void;
+    messageSent(e: Envelope): void;
     /**
      * messageAccepted
      */
-    messageAccepted<M>(e: Envelope<M>): void;
+    messageAccepted(e: Envelope): void;
     /**
      * messageReceived
      */
-    messageReceived<M>(e: Envelope<M>): void;
+    messageReceived(e: Envelope): void;
     /**
      * messageRejected
      */
-    messageRejected<M>(e: Envelope<M>): void;
+    messageRejected(e: Envelope): void;
     /**
      * receiveStarted
      */

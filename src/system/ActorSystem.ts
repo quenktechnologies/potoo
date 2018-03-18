@@ -157,7 +157,7 @@ export class ActorSystem implements System, actor.Actor {
 
     }
 
-    discard<M>(m: Envelope<M>): ActorSystem {
+    discard(m: Envelope): ActorSystem {
 
         this.logging.messageDropped(m);
         return this;
@@ -171,7 +171,7 @@ export class ActorSystem implements System, actor.Actor {
 
     }
 
-    putMessage<M>(e: Envelope<M>): ActorSystem {
+    putMessage(e: Envelope): ActorSystem {
 
         let actor = this.actors[e.to];
 
@@ -196,7 +196,7 @@ export class ActorSystem implements System, actor.Actor {
 
     }
 
-    askMessage<M, R>(m: Envelope<M>, time = Infinity): Promise<R> {
+    askMessage<R>(m: Envelope, time = Infinity): Promise<R> {
 
         //See https://github.com/petkaantonov/bluebird/issues/1200 about Promise.timeout.
 
@@ -258,7 +258,7 @@ export class ActorSystem implements System, actor.Actor {
      *
      * It will be discarded.
      */
-    accept<M>(e: Envelope<M>): ActorSystem {
+    accept(e: Envelope): ActorSystem {
 
         this.discard(e);
         return this;

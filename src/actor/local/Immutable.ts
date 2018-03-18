@@ -13,7 +13,7 @@ export abstract class Immutable<T> extends Resident {
 
     run(): Immutable<T> { return this; }
 
-    accept<M>(e: Envelope<M | T>): Immutable<T> {
+    accept(e: Envelope): Immutable<T> {
 
         let r = Array.isArray(this.receive) ? this.receive : [this.receive];
 

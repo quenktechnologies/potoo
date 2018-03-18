@@ -28,7 +28,7 @@ export type ConsumeResult
  */
 export interface Behaviour {
 
-    consume<M>(e: Envelope<M>): ConsumeResult;
+    consume(e: Envelope): ConsumeResult;
 
 }
 
