@@ -180,7 +180,9 @@ export class ActorSystem implements System, actor.Actor {
         } else {
 
             setTimeout(() => {
-                this.logging.messageSent(e); actor.accept(e);
+                this.logging.messageSent(e);
+                //Using the reference on the system in case the actor changed.
+                this.actors[e.to].accept(e); 
             }, 0);
 
         }

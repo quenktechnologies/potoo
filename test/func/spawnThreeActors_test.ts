@@ -3,9 +3,9 @@ import * as must from 'must/register';
 import * as local from '../../lib/actor/local';
 import * as system from '../../lib/system';
 
-class A1 extends local.Mutable<void> { }
+class A1 extends local.Mutable { }
 
-class A2 extends local.Mutable<void> { }
+class A2 extends local.Mutable { }
 
 class A3 extends local.Immutable<String> {
 

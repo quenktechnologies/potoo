@@ -32,7 +32,7 @@ class ServerB extends local.Immutable<Block> {
 
 }
 
-class Client extends local.Mutable<string> {
+class Client extends local.Mutable {
 
     constructor(s: system.System, public done: () => void) {
 
