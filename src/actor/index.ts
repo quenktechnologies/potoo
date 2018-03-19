@@ -1,4 +1,6 @@
-import { Envelope, System } from '../system';
+import { Envelope, System, Message } from '../system';
+
+export {Message}
 
 /**
  * Address used by the system to distinguish actors.
