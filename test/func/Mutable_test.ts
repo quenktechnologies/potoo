@@ -3,7 +3,7 @@ import * as local from '../../lib/actor/local';
 import * as system from '../../lib/system';
 import * as log from '../../lib/system/log';
 
-class Selector extends local.Mutable {
+class ShouldWork extends local.Mutable {
 
     constructor(public s: system.System, public done: () => void) {
 
@@ -42,7 +42,6 @@ class Selector extends local.Mutable {
     }
 
 }
-
 describe('select', function() {
 
     it('should be possible', function(done) {
@@ -50,7 +49,7 @@ describe('select', function() {
         system
             .ActorSystem
             .create({ log: { level: log.INFO, logger: console } })
-            .spawn({ id: 'selector', create: s => new Selector(s, done) });
+            .spawn({ id: 'selector', create: s => new ShouldWork(s, done) });
 
     });
 
