@@ -1,5 +1,6 @@
 import { Envelope } from '../../system';
 import { Resident, Cases } from '.';
+import { Result, rejected, accepted } from '..';
 
 /**
  * Immutable actors do not change their behaviour. 
@@ -11,19 +12,14 @@ export abstract class Immutable<T> extends Resident {
 
     abstract receive: Cases<T>
 
-    run(): Immutable<T> { return this; }
-
-    accept(e: Envelope): Immutable<T> {
+    accept(e: Envelope): Result {
 
         let r = Array.isArray(this.receive) ? this.receive : [this.receive];
 
-        this.system.log().messageAccepted(e);
-
-        if (!r.some(c => c.match(<T>e.message)))
-            this.system.discard(e);
-
-        return this;
+        return (r.some(c => c.match(<T>e.message))) ? accepted(e) : rejected(e);
 
     }
+
+    run() { }
 
 }

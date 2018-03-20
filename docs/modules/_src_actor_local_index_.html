@@ -74,15 +74,15 @@
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_src_actor_local_index_.behaviour.html" class="tsd-kind-icon">Behaviour</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter"><a href="../interfaces/_src_actor_local_index_.handler.html" class="tsd-kind-icon">Handler</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_src_actor_local_index_.localactor.html" class="tsd-kind-icon">Local<wbr>Actor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Type aliases</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_src_actor_local_index_.html#cases" class="tsd-kind-icon">Cases</a></li>
-								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_src_actor_local_index_.html#consumeresult" class="tsd-kind-icon">Consume<wbr>Result</a></li>
-								<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_src_actor_local_index_.html#matched" class="tsd-kind-icon">Matched</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_src_actor_local_index_.html#handler" class="tsd-kind-icon">Handler</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_src_actor_local_index_.html#receiver" class="tsd-kind-icon">Receiver</a></li>
 							</ul>
 						</section>
 					</div>
@@ -96,7 +96,7 @@
 					<div class="tsd-signature tsd-kind-icon">Cases<span class="tsd-signature-symbol">:</span> <a href="../classes/_src_actor_local_case_.case.html" class="tsd-signature-type">Case</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/c8155ee/src/actor/local/index.ts#L37">src/actor/local/index.ts:37</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/actor/local/index.ts#L39">src/actor/local/index.ts:39</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -106,32 +106,77 @@
 						</div>
 					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
-					<a name="consumeresult" class="tsd-anchor"></a>
-					<h3>Consume<wbr>Result</h3>
-					<div class="tsd-signature tsd-kind-icon">Consume<wbr>Result<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_src_actor_local_index_.behaviour.html" class="tsd-signature-type">Behaviour</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
+					<a name="handler" class="tsd-anchor"></a>
+					<h3>Handler</h3>
+					<div class="tsd-signature tsd-kind-icon">Handler<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/c8155ee/src/actor/local/index.ts#L19">src/actor/local/index.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/actor/local/index.ts#L44">src/actor/local/index.ts:44</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>This module provides some primitives for local actors, that is
-								actors that run in the same runtime of the system are generally
-							not concurrent.</p>
+							<p>Handler for a Case.</p>
 						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-siganture">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias tsd-is-not-exported">
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>t<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>t: <span class="tsd-signature-type">T</span></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
-					<a name="matched" class="tsd-anchor"></a>
-					<h3>Matched</h3>
-					<div class="tsd-signature tsd-kind-icon">Matched<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">T</span></div>
+					<a name="receiver" class="tsd-anchor"></a>
+					<h3>Receiver</h3>
+					<div class="tsd-signature tsd-kind-icon">Receiver<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/c8155ee/src/actor/local/index.ts#L39">src/actor/local/index.ts:39</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/actor/local/index.ts#L49">src/actor/local/index.ts:49</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Receiver function.</p>
+						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-siganture">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias tsd-is-not-exported">
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>m<span class="tsd-signature-symbol">: </span><a href="_src_system_index_.html#message" class="tsd-signature-type">Message</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Result</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>m: <a href="_src_system_index_.html#message" class="tsd-signature-type">Message</a></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Result</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -154,9 +199,6 @@
 						<a href="_src_actor_local_immutable_.html">"src/actor/local/<wbr>Immutable"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_src_actor_local_local_.html">"src/actor/local/<wbr>Local"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
 						<a href="_src_actor_local_mutable_.html">"src/actor/local/<wbr>Mutable"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -167,6 +209,9 @@
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_src_actor_local_receive_.html">"src/actor/local/<wbr>Receive"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_src_actor_local_resident_.html">"src/actor/local/<wbr>Resident"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_src_actor_local_select_.html">"src/actor/local/<wbr>Select"</a>
@@ -214,17 +259,17 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/_src_actor_local_index_.behaviour.html" class="tsd-kind-icon">Behaviour</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="../interfaces/_src_actor_local_index_.handler.html" class="tsd-kind-icon">Handler</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_src_actor_local_index_.localactor.html" class="tsd-kind-icon">Local<wbr>Actor</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
 						<a href="_src_actor_local_index_.html#cases" class="tsd-kind-icon">Cases</a>
 					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
-						<a href="_src_actor_local_index_.html#consumeresult" class="tsd-kind-icon">Consume<wbr>Result</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="_src_actor_local_index_.html#handler" class="tsd-kind-icon">Handler</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_src_actor_local_index_.html#matched" class="tsd-kind-icon">Matched</a>
+						<a href="_src_actor_local_index_.html#receiver" class="tsd-kind-icon">Receiver</a>
 					</li>
 				</ul>
 			</nav>

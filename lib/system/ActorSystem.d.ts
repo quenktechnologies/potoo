@@ -54,7 +54,7 @@ export declare class ActorSystem implements System, actor.Actor {
      */
     spawn(t: actor.Template): ActorSystem;
     putChild(parent: actor.Actor, t: actor.Template): actor.Address;
-    discard(m: Envelope): ActorSystem;
+    discard(e: Envelope): ActorSystem;
     putActor(path: string, actor: actor.Actor): ActorSystem;
     putMessage(e: Envelope): ActorSystem;
     putError(_src: actor.Actor, e: Error): System;
@@ -66,7 +66,7 @@ export declare class ActorSystem implements System, actor.Actor {
      *
      * It will be discarded.
      */
-    accept(e: Envelope): ActorSystem;
+    accept(e: Envelope): actor.Result;
     /**
      * run does nothing.
      */

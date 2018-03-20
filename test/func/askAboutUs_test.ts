@@ -16,8 +16,10 @@ const block = { sender: String, message: String }
 class ServerA extends local.Immutable<Block> {
 
     receive = [
+
         new local.Case(block, ({ sender, message }: Block) =>
             this.tell(sender, `${message}->A`))
+
     ]
 
 }
@@ -25,8 +27,9 @@ class ServerA extends local.Immutable<Block> {
 class ServerB extends local.Immutable<Block> {
 
     receive = [
+
         new local.Case(block, ({ sender, message }: Block) =>
-            setTimeout(() => this.tell(sender, `${message}->B`), 1000)),
+            setTimeout(() => this.tell(sender, `${message}->B`), 1000))
 
     ]
 

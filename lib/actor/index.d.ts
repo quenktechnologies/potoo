@@ -1,4 +1,9 @@
-import { Envelope, System } from '../system';
+import { Either } from 'afpl/lib/monad/Either';
+import { Envelope, System, Message } from '../system';
+export { Message };
+export declare type Accept = 'accept';
+export declare type Reject = 'reject';
+export declare type Result = Either<Reject, Accept>;
 /**
  * Address used by the system to distinguish actors.
  *
@@ -42,11 +47,11 @@ export interface Actor {
     /**
      * accept a Message destined for this actor.
      */
-    accept(e: Envelope): Actor;
+    accept(e: Envelope): Result;
     /**
      * run this actor.
      */
-    run(path: string): Actor;
+    run(path: string): void;
     /**
      * terminate is called by the system when the actor is removed.
      */
@@ -58,3 +63,11 @@ export interface Actor {
 export interface AddressTable {
     [key: string]: Address;
 }
+/**
+ * rejected
+ */
+export declare const rejected: (_: Envelope) => Either<"reject", "accept">;
+/**
+ * accepted
+ */
+export declare const accepted: (_: Envelope) => Either<"reject", "accept">;

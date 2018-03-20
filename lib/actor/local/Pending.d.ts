@@ -1,4 +1,4 @@
-import { Actor } from '..';
+import { Actor, Result } from '..';
 import { System, Envelope } from '../../system';
 /**
  * Pending is used as a placeholder for an actor awaiting a reply.
@@ -11,7 +11,7 @@ export declare class Pending<R> implements Actor {
     resolve: (r: R) => void;
     system: System;
     constructor(askee: string, original: Actor, resolve: (r: R) => void, system: System);
-    accept(e: Envelope): Pending<R>;
-    run(): Pending<R>;
+    accept(e: Envelope): Result;
+    run(): void;
     terminate(): void;
 }

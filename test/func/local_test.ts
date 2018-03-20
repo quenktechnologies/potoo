@@ -20,8 +20,10 @@ class A1 extends local.Mutable {
 class A2 extends local.Immutable<String> {
 
     receive = [
+
         new local.Case('exit', (_: string) => this.exit()),
         new local.Case('kill', (_: string) => this.kill('a2/a2b'))
+
     ];
 
     run() {
@@ -36,7 +38,9 @@ class A2 extends local.Immutable<String> {
 class A2B extends local.Immutable<String> {
 
     receive = [
+      
         new local.Case('exit', (_: string) => { })
+
     ]
 
     run() {

@@ -1,4 +1,5 @@
 import { Envelope } from '../../system';
+import { Result, rejected } from '..';
 import { Resident } from '.';
 
 /**
@@ -6,16 +7,9 @@ import { Resident } from '.';
  */
 export class Parent extends Resident {
 
-    accept(e: Envelope): Parent {
+    accept(e: Envelope): Result {
 
-        this.system.discard(e);
-        return this;
-
-    }
-
-    run() {
-
-        return this;
+        return rejected(e);
 
     }
 

@@ -91,7 +91,7 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter"><a href="_src_actor_local_index_.behaviour.html#consume" class="tsd-kind-icon">consume</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_src_actor_local_index_.behaviour.html#apply" class="tsd-kind-icon">apply</a></li>
 							</ul>
 						</section>
 					</div>
@@ -99,32 +99,31 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
-					<a name="consume" class="tsd-anchor"></a>
-					<h3>consume</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">consume&lt;M&gt;<span class="tsd-signature-symbol">(</span>e<span class="tsd-signature-symbol">: </span><a href="../classes/_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">M</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_src_actor_local_index_.html#consumeresult" class="tsd-signature-type">ConsumeResult</a></li>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="apply" class="tsd-anchor"></a>
+					<h3>apply</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">apply<span class="tsd-signature-symbol">(</span>e<span class="tsd-signature-symbol">: </span><a href="../classes/_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_src_actor_local_index_.behaviour.html" class="tsd-signature-type">Behaviour</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/c8155ee/src/actor/local/index.ts#L29">src/actor/local/index.ts:29</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/actor/local/index.ts#L31">src/actor/local/index.ts:31</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-type-parameters-title">Type parameters</h4>
-							<ul class="tsd-type-parameters">
-								<li>
-									<h4>M</h4>
-								</li>
-							</ul>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>apply this behaviour to an Envelope.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>e: <a href="../classes/_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">M</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<h5>e: <a href="../classes/_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../modules/_src_actor_local_index_.html#consumeresult" class="tsd-signature-type">ConsumeResult</a></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_src_actor_local_index_.behaviour.html" class="tsd-signature-type">Behaviour</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -149,9 +148,6 @@
 						<a href="../modules/_src_actor_local_immutable_.html">"src/actor/local/<wbr>Immutable"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="../modules/_src_actor_local_local_.html">"src/actor/local/<wbr>Local"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
 						<a href="../modules/_src_actor_local_mutable_.html">"src/actor/local/<wbr>Mutable"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -162,6 +158,9 @@
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_src_actor_local_receive_.html">"src/actor/local/<wbr>Receive"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="../modules/_src_actor_local_resident_.html">"src/actor/local/<wbr>Resident"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="../modules/_src_actor_local_select_.html">"src/actor/local/<wbr>Select"</a>
@@ -211,24 +210,24 @@
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="_src_actor_local_index_.behaviour.html" class="tsd-kind-icon">Behaviour</a>
 						<ul>
-							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-has-type-parameter">
-								<a href="_src_actor_local_index_.behaviour.html#consume" class="tsd-kind-icon">consume</a>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="_src_actor_local_index_.behaviour.html#apply" class="tsd-kind-icon">apply</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_src_actor_local_index_.handler.html" class="tsd-kind-icon">Handler</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_src_actor_local_index_.localactor.html" class="tsd-kind-icon">Local<wbr>Actor</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
 						<a href="../modules/_src_actor_local_index_.html#cases" class="tsd-kind-icon">Cases</a>
 					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
-						<a href="../modules/_src_actor_local_index_.html#consumeresult" class="tsd-kind-icon">Consume<wbr>Result</a>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../modules/_src_actor_local_index_.html#handler" class="tsd-kind-icon">Handler</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="../modules/_src_actor_local_index_.html#matched" class="tsd-kind-icon">Matched</a>
+						<a href="../modules/_src_actor_local_index_.html#receiver" class="tsd-kind-icon">Receiver</a>
 					</li>
 				</ul>
 			</nav>

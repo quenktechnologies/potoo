@@ -15,14 +15,21 @@ class Selector extends local.Mutable {
 
         let bucket = [];
 
-        let cases = [
-            new local.Case('one', () => (bucket.push(1), this.select(cases))),
-            new local.Case('two', () => (bucket.push(2), this.select(cases))),
-            new local.Case('three', () => (bucket.push(3), this.select(cases))),
-            new local.Case('done', () => { must(bucket.join(',')).eql('1,2,3'); this.done(); })
+        let cases0 = [
+
+            new local.Case('one', () => (bucket.push(1), this.select(cases0).select(cases1))),
+            new local.Case('two', () => (bucket.push(2), this.select(cases0).select(cases1))),
+
         ];
 
-        this.select(cases);
+        let cases1 = [
+
+            new local.Case('three', () => (bucket.push(3), this.select(cases0).select(cases1))),
+            new local.Case('done', () => { must(bucket.join(',')).eql('1,2,3'); this.done(); })
+
+        ];
+
+        this.select(cases0.concat(cases1));
         this.tell('selector', 'one');
         this.tell('selector', 'seven');
         this.tell('selector', 'two');

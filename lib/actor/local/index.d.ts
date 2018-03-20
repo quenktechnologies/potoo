@@ -1,8 +1,10 @@
 import * as Promise from 'bluebird';
-import { Envelope } from '../../system';
+import { Maybe } from 'afpl/lib/monad/Maybe';
+import { Result } from '@quenk/match';
+import { Envelope, Message } from '../../system';
 import { Case } from './Case';
 import { Actor, Template, Address } from '..';
-export { Case };
+export { Message, Case };
 export { Resident } from './Resident';
 export { Mutable } from './Mutable';
 export { Parent } from './Parent';
@@ -15,12 +17,14 @@ export { Pending } from './Pending';
  * actors that run in the same runtime of the system are generally
  * not concurrent.
  */
-export declare type ConsumeResult = Behaviour | null;
 /**
  * Behaviour of a dynamic actor.
  */
 export interface Behaviour {
-    consume(e: Envelope): ConsumeResult;
+    /**
+     * apply this behaviour to an Envelope.
+     */
+    apply(e: Envelope): Maybe<Behaviour>;
 }
 /**
  * Cases is a list of Case instances that will be applied to a message
@@ -30,9 +34,11 @@ export declare type Cases<T> = Case<T>[];
 /**
  * Handler for a Case.
  */
-export interface Handler<T> {
-    (t: T): void;
-}
+export declare type Handler<T> = (t: T) => void;
+/**
+ * Receiver function.
+ */
+export declare type Receiver<T> = (m: Message) => Result<T>;
 /**
  * LocalActor is an actor that exists in the current runtime.
  */
@@ -54,6 +60,11 @@ export interface LocalActor extends Actor {
      */
     ask<M, R>(ref: string, m: M, time: number): Promise<R>;
     /**
+     * select the next message to be processed, applying each Case
+     * until one matches.
+     */
+    select<T>(c: Cases<T>): LocalActor;
+    /**
      * kill another actor.
      */
     kill(addr: Address): LocalActor;
@@ -61,14 +72,4 @@ export interface LocalActor extends Actor {
      * exit instructs the system to kill of this actor.
      */
     exit(): void;
-}
-/**
- * SelectiveLocalActor provides an API for preforming selective receives.
- */
-export interface SelectiveLocalActor extends LocalActor {
-    /**
-     * select the next message to be processed, applying each Case
-     * until one matches.
-     */
-    select<T>(c: Cases<T>): SelectiveLocalActor;
 }

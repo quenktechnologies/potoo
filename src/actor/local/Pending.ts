@@ -1,4 +1,4 @@
-import { Actor } from '..';
+import { Actor, Result, rejected, accepted } from '..';
 import { System, Envelope } from '../../system';
 
 /**
@@ -14,15 +14,16 @@ export class Pending<R> implements Actor {
         public resolve: (r: R) => void,
         public system: System) { }
 
-    accept(e: Envelope): Pending<R> {
+    accept(e: Envelope): Result {
 
         if (e.from !== this.askee) {
 
-            this.system.discard(e);
+            //TODO: store the message instead of rejecting. 
+            return rejected(e);
 
         } else {
 
-            this
+            return this
                 .system
                 .toAddress(this)
                 .map(addr =>
@@ -30,15 +31,14 @@ export class Pending<R> implements Actor {
                         .system
                         .putActor(addr, this.original))
                 .map(() => this.resolve(<R>e.message))
+                .map(() => accepted(e))
                 .get();
 
         }
 
-        return this;
-
     }
 
-    run(): Pending<R> { return this; }
+    run() { }
 
     terminate() { }
 

@@ -74,6 +74,7 @@
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_src_actor_index_.actor.html" class="tsd-kind-icon">Actor</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_src_actor_index_.addresstable.html" class="tsd-kind-icon">Address<wbr>Table</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_src_actor_index_.instantiator.html" class="tsd-kind-icon">Instantiator</a></li>
 								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_src_actor_index_.template.html" class="tsd-kind-icon">Template</a></li>
 							</ul>
@@ -81,7 +82,17 @@
 						<section class="tsd-index-section ">
 							<h3>Type aliases</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_src_actor_index_.html#accept" class="tsd-kind-icon">Accept</a></li>
 								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_src_actor_index_.html#address" class="tsd-kind-icon">Address</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_src_actor_index_.html#reject" class="tsd-kind-icon">Reject</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_src_actor_index_.html#result" class="tsd-kind-icon">Result</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Functions</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_src_actor_index_.html#accepted" class="tsd-kind-icon">accepted</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_src_actor_index_.html#rejected" class="tsd-kind-icon">rejected</a></li>
 							</ul>
 						</section>
 					</div>
@@ -90,12 +101,22 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Type aliases</h2>
 				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="accept" class="tsd-anchor"></a>
+					<h3>Accept</h3>
+					<div class="tsd-signature tsd-kind-icon">Accept<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"accept"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/actor/index.ts#L6">src/actor/index.ts:6</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
 					<a name="address" class="tsd-anchor"></a>
 					<h3>Address</h3>
 					<div class="tsd-signature tsd-kind-icon">Address<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/concern/blob/c8155ee/src/actor/index.ts#L9">src/actor/index.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/actor/index.ts#L18">src/actor/index.ts:18</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -105,6 +126,85 @@
 						<p>Potoo actor addresses are just urls in order to make
 						working with the Web and existing infrastructure easier.</p>
 					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="reject" class="tsd-anchor"></a>
+					<h3>Reject</h3>
+					<div class="tsd-signature tsd-kind-icon">Reject<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"reject"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/actor/index.ts#L8">src/actor/index.ts:8</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+					<a name="result" class="tsd-anchor"></a>
+					<h3>Result</h3>
+					<div class="tsd-signature tsd-kind-icon">Result<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Either</span><span class="tsd-signature-symbol">&lt;</span><a href="_src_actor_index_.html#reject" class="tsd-signature-type">Reject</a><span class="tsd-signature-symbol">, </span><a href="_src_actor_index_.html#accept" class="tsd-signature-type">Accept</a><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/actor/index.ts#L10">src/actor/index.ts:10</a></li>
+						</ul>
+					</aside>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="accepted" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> accepted</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">accepted<span class="tsd-signature-symbol">(</span>_<span class="tsd-signature-symbol">: </span><a href="../classes/_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_actor_index_.html#result" class="tsd-signature-type">Result</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/actor/index.ts#L95">src/actor/index.ts:95</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>accepted</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_: <a href="../classes/_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_src_actor_index_.html#result" class="tsd-signature-type">Result</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="rejected" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> rejected</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">rejected<span class="tsd-signature-symbol">(</span>_<span class="tsd-signature-symbol">: </span><a href="../classes/_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_actor_index_.html#result" class="tsd-signature-type">Result</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/actor/index.ts#L90">src/actor/index.ts:90</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>rejected</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_: <a href="../classes/_src_system_envelope_.envelope.html" class="tsd-signature-type">Envelope</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_src_actor_index_.html#result" class="tsd-signature-type">Result</a></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -127,9 +227,6 @@
 						<a href="_src_actor_local_immutable_.html">"src/actor/local/<wbr>Immutable"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="_src_actor_local_local_.html">"src/actor/local/<wbr>Local"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
 						<a href="_src_actor_local_mutable_.html">"src/actor/local/<wbr>Mutable"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
@@ -140,6 +237,9 @@
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_src_actor_local_receive_.html">"src/actor/local/<wbr>Receive"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="_src_actor_local_resident_.html">"src/actor/local/<wbr>Resident"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="_src_actor_local_select_.html">"src/actor/local/<wbr>Select"</a>
@@ -188,13 +288,31 @@
 						<a href="../interfaces/_src_actor_index_.actor.html" class="tsd-kind-icon">Actor</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_src_actor_index_.addresstable.html" class="tsd-kind-icon">Address<wbr>Table</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/_src_actor_index_.instantiator.html" class="tsd-kind-icon">Instantiator</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="../interfaces/_src_actor_index_.template.html" class="tsd-kind-icon">Template</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="_src_actor_index_.html#accept" class="tsd-kind-icon">Accept</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 						<a href="_src_actor_index_.html#address" class="tsd-kind-icon">Address</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="_src_actor_index_.html#reject" class="tsd-kind-icon">Reject</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+						<a href="_src_actor_index_.html#result" class="tsd-kind-icon">Result</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_src_actor_index_.html#accepted" class="tsd-kind-icon">accepted</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_src_actor_index_.html#rejected" class="tsd-kind-icon">rejected</a>
 					</li>
 				</ul>
 			</nav>

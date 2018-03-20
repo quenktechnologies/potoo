@@ -1,16 +1,14 @@
 import * as Promise from 'bluebird';
 import { System, PsuedoSystem, Envelope } from '../../system';
-import { LocalActor } from '.';
-import { Template, Address } from '..';
+import { Cases, LocalActor } from '.';
+import { Template, Address, Result } from '..';
 
 /**
  * Resident provides a LocalActor impleemntation.
  */
 export abstract class Resident implements LocalActor {
 
-    abstract run(path: Address): Resident;
-
-    abstract accept(m: Envelope): Resident;
+    abstract accept(m: Envelope): Result;
 
     self = () => this.system.toAddress(this).get();
 
@@ -34,6 +32,14 @@ export abstract class Resident implements LocalActor {
         return this.system.askMessage<R>(new Envelope(ref, this.self(), m), time);
 
     }
+
+    select<T>(_: Cases<T>): Resident {
+
+        return this;
+
+    }
+
+    run(_:Address) { }
 
     kill(addr: Address): Resident {
 

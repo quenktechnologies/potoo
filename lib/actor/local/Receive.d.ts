@@ -1,11 +1,12 @@
 import { System, Envelope } from '../../system';
-import { ConsumeResult, Case } from '.';
+import { Maybe } from 'afpl/lib/monad/Maybe';
+import { Receiver } from '.';
 /**
  * Receive block for messages.
  */
 export declare class Receive<T> {
-    cases: Case<T>[];
+    fn: Receiver<T>;
     system: System;
-    constructor(cases: Case<T>[], system: System);
-    consume(e: Envelope): ConsumeResult;
+    constructor(fn: Receiver<T>, system: System);
+    apply(e: Envelope): Maybe<Receive<T>>;
 }

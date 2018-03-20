@@ -157,9 +157,9 @@ export class ActorSystem implements System, actor.Actor {
 
     }
 
-    discard(m: Envelope): ActorSystem {
+    discard(e: Envelope): ActorSystem {
 
-        this.logging.messageDropped(m);
+        this.logging.messageDropped(e);
         return this;
 
     }
@@ -173,19 +173,19 @@ export class ActorSystem implements System, actor.Actor {
 
     putMessage(e: Envelope): ActorSystem {
 
-        let actor = this.actors[e.to];
+        this.logging.messageSent(e);
 
-        if (!actor) {
-            this.discard(e);
-        } else {
+        setTimeout(() => {
 
-            setTimeout(() => {
-                this.logging.messageSent(e);
-                //Using the reference on the system in case the actor changed.
-                this.actors[e.to].accept(e); 
-            }, 0);
-
-        }
+            Maybe
+                .fromAny(this.actors[e.to])
+                .map(actor =>
+                    actor
+                        .accept(e)
+                        .map(() => this.logging.messageAccepted(e))
+                        .orRight(() => this.logging.messageRejected(e)))
+                .orJust(() => this.discard(e)) //?
+        }, 0);
 
         return this;
 
@@ -260,10 +260,9 @@ export class ActorSystem implements System, actor.Actor {
      *
      * It will be discarded.
      */
-    accept(e: Envelope): ActorSystem {
+    accept(e: Envelope): actor.Result {
 
-        this.discard(e);
-        return this;
+        return actor.rejected(e);
 
     }
 

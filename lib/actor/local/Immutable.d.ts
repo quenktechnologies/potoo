@@ -1,5 +1,6 @@
 import { Envelope } from '../../system';
 import { Resident, Cases } from '.';
+import { Result } from '..';
 /**
  * Immutable actors do not change their behaviour.
  *
@@ -8,6 +9,6 @@ import { Resident, Cases } from '.';
  */
 export declare abstract class Immutable<T> extends Resident {
     abstract receive: Cases<T>;
-    run(): Immutable<T>;
-    accept(e: Envelope): Immutable<T>;
+    accept(e: Envelope): Result;
+    run(): void;
 }

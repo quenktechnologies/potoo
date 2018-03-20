@@ -1,26 +1,26 @@
-import { System,Envelope } from '../../system';
-import {ConsumeResult, Case} from '.';
+import { System, Envelope } from '../../system';
+import {Maybe, just } from 'afpl/lib/monad/Maybe';
+import { Receiver } from '.';
 
 /**
  * Receive block for messages.
  */
 export class Receive<T> {
 
-    constructor(public cases: Case<T>[], public system: System) { }
+    constructor(public fn: Receiver<T>, public system: System) { }
 
-    consume(e: Envelope): ConsumeResult {
+    apply(e: Envelope): Maybe<Receive<T>> {
 
-        if (this.cases.some(c => c.match(<T>e.message))) {
+        let received = false;
 
+        this
+            .fn(e.message)
+            .orElse(() => { received = true; this.system.discard(e); })
+
+        if (received)
             this.system.log().messageReceived(e);
 
-        } else {
-
-            this.system.log().messageDropped(e);
-
-        }
-
-        return this;
+        return just(this);
 
     }
 
