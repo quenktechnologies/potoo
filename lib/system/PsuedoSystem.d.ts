@@ -1,7 +1,7 @@
 import * as Promise from 'bluebird';
 import * as actor from '../actor';
-import * as log from './log';
 import { Maybe } from 'afpl/lib/monad/Maybe';
+import { Event } from './log/event';
 import { System, Envelope } from '.';
 /**
  * PsuedoSystem satisfies the system interface but is really a fraud.
@@ -10,8 +10,8 @@ import { System, Envelope } from '.';
  * from the system.
  */
 export declare class PsuedoSystem implements System {
-    logging: log.LogLogic;
-    constructor(logging: log.LogLogic);
+    system: System;
+    constructor(system: System);
     toAddress(_: actor.Actor): Maybe<string>;
     putMessage(e: Envelope): PsuedoSystem;
     askMessage<R>(e: Envelope, _?: number): Promise<R>;
@@ -28,5 +28,5 @@ export declare class PsuedoSystem implements System {
     discard(e: Envelope): PsuedoSystem;
     putActor(_path: string, _actor: actor.Actor): PsuedoSystem;
     putError(_: actor.Actor, e: Error): PsuedoSystem;
-    log(): log.LogLogic;
+    log(e: Event): PsuedoSystem;
 }

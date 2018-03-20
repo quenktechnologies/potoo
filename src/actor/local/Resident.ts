@@ -56,7 +56,7 @@ export abstract class Resident implements LocalActor {
 
     terminate(): void {
 
-        this.system = new PsuedoSystem(this.system.log());
+        this.system = new PsuedoSystem(this.system);
 
     }
 

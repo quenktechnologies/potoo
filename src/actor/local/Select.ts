@@ -1,3 +1,4 @@
+import * as event from '../../system/log/event';
 import {Maybe, just, nothing} from 'afpl/lib/monad/Maybe';
 import { System, Envelope } from '../../system';
 import { Case } from '.';
@@ -9,16 +10,16 @@ export class Select<T> {
 
     constructor(public cases: Case<T>[], public system: System) { }
 
-    apply(m: Envelope): Maybe<Select<T>> {
+    apply(e: Envelope): Maybe<Select<T>> {
 
-        if (this.cases.some(c => c.match(<T>m.message))) {
+        if (this.cases.some(c => c.match(<T>e.message))) {
 
-            this.system.log().messageReceived(m);
+            this.system.log(new event.MessageReceivedEvent(e.to, e.from, e.message));
             return nothing<Select<T>>();
 
         } else {
 
-            this.system.log().messageDropped(m);
+            this.system.discard(e);
             return just(this);
 
         }

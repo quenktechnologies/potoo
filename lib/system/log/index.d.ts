@@ -37,24 +37,53 @@ export interface Logger {
  * LogPolicy sets what the system should log
  */
 export interface LogPolicy {
+    /**
+     * level of the events to be logged.
+     */
     level: number;
+    /**
+     * logger is the actual logging implemention.
+     *
+     * It MUST correspond to the basic info,warn and error api of the javascript console.
+     */
     logger: Logger;
 }
 /**
  * LogLogic provides methods for telling the story of the system
  * and its actor's lifecycles.
  *
- * Actor implementation MUST call the repsective methods
- * as they take action otherwise they will not appear in the system log.
  */
-export declare class LogLogic {
-    policy: LogPolicy;
-    constructor(policy: LogPolicy);
-    static createFrom(p: LogPolicy): LogLogic;
+export interface LogLogic {
+    /**
+     * log an event.
+     *
+     * If the event level is less than the current policy level
+     * then it will not be logged.
+     */
+    log(e: event.Event): LogLogic;
     /**
      * error
      */
-    error(e: Error): void;
+    error(e: Error): LogLogic;
+}
+/**
+ * SystemLogLogic implementation.
+ */
+export declare class SystemLogLogic implements LogLogic {
+    policy: LogPolicy;
+    constructor(policy: LogPolicy);
+    static createFrom(p: LogPolicy): SystemLogLogic;
+    /**
+     * log an event.
+     *
+     * If the event level is less than the current policy level
+     * then it will not be logged.
+     */
+    log(e: event.Event): SystemLogLogic;
+    /**
+     * error
+     */
+    error(e: Error): SystemLogLogic;
     /**
      * childSpawned
      */

@@ -1,7 +1,8 @@
 import * as Promise from 'bluebird';
 import * as actor from '../actor';
-import * as log from './log';
+import * as event from './log/event';
 import { Maybe } from 'afpl/lib/monad/Maybe';
+import { Event } from './log/event';
 import { System, Envelope, DEAD_ADDRESS } from '.';
 
 /**
@@ -12,7 +13,7 @@ import { System, Envelope, DEAD_ADDRESS } from '.';
  */
 export class PsuedoSystem implements System {
 
-    constructor(public logging: log.LogLogic) { }
+    constructor(public system: System) { }
 
     toAddress(_: actor.Actor): Maybe<string> {
 
@@ -22,21 +23,24 @@ export class PsuedoSystem implements System {
 
     putMessage(e: Envelope): PsuedoSystem {
 
-        this.logging.messageRejected(e);
+        this.system.log(new event.MessageRejectedEvent(e.to, e.from, e.message));
         return this;
 
     }
 
-    askMessage< R>(e: Envelope, _ = Infinity): Promise<R> {
+    askMessage<R>(e: Envelope, _ = Infinity): Promise<R> {
 
-        this.logging.messageRejected(e)
+        this.system.log(new event.MessageRejectedEvent(e.to, e.from, e.message));
         return Promise.resolve(undefined);
 
     }
 
     removeActor(_: actor.Actor, addr: string): PsuedoSystem {
 
-        this.logging.error(new Error(`removeActor(): Cannot removed actor "${addr}" from isolated system!`));
+        let msg = `removeActor(): Cannot removed actor "${addr}" from isolated system!`;
+
+        this.system.log(new event.ErrorEvent(new Error(msg)));
+
         return this;
 
     }
@@ -46,7 +50,10 @@ export class PsuedoSystem implements System {
      */
     putChild(_parent: actor.Actor, _: actor.Template): actor.Address {
 
-        this.logging.error(new Error(`putChild(): Cannot put an actor in an isolated system!`));
+        let msg = `putChild(): Cannot put an actor in an isolated system!`;
+
+        this.system.log(new event.ErrorEvent(new Error(msg)));
+
         return DEAD_ADDRESS;
 
     }
@@ -58,28 +65,31 @@ export class PsuedoSystem implements System {
      */
     discard(e: Envelope): PsuedoSystem {
 
-        this.logging.messageDropped(e);
+        this.system.discard(e);
         return this;
 
     }
 
     putActor(_path: string, _actor: actor.Actor): PsuedoSystem {
 
-        this.logging.error(new Error(`putActor(): Cannot put an actor into an isolated system!`));
+        let msg = `putActor(): Cannot put an actor into an isolated system!`;
+
+        this.system.log(new event.ErrorEvent(Error(msg)));
         return this;
 
     }
 
     putError(_: actor.Actor, e: Error): PsuedoSystem {
 
-        this.logging.error(e);
+        this.system.log(new event.ErrorEvent(e));
         return this;
 
     }
 
-    log(): log.LogLogic {
+    log(e: Event): PsuedoSystem {
 
-        return this.logging;
+        this.system.log(e);
+        return this;
 
     }
 

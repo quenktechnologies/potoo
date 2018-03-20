@@ -8,6 +8,6 @@ export declare class Select<T> {
     cases: Case<T>[];
     system: System;
     constructor(cases: Case<T>[], system: System);
-    apply(m: Envelope): Maybe<Select<T>>;
+    apply(e: Envelope): Maybe<Select<T>>;
     merge<A>(cases: Case<T>[]): Select<T | A>;
 }

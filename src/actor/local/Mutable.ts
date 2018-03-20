@@ -1,3 +1,4 @@
+import * as event from '../../system/log/event';
 import { match } from '@quenk/match';
 import { Maybe, fromArray } from 'afpl/lib/monad/Maybe';
 import { System, Envelope } from '../../system';
@@ -50,7 +51,7 @@ export abstract class Mutable extends Resident implements LocalActor {
                     .end())
                 .orJust(() => new Select(cases, this.system));
 
-        this.system.log().receiveStarted(this.system.toAddress(this).get());
+        this.system.log(new event.ReceiveStartedEvent(this.system.toAddress(this).get()));
         this.consume();
 
         return this;
@@ -70,7 +71,7 @@ export abstract class Mutable extends Resident implements LocalActor {
                 .behaviour
                 .orJust(() => new Receive(fn, this.system))
 
-        this.system.log().receiveStarted(this.system.toAddress(this).get());
+        this.system.log(new event.ReceiveStartedEvent(this.system.toAddress(this).get()));
         this.consume();
         return this;
 

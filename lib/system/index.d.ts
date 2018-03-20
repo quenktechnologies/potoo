@@ -3,6 +3,7 @@ import * as actor from '../actor';
 import * as log from './log';
 import { Maybe } from 'afpl/lib/monad/Maybe';
 import { Either, Left, Right } from 'afpl/lib/monad/Either';
+import { Event } from './log/event';
 import { Envelope } from './Envelope';
 export { ActorSystem } from './ActorSystem';
 export { PsuedoSystem } from './PsuedoSystem';
@@ -82,9 +83,9 @@ export interface System {
      */
     removeActor(parent: actor.Actor, address: actor.Address): System;
     /**
-     * log provides the logging logic for the system.
+     * log an event to the system log.
      */
-    log(): log.LogLogic;
+    log(e: Event): System;
 }
 /**
  * mkChildPath produces the path for a child actor given its parent's path.

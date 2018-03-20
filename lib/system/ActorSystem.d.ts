@@ -1,6 +1,7 @@
 import * as Promise from 'bluebird';
 import * as actor from '../actor';
 import * as log from './log';
+import * as event from './log/event';
 import { Maybe } from 'afpl/lib/monad/Maybe';
 import { Configuration, ActorTable, Envelope, System } from '.';
 /**
@@ -18,7 +19,7 @@ import { Configuration, ActorTable, Envelope, System } from '.';
  */
 export declare class ActorSystem implements System, actor.Actor {
     config: Configuration;
-    logging: log.LogLogic;
+    logging: log.SystemLogLogic;
     /**
      * path is the static path of the system.
      *
@@ -30,7 +31,7 @@ export declare class ActorSystem implements System, actor.Actor {
      * actors is the ActorTable where all known actor's are stored.
      */
     actors: ActorTable;
-    constructor(config?: Configuration, logging?: log.LogLogic);
+    constructor(config?: Configuration, logging?: log.SystemLogLogic);
     /**
      * create a new system
      */
@@ -60,7 +61,7 @@ export declare class ActorSystem implements System, actor.Actor {
     putError(_src: actor.Actor, e: Error): System;
     askMessage<R>(m: Envelope, time?: number): Promise<R>;
     removeActor(parent: actor.Actor, addr: actor.Address): ActorSystem;
-    log(): log.LogLogic;
+    log(e: event.Event): ActorSystem;
     /**
      * accept a message bound for the system.
      *

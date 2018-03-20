@@ -2,6 +2,7 @@ import * as Promise from 'bluebird';
 import * as actor from '../actor';
 import * as local from '../actor/local';
 import * as log from './log';
+import * as event from './log/event';
 import { match } from '@quenk/match';
 import { Either, left, right } from 'afpl/lib/monad/Either';
 import { Maybe } from 'afpl/lib/monad/Maybe';
@@ -63,7 +64,7 @@ export class ActorSystem implements System, actor.Actor {
 
     constructor(
         public config: Configuration = defaults,
-        public logging: log.LogLogic = log.LogLogic.createFrom(config.log)) { }
+        public logging: log.SystemLogLogic = log.SystemLogLogic.createFrom(config.log)) { }
 
     /**
      * create a new system
@@ -249,9 +250,10 @@ export class ActorSystem implements System, actor.Actor {
 
     }
 
-    log(): log.LogLogic {
+    log(e: event.Event): ActorSystem {
 
-        return this.logging;
+        this.logging.log(e);
+        return this;
 
     }
 

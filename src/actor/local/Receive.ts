@@ -1,3 +1,4 @@
+import * as event from '../../system/log/event';
 import { System, Envelope } from '../../system';
 import {Maybe, just } from 'afpl/lib/monad/Maybe';
 import { Receiver } from '.';
@@ -18,7 +19,7 @@ export class Receive<T> {
             .orElse(() => { received = true; this.system.discard(e); })
 
         if (received)
-            this.system.log().messageReceived(e);
+            this.system.log(new event.MessageReceivedEvent(e.to, e.from, e.message));
 
         return just(this);
 

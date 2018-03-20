@@ -48,7 +48,16 @@ export interface Logger {
  */
 export interface LogPolicy {
 
+    /**
+     * level of the events to be logged.
+     */
     level: number;
+
+    /**
+     * logger is the actual logging implemention.
+     *
+     * It MUST correspond to the basic info,warn and error api of the javascript console.
+     */
     logger: Logger;
 
 }
@@ -57,26 +66,66 @@ export interface LogPolicy {
  * LogLogic provides methods for telling the story of the system
  * and its actor's lifecycles.
  *
- * Actor implementation MUST call the repsective methods
- * as they take action otherwise they will not appear in the system log.
  */
-export class LogLogic {
+export interface LogLogic {
+
+    /**
+     * log an event.
+     *
+     * If the event level is less than the current policy level
+     * then it will not be logged.
+     */
+    log(e: event.Event): LogLogic;
+
+    /**
+     * error
+     */
+    error(e: Error): LogLogic;
+
+}
+
+/**
+ * SystemLogLogic implementation.
+ */
+export class SystemLogLogic implements LogLogic {
 
     constructor(public policy: LogPolicy) { }
 
-    static createFrom(p: LogPolicy) {
+    static createFrom(p: LogPolicy) : SystemLogLogic {
 
-        return new LogLogic(p);
+        return new SystemLogLogic(p);
+
+    }
+
+    /**
+     * log an event.
+     *
+     * If the event level is less than the current policy level
+     * then it will not be logged.
+     */
+    log(e: event.Event): SystemLogLogic {
+
+        if (this.policy.level >= e.level)
+            if (e.level >= INFO)
+                this.policy.logger.info(e);
+            else if (e.level >= WARN)
+                this.policy.logger.warn(e);
+            else if (e.level >= ERROR)
+                this.policy.logger.error(e);
+
+        return this;
 
     }
 
     /**
      * error
      */
-    error(e: Error) {
+    error(e: Error): SystemLogLogic {
 
         if (this.policy.level >= ERROR)
             this.policy.logger.error(new event.ErrorEvent(e));
+
+        return this;
 
     }
 

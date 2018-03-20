@@ -4,6 +4,7 @@ import * as log from './log';
 import { match } from '@quenk/match';
 import { Maybe } from 'afpl/lib/monad/Maybe';
 import { Either, Left, Right, left, right } from 'afpl/lib/monad/Either';
+import { Event } from './log/event';
 import { Envelope } from './Envelope';
 
 export { ActorSystem } from './ActorSystem';
@@ -99,9 +100,9 @@ export interface System {
     removeActor(parent: actor.Actor, address: actor.Address): System;
 
     /**
-     * log provides the logging logic for the system.
+     * log an event to the system log.
      */
-    log(): log.LogLogic;
+    log(e: Event): System;
 
 }
 
