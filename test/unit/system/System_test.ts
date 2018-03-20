@@ -1,6 +1,6 @@
 import * as must from 'must/register';
 import { Left, Right } from 'afpl/lib/monad/Either';
-import { validateId } from '../../lib/system';
+import { validateId } from '../../../lib/system';
 
 describe('validateId', function() {
 
