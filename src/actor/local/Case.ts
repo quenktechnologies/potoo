@@ -1,5 +1,5 @@
 import { Pattern, kindOf } from '@quenk/kindof';
-import {Message} from '../../system';
+import { Message } from '../../system';
 import { Handler } from '.';
 
 /**
@@ -18,7 +18,7 @@ export class Case<T> {
         let r = kindOf(m, this.type);
 
         if (r)
-        setTimeout(() => this.handler(m), 0);
+            this.handler(m);
 
         return r;
 
