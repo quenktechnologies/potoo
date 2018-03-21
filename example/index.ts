@@ -12,18 +12,22 @@ const per2num = (v: string): number => Number(v.split('%')[0]);
 
 const num2per = (v: number): string => `${v}%`;
 
-class Player extends local.Static<KeyboardEvent>{
+class Player extends local.Immutable<KeyboardEvent>{
 
-    receive = new local.Case(KeyboardEvent, (e: KeyboardEvent) => {
+    receive = [
 
-        if (e.keyCode === 37)
-            this.getPlayer().style.left = this.moveLeft(<HTMLElement>e.target);
-        else if (e.keyCode === 39)
-            this.getPlayer().style.left = this.moveRight(<HTMLElement>e.target);
-        else
-            console.log(`ignored key code ${e.keyCode}`);
+        new local.Case(KeyboardEvent, (e: KeyboardEvent) => {
 
-    })
+            if (e.keyCode === 37)
+                this.getPlayer().style.left = this.moveLeft(<HTMLElement>e.target);
+            else if (e.keyCode === 39)
+                this.getPlayer().style.left = this.moveRight(<HTMLElement>e.target);
+            else
+                console.log(`ignored key code ${e.keyCode}`);
+
+        })
+
+    ]
 
     constructor(s: sys.System, public id: string) { super(s); }
 
