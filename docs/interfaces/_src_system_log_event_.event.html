@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ErrorEvent | potoo</title>
+	<title>Event | potoo</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/_src_system_log_event_.html">&quot;src/system/log/event&quot;</a>
 				</li>
 				<li>
-					<a href="_src_system_log_event_.errorevent.html">ErrorEvent</a>
+					<a href="_src_system_log_event_.event.html">Event</a>
 				</li>
 			</ul>
-			<h1>Class ErrorEvent</h1>
+			<h1>Interface Event</h1>
 		</div>
 	</div>
 </header>
@@ -72,29 +72,32 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>ErrorEvent is generated when an error occurs that does not
-						stop the system from operating.</p>
+						<p>Event is the superclass of all events logged by the system.</p>
 					</div>
-					<p>This is typically incorrect actor id names or duplicate actor addresses etc.</p>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="_src_system_log_event_.systemevent.html" class="tsd-signature-type">SystemEvent</a>
-						<ul class="tsd-hierarchy">
-							<li>
-								<span class="target">ErrorEvent</span>
-							</li>
-						</ul>
+						<span class="target">Event</span>
 					</li>
 				</ul>
 			</section>
 			<section class="tsd-panel">
-				<h3>Implements</h3>
+				<h3>Implemented by</h3>
 				<ul class="tsd-hierarchy">
-					<li><a href="../interfaces/_src_system_log_event_.event.html" class="tsd-signature-type">Event</a></li>
+					<li><a href="../classes/_src_system_log_event_.actorremovedevent.html" class="tsd-signature-type">ActorRemovedEvent</a></li>
+					<li><a href="../classes/_src_system_log_event_.childspawnedevent.html" class="tsd-signature-type">ChildSpawnedEvent</a></li>
+					<li><a href="../classes/_src_system_log_event_.errorevent.html" class="tsd-signature-type">ErrorEvent</a></li>
+					<li><a href="../classes/_src_system_log_event_.messageacceptedevent.html" class="tsd-signature-type">MessageAcceptedEvent</a></li>
+					<li><a href="../classes/_src_system_log_event_.messagedroppedevent.html" class="tsd-signature-type">MessageDroppedEvent</a></li>
+					<li><a href="../classes/_src_system_log_event_.messagereceivedevent.html" class="tsd-signature-type">MessageReceivedEvent</a></li>
+					<li><a href="../classes/_src_system_log_event_.messagerejectedevent.html" class="tsd-signature-type">MessageRejectedEvent</a></li>
+					<li><a href="../classes/_src_system_log_event_.messagesentevent.html" class="tsd-signature-type">MessageSentEvent</a></li>
+					<li><a href="../classes/_src_system_log_event_.receivestartedevent.html" class="tsd-signature-type">ReceiveStartedEvent</a></li>
+					<li><a href="../classes/_src_system_log_event_.selectstartedevent.html" class="tsd-signature-type">SelectStartedEvent</a></li>
+					<li><a href="../classes/_src_system_log_event_.systemevent.html" class="tsd-signature-type">SystemEvent</a></li>
 				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -102,83 +105,46 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Constructors</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_src_system_log_event_.errorevent.html#constructor" class="tsd-kind-icon">constructor</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_src_system_log_event_.errorevent.html#error" class="tsd-kind-icon">error</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite"><a href="_src_system_log_event_.errorevent.html#level" class="tsd-kind-icon">level</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_src_system_log_event_.errorevent.html#timestamp" class="tsd-kind-icon">timestamp</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_src_system_log_event_.event.html#level" class="tsd-kind-icon">level</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_src_system_log_event_.event.html#timestamp" class="tsd-kind-icon">timestamp</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Constructors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
-					<a name="constructor" class="tsd-anchor"></a>
-					<h3>constructor</h3>
-					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Error<wbr>Event<span class="tsd-signature-symbol">(</span>error<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Error</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_src_system_log_event_.errorevent.html" class="tsd-signature-type">ErrorEvent</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L39">src/system/log/event.ts:39</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>error: <span class="tsd-signature-type">Error</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="_src_system_log_event_.errorevent.html" class="tsd-signature-type">ErrorEvent</a></h4>
-						</li>
-					</ul>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="error" class="tsd-anchor"></a>
-					<h3>error</h3>
-					<div class="tsd-signature tsd-kind-icon">error<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Error</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L41">src/system/log/event.ts:41</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="level" class="tsd-anchor"></a>
 					<h3>level</h3>
-					<div class="tsd-signature tsd-kind-icon">level<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;level.ERROR</span></div>
+					<div class="tsd-signature tsd-kind-icon">level<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
-						<p>Implementation of <a href="../interfaces/_src_system_log_event_.event.html">Event</a>.<a href="../interfaces/_src_system_log_event_.event.html#level">level</a></p>
-						<p>Overrides <a href="_src_system_log_event_.systemevent.html">SystemEvent</a>.<a href="_src_system_log_event_.systemevent.html#level">level</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L39">src/system/log/event.ts:39</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L11">src/system/log/event.ts:11</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>level of the Event distiguishes its severity.</p>
+						</div>
+					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="timestamp" class="tsd-anchor"></a>
 					<h3>timestamp</h3>
-					<div class="tsd-signature tsd-kind-icon">timestamp<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;Date.now() / 1000</span></div>
+					<div class="tsd-signature tsd-kind-icon">timestamp<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
-						<p>Implementation of <a href="../interfaces/_src_system_log_event_.event.html">Event</a>.<a href="../interfaces/_src_system_log_event_.event.html#timestamp">timestamp</a></p>
-						<p>Inherited from <a href="_src_system_log_event_.systemevent.html">SystemEvent</a>.<a href="_src_system_log_event_.systemevent.html#timestamp">timestamp</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L27">src/system/log/event.ts:27</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L16">src/system/log/event.ts:16</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>timestamp of when the event was generated.</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -259,59 +225,53 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_src_system_log_event_.actorremovedevent.html" class="tsd-kind-icon">Actor<wbr>Removed<wbr>Event</a>
+						<a href="../classes/_src_system_log_event_.actorremovedevent.html" class="tsd-kind-icon">Actor<wbr>Removed<wbr>Event</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_src_system_log_event_.childspawnedevent.html" class="tsd-kind-icon">Child<wbr>Spawned<wbr>Event</a>
+						<a href="../classes/_src_system_log_event_.childspawnedevent.html" class="tsd-kind-icon">Child<wbr>Spawned<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module">
+						<a href="../classes/_src_system_log_event_.errorevent.html" class="tsd-kind-icon">Error<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../classes/_src_system_log_event_.messageacceptedevent.html" class="tsd-kind-icon">Message<wbr>Accepted<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../classes/_src_system_log_event_.messagedroppedevent.html" class="tsd-kind-icon">Message<wbr>Dropped<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../classes/_src_system_log_event_.messagereceivedevent.html" class="tsd-kind-icon">Message<wbr>Received<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../classes/_src_system_log_event_.messagerejectedevent.html" class="tsd-kind-icon">Message<wbr>Rejected<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../classes/_src_system_log_event_.messagesentevent.html" class="tsd-kind-icon">Message<wbr>Sent<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module">
+						<a href="../classes/_src_system_log_event_.receivestartedevent.html" class="tsd-kind-icon">Receive<wbr>Started<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module">
+						<a href="../classes/_src_system_log_event_.selectstartedevent.html" class="tsd-kind-icon">Select<wbr>Started<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module">
+						<a href="../classes/_src_system_log_event_.systemevent.html" class="tsd-kind-icon">System<wbr>Event</a>
 					</li>
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_src_system_log_event_.errorevent.html" class="tsd-kind-icon">Error<wbr>Event</a>
+					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_src_system_log_event_.event.html" class="tsd-kind-icon">Event</a>
 						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="_src_system_log_event_.errorevent.html#constructor" class="tsd-kind-icon">constructor</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_src_system_log_event_.event.html#level" class="tsd-kind-icon">level</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="_src_system_log_event_.errorevent.html#error" class="tsd-kind-icon">error</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
-								<a href="_src_system_log_event_.errorevent.html#level" class="tsd-kind-icon">level</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="_src_system_log_event_.errorevent.html#timestamp" class="tsd-kind-icon">timestamp</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_src_system_log_event_.event.html#timestamp" class="tsd-kind-icon">timestamp</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_src_system_log_event_.messageacceptedevent.html" class="tsd-kind-icon">Message<wbr>Accepted<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_src_system_log_event_.messagedroppedevent.html" class="tsd-kind-icon">Message<wbr>Dropped<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_src_system_log_event_.messagereceivedevent.html" class="tsd-kind-icon">Message<wbr>Received<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_src_system_log_event_.messagerejectedevent.html" class="tsd-kind-icon">Message<wbr>Rejected<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_src_system_log_event_.messagesentevent.html" class="tsd-kind-icon">Message<wbr>Sent<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_src_system_log_event_.receivestartedevent.html" class="tsd-kind-icon">Receive<wbr>Started<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_src_system_log_event_.selectstartedevent.html" class="tsd-kind-icon">Select<wbr>Started<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_src_system_log_event_.systemevent.html" class="tsd-kind-icon">System<wbr>Event</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="../interfaces/_src_system_log_event_.event.html" class="tsd-kind-icon">Event</a>
-					</li>
 				</ul>
 			</nav>
 		</div>

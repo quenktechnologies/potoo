@@ -98,6 +98,12 @@
 					</li>
 				</ul>
 			</section>
+			<section class="tsd-panel">
+				<h3>Implements</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="../interfaces/_src_system_log_event_.event.html" class="tsd-signature-type">Event</a></li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
@@ -108,10 +114,11 @@
 								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><a href="_src_system_log_event_.messagerejectedevent.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-inherited">
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_src_system_log_event_.messagerejectedevent.html#from" class="tsd-kind-icon">from</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite"><a href="_src_system_log_event_.messagerejectedevent.html#level" class="tsd-kind-icon">level</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_src_system_log_event_.messagerejectedevent.html#message" class="tsd-kind-icon">message</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_src_system_log_event_.messagerejectedevent.html#timestamp" class="tsd-kind-icon">timestamp</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_src_system_log_event_.messagerejectedevent.html#to" class="tsd-kind-icon">to</a></li>
@@ -133,7 +140,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_src_system_log_event_.messagesentevent.html">MessageSentEvent</a>.<a href="_src_system_log_event_.messagesentevent.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/system/log/event.ts#L38">src/system/log/event.ts:38</a></li>
+									<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L61">src/system/log/event.ts:61</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -153,7 +160,7 @@
 					</ul>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="from" class="tsd-anchor"></a>
@@ -162,7 +169,19 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_src_system_log_event_.messagesentevent.html">MessageSentEvent</a>.<a href="_src_system_log_event_.messagesentevent.html#from">from</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/system/log/event.ts#L40">src/system/log/event.ts:40</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L63">src/system/log/event.ts:63</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
+					<a name="level" class="tsd-anchor"></a>
+					<h3>level</h3>
+					<div class="tsd-signature tsd-kind-icon">level<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;level.WARN</span></div>
+					<aside class="tsd-sources">
+						<p>Implementation of <a href="../interfaces/_src_system_log_event_.event.html">Event</a>.<a href="../interfaces/_src_system_log_event_.event.html#level">level</a></p>
+						<p>Overrides <a href="_src_system_log_event_.messagesentevent.html">MessageSentEvent</a>.<a href="_src_system_log_event_.messagesentevent.html#level">level</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L100">src/system/log/event.ts:100</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -173,7 +192,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_src_system_log_event_.messagesentevent.html">MessageSentEvent</a>.<a href="_src_system_log_event_.messagesentevent.html#message">message</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/system/log/event.ts#L40">src/system/log/event.ts:40</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L63">src/system/log/event.ts:63</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -182,16 +201,12 @@
 					<h3>timestamp</h3>
 					<div class="tsd-signature tsd-kind-icon">timestamp<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;Date.now() / 1000</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="_src_system_log_event_.event.html">Event</a>.<a href="_src_system_log_event_.event.html#timestamp">timestamp</a></p>
+						<p>Implementation of <a href="../interfaces/_src_system_log_event_.event.html">Event</a>.<a href="../interfaces/_src_system_log_event_.event.html#timestamp">timestamp</a></p>
+						<p>Inherited from <a href="_src_system_log_event_.systemevent.html">SystemEvent</a>.<a href="_src_system_log_event_.systemevent.html#timestamp">timestamp</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/system/log/event.ts#L10">src/system/log/event.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L27">src/system/log/event.ts:27</a></li>
 						</ul>
 					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>timestamp of when the event was generated.</p>
-						</div>
-					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="to" class="tsd-anchor"></a>
@@ -200,7 +215,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="_src_system_log_event_.messagesentevent.html">MessageSentEvent</a>.<a href="_src_system_log_event_.messagesentevent.html#to">to</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3457fb7/src/system/log/event.ts#L40">src/system/log/event.ts:40</a></li>
+							<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/f86ef9e/src/system/log/event.ts#L63">src/system/log/event.ts:63</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -291,9 +306,6 @@
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
 						<a href="_src_system_log_event_.errorevent.html" class="tsd-kind-icon">Error<wbr>Event</a>
 					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="_src_system_log_event_.event.html" class="tsd-kind-icon">Event</a>
-					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
 						<a href="_src_system_log_event_.messageacceptedevent.html" class="tsd-kind-icon">Message<wbr>Accepted<wbr>Event</a>
 					</li>
@@ -313,6 +325,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 								<a href="_src_system_log_event_.messagerejectedevent.html#from" class="tsd-kind-icon">from</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_src_system_log_event_.messagerejectedevent.html#level" class="tsd-kind-icon">level</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 								<a href="_src_system_log_event_.messagerejectedevent.html#message" class="tsd-kind-icon">message</a>
@@ -335,6 +350,12 @@
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
 						<a href="_src_system_log_event_.selectstartedevent.html" class="tsd-kind-icon">Select<wbr>Started<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-external-module">
+						<a href="_src_system_log_event_.systemevent.html" class="tsd-kind-icon">System<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_src_system_log_event_.event.html" class="tsd-kind-icon">Event</a>
 					</li>
 				</ul>
 			</nav>
