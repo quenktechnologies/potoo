@@ -64,7 +64,7 @@ export interface System {
      *
      * An event will be logged to the system log.
      */
-    discard(m: Envelope): System;
+    discard(e: Envelope): System;
 
     /**
      * putActor replaces an actor's context within the system.

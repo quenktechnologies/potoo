@@ -24,14 +24,16 @@ var Player = /** @class */ (function (_super) {
     function Player(s, id) {
         var _this = _super.call(this, s) || this;
         _this.id = id;
-        _this.receive = new local.Case(KeyboardEvent, function (e) {
-            if (e.keyCode === 37)
-                _this.getPlayer().style.left = _this.moveLeft(e.target);
-            else if (e.keyCode === 39)
-                _this.getPlayer().style.left = _this.moveRight(e.target);
-            else
-                console.log("ignored key code " + e.keyCode);
-        });
+        _this.receive = [
+            new local.Case(KeyboardEvent, function (e) {
+                if (e.keyCode === 37)
+                    _this.getPlayer().style.left = _this.moveLeft(e.target);
+                else if (e.keyCode === 39)
+                    _this.getPlayer().style.left = _this.moveRight(e.target);
+                else
+                    console.log("ignored key code " + e.keyCode);
+            })
+        ];
         return _this;
     }
     Player.prototype.getEntity = function (id) {
@@ -53,7 +55,7 @@ var Player = /** @class */ (function (_super) {
         window.onkeydown = function (e) { return _this.tell(_this.id, e); };
     };
     return Player;
-}(local.Static));
+}(local.Immutable));
 sys
     .ActorSystem
     .create()

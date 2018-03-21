@@ -1,10 +1,12 @@
 import * as event from '../../system/log/event';
-import { match } from '@quenk/match';
-import { Maybe, fromArray } from 'afpl/lib/monad/Maybe';
+import { Maybe, fromAny, fromArray } from 'afpl/lib/monad/Maybe';
 import { System, Envelope } from '../../system';
 import { Result, accepted } from '..';
 import { Cases, Receiver, Resident, LocalActor, Behaviour, Select, Receive } from '.';
 
+const _selectErr = (addr: string) =>
+    new event.ErrorEvent(
+        new Error(`${addr}: called select while multiple times!`));
 /**
  * Mutable can change their behaviour during message processing.
  *
@@ -25,15 +27,13 @@ export abstract class Mutable extends Resident implements LocalActor {
      */
     consume(): void {
 
-        this.behaviour =
-            this
-                .behaviour
-                .chain(b =>
-                    fromArray(this.mailbox)
-                        .map(mbox => mbox.shift())
-                        .chain(m => b.apply(m))
-                        .map(b => { this.consume(); return b; })
-                        .orJust(() => b));
+        this
+            .behaviour
+            .chain(b =>
+                fromArray(this.mailbox)
+                    .map(mbox => mbox.shift())
+                    .map(m => { this.behaviour = b.apply(m); })
+                    .map(() => this.consume()))
 
     }
 
@@ -42,17 +42,14 @@ export abstract class Mutable extends Resident implements LocalActor {
      */
     select<T>(cases: Cases<T>): Mutable {
 
-        this.behaviour =
-            this
-                .behaviour
-                .map(b => match<Behaviour>(b)
-                    .caseOf(Select, (b: Select<T>) => b.merge(cases))
-                    .orElse(() => b) //TODO: this should probably generate an error.
-                    .end())
-                .orJust(() => new Select(cases, this.system));
-
-        this.system.log(new event.ReceiveStartedEvent(this.system.toAddress(this).get()));
-        this.consume();
+        this
+            .behaviour
+            .map(() => this.system.log(_selectErr(this.self())))
+            .orJust(() => this.behaviour = fromAny<Behaviour>(new Select(cases, this.system)))
+            .map(() => this.system.log(new event.ReceiveStartedEvent(this.self())))
+            .map(() => this.consume())
+            .map(() => this)
+            .get();
 
         return this;
 

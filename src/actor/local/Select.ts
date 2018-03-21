@@ -1,5 +1,5 @@
 import * as event from '../../system/log/event';
-import {Maybe, just, nothing} from 'afpl/lib/monad/Maybe';
+import { Maybe, just, nothing } from 'afpl/lib/monad/Maybe';
 import { System, Envelope } from '../../system';
 import { Case } from '.';
 

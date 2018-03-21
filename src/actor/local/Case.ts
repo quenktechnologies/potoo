@@ -17,7 +17,7 @@ export class Case<T> {
 
         let r = kindOf(m, this.type);
 
-      //setTimeout is needed to keep things going.
+        //setTimeout is needed to keep things going.
 
         if (r)
             setTimeout(() => this.handler(m), 0);
