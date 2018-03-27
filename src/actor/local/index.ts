@@ -1,5 +1,5 @@
 import * as Promise from 'bluebird';
-import {Maybe} from 'afpl/lib/monad/Maybe';
+import { Maybe } from 'afpl/lib/monad/Maybe';
 import { Result } from '@quenk/match';
 import { Envelope, Message } from '../../system';
 import { Case } from './Case';
