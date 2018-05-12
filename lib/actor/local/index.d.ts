@@ -5,6 +5,7 @@ import { Envelope, Message } from '../../system';
 import { Case } from './Case';
 import { Actor, Template, Address } from '..';
 export { Message, Case };
+export { Pattern } from '@quenk/kindof';
 export { Resident } from './Resident';
 export { Mutable } from './Mutable';
 export { Parent } from './Parent';
