@@ -20,7 +20,7 @@ export abstract class Resident implements LocalActor {
 
     }
 
-    tell<M>(ref: string, m: M): Resident {
+    tell<M>(ref: string, m: M): this {
 
         this.system.putMessage(new Envelope(ref, this.self(), m));
         return this;
@@ -33,13 +33,13 @@ export abstract class Resident implements LocalActor {
 
     }
 
-    select<T>(_: Cases<T>): Resident {
+    select<T>(_: Cases<T>): this {
 
         return this;
 
     }
 
-    run(_:Address) { }
+    run(_: Address) { }
 
     kill(addr: Address): Resident {
 

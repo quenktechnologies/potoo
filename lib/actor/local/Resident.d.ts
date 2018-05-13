@@ -11,9 +11,9 @@ export declare abstract class Resident implements LocalActor {
     self: () => string;
     constructor(system: System);
     spawn(t: Template): Address;
-    tell<M>(ref: string, m: M): Resident;
+    tell<M>(ref: string, m: M): this;
     ask<M, R>(ref: string, m: M, time?: number): Promise<R>;
-    select<T>(_: Cases<T>): Resident;
+    select<T>(_: Cases<T>): this;
     run(_: Address): void;
     kill(addr: Address): Resident;
     exit(): void;
