@@ -22,7 +22,7 @@ export declare abstract class Mutable extends Resident implements LocalActor {
     /**
      * select allows for selectively receiving messages based on Case classes.
      */
-    select<T>(cases: Cases<T>): this;
+    select<T>(cases: Cases<T>): Mutable;
     /**
      * receive is deperecated
      * @deprecated

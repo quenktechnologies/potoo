@@ -32,4 +32,3 @@ export declare const combine: <A, M>(...fs: CaseFunction<A, M>[]) => CaseListFun
  * that when given a value produces a combined array of Cases.
  */
 export declare const combineA: <A, M>(...fs: CaseListFunction<A, M>[]) => CaseListFunction<A, M>;
-export declare const combineA3: <A, M, N, O>(f: CaseListFunction<A, M>, g: CaseListFunction<A, N>, h: CaseListFunction<A, O>) => (a: A) => (Case<M> | Case<N> | Case<O>)[];

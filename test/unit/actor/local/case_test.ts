@@ -1,5 +1,5 @@
 import * as must from 'must/register';
-import { combine, combineA, combineA3, Case } from '../../../../src/actor/local/case';
+import { combine, combineA, Case } from '../../../../src/actor/local/case';
 
 class A { }
 

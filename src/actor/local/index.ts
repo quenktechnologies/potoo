@@ -67,7 +67,7 @@ export interface LocalActor extends Actor {
     /**
      * tell a message to an actor address.
      */
-    tell<M>(ref: string, m: M): this;
+    tell<M>(ref: string, m: M): LocalActor;
 
     /**
      * ask for a reply from a message sent to an address.
@@ -78,7 +78,7 @@ export interface LocalActor extends Actor {
      * select the next message to be processed, applying each Case 
      * until one matches.
      */
-    select<T>(c: Cases<T>): this;
+    select<T>(c: Cases<T>): LocalActor;
 
     /**
      * kill another actor.
