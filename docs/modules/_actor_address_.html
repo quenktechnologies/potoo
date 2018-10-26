@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@quenk/potoo | @quenk/potoo</title>
+	<title>&quot;actor/address&quot; | @quenk/potoo</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -879,7 +879,7 @@ img { max-width: 100%; }
 		<div class="container">
 			<div class="table-wrap">
 				<div class="table-cell">
-					<strong><a href="index.html">@quenk/potoo</a></strong>
+					<strong><a href="../index.html">@quenk/potoo</a></strong>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -907,135 +907,261 @@ img { max-width: 100%; }
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
+		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
+			<a href="_actor_address_.html#address" class="tsd-kind-icon">Address</a>
+		</li>
+		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+			<a href="_actor_address_.html#address_discard" class="tsd-kind-icon">ADDRESS_<wbr>DISCARD</a>
+		</li>
+		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+			<a href="_actor_address_.html#address_empty" class="tsd-kind-icon">ADDRESS_<wbr>EMPTY</a>
+		</li>
+		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+			<a href="_actor_address_.html#address_restricted" class="tsd-kind-icon">ADDRESS_<wbr>RESTRICTED</a>
+		</li>
+		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+			<a href="_actor_address_.html#address_system" class="tsd-kind-icon">ADDRESS_<wbr>SYSTEM</a>
+		</li>
+		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+			<a href="_actor_address_.html#seperator" class="tsd-kind-icon">SEPERATOR</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module">
+			<a href="_actor_address_.html#getid" class="tsd-kind-icon">get<wbr>Id</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module">
+			<a href="_actor_address_.html#getparent" class="tsd-kind-icon">get<wbr>Parent</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module">
+			<a href="_actor_address_.html#isrestricted" class="tsd-kind-icon">is<wbr>Restricted</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module">
+			<a href="_actor_address_.html#make" class="tsd-kind-icon">make</a>
+		</li>
 	</ul>
 </nav>
 <div class="container container-main">
 	<div class="content-wrap">
-		<div class="tsd-panel tsd-typography">
-			<h1 id="potoo">Potoo</h1>
-			<p>Actor library for client and server side projects.</p>
-			<h1 id="installation">Installation</h1>
-			<pre><code class="lang-sh">npm install --save @quenk/potoo
-
-</code></pre>
-			<h1 id="usage">Usage</h1>
-			<p>According to &quot;Actor Model of Computation: Scalable Robust Information Systems&quot;:
-				&quot;The Actor Model is a mathematical theory that treats “Actors” as the universal
-			primitives of digital computation.&quot; </p>
-			<p>As far as this library is concerned, actors are a clean way to
-			communicate between modules of a program through message passing.</p>
-			<p>Actors that communicate which each other are part of a system. To begin
-				using this library you have to create one. A single function <code>system</code> is
-			exported for this purpose:</p>
-			<h2 id="example">Example</h2>
-			<pre><code class="lang-typescript">
-<span class="hljs-keyword">import</span> {Immutable, Mutable, Case} <span class="hljs-keyword">from</span> <span class="hljs-string">'@quenk/potoo/lib/actor/resident'</span>;
-<span class="hljs-keyword">import</span> {system} <span class="hljs-keyword">from</span> <span class="hljs-string">'@quenk/potoo'</span>;
-
-<span class="hljs-keyword">class</span> Server <span class="hljs-keyword">extends</span> Immutable&lt;<span class="hljs-built_in">string</span>&gt; {
-
-  receive = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'connect'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.tell(<span class="hljs-string">'client'</span>, <span class="hljs-string">'connected'</span>)),
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'time'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.tell(<span class="hljs-string">'client'</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>())),
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'close'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.tell(<span class="hljs-string">'client'</span>, <span class="hljs-string">'bye!'</span>))
-
-  ]
-
-}
-
-<span class="hljs-keyword">class</span> Client <span class="hljs-keyword">extends</span> Mutable&lt;<span class="hljs-built_in">string</span>&gt; {
-
-  receive = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'start'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.connect())
-
-  ]
-
-  connecting = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'connected'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> 
-      <span class="hljs-keyword">this</span>
-        .tell(<span class="hljs-string">'server'</span>, <span class="hljs-string">'time'</span>)
-        .select(<span class="hljs-keyword">this</span>.connected))
-
-  ]
-
-  connected = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-built_in">Date</span>, <span class="hljs-function">(<span class="hljs-params">d:date</span>)=&gt;</span> {
-
-      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Today is <span class="hljs-subst">${d}</span>.`</span>);
-
-      <span class="hljs-keyword">this</span>
-        .tell(<span class="hljs-string">'server'</span>, <span class="hljs-string">'close'</span>)
-        .select(connected);
-
-    }),
-
-  ]
-
-  connect() {
-
-    <span class="hljs-keyword">this</span>
-    .tell(<span class="hljs-string">'server'</span>, <span class="hljs-string">'connect'</span>)
-    .select(<span class="hljs-keyword">this</span>.connecting);
-
-  }
-
-}
-
-<span class="hljs-comment">//start the system and spawn the actors</span>
-system({log:{level:<span class="hljs-number">8</span>}})
-.spawn({id: <span class="hljs-string">'server'</span>, <span class="hljs-function"><span class="hljs-params">s</span> =&gt;</span> <span class="hljs-keyword">new</span> Server(s)})
-.spawn({id: <span class="hljs-string">'client'</span>, <span class="hljs-function"><span class="hljs-params">s</span> =&gt;</span> <span class="hljs-keyword">new</span> Client(s)})
-
-</code></pre>
-			<h1 id="license">License</h1>
-			<p>Apache-2.0 (C) Quenk Technologies Limited</p>
-		</div>
 		<section class="tsd-panel-group tsd-index-group">
 			<h2>Index</h2>
 			<section class="tsd-panel tsd-index-panel">
 				<div class="tsd-index-content">
 					<section class="tsd-index-section ">
-						<h3>External modules</h3>
+						<h3>Type aliases</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-external-module"><a href="modules/_actor_address_.html" class="tsd-kind-icon">"actor/address"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_err_.html" class="tsd-kind-icon">"actor/err"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_index_.html" class="tsd-kind-icon">"actor/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_message_.html" class="tsd-kind-icon">"actor/message"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_process_index_.html" class="tsd-kind-icon">"actor/process/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_process_script_.html" class="tsd-kind-icon">"actor/process/script"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_resident_.html" class="tsd-kind-icon">"actor/resident"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_error_.html" class="tsd-kind-icon">"actor/system/error"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_hooks_.html" class="tsd-kind-icon">"actor/system/hooks"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_index_.html" class="tsd-kind-icon">"actor/system/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_log_.html" class="tsd-kind-icon">"actor/system/log"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_mailbox_.html" class="tsd-kind-icon">"actor/system/mailbox"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_check_.html" class="tsd-kind-icon">"actor/system/op/check"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_drop_.html" class="tsd-kind-icon">"actor/system/op/drop"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_flag_.html" class="tsd-kind-icon">"actor/system/op/flag"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_index_.html" class="tsd-kind-icon">"actor/system/op/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_kill_.html" class="tsd-kind-icon">"actor/system/op/kill"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_raise_.html" class="tsd-kind-icon">"actor/system/op/raise"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_read_.html" class="tsd-kind-icon">"actor/system/op/read"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_receive_.html" class="tsd-kind-icon">"actor/system/op/receive"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_restart_.html" class="tsd-kind-icon">"actor/system/op/restart"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_route_.html" class="tsd-kind-icon">"actor/system/op/route"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_run_.html" class="tsd-kind-icon">"actor/system/op/run"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_spawn_.html" class="tsd-kind-icon">"actor/system/op/spawn"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_stop_.html" class="tsd-kind-icon">"actor/system/op/stop"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_tell_.html" class="tsd-kind-icon">"actor/system/op/tell"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_transfer_.html" class="tsd-kind-icon">"actor/system/op/transfer"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_state_.html" class="tsd-kind-icon">"actor/system/state"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_template_.html" class="tsd-kind-icon">"actor/template"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_index_.html" class="tsd-kind-icon">"index"</a></li>
+							<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_actor_address_.html#address" class="tsd-kind-icon">Address</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
+						<h3>Variables</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_address_.html#address_discard" class="tsd-kind-icon">ADDRESS_<wbr>DISCARD</a></li>
+							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_address_.html#address_empty" class="tsd-kind-icon">ADDRESS_<wbr>EMPTY</a></li>
+							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_address_.html#address_restricted" class="tsd-kind-icon">ADDRESS_<wbr>RESTRICTED</a></li>
+							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_address_.html#address_system" class="tsd-kind-icon">ADDRESS_<wbr>SYSTEM</a></li>
+							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_address_.html#seperator" class="tsd-kind-icon">SEPERATOR</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
+						<h3>Functions</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_actor_address_.html#getid" class="tsd-kind-icon">get<wbr>Id</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_actor_address_.html#getparent" class="tsd-kind-icon">get<wbr>Parent</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_actor_address_.html#isrestricted" class="tsd-kind-icon">is<wbr>Restricted</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_actor_address_.html#make" class="tsd-kind-icon">make</a></li>
 						</ul>
 					</section>
 				</div>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Type aliases</h2>
+			<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module">
+				<a name="address" class="tsd-anchor"></a>
+				<h3>Address</h3>
+				<div class="tsd-signature tsd-kind-icon">Address<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in actor/address.ts:20</li>
+					</ul>
+				</aside>
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Address of an actor.</p>
+					</div>
+					<p>Addresses are used to properly route messages between actors in the system
+					and conform to the path part of a URL.</p>
+				</div>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Variables</h2>
+			<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+				<a name="address_discard" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> ADDRESS_<wbr>DISCARD</h3>
+				<div class="tsd-signature tsd-kind-icon">ADDRESS_<wbr>DISCARD<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"?"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;?&quot;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in actor/address.ts:5</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+				<a name="address_empty" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> ADDRESS_<wbr>EMPTY</h3>
+				<div class="tsd-signature tsd-kind-icon">ADDRESS_<wbr>EMPTY<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;&quot;</span><span class="tsd-signature-symbol"> =&nbsp;&quot;&quot;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in actor/address.ts:7</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+				<a name="address_restricted" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> ADDRESS_<wbr>RESTRICTED</h3>
+				<div class="tsd-signature tsd-kind-icon">ADDRESS_<wbr>RESTRICTED<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[ADDRESS_DISCARD,ADDRESS_SYSTEM,SEPERATOR]</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in actor/address.ts:8</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+				<a name="address_system" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> ADDRESS_<wbr>SYSTEM</h3>
+				<div class="tsd-signature tsd-kind-icon">ADDRESS_<wbr>SYSTEM<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"$"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;$&quot;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in actor/address.ts:6</li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+				<a name="seperator" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> SEPERATOR</h3>
+				<div class="tsd-signature tsd-kind-icon">SEPERATOR<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"/"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;/&quot;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in actor/address.ts:3</li>
+					</ul>
+				</aside>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Functions</h2>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+				<a name="getid" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Id</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Id<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="_actor_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in actor/address.ts:67</li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>getId provides the id part of an actor address.</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>addr: <a href="_actor_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+				<a name="getparent" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Parent</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Parent<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="_actor_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_address_.html#address" class="tsd-signature-type">Address</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in actor/address.ts:41</li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>getParent computes the parent of an Address.</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>addr: <a href="_actor_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="_actor_address_.html#address" class="tsd-signature-type">Address</a></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+				<a name="isrestricted" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> is<wbr>Restricted</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+					<li class="tsd-signature tsd-kind-icon">is<wbr>Restricted<span class="tsd-signature-symbol">(</span>id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in actor/address.ts:25</li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>isRestricted indicates whether an actor id is restricted or not.</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>id: <span class="tsd-signature-type">string</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+				<a name="make" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> make</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+					<li class="tsd-signature tsd-kind-icon">make<span class="tsd-signature-symbol">(</span>parent<span class="tsd-signature-symbol">: </span><a href="_actor_address_.html#address" class="tsd-signature-type">Address</a>, id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_address_.html#address" class="tsd-signature-type">Address</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in actor/address.ts:31</li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>make a child address given its id and parent address.</p>
+							</div>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>parent: <a href="_actor_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+							<li>
+								<h5>id: <span class="tsd-signature-type">string</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="_actor_address_.html#address" class="tsd-signature-type">Address</a></h4>
+					</li>
+				</ul>
 			</section>
 		</section>
 		<footer class="with-border-bottom">
