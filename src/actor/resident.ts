@@ -1,12 +1,16 @@
 import { test } from '@quenk/noni/lib/data/type';
 import { fromBoolean } from '@quenk/noni/lib/data/either';
+import { fromArray } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
 import { ADDRESS_DISCARD, Address, isRestricted, make } from './address';
 import { Message } from './message';
+import { Envelope } from './system/mailbox';
 import { Spawn } from './system/op/spawn';
 import { Tell } from './system/op/tell';
 import { Kill } from './system/op/kill';
+import { Drop } from './system/op/drop';
 import { Receive } from './system/op/receive';
+import { Flag } from './system/op/flag';
 import { System, NullSystem } from './system';
 import { Template } from './template';
 import { Actor, } from './';
@@ -45,9 +49,9 @@ export type Handler<T> = (t: T) => void;
 export class Case<T> {
 
     constructor(pattern: Cons<T>, f: (value: T) => void)
-    constructor(pattern: String, f: (value: string) => void)
-    constructor(pattern: Number, f: (value: number) => void)
-    constructor(pattern: Boolean, f: (value: boolean) => void)
+    constructor(pattern: NumberConstructor, f: (value: number) => void)
+    constructor(pattern: BooleanConstructor, f: (value: boolean) => void)
+    constructor(pattern: StringConstructor, f: (value: string) => void)
     constructor(pattern: object, f: (value: { [P in keyof T]: Message }) => void)
     constructor(pattern: string, f: (value: string) => void)
     constructor(pattern: number, f: (value: number) => void)
@@ -154,6 +158,13 @@ export abstract class AbstractResident implements Resident {
             .orJust(() => ADDRESS_DISCARD)
             .get();
 
+    accept({ to, from, message }: Envelope) {
+
+        this.system.exec(new Drop(to, from, message));
+        return this;
+
+    }
+
     spawn(t: Template): Address {
 
         this.system.exec(new Spawn(this, t));
@@ -236,6 +247,7 @@ export abstract class Immutable<T> extends AbstractResident {
     run() {
 
         this.onRun();
+        this.system.exec(new Flag(this.self(), { immutable: true }));
         this.system.exec(new Receive(this.self(), true, ibehaviour(this)));
 
     }
@@ -258,7 +270,7 @@ export abstract class Mutable<T> extends AbstractResident {
      *
      * Use this instead of overriding the run hook.
      */
-    onRun(): void {}
+    onRun(): void { }
 
     /**
      * select allows for selectively receiving messages based on Case classes.
@@ -278,10 +290,10 @@ export abstract class Mutable<T> extends AbstractResident {
      */
     run() {
 
-        if (this.receive.length > 0)
-            this
-                .select(this.receive)
-                .onRun();
+        fromArray(this.receive)
+            .map(r => this.select(r))
+            .orJust(noop)
+            .map(() => this.onRun());
     }
 
 }
