@@ -1,2 +1,6 @@
-import { ActorSystem, Configuration } from './system';
-export declare const system: (conf?: Configuration) => ActorSystem;
+import { System, Configuration } from './actor/system';
+/**
+ * system creates a new actor system using the optionally passed
+ * configuration.
+ */
+export declare const system: (conf?: Configuration) => System;
