@@ -1,42 +1,13 @@
-import { Either } from 'afpl/lib/monad/Either';
-import { Envelope, System, Message } from '../system';
-export { Message };
-export declare type Accept = 'accept';
-export declare type Reject = 'reject';
-export declare type Result = Either<Reject, Accept>;
+import { Either } from '@quenk/noni/lib/data/either';
+import { Envelope } from './system/mailbox';
 /**
- * Address used by the system to distinguish actors.
+ * Behaviour of an actor.
  *
- * Potoo actor addresses are just urls in order to make
- * working with the Web and existing infrastructure easier.
+ * Behaviours are represented by imperative side-effectfull
+ * functions that return an Either that indicates whether
+ * the message is rejected or will/was processed.
  */
-export declare type Address = string;
-/**
- * Instantiator is a function that given a System reference produces a new
- * instance of some actor.
- *
- * If you need to provide additional arguments, use partial application.
- */
-export interface Instantiator {
-    (s: System): Actor;
-}
-/**
- * Template of an actor.
- *
- * Actors are created using templates that describe how to spawn and manage them
- * to the system.represents the minimum amount of information required to create
- * a new actor instance.
- */
-export interface Template {
-    /**
-     * id of the actor used when constructing its address.
-     */
-    id: string;
-    /**
-     * create function.
-     */
-    create: Instantiator;
-}
+export declare type Behaviour = <M>(m: M) => Either<M, void>;
 /**
  * Actor common interface.
  *
@@ -45,29 +16,18 @@ export interface Template {
  */
 export interface Actor {
     /**
-     * accept a Message destined for this actor.
+     * accept an enveloped message.
+     *
+     * For some actors, this message allows bypassing the mailbox
+     * system and handling messages directly.
      */
-    accept(e: Envelope): Result;
+    accept(e: Envelope): Actor;
     /**
-     * run this actor.
-     */
-    run(path: string): void;
+    * run this actor.
+    */
+    run(): void;
     /**
-     * terminate is called by the system when the actor is removed.
+     * stop is called by the system to stop the actor.
      */
-    terminate(): void;
+    stop(): void;
 }
-/**
- * AddressTable provides a mapping of keys to actor addresses.
- */
-export interface AddressTable {
-    [key: string]: Address;
-}
-/**
- * rejected
- */
-export declare const rejected: (_: Envelope) => Either<"reject", "accept">;
-/**
- * accepted
- */
-export declare const accepted: (_: Envelope) => Either<"reject", "accept">;
