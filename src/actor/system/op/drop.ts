@@ -1,5 +1,6 @@
 import * as log from '../log';
 import { Address } from '../../address';
+import { Frame } from '../state/frame';
 import { System } from '../';
 import { Message } from '../../message';
 import { OP_DROP, Op } from './';
@@ -18,7 +19,7 @@ export class Drop extends Op {
 
     public level = log.WARN;
 
-    exec(_: System): void {
+  exec<F extends Frame>(_: System<F>): void {
 
     }
 
