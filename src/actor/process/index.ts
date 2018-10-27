@@ -13,8 +13,7 @@ import { Route } from '../system/op/route';
 import { Envelope } from '../system/mailbox';
 import { Message } from '../message';
 import { Address, getId } from '../address';
-import { Actor } from '../';
-import { Flags } from '../system/state/flags';
+import { Actor, Initializer } from '../';
 
 export const SCRIPT_PATH = `${__dirname}/../../../lib/actor/process/script.js`;
 
@@ -69,9 +68,9 @@ export class Process implements Actor {
 
     handle: Maybe<ChildProcess> = nothing();
 
-    flags(): Flags {
+    init(): Initializer {
 
-        return { immutable: true, buffered: false };
+        return [undefined, { immutable: true, buffered: false }];
 
     }
 
