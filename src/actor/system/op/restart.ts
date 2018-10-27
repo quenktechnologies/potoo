@@ -1,9 +1,10 @@
 import * as log from '../log';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
+import { Frame } from '../state/frame';
 import { System } from '../';
-import { Frame } from '../state';
 import { Run } from './run';
+import { Tell } from './tell';
 import { OP_RESTART, Op } from './';
 
 /**
@@ -17,7 +18,7 @@ export class Restart extends Op {
 
     public level = log.INFO;
 
-    exec(s: System): void {
+    exec<F extends Frame>(s: System<F>): void {
 
         return execRestart(s, this);
 
@@ -32,20 +33,27 @@ export class Restart extends Op {
  * It is then restart by creating a new instance and invoking its
  * run method.
  */
-export const execRestart = (s: System, { address }: Restart) =>
-    s
-        .actors
-        .get(address)
-        .map(f => {
+export const execRestart =
+    <F extends Frame>(s: System<F>, op: Restart) =>
+        s
+            .state
+            .get(op.address)
+            .map(doRestart(s, op))
+            .orJust(noop)
+            .get();
 
-            f.actor.stop();
+const doRestart =
+    <F extends Frame>(s: System<F>, { address }: Restart) => (f: F) => {
 
-            s.actors.put(address, new Frame([], f.template.create(s),
-                [], f.flags, f.template));
+        f.actor.stop();
 
-            s.exec(new Run(address, 'restart', f.template.delay || 0, () =>
-                s.actors.runInstance(address)));
+        s.state.put(address, s.allocate(f.template));
 
-        })
-        .orJust(noop)
-        .get();
+        s.exec(new Run(address, 'restart',
+            f.template.delay || 0, () => s.state.runInstance(address)));
+
+        f
+            .mailbox
+            .map(m => m.map(e => s.exec(new Tell(e.to, e.from, e.message))));
+
+    }
