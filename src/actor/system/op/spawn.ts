@@ -10,7 +10,7 @@ import { Actor } from '../../';
 import { Template } from '../../template';
 import { Frame } from '../state/frame';
 import { Address, isRestricted, make } from '../../address';
-import { System } from '../';
+import { Executor } from './';
 import { SystemError } from '../error';
 import { Raise } from './raise';
 import { Run } from './run';
@@ -51,7 +51,7 @@ export class Spawn extends Op {
 
     public level = log.INFO;
 
-    exec<F extends Frame>(s: System<F>): void {
+    exec<F extends Frame>(s: Executor<F>): void {
 
         return execSpawn(s, this);
 
@@ -68,7 +68,7 @@ export class Spawn extends Op {
  * If that is successfull we create and check for a duplicate id
  * then finally add the child to the system.
  */
-export const execSpawn = <F extends Frame>(s: System<F>, { parent, template }: Spawn) =>
+export const execSpawn = <F extends Frame>(s: Executor<F>, { parent, template }: Spawn) =>
     s
         .state
         .getAddress(parent)
@@ -91,11 +91,11 @@ export const execSpawn = <F extends Frame>(s: System<F>, { parent, template }: S
 const makeAddress = (parent: Address) => (template: Template) =>
     fromString(make(parent, template.id))
 
-const checkAddress = <F extends Frame>(s: System<F>, addr: Address) =>
+const checkAddress = <F extends Frame>(s: Executor<F>, addr: Address) =>
     fromBoolean(!s.state.exists(addr));
 
 const generate =
-    <F extends Frame>(s: System<F>, template: Template) => (addr: Address) =>
+    <F extends Frame>(s: Executor<F>, template: Template) => (addr: Address) =>
         fromNullable(s.allocate(template))
             .map(f => {
 
@@ -109,12 +109,12 @@ const generate =
             });
 
 const spawnChildren =
-    <F extends Frame>(s: System<F>, t: Template) => (parent: Actor) =>
+    <F extends Frame>(s: Executor<F>, t: Template) => (parent: Actor) =>
         fromNullable(<Template[]>t.children)
             .map(children => children.forEach(c => s.exec(new Spawn(parent, c))));
 
 const raiseInvalidIdError =
-    <F extends Frame>(s: System<F>, id: string, parent: Address) => () => {
+    <F extends Frame>(s: Executor<F>, id: string, parent: Address) => () => {
 
         s.exec(new Raise(new InvalidIdError(id), parent, parent));
         return nothing();
@@ -122,7 +122,7 @@ const raiseInvalidIdError =
     }
 
 const raiseDuplicateAddressError =
-    <F extends Frame>(s: System<F>, parent: Address, addr: Address) => () => {
+    <F extends Frame>(s: Executor<F>, parent: Address, addr: Address) => () => {
 
         s.exec(new Raise(
             new DuplicateAddressError(addr), parent, parent));

@@ -4,7 +4,7 @@ import { Address } from '../../address';
 import { Message } from '../../message';
 import { Envelope } from '../mailbox';
 import { Frame } from '../state/frame';
-import { System } from '../';
+import { Executor } from './';
 import { Drop } from './drop';
 import { OP_TRANSFER, Op } from './';
 
@@ -23,7 +23,7 @@ export class Transfer extends Op {
 
     public level = log.DEBUG;
 
-    exec<F extends Frame>(s: System<F>): void {
+    exec<F extends Frame>(s: Executor<F>): void {
 
         return execTransfer(s, this);
 
@@ -38,7 +38,7 @@ export class Transfer extends Op {
  * schedules a Read if for the oldest one.
  */
 export const execTransfer =
-    <F extends Frame>(s: System<F>, { router, to, from, message }: Transfer) =>
+    <F extends Frame>(s: Executor<F>, { router, to, from, message }: Transfer) =>
         s
             .state
             .getInstance(router)

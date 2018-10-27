@@ -7,7 +7,7 @@ import { Address } from '../../address';
 import { Message } from '../../message';
 import { Mailbox, Envelope } from '../mailbox';
 import { Frame } from '../state/frame';
-import { System } from '../';
+import { Executor } from './';
 import { Check } from './check';
 import { Transfer } from './transfer';
 import { Drop } from './drop';
@@ -27,7 +27,7 @@ export class Tell extends Op {
 
     public level = log.INFO;
 
-    exec<F extends Frame>(s: System<F>): void {
+    exec<F extends Frame>(s: Executor<F>): void {
 
         return execTell(s, this);
 
@@ -46,7 +46,7 @@ export class Tell extends Op {
  *
  * The message is dropped otherwise.
  */
-export const execTell = <F extends Frame>(s: System<F>, op: Tell) =>
+export const execTell = <F extends Frame>(s: Executor<F>, op: Tell) =>
     s
         .state
         .getRouter(op.to)
@@ -58,23 +58,23 @@ export const execTell = <F extends Frame>(s: System<F>, op: Tell) =>
         .get();
 
 const runTransfer = <F extends Frame>
-    (s: System<F>, { to, from, message }: Tell) => (r: Address) =>
+    (s: Executor<F>, { to, from, message }: Tell) => (r: Address) =>
         s.exec(new Transfer(to, from, r, message));
 
-const runTell = <F extends Frame>(s: System<F>, op: Tell) => () =>
+const runTell = <F extends Frame>(s: Executor<F>, op: Tell) => () =>
     s
         .state
         .get(op.to)
         .chain(doTell(s, op));
 
-const doTell = <F extends Frame>(s: System<F>, op: Tell) => (f: F) =>
+const doTell = <F extends Frame>(s: Executor<F>, op: Tell) => (f: F) =>
     f
         .mailbox
         .map(doTellMailbox(s, op))
         .orJust(() => f.actor.accept(toEnvelope(op)));
 
 const doTellMailbox = <F extends Frame>
-    (s: System<F>, { to, from, message }: Tell) => (m: Mailbox) =>
+    (s: Executor<F>, { to, from, message }: Tell) => (m: Mailbox) =>
         tick(() => {
 
             m.push(new Envelope(to, from, message));
@@ -82,13 +82,13 @@ const doTellMailbox = <F extends Frame>
 
         });
 
-const invokeDropHook = <F extends Frame>(s: System<F>, op: Tell) => () =>
+const invokeDropHook = <F extends Frame>(s: Executor<F>, op: Tell) => () =>
     fromNullable(s.configuration.hooks)
         .chain((h: hooks.Hooks) => fromNullable(h.drop))
         .map((f: hooks.Drop) => f(toEnvelope(op)));
 
 const justDrop =
-    <F extends Frame>(s: System<F>, { to, from, message }: Tell) => () =>
+    <F extends Frame>(s: Executor<F>, { to, from, message }: Tell) => () =>
         s.exec(new Drop(to, from, message));
 
 const toEnvelope = ({ to, from, message }: Tell) =>

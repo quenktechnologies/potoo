@@ -2,7 +2,7 @@ import * as log from '../log';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Frame } from '../state/frame';
-import { System } from '../';
+import { Executor } from './';
 import { Run } from './run';
 import { Tell } from './tell';
 import { OP_RESTART, Op } from './';
@@ -18,7 +18,7 @@ export class Restart extends Op {
 
     public level = log.INFO;
 
-    exec<F extends Frame>(s: System<F>): void {
+    exec<F extends Frame>(s: Executor<F>): void {
 
         return execRestart(s, this);
 
@@ -34,7 +34,7 @@ export class Restart extends Op {
  * run method.
  */
 export const execRestart =
-    <F extends Frame>(s: System<F>, op: Restart) =>
+    <F extends Frame>(s: Executor<F>, op: Restart) =>
         s
             .state
             .get(op.address)
@@ -43,7 +43,7 @@ export const execRestart =
             .get();
 
 const doRestart =
-    <F extends Frame>(s: System<F>, { address }: Restart) => (f: F) => {
+    <F extends Frame>(s: Executor<F>, { address }: Restart) => (f: F) => {
 
         f.actor.stop();
 

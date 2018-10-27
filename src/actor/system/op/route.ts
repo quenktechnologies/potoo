@@ -1,7 +1,7 @@
 import * as log from '../log';
 import { Address } from '../../address';
 import { Frame } from '../state/frame';
-import { System } from '../';
+import { Executor } from './';
 import { OP_ROUTE, Op } from './';
 
 /**
@@ -15,7 +15,7 @@ export class Route extends Op {
 
     public level = log.INFO;
 
-    exec<F extends Frame>(s: System<F>): void {
+    exec<F extends Frame>(s: Executor<F>): void {
 
         return execRoute(s, this);
 
@@ -30,7 +30,7 @@ export class Route extends Op {
  * sent to one address to be forwarded to another actor.
  */
 export const execRoute =
-    <F extends Frame>(s: System<F>, { from, to }: Route) => {
+    <F extends Frame>(s: Executor<F>, { from, to }: Route) => {
 
         s
             .state

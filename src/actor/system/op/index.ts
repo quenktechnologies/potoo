@@ -1,4 +1,9 @@
-import { System } from '../';
+import * as logging from '../log';
+import { Frame } from '../state/frame';
+import { Template } from '../../template';
+import { State } from '../state';
+import { Logger } from '../log';
+import { Configuration } from '../configuration';
 
 //Op codes.
 export const OP_RAISE = 0x64;
@@ -17,7 +22,36 @@ export const OP_ROUTE = 0xb;
 export const OP_TRANSFER = 0xc;
 
 /**
- * Op is an instruction executed by a System.
+ * Executor interface.
+ *
+ * Has methods and properties needed for opcode execution.
+ */
+export interface Executor<F extends Frame> {
+
+    /**
+     * configuration
+     */
+    configuration: Configuration;
+
+    /**
+     * state serves as a table of actors within the system.
+     */
+    state: State<F>;
+
+    /**
+     * allocate a new Frame for an actor.
+     */
+    allocate(t: Template): F;
+
+    /**
+     * exec an op code.
+     */
+    exec(code: Op): Executor<F>;
+
+}
+
+/**
+ * Op is an instruction executed by a System/Executor.
  */
 export abstract class Op {
 
@@ -34,12 +68,32 @@ export abstract class Op {
     /**
      * exec the instruction.
      */
-    public abstract exec(s: System): void;
+    public abstract exec<F extends Frame>(s: Executor<F>): void;
 
 }
 
+/**
+ * log an Op to the Executor's logger.
+ */
+export const log = (level: number, logger: Logger, o: Op): Op => {
 
+    if (o.level <= <number>level)
+        switch (o.level) {
+            case logging.INFO:
+                (<logging.Logger>logger).info(o);
+                break;
+            case logging.WARN:
+                (<logging.Logger>logger).warn(o);
+                break;
+            case logging.ERROR:
+                (<logging.Logger>logger).error(o);
+                break;
+            default:
+                (<logging.Logger>logger).log(o)
+                break;
 
+        }
 
+    return o;
 
-
+}

@@ -1,7 +1,7 @@
 import * as log from '../log';
 import { Address } from '../../address';
 import { Frame } from '../state/frame';
-import { System } from '../';
+import { Executor } from './';
 import { Message } from '../../message';
 import { OP_DROP, Op } from './';
 
@@ -19,7 +19,7 @@ export class Drop extends Op {
 
     public level = log.WARN;
 
-  exec<F extends Frame>(_: System<F>): void {
+    exec<F extends Frame>(_: Executor<F>): void {
 
     }
 

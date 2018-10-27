@@ -3,8 +3,8 @@ import * as template from '../../template';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Err } from '../../err';
 import { Address, getParent } from '../../address';
-import {Frame} from '../state/frame';
-import { System } from '../';
+import { Frame } from '../state/frame';
+import { Executor } from './';
 import { Restart } from './restart';
 import { Stop } from './stop';
 import { OP_RAISE, Op } from './';
@@ -28,7 +28,7 @@ export class Raise extends Op {
      *
      * 
      */
-  exec<F extends Frame>(s: System<F>): void {
+    exec<F extends Frame>(s: Executor<F>): void {
 
         return execRaise(s, this);
 
@@ -48,44 +48,44 @@ export class Raise extends Op {
  *
  * If no trap is provided we do 1. until we hit the system actor.
  */
-export const execRaise = 
-  <F extends Frame>(s: System<F>, { error, src, dest }: Raise) =>
-    s
-        .state
-        .getTemplate(dest)
-        .map(t => {
+export const execRaise =
+    <F extends Frame>(s: Executor<F>, { error, src, dest }: Raise) =>
+        s
+            .state
+            .getTemplate(dest)
+            .map(t => {
 
-            if (t.trap != null) {
+                if (t.trap != null) {
 
-                switch (t.trap(error)) {
+                    switch (t.trap(error)) {
 
-                    case template.ACTION_RAISE:
-                        s.exec(new Raise(error, src, getParent(dest)));
-                        break;
+                        case template.ACTION_RAISE:
+                            s.exec(new Raise(error, src, getParent(dest)));
+                            break;
 
-                    case template.ACTION_IGNORE:
-                        break;
+                        case template.ACTION_IGNORE:
+                            break;
 
-                    case template.ACTION_RESTART:
-                        s.exec(new Restart(src));
-                        break;
+                        case template.ACTION_RESTART:
+                            s.exec(new Restart(src));
+                            break;
 
-                    case template.ACTION_STOP:
-                        s.exec(new Stop(src));
-                        break;
+                        case template.ACTION_STOP:
+                            s.exec(new Stop(src));
+                            break;
 
-                    default:
-                        break; //ignore
+                        default:
+                            break; //ignore
+
+                    }
+
+                } else {
+
+                    s.exec(new Raise(error, src, getParent(dest)));
 
                 }
 
-            } else {
-
-                s.exec(new Raise(error, src, getParent(dest)));
-
-            }
-
-        })
-        .map(noop)
-        .orJust(noop)
-        .get();
+            })
+            .map(noop)
+            .orJust(noop)
+            .get();
