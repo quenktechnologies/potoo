@@ -907,21 +907,15 @@ img { max-width: 100%; }
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
-		<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-is-private">
+		<li class=" tsd-kind-class tsd-parent-kind-external-module">
 			<a href="../classes/_actor_system_index_.actorsystem.html" class="tsd-kind-icon">Actor<wbr>System</a>
 		</li>
 		<li class=" tsd-kind-class tsd-parent-kind-external-module">
 			<a href="../classes/_actor_system_index_.nullsystem.html" class="tsd-kind-icon">Null<wbr>System</a>
 		</li>
-		<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-			<a href="_actor_system_index_.configuration.html" class="tsd-kind-icon">Configuration</a>
-		</li>
 		<li class="current tsd-kind-interface tsd-parent-kind-external-module">
 			<a href="_actor_system_index_.system.html" class="tsd-kind-icon">System</a>
 			<ul>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="_actor_system_index_.system.html#actors" class="tsd-kind-icon">actors</a>
-				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
 					<a href="_actor_system_index_.system.html#configuration" class="tsd-kind-icon">configuration</a>
 				</li>
@@ -930,6 +924,12 @@ img { max-width: 100%; }
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-interface">
 					<a href="_actor_system_index_.system.html#exec" class="tsd-kind-icon">exec</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-interface">
+					<a href="_actor_system_index_.system.html#identify" class="tsd-kind-icon">identify</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a href="_actor_system_index_.system.html#init" class="tsd-kind-icon">init</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 					<a href="_actor_system_index_.system.html#run" class="tsd-kind-icon">run</a>
@@ -981,7 +981,6 @@ img { max-width: 100%; }
 					<section class="tsd-index-section ">
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actor_system_index_.system.html#actors" class="tsd-kind-icon">actors</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actor_system_index_.system.html#configuration" class="tsd-kind-icon">configuration</a></li>
 						</ul>
 					</section>
@@ -990,6 +989,8 @@ img { max-width: 100%; }
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_actor_system_index_.system.html#accept" class="tsd-kind-icon">accept</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_actor_system_index_.system.html#exec" class="tsd-kind-icon">exec</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_actor_system_index_.system.html#identify" class="tsd-kind-icon">identify</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_actor_system_index_.system.html#init" class="tsd-kind-icon">init</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_actor_system_index_.system.html#run" class="tsd-kind-icon">run</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_actor_system_index_.system.html#spawn" class="tsd-kind-icon">spawn</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_actor_system_index_.system.html#stop" class="tsd-kind-icon">stop</a></li>
@@ -1001,27 +1002,12 @@ img { max-width: 100%; }
 		<section class="tsd-panel-group tsd-member-group ">
 			<h2>Properties</h2>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="actors" class="tsd-anchor"></a>
-				<h3>actors</h3>
-				<div class="tsd-signature tsd-kind-icon">actors<span class="tsd-signature-symbol">:</span> <a href="../classes/_actor_system_state_.state.html" class="tsd-signature-type">State</a></div>
-				<aside class="tsd-sources">
-					<ul>
-						<li>Defined in actor/system/index.ts:27</li>
-					</ul>
-				</aside>
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>actors table.</p>
-					</div>
-				</div>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 				<a name="configuration" class="tsd-anchor"></a>
 				<h3>configuration</h3>
-				<div class="tsd-signature tsd-kind-icon">configuration<span class="tsd-signature-symbol">:</span> <a href="_actor_system_index_.configuration.html" class="tsd-signature-type">Configuration</a></div>
+				<div class="tsd-signature tsd-kind-icon">configuration<span class="tsd-signature-symbol">:</span> <a href="_actor_system_configuration_.configuration.html" class="tsd-signature-type">Configuration</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in actor/system/index.ts:22</li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/61c689b/lib/actor/system/index.ts#L27">actor/system/index.ts:27</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1044,7 +1030,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from <a href="_actor_index_.actor.html">Actor</a>.<a href="_actor_index_.actor.html#accept">accept</a></p>
 							<ul>
-								<li>Defined in actor/index.ts:27</li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/61c689b/lib/actor/index.ts#L41">actor/index.ts:41</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1074,7 +1060,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in actor/system/index.ts:37</li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/61c689b/lib/actor/system/index.ts#L44">actor/system/index.ts:44</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1092,6 +1078,60 @@ img { max-width: 100%; }
 					</li>
 				</ul>
 			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+				<a name="identify" class="tsd-anchor"></a>
+				<h3>identify</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+					<li class="tsd-signature tsd-kind-icon">identify<span class="tsd-signature-symbol">(</span>a<span class="tsd-signature-symbol">: </span><a href="_actor_index_.actor.html" class="tsd-signature-type">Actor</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/61c689b/lib/actor/system/index.ts#L39">actor/system/index.ts:39</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>identify an actor instance.</p>
+							</div>
+							<p>If the actor is unknown the ADDRESS_DISCARD should be returned.</p>
+						</div>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>a: <a href="_actor_index_.actor.html" class="tsd-signature-type">Actor</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+				<a name="init" class="tsd-anchor"></a>
+				<h3>init</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">init<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_actor_index_.html#initializer" class="tsd-signature-type">Initializer</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Inherited from <a href="_actor_index_.actor.html">Actor</a>.<a href="_actor_index_.actor.html#init">init</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/61c689b/lib/actor/index.ts#L33">actor/index.ts:33</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>init method.</p>
+							</div>
+							<p>This method provides information to the system
+							about how to prepare state frames for the actor.</p>
+						</div>
+						<h4 class="tsd-returns-title">Returns <a href="../modules/_actor_index_.html#initializer" class="tsd-signature-type">Initializer</a></h4>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 				<a name="run" class="tsd-anchor"></a>
 				<h3>run</h3>
@@ -1103,7 +1143,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from <a href="_actor_index_.actor.html">Actor</a>.<a href="_actor_index_.actor.html#run">run</a></p>
 							<ul>
-								<li>Defined in actor/index.ts:32</li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/61c689b/lib/actor/index.ts#L46">actor/index.ts:46</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1125,7 +1165,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in actor/system/index.ts:32</li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/61c689b/lib/actor/system/index.ts#L32">actor/system/index.ts:32</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1154,7 +1194,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from <a href="_actor_index_.actor.html">Actor</a>.<a href="_actor_index_.actor.html#stop">stop</a></p>
 							<ul>
-								<li>Defined in actor/index.ts:37</li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/61c689b/lib/actor/index.ts#L51">actor/index.ts:51</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
