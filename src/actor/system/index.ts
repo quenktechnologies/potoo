@@ -1,14 +1,19 @@
 import * as address from '../address';
-import * as log from './log';
-import * as hooks from './hooks';
-import { Actor } from '../';
+import * as config from './configuration';
+import { just, nothing } from '@quenk/noni/lib/data/maybe';
+import { merge } from '@quenk/noni/lib/data/record';
+import { ADDRESS_DISCARD, Address } from '../address';
 import { Template } from '../template';
+import { Actor, Behaviour } from '../';
 import { Spawn } from './op/spawn';
 import { Drop } from './op/drop';
-import { Op } from './op';
+import { Op, log } from './op';
 import { Err } from '../err';
 import { Envelope } from './mailbox';
-import { State, Frame } from './state';
+import { ActorFrame } from './state/frame';
+import { Initializer } from '../';
+import { State } from './state';
+import { Executor } from './op';
 
 /**
  * System represents a dynamic collection of actors that 
@@ -19,17 +24,19 @@ export interface System extends Actor {
     /**
      * configuration
      */
-    configuration: Configuration;
-
-    /**
-     * actors table.
-     */
-    actors: State;
+    configuration: config.Configuration;
 
     /**
      * spawn a new root level child actor.
      */
     spawn(t: Template): System;
+
+    /**
+     * identify an actor instance.
+     *
+     * If the actor is unknown the ADDRESS_DISCARD should be returned.
+     */
+    identify(a: Actor): Address;
 
     /**
      * exec queses up an Op to be executed by the System.
@@ -38,6 +45,10 @@ export interface System extends Actor {
 
 }
 
+
+/**
+ * @private
+ */
 class SysT {
 
     public id = address.ADDRESS_SYSTEM;
@@ -53,37 +64,28 @@ class SysT {
 }
 
 /**
- * Configuration values for an actor system.
- */
-export interface Configuration {
-
-    /**
-     * log settings
-     */
-    log?: log.LogPolicy,
-
-    /**
-     * hooks defined by the user.
-     */
-    hooks?: hooks.Hooks;
-
-}
-
-/**
  * ActorSystem
- * @private
+ *
+ * Implemnation of a System and Executor that spawns
+ * various general purpose actors.
  */
-export class ActorSystem implements System {
+export class ActorSystem implements System, Executor<ActorFrame> {
 
     constructor(
         public stack: Op[],
-        public configuration: Configuration) { }
+        public configuration: config.Configuration) { }
 
-    actors: State = new State({ $: nullFrame(this) }, {});
+    state: State<ActorFrame> = new State({ $: nullFrame(this) }, {});
 
     running: boolean = false;
 
-    exec(code: Op): System {
+    init(): Initializer {
+
+        return [undefined, { immutable: true, buffered: false }];
+
+    }
+
+    exec(code: Op): ActorSystem {
 
         this.stack.push(code);
         this.run();
@@ -91,7 +93,7 @@ export class ActorSystem implements System {
 
     }
 
-    accept({ to, from, message }: Envelope): System {
+    accept({ to, from, message }: Envelope): ActorSystem {
 
         return this.exec(new Drop(to, from, message));
 
@@ -103,51 +105,45 @@ export class ActorSystem implements System {
 
     }
 
-    /**
-     * logOp
-     *
-     * @private
-     */
-    logOp(o: Op): Op {
+    allocate(t: Template): ActorFrame {
 
-        let { level, logger } = (<log.LogPolicy>this.configuration.log);
+        let a = t.create(this);
+        let i = a.init();
+        let flags = flagDefaults(i[1] || {});
+        let stack: Behaviour[] = i[0] ? [<Behaviour>i[0]] : [];
 
-        if (o.level <= <number>level)
-            switch (o.level) {
-                case log.INFO:
-                    (<log.Logger>logger).info(o);
-                    break;
-                case log.WARN:
-                    (<log.Logger>logger).warn(o);
-                    break;
-                case log.ERROR:
-                    (<log.Logger>logger).error(o);
-                    break;
-                default:
-                    (<log.Logger>logger).log(o)
-                    break;
-
-            }
-
-        return o;
+        return new ActorFrame(flags.buffered ? just([]) : nothing(),
+            a, stack, flags, t);
 
     }
 
-    spawn(t: Template): System {
+    spawn(t: Template): ActorSystem {
 
         this.exec(new Spawn(this, t));
         return this;
 
     }
 
+    identify(actor: Actor): Address {
+
+        return this
+            .state
+            .getAddress(actor)
+            .orJust(() => ADDRESS_DISCARD)
+            .get();
+
+    }
+
     run(): void {
+
+        let { level, logger } = <config.LogPolicy>this.configuration.log;
 
         if (this.running) return;
 
         this.running = true;
 
         while (this.stack.length > 0)
-            this.logOp(<Op>this.stack.pop()).exec(this);
+            log(level || 0, logger || console, <Op>this.stack.pop()).exec(this);
 
         this.running = false;
 
@@ -161,17 +157,17 @@ export class ActorSystem implements System {
  */
 export class NullSystem implements System {
 
-    actors: State = new State({ $: nullFrame(this) }, {});
+    state: State<ActorFrame> = new State({ $: nullFrame(this) }, {});
 
-  configuration = {};
+    configuration = {};
 
-    exec(_: Op): System {
+    init(): Initializer {
 
-        return this;
+        return [undefined, undefined];
 
     }
 
-    accept({ to, from, message }: Envelope): System {
+    accept({ to, from, message }: Envelope): NullSystem {
 
         return this.exec(new Drop(to, from, message));
 
@@ -183,19 +179,36 @@ export class NullSystem implements System {
 
     }
 
-    spawn(_: Template): System {
+    allocate(t: Template): ActorFrame {
+
+        return new ActorFrame(nothing(), this, [], flagDefaults({}), t);
+
+    }
+
+    spawn(_: Template): NullSystem {
 
         return this;
 
     }
 
-    run(): void {
+    identify(_: Actor): Address {
+
+        return ADDRESS_DISCARD;
 
     }
 
+    exec(_: Op): NullSystem {
+
+        return this;
+
+    }
+
+    run(): void { }
+
 }
 
-const nullFrame = (s: System) => new Frame([], s, [], {
-    immutable: true,
-    busy: true
-}, new SysT())
+const flagDefaults = (f: { [key: string]: boolean }) =>
+    merge({ buffered: true, immutable: true }, f);
+
+const nullFrame = (s: System) =>
+  new ActorFrame(nothing(), s, [], flagDefaults({}), new SysT());

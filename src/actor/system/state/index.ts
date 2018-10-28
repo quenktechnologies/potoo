@@ -8,19 +8,11 @@ import {
 } from '@quenk/noni/lib/data/maybe';
 import { reduce, contains, partition } from '@quenk/noni/lib/data/record';
 import { startsWith } from '@quenk/noni/lib/data/string';
-import { Actor, Behaviour } from '../';
-import { Template } from '../template';
-import { Mailbox, Envelope } from './mailbox';
-import { Address, getParent } from '../address';
-
-/**
- * Frames map.
- */
-export interface Frames {
-
-    [key: string]: Frame
-
-}
+import { Actor, Behaviour } from '../../';
+import { Template } from '../../template';
+import { Envelope } from '../mailbox';
+import { Address, getParent } from '../../address';
+import { Frame, Frames } from './frame';
 
 /**
  * Routes map.
@@ -32,47 +24,12 @@ export interface Routes {
 }
 
 /**
- * Flags used to indicate a Frame's state.
- */
-export interface Flags {
-
-    [key: string]: boolean | undefined
-
-    /**
-     * immutable indicates whether the Frame's current receive
-     * should remain after message consumption.
-     */
-    immutable?: boolean,
-
-    /**
-     * busy indicates whether the Frame's actor is busy consuming or not.
-     */
-    busy?: boolean
-
-}
-
-/**
- * Frame stores all information about an actor 
- * needed by the system.
- */
-export class Frame {
-
-    constructor(
-        public mailbox: Mailbox,
-        public actor: Actor,
-        public behaviour: Behaviour[],
-        public flags: Flags,
-        public template: Template) { }
-
-}
-
-/**
  * State contains Frame entries for all actors in the system.
  */
-export class State {
+export class State<F extends Frame> {
 
     constructor(
-        public frames: Frames,
+        public frames: Frames<F>,
         public routes: Routes) { }
 
     /**
@@ -87,7 +44,7 @@ export class State {
     /**
      * get a Frame using an Address.
      */
-    get(addr: Address): Maybe<Frame> {
+    get(addr: Address): Maybe<F> {
 
         return fromNullable(this.frames[addr]);
 
@@ -135,7 +92,8 @@ export class State {
 
         return this
             .get(addr)
-            .chain(f => fromArray(f.mailbox))
+            .chain(f => f.mailbox)
+            .chain(m => fromArray(m))
             .map(m => <Envelope>m.shift());
 
     }
@@ -156,20 +114,20 @@ export class State {
     /**
      * getChildFrames returns the child frames for an address.
      */
-    getChildFrames(addr: Address): Frames {
+    getChildFrames(addr: Address): Frames<F> {
 
-        return <Frames>partition(this.frames)((_, key) =>
+        return <Frames<F>>partition(this.frames)((_, key) =>
             (startsWith(getParent(key), addr) && key !== addr))[0];
 
     }
 
-  /**
-   * getRouter will attempt to provide the 
-   * routing actor for an Address.
-   *
-   * The value returned depends on whether the given 
-   * address begins with any of the installed router's address.
-   */
+    /**
+     * getRouter will attempt to provide the 
+     * routing actor for an Address.
+     *
+     * The value returned depends on whether the given 
+     * address begins with any of the installed router's address.
+     */
     getRouter(addr: Address): Maybe<Address> {
 
         return reduce(this.routes, nothing(), (p, k) =>
@@ -180,7 +138,7 @@ export class State {
     /**
      * put a new Frame in the State.
      */
-    put(addr: Address, frame: Frame): State {
+    put(addr: Address, frame: F): State<F> {
 
         this.frames[addr] = frame;
 
@@ -191,7 +149,7 @@ export class State {
     /**
      * putRoute adds a route to the routing table.
      */
-    putRoute(from: Address, to: Address): State {
+    putRoute(from: Address, to: Address): State<F> {
 
         this.routes[from] = to;
         return this;
@@ -201,7 +159,7 @@ export class State {
     /**
      * remove an actor entry.
      */
-    remove(addr: Address): State {
+    remove(addr: Address): State<F> {
 
         delete this.frames[addr];
 
@@ -219,9 +177,3 @@ export class State {
     }
 
 }
-
-/**
- * newFrame constructs a new Frame with default values.
- */
-export const newFrame = (actor: Actor, template: Template) =>
-    new Frame([], actor, [], { immutable: false, busy: false }, template);

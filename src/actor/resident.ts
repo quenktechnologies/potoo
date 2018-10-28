@@ -1,6 +1,5 @@
 import { test } from '@quenk/noni/lib/data/type';
 import { fromBoolean } from '@quenk/noni/lib/data/either';
-import { fromArray, just } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
 import { ADDRESS_DISCARD, Address, isRestricted, make } from './address';
 import { Message } from './message';
@@ -151,7 +150,11 @@ export abstract class AbstractResident implements Resident {
 
     self = () => this.system.identify(this);
 
-    abstract init(): Initializer;
+    init(): Initializer {
+
+        return [undefined, undefined];
+
+    }
 
     accept({ to, from, message }: Envelope) {
 
@@ -219,7 +222,7 @@ export abstract class Immutable<T> extends AbstractResident {
 
     init(): Initializer {
 
-        return [        ibehaviour(this),            { immutable: true, buffered: true }        ];
+        return [ibehaviour(this), { immutable: true, buffered: true }];
 
     }
 
@@ -249,7 +252,7 @@ export abstract class Mutable<T> extends AbstractResident {
 
         return [
 
-          (this.receive.length > 0) ? mbehaviour(this.receive) : undefined,
+            (this.receive.length > 0) ? mbehaviour(this.receive) : undefined,
             { immutable: false, buffered: true }
 
         ];

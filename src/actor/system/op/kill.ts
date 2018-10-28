@@ -33,7 +33,7 @@ export class Kill extends Op {
 
     exec<F extends Frame>(s: Executor<F>): void {
 
-        return execKill(s, this);
+         execKill(s, this);
 
     }
 
