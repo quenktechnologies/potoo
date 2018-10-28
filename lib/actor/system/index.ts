@@ -22,16 +22,6 @@ import { Executor } from './op';
 export interface System extends Actor {
 
     /**
-     * configuration
-     */
-    configuration: config.Configuration;
-
-    /**
-     * spawn a new root level child actor.
-     */
-    spawn(t: Template): System;
-
-    /**
      * identify an actor instance.
      *
      * If the actor is unknown the ADDRESS_DISCARD should be returned.
@@ -211,4 +201,4 @@ const flagDefaults = (f: { [key: string]: boolean }) =>
     merge({ buffered: true, immutable: true }, f);
 
 const nullFrame = (s: System) =>
-  new ActorFrame(nothing(), s, [], flagDefaults({}), new SysT());
+    new ActorFrame(nothing(), s, [], flagDefaults({}), new SysT());
