@@ -3,8 +3,8 @@ import { fromArray } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Envelope } from '../mailbox';
-import { System } from '../';
-import { Frame } from '../state';
+import { Executor } from './';
+import { Frame } from '../state/frame';
 import { Drop } from './drop';
 import { OP_READ, Op } from './';
 
@@ -21,7 +21,7 @@ export class Read extends Op {
 
     public level = log.INFO;
 
-    exec(s: System): void {
+    exec<F extends Frame>(s: Executor<F>): void {
 
         return execRead(s, this);
 
@@ -35,16 +35,17 @@ export class Read extends Op {
  * Applies the actor behaviour in the "next tick" if a 
  * receive is pending.
  */
-export const execRead = (s: System, { address, envelope }: Read) =>
-    s
-        .actors
-        .get(address)
-        .chain(consume(s, envelope))
-        .orJust(noop)
-        .map(noop)
-        .get();
+export const execRead =
+    <F extends Frame>(s: Executor<F>, { address, envelope }: Read) =>
+        s
+            .state
+            .get(address)
+            .chain(consume(s, envelope))
+            .orJust(noop)
+            .map(noop)
+            .get();
 
-const consume = (s: System, e: Envelope) => (f: Frame) =>
+const consume = <F extends Frame>(s: Executor<F>, e: Envelope) => (f: F) =>
     fromArray(f.behaviour)
         .map(([b]) => b)
         .chain(b =>

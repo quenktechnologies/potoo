@@ -1,5 +1,6 @@
 import { Address } from '../../address';
-import { System } from '../';
+import { Frame } from '../state/frame';
+import { Executor } from './';
 import { Op } from './';
 /**
  * Run instruction.
@@ -12,7 +13,7 @@ export declare class Run extends Op {
     constructor(tag: string, actor: Address, delay: number, func: () => void);
     code: number;
     level: number;
-    exec(_: System): void;
+    exec<F extends Frame>(_: Executor<F>): void;
 }
 /**
  * execRun

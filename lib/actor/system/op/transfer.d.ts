@@ -1,6 +1,7 @@
 import { Address } from '../../address';
 import { Message } from '../../message';
-import { System } from '../';
+import { Frame } from '../state/frame';
+import { Executor } from './';
 import { Op } from './';
 /**
  * Transfer instruction.
@@ -13,7 +14,7 @@ export declare class Transfer extends Op {
     constructor(to: Address, from: Address, router: Address, message: Message);
     code: number;
     level: number;
-    exec(s: System): void;
+    exec<F extends Frame>(s: Executor<F>): void;
 }
 /**
  * execTransfer
@@ -21,4 +22,4 @@ export declare class Transfer extends Op {
  * Peeks at the actors mailbox for new messages and
  * schedules a Read if for the oldest one.
  */
-export declare const execTransfer: (s: System, { router, to, from, message }: Transfer) => void;
+export declare const execTransfer: <F extends Frame>(s: Executor<F>, { router, to, from, message }: Transfer) => void;

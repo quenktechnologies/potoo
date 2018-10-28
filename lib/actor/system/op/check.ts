@@ -1,7 +1,8 @@
 import * as log from '../log';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
-import { System } from '../';
+import { Frame } from '../state/frame';
+import { Executor } from './';
 import { Read } from './read';
 import { OP_CHECK, Op } from './';
 
@@ -16,7 +17,7 @@ export class Check extends Op {
 
     public level = log.INFO;
 
-    exec(s: System): void {
+    exec<F extends Frame>(s: Executor<F>): void {
 
         return execCheck(s, this);
 
@@ -30,11 +31,11 @@ export class Check extends Op {
  * Peeks at the actors mailbox for new messages and 
  * schedules a Read if for the oldest one.
  */
-export const execCheck = (s: System, { address }: Check) =>
+export const execCheck = <F extends Frame>(s: Executor<F>, { address }: Check) =>
     s
-        .actors
+        .state
         .getBehaviour(address)
-  .chain(()=> s.actors.getMessage(address))
+        .chain(() => s.state.getMessage(address))
         .map(e => s.exec(new Read(address, e)))
         .map(noop)
         .orJust(noop)

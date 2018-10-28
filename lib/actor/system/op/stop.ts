@@ -1,8 +1,9 @@
 import * as log from '../log';
-import {map} from '@quenk/noni/lib/data/record';
-import {noop} from '@quenk/noni/lib/data/function';
+import { map } from '@quenk/noni/lib/data/record';
+import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
-import { System } from '../';
+import { Frame } from '../state/frame';
+import { Executor } from './';
 import { Restart } from './restart';
 import { OP_STOP, Op } from './';
 
@@ -17,7 +18,7 @@ export class Stop extends Op {
 
     public level = log.WARN;
 
-    exec(s: System): void {
+    exec<F extends Frame>(s: Executor<F>): void {
 
         return execStop(s, this);
 
@@ -32,14 +33,14 @@ export class Stop extends Op {
  * the actor will be restarted instead.
  * Otherwised it is stopped and ejected from the system.
  */
-export const execStop = (s: System, { address }: Stop) =>
+export const execStop = <F extends Frame>(s: Executor<F>, { address }: Stop) =>
     s
-        .actors
+        .state
         .get(address)
         .map(f => {
 
-          map(s.actors.getChildFrames(address), (_,k) => 
-            s.exec(new Stop(k)));
+            map(s.state.getChildFrames(address), (_, k) =>
+                s.exec(new Stop(k)));
 
             if (f.template.restart) {
 
@@ -48,9 +49,9 @@ export const execStop = (s: System, { address }: Stop) =>
             } else {
 
                 f.actor.stop();
-                s.actors.remove(address);
+                s.state.remove(address);
 
             }
         })
-.orJust(noop)
+        .orJust(noop)
         .get();

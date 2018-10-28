@@ -12,8 +12,8 @@ import { Tell } from '../system/op/tell';
 import { Route } from '../system/op/route';
 import { Envelope } from '../system/mailbox';
 import { Message } from '../message';
-import { ADDRESS_DISCARD, Address, getId } from '../address';
-import { Actor } from '../';
+import { Address, getId } from '../address';
+import { Actor, Initializer } from '../';
 
 export const SCRIPT_PATH = `${__dirname}/../../../lib/actor/process/script.js`;
 
@@ -68,6 +68,12 @@ export class Process implements Actor {
 
     handle: Maybe<ChildProcess> = nothing();
 
+    init(): Initializer {
+
+        return [undefined, { immutable: true, buffered: false }];
+
+    }
+
     accept(e: Envelope): Process {
 
         this
@@ -103,12 +109,7 @@ export class Process implements Actor {
 
 }
 
-const self = (p: Process) => p
-    .system
-    .actors
-    .getAddress(p)
-    .orJust(() => ADDRESS_DISCARD)
-    .get();
+const self = (p: Process) => p.system.identify(p);
 
 const spawn = (p: Process) => fork(resolve(SCRIPT_PATH), [], {
 

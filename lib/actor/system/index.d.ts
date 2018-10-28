@@ -1,10 +1,13 @@
-import * as log from './log';
-import * as hooks from './hooks';
-import { Actor } from '../';
+import * as config from './configuration';
+import { Address } from '../address';
 import { Template } from '../template';
+import { Actor } from '../';
 import { Op } from './op';
 import { Envelope } from './mailbox';
+import { ActorFrame } from './state/frame';
+import { Initializer } from '../';
 import { State } from './state';
+import { Executor } from './op';
 /**
  * System represents a dynamic collection of actors that
  * share the JS event loop.
@@ -13,53 +16,41 @@ export interface System extends Actor {
     /**
      * configuration
      */
-    configuration: Configuration;
-    /**
-     * actors table.
-     */
-    actors: State;
+    configuration: config.Configuration;
     /**
      * spawn a new root level child actor.
      */
     spawn(t: Template): System;
+    /**
+     * identify an actor instance.
+     *
+     * If the actor is unknown the ADDRESS_DISCARD should be returned.
+     */
+    identify(a: Actor): Address;
     /**
      * exec queses up an Op to be executed by the System.
      */
     exec(code: Op): System;
 }
 /**
- * Configuration values for an actor system.
- */
-export interface Configuration {
-    /**
-     * log settings
-     */
-    log?: log.LogPolicy;
-    /**
-     * hooks defined by the user.
-     */
-    hooks?: hooks.Hooks;
-}
-/**
  * ActorSystem
- * @private
+ *
+ * Implemnation of a System and Executor that spawns
+ * various general purpose actors.
  */
-export declare class ActorSystem implements System {
+export declare class ActorSystem implements System, Executor<ActorFrame> {
     stack: Op[];
-    configuration: Configuration;
-    constructor(stack: Op[], configuration: Configuration);
-    actors: State;
+    configuration: config.Configuration;
+    constructor(stack: Op[], configuration: config.Configuration);
+    state: State<ActorFrame>;
     running: boolean;
-    exec(code: Op): System;
-    accept({to, from, message}: Envelope): System;
+    init(): Initializer;
+    exec(code: Op): ActorSystem;
+    accept({to, from, message}: Envelope): ActorSystem;
     stop(): void;
-    /**
-     * logOp
-     *
-     * @private
-     */
-    logOp(o: Op): Op;
-    spawn(t: Template): System;
+    allocate(t: Template): ActorFrame;
+    spawn(t: Template): ActorSystem;
+    identify(actor: Actor): Address;
     run(): void;
 }
 /**
@@ -67,11 +58,14 @@ export declare class ActorSystem implements System {
  * communication.
  */
 export declare class NullSystem implements System {
-    actors: State;
+    state: State<ActorFrame>;
     configuration: {};
-    exec(_: Op): System;
-    accept({to, from, message}: Envelope): System;
+    init(): Initializer;
+    accept({to, from, message}: Envelope): NullSystem;
     stop(): void;
-    spawn(_: Template): System;
+    allocate(t: Template): ActorFrame;
+    spawn(_: Template): NullSystem;
+    identify(_: Actor): Address;
+    exec(_: Op): NullSystem;
     run(): void;
 }

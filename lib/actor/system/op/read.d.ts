@@ -1,6 +1,7 @@
 import { Address } from '../../address';
 import { Envelope } from '../mailbox';
-import { System } from '../';
+import { Executor } from './';
+import { Frame } from '../state/frame';
 import { Op } from './';
 /**
  * Read instruction.
@@ -11,7 +12,7 @@ export declare class Read extends Op {
     constructor(address: Address, envelope: Envelope);
     code: number;
     level: number;
-    exec(s: System): void;
+    exec<F extends Frame>(s: Executor<F>): void;
 }
 /**
  * execRead
@@ -19,4 +20,4 @@ export declare class Read extends Op {
  * Applies the actor behaviour in the "next tick" if a
  * receive is pending.
  */
-export declare const execRead: (s: System, { address, envelope }: Read) => void;
+export declare const execRead: <F extends Frame>(s: Executor<F>, { address, envelope }: Read) => void;

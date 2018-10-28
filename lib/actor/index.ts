@@ -1,5 +1,6 @@
 import { Either } from '@quenk/noni/lib/data/either';
-import {Envelope} from './system/mailbox';
+import { Envelope } from './system/mailbox';
+import { Flags } from './system/state/flags';
 
 /**
  * Behaviour of an actor.
@@ -11,6 +12,11 @@ import {Envelope} from './system/mailbox';
 export type Behaviour = <M>(m: M) => Either<M, void>;
 
 /**
+ * Initializer
+ */
+export type Initializer = [Behaviour|undefined, Flags|undefined];
+
+/**
  * Actor common interface.
  *
  * The system expects all actors to satisfy this interface so they 
@@ -18,17 +24,25 @@ export type Behaviour = <M>(m: M) => Either<M, void>;
  */
 export interface Actor {
 
-  /**
-   * accept an enveloped message.
-   *
-   * For some actors, this message allows bypassing the mailbox
-   * system and handling messages directly.
-   */
-  accept(e:Envelope) : Actor ;
+    /**
+     * init method.
+     *
+     * This method provides information to the system
+     * about how to prepare state frames for the actor.
+     */
+    init(): Initializer;
 
     /**
-    * run this actor.
-    */
+     * accept an enveloped message.
+     *
+     * For some actors, this message allows bypassing the mailbox
+     * system and handling messages directly.
+     */
+    accept(e: Envelope): Actor;
+
+    /**
+     * run this actor.
+     */
     run(): void;
 
     /**

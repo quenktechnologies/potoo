@@ -44,22 +44,3 @@ export interface Logger {
     log(e: any): void;
 
 }
-
-/**
- * LogPolicy for the system.
- */
-export interface LogPolicy {
-
-    /**
-     * level of the events to be logged.
-     */
-    level?: number;
-
-    /**
-     * logger is the actual logging implemention.
-     *
-     * It MUST correspond to the basic info,warn and error api of the javascript console.
-     */
-    logger?: Logger;
-
-}

@@ -1,5 +1,6 @@
 import { Address } from '../../address';
-import { System } from '../';
+import { Frame } from '../state/frame';
+import { Executor } from './';
 import { Op } from './';
 /**
  * Restart instruction.
@@ -9,7 +10,7 @@ export declare class Restart extends Op {
     constructor(address: Address);
     code: number;
     level: number;
-    exec(s: System): void;
+    exec<F extends Frame>(s: Executor<F>): void;
 }
 /**
  * execRestart
@@ -18,4 +19,4 @@ export declare class Restart extends Op {
  * It is then restart by creating a new instance and invoking its
  * run method.
  */
-export declare const execRestart: (s: System, { address }: Restart) => void;
+export declare const execRestart: <F extends Frame>(s: Executor<F>, op: Restart) => void;

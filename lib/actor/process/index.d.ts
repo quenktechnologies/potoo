@@ -3,7 +3,7 @@ import { ChildProcess } from 'child_process';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { System } from '../system';
 import { Envelope } from '../system/mailbox';
-import { Actor } from '../';
+import { Actor, Initializer } from '../';
 export declare const SCRIPT_PATH: string;
 /**
  * Path to the actor process.
@@ -30,6 +30,7 @@ export declare class Process implements Actor {
     system: System;
     constructor(module: Path, system: System);
     handle: Maybe<ChildProcess>;
+    init(): Initializer;
     accept(e: Envelope): Process;
     stop(): void;
     run(): void;

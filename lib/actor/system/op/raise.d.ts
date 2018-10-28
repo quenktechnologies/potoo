@@ -1,6 +1,7 @@
 import { Err } from '../../err';
 import { Address } from '../../address';
-import { System } from '../';
+import { Frame } from '../state/frame';
+import { Executor } from './';
 import { Op } from './';
 /**
  * Raise instruction.
@@ -17,7 +18,7 @@ export declare class Raise extends Op {
      *
      *
      */
-    exec(s: System): void;
+    exec<F extends Frame>(s: Executor<F>): void;
 }
 /**
  * execRaise
@@ -31,4 +32,4 @@ export declare class Raise extends Op {
  *
  * If no trap is provided we do 1. until we hit the system actor.
  */
-export declare const execRaise: (s: System, { error, src, dest }: Raise) => void;
+export declare const execRaise: <F extends Frame>(s: Executor<F>, { error, src, dest }: Raise) => void;

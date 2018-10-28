@@ -1,4 +1,8 @@
-import { System } from '../';
+import * as logging from '../log';
+import { Frame } from '../state/frame';
+import { Template } from '../../template';
+import { State } from '../state';
+import { Configuration } from '../configuration';
 export declare const OP_RAISE = 100;
 export declare const OP_STOP = 0;
 export declare const OP_RUN = 1;
@@ -14,7 +18,30 @@ export declare const OP_FLAGS = 10;
 export declare const OP_ROUTE = 11;
 export declare const OP_TRANSFER = 12;
 /**
- * Op is an instruction executed by a System.
+ * Executor interface.
+ *
+ * Has methods and properties needed for opcode execution.
+ */
+export interface Executor<F extends Frame> {
+    /**
+     * configuration
+     */
+    configuration: Configuration;
+    /**
+     * state serves as a table of actors within the system.
+     */
+    state: State<F>;
+    /**
+     * allocate a new Frame for an actor.
+     */
+    allocate(t: Template): F;
+    /**
+     * exec an op code.
+     */
+    exec(code: Op): Executor<F>;
+}
+/**
+ * Op is an instruction executed by a System/Executor.
  */
 export declare abstract class Op {
     /**
@@ -28,5 +55,9 @@ export declare abstract class Op {
     /**
      * exec the instruction.
      */
-    abstract exec(s: System): void;
+    abstract exec<F extends Frame>(s: Executor<F>): void;
 }
+/**
+ * log an Op to the Executor's logger.
+ */
+export declare const log: (level: number, logger: logging.Logger, o: Op) => Op;

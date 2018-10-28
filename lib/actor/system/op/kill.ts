@@ -1,9 +1,10 @@
 import * as log from '../log';
 import { startsWith } from '@quenk/noni/lib/data/string';
-import {noop} from '@quenk/noni/lib/data/function';
+import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Actor } from '../../';
-import { System } from '../';
+import { Frame } from '../state/frame';
+import { Executor } from './';
 import { Stop } from './stop';
 import { Raise } from './raise';
 import { SystemError } from '../error';
@@ -30,9 +31,9 @@ export class Kill extends Op {
 
     public level = log.WARN;
 
-    exec(s: System): void {
+    exec<F extends Frame>(s: Executor<F>): void {
 
-        return execKill(s, this);
+         execKill(s, this);
 
     }
 
@@ -44,15 +45,13 @@ export class Kill extends Op {
  * Verify the target child is somewhere in the hierachy of the requesting
  * actor before killing it.
  */
-export const execKill = (s: System, { child, actor }: Kill) =>
+export const execKill = <F extends Frame>(s: Executor<F>, { child, actor }: Kill) =>
     s
-        .actors
+        .state
         .getAddress(actor)
-        .map(addr => {
-
+        .map(addr =>
             s.exec(startsWith(child, addr) ?
                 new Stop(child) :
-                new Raise(new IllegalKillSignal(addr, child), addr, addr))
-        })
-.orJust(noop)
+                new Raise(new IllegalKillSignal(addr, child), addr, addr)))
+        .orJust(noop)
         .get();

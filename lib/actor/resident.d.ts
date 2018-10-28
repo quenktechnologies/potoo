@@ -3,7 +3,7 @@ import { Message } from './message';
 import { Envelope } from './system/mailbox';
 import { System } from './system';
 import { Template } from './template';
-import { Actor } from './';
+import { Actor, Initializer } from './';
 /**
  * Ref function type.
  */
@@ -104,6 +104,7 @@ export declare abstract class AbstractResident implements Resident {
     constructor(system: System);
     ref: (addr: string) => (m: any) => AbstractResident;
     self: () => string;
+    init(): Initializer;
     accept({to, from, message}: Envelope): this;
     spawn(t: Template): Address;
     tell<M>(ref: Address, m: M): AbstractResident;
@@ -126,23 +127,11 @@ export declare abstract class Immutable<T> extends AbstractResident {
      * that the actor will always use to process messages.
      */
     abstract receive: Case<T>[];
-    /**
-     * onRun hook.
-     *
-     * Use this instead of overriding the run hook.
-     */
-    onRun(): void;
+    init(): Initializer;
     /**
      * select noop.
      */
     select<M>(_: Case<M>[]): Immutable<T>;
-    /**
-     * run installs an Immutable's behaviour.
-     *
-     * If this method is overriden super.run() must be called in
-     * order for messages to be handled.
-     */
-    run(): void;
 }
 /**
  * Mutable actors can change their behaviour after message processing.
@@ -153,21 +142,9 @@ export declare abstract class Mutable<T> extends AbstractResident {
      * that the actor will always use to process messages.
      */
     abstract receive: Case<T>[];
-    /**
-     * onRun hook.
-     *
-     * Use this instead of overriding the run hook.
-     */
-    onRun(): void;
+    init(): Initializer;
     /**
      * select allows for selectively receiving messages based on Case classes.
      */
     select<M>(cases: Case<M>[]): Mutable<T>;
-    /**
-     * run the actor.
-     *
-     * If the receive property is populated the actor will
-     * automatically start receiving.
-     */
-    run(): void;
 }

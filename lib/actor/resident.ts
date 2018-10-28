@@ -1,6 +1,5 @@
 import { test } from '@quenk/noni/lib/data/type';
 import { fromBoolean } from '@quenk/noni/lib/data/either';
-import { fromArray } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
 import { ADDRESS_DISCARD, Address, isRestricted, make } from './address';
 import { Message } from './message';
@@ -10,10 +9,9 @@ import { Tell } from './system/op/tell';
 import { Kill } from './system/op/kill';
 import { Drop } from './system/op/drop';
 import { Receive } from './system/op/receive';
-import { Flag } from './system/op/flag';
 import { System, NullSystem } from './system';
 import { Template } from './template';
-import { Actor, } from './';
+import { Actor, Initializer } from './';
 
 /**
  * Ref function type.
@@ -150,13 +148,13 @@ export abstract class AbstractResident implements Resident {
 
     ref = (addr: Address) => (m: Message) => this.tell(addr, m);
 
-    self = () =>
-        this
-            .system
-            .actors
-            .getAddress(this)
-            .orJust(() => ADDRESS_DISCARD)
-            .get();
+    self = () => this.system.identify(this);
+
+    init(): Initializer {
+
+        return [undefined, undefined];
+
+    }
 
     accept({ to, from, message }: Envelope) {
 
@@ -222,12 +220,11 @@ export abstract class Immutable<T> extends AbstractResident {
      */
     abstract receive: Case<T>[];
 
-    /**
-     * onRun hook.
-     *
-     * Use this instead of overriding the run hook.
-     */
-    onRun(): void { }
+    init(): Initializer {
+
+        return [ibehaviour(this), { immutable: true, buffered: true }];
+
+    }
 
     /**
      * select noop.
@@ -235,20 +232,6 @@ export abstract class Immutable<T> extends AbstractResident {
     select<M>(_: Case<M>[]): Immutable<T> {
 
         return this;
-
-    }
-
-    /**
-     * run installs an Immutable's behaviour.
-     *
-     * If this method is overriden super.run() must be called in 
-     * order for messages to be handled.
-     */
-    run() {
-
-        this.onRun();
-        this.system.exec(new Flag(this.self(), { immutable: true }));
-        this.system.exec(new Receive(this.self(), true, ibehaviour(this)));
 
     }
 
@@ -265,12 +248,16 @@ export abstract class Mutable<T> extends AbstractResident {
      */
     abstract receive: Case<T>[];
 
-    /**
-     * onRun hook.
-     *
-     * Use this instead of overriding the run hook.
-     */
-    onRun(): void { }
+    init(): Initializer {
+
+        return [
+
+            (this.receive.length > 0) ? mbehaviour(this.receive) : undefined,
+            { immutable: false, buffered: true }
+
+        ];
+
+    }
 
     /**
      * select allows for selectively receiving messages based on Case classes.
@@ -280,20 +267,6 @@ export abstract class Mutable<T> extends AbstractResident {
         this.system.exec(new Receive(this.self(), false, mbehaviour(cases)));
         return this;
 
-    }
-
-    /**
-     * run the actor.
-     *
-     * If the receive property is populated the actor will
-     * automatically start receiving.
-     */
-    run() {
-
-        fromArray(this.receive)
-            .map(r => this.select(r))
-            .orJust(noop)
-            .map(() => this.onRun());
     }
 
 }
