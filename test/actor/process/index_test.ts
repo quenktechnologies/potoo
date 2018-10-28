@@ -22,7 +22,7 @@ class Sender extends Mutable<String> {
 
     ]
 
-    onRun() {
+    run() {
 
         this.tell('echo', { client: this.self(), message: 'hi' });
 
@@ -34,7 +34,7 @@ class Sender extends Mutable<String> {
 
                 this.done();
 
-            })])
+            })]);
 
     }
 
@@ -46,7 +46,7 @@ describe('process', () => {
 
         it('should be spawnable', done => {
 
-            system({ log: { level: 8 } })
+            system({ log: { level:1 } })
 
                 .spawn({
 

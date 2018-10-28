@@ -49,6 +49,8 @@ class Victim extends Immutable<void> {
 
     receive = []
 
+    run() { }
+
 }
 
 class Exiter extends AbstractResident {
@@ -86,7 +88,7 @@ class ShouldWork extends Mutable<void> {
 
     receive = [];
 
-    onRun() {
+    run() {
 
         let bucket: any = [];
 
@@ -146,7 +148,7 @@ class MutableSelfTalk extends Mutable<string> {
 
     ]
 
-    onRun() {
+    run() {
 
         this.tell(this.self(), 'ping');
 
@@ -183,7 +185,7 @@ class ImmutableSelfTalk extends Immutable<string> {
 
     ]
 
-    onRun() {
+    run() {
 
         this.tell(this.self(), 'ping');
 
@@ -203,9 +205,9 @@ describe('resident', () => {
                     .spawn({
 
                         id: 'a',
-                        create: s => new Killer(s, k => {
+                        create: sys => new Killer(sys, k => {
 
-                            must(s.actors.frames['a/targets']).not.be(undefined);
+                            must(s.state.frames['a/targets']).not.be(undefined);
                             setTimeout(() => k.kill('a/targets'), 100);
 
                         })
@@ -213,7 +215,7 @@ describe('resident', () => {
 
                 setTimeout(() => {
 
-                    must(s.actors.frames['a/targets']).be(undefined);
+                    must(s.state.frames['a/targets']).be(undefined);
                     done();
 
                 }, 200);
@@ -225,11 +227,12 @@ describe('resident', () => {
                     .spawn({
 
                         id: 'a',
-                        create: s => new Killer(s, k => {
+                        create: sys => new Killer(sys, k => {
 
 
                             setTimeout(() =>
-                                must(s.actors.frames['a/targets/a']).not.be(undefined), 200);
+                                must(s.state.frames['a/targets/a'])
+                                    .not.be(undefined), 200);
 
                             setTimeout(() => k.kill('a/targets/a'), 300);
 
@@ -238,7 +241,7 @@ describe('resident', () => {
 
                 setTimeout(() => {
 
-                    must(s.actors.frames['a/targets/a']).be(undefined);
+                    must(s.state.frames['a/targets/a']).be(undefined);
                     done();
 
                 }, 400);
@@ -250,19 +253,19 @@ describe('resident', () => {
 
             it('should work', done => {
 
-                system({ log: { level: 1 } })
+               let s =  system({ log: { level: 1 } })
                     .spawn({
 
                         id: 'a',
-                        create: s => new Exiter(s, () => {
+                        create: sys => new Exiter(sys, () => {
 
 
                             setTimeout(() =>
-                                must(s.actors.frames['a']).not.be(undefined), 100);
+                                must(s.state.frames['a']).not.be(undefined), 100);
 
                             setTimeout(() => {
 
-                                must(s.actors.frames['a']).be(undefined);
+                                must(s.state.frames['a']).be(undefined);
                                 done();
 
                             }, 300);

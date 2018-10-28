@@ -6,11 +6,15 @@ class A1 extends Mutable<void> {
 
     receive = [];
 
+    run() { }
+
 }
 
 class A2 extends Mutable<void> {
 
     receive = [];
+
+    run() { }
 
 }
 
@@ -22,7 +26,7 @@ class A3 extends Immutable<String> {
 
     ]
 
-    onRun() {
+    run() {
 
         this.spawn({ id: 'a3a', create: s => new A3A(s) });
         this.tell('a3/a3a', 'Hello!');
@@ -39,6 +43,8 @@ class A3A extends Immutable<any> {
 
     ]
 
+    run() { }
+
 }
 
 describe('system', function() {
@@ -47,19 +53,19 @@ describe('system', function() {
 
         describe('spawn', () => {
 
-            it('should spawn actors', (done) => {
+            it('should spawn actors', done => {
 
-                let s = system()
+                let s = system({})
                     .spawn({ id: 'a1', create: s => new A1(s) })
                     .spawn({ id: 'a2', create: s => new A2(s) })
                     .spawn({ id: 'a3', create: s => new A3(s) });
 
-                must(s.actors.frames['a1'].actor).be.instanceOf(Mutable);
-                must(s.actors.frames['a2'].actor).be.instanceOf(Mutable);
-                must(s.actors.frames['a3'].actor).be.instanceOf(Immutable);
+                must(s.state.frames['a1'].actor).be.instanceOf(Mutable);
+                must(s.state.frames['a2'].actor).be.instanceOf(Mutable);
+                must(s.state.frames['a3'].actor).be.instanceOf(Immutable);
 
                 setTimeout(() => {
-                    must(s.actors.frames['a3/a3a'].actor).be.instanceOf(Immutable);
+                    must(s.state.frames['a3/a3a'].actor).be.instanceOf(Immutable);
                     done();
                 }, 200);
 

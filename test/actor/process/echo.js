@@ -18,4 +18,6 @@ function Echo (s) {
 
 Echo.prototype = Object.create(Immutable.prototype);
 
+Echo.prototype.run = () =>{}
+
 module.exports.create = s => new Echo(s);
