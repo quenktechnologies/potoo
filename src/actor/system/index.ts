@@ -35,7 +35,6 @@ export interface System extends Actor {
 
 }
 
-
 /**
  * @private
  */
