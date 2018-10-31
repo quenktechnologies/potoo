@@ -1,7 +1,6 @@
 import { Address } from '../../address';
-import { Frame } from '../state/frame';
-import { Executor } from './';
-import { Op } from './';
+import { Context } from '../state/context';
+import { Op, Executor } from './';
 /**
  * Stop instruction.
  */
@@ -10,7 +9,7 @@ export declare class Stop extends Op {
     constructor(address: Address);
     code: number;
     level: number;
-    exec<F extends Frame>(s: Executor<F>): void;
+    exec<C extends Context>(s: Executor<C>): void;
 }
 /**
  * execStop
@@ -19,4 +18,4 @@ export declare class Stop extends Op {
  * the actor will be restarted instead.
  * Otherwised it is stopped and ejected from the system.
  */
-export declare const execStop: <F extends Frame>(s: Executor<F>, { address }: Stop) => void;
+export declare const execStop: <C extends Context>(s: Executor<C>, { address }: Stop) => void;

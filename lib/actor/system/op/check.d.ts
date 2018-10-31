@@ -1,7 +1,6 @@
 import { Address } from '../../address';
-import { Frame } from '../state/frame';
-import { Executor } from './';
-import { Op } from './';
+import { Context } from '../state/context';
+import { Op, Executor } from './';
 /**
  * Check instruction.
  */
@@ -10,7 +9,7 @@ export declare class Check extends Op {
     constructor(address: Address);
     code: number;
     level: number;
-    exec<F extends Frame>(s: Executor<F>): void;
+    exec<C extends Context>(s: Executor<C>): void;
 }
 /**
  * execCheck
@@ -18,4 +17,4 @@ export declare class Check extends Op {
  * Peeks at the actors mailbox for new messages and
  * schedules a Read if for the oldest one.
  */
-export declare const execCheck: <F extends Frame>(s: Executor<F>, { address }: Check) => void;
+export declare const execCheck: <C extends Context>(s: Executor<C>, { address }: Check) => void;

@@ -1,8 +1,7 @@
 import { Address } from '../../address';
 import { Behaviour } from '../../';
-import { Frame } from '../state/frame';
-import { Executor } from './';
-import { Op } from './';
+import { Context } from '../state/context';
+import { Op, Executor } from './';
 /**
  * Receive instruction.
  */
@@ -13,11 +12,11 @@ export declare class Receive extends Op {
     constructor(address: Address, immutable: boolean, behaviour: Behaviour);
     code: number;
     level: number;
-    exec<F extends Frame>(s: Executor<F>): void;
+    exec<F extends Context>(s: Executor<F>): void;
 }
 /**
  * execReceive
  *
  * Currently only one pending receive is allowed at a time.
  */
-export declare const execReceive: <F extends Frame>(s: Executor<F>, { address, behaviour }: Receive) => void;
+export declare const execReceive: <C extends Context>(s: Executor<C>, { address, behaviour }: Receive) => void;

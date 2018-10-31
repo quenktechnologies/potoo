@@ -1,11 +1,11 @@
 import * as log from '../log';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
-import { Frame } from '../state/frame';
-import { Executor } from './';
+import { Context } from '../state/context';
+import { put, runInstance, get } from '../state';
 import { Run } from './run';
 import { Tell } from './tell';
-import { OP_RESTART, Op } from './';
+import { OP_RESTART, Op, Executor } from './';
 
 /**
  * Restart instruction.
@@ -18,7 +18,7 @@ export class Restart extends Op {
 
     public level = log.INFO;
 
-    exec<F extends Frame>(s: Executor<F>): void {
+    exec<C extends Context>(s: Executor<C>): void {
 
         return execRestart(s, this);
 
@@ -34,23 +34,21 @@ export class Restart extends Op {
  * run method.
  */
 export const execRestart =
-    <F extends Frame>(s: Executor<F>, op: Restart) =>
-        s
-            .state
-            .get(op.address)
+    <C extends Context>(s: Executor<C>, op: Restart) =>
+        get(s.state, op.address)
             .map(doRestart(s, op))
             .orJust(noop)
             .get();
 
 const doRestart =
-    <F extends Frame>(s: Executor<F>, { address }: Restart) => (f: F) => {
+    <C extends Context>(s: Executor<C>, { address }: Restart) => (f: C) => {
 
         f.actor.stop();
 
-        s.state.put(address, s.allocate(f.template));
+        s.state = put(s.state, address, s.allocate(f.template));
 
         s.exec(new Run(address, 'restart',
-            f.template.delay || 0, () => s.state.runInstance(address)));
+            f.template.delay || 0, () => runInstance(s.state, address)));
 
         f
             .mailbox

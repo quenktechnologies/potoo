@@ -3,12 +3,12 @@ import { startsWith } from '@quenk/noni/lib/data/string';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Actor } from '../../';
-import { Frame } from '../state/frame';
-import { Executor } from './';
+import { Context } from '../state/context';
+import { getAddress } from '../state';
 import { Stop } from './stop';
 import { Raise } from './raise';
 import { SystemError } from '../error';
-import { OP_KILL, Op } from './';
+import { OP_KILL, Op, Executor } from './';
 
 export class IllegalKillSignal extends SystemError {
 
@@ -31,9 +31,9 @@ export class Kill extends Op {
 
     public level = log.WARN;
 
-    exec<F extends Frame>(s: Executor<F>): void {
+    exec<F extends Context>(s: Executor<F>): void {
 
-         execKill(s, this);
+        execKill(s, this);
 
     }
 
@@ -45,10 +45,8 @@ export class Kill extends Op {
  * Verify the target child is somewhere in the hierachy of the requesting
  * actor before killing it.
  */
-export const execKill = <F extends Frame>(s: Executor<F>, { child, actor }: Kill) =>
-    s
-        .state
-        .getAddress(actor)
+export const execKill = <F extends Context>(s: Executor<F>, { child, actor }: Kill) =>
+    getAddress(s.state, actor)
         .map(addr =>
             s.exec(startsWith(child, addr) ?
                 new Stop(child) :

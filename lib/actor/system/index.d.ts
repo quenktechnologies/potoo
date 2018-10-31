@@ -4,7 +4,7 @@ import { Template } from '../template';
 import { Actor } from '../';
 import { Op } from './op';
 import { Envelope } from './mailbox';
-import { ActorFrame } from './state/frame';
+import { ActorContext } from './state/context';
 import { Initializer } from '../';
 import { State } from './state';
 import { Executor } from './op';
@@ -30,17 +30,17 @@ export interface System extends Actor {
  * Implemnation of a System and Executor that spawns
  * various general purpose actors.
  */
-export declare class ActorSystem implements System, Executor<ActorFrame> {
+export declare class ActorSystem implements System, Executor<ActorContext> {
     stack: Op[];
     configuration: config.Configuration;
     constructor(stack: Op[], configuration: config.Configuration);
-    state: State<ActorFrame>;
+    state: State<ActorContext>;
     running: boolean;
     init(): Initializer;
     exec(code: Op): ActorSystem;
     accept({to, from, message}: Envelope): ActorSystem;
     stop(): void;
-    allocate(t: Template): ActorFrame;
+    allocate(t: Template): ActorContext;
     spawn(t: Template): ActorSystem;
     identify(actor: Actor): Address;
     run(): void;
@@ -50,12 +50,12 @@ export declare class ActorSystem implements System, Executor<ActorFrame> {
  * communication.
  */
 export declare class NullSystem implements System {
-    state: State<ActorFrame>;
+    state: State<ActorContext>;
     configuration: {};
     init(): Initializer;
     accept({to, from, message}: Envelope): NullSystem;
     stop(): void;
-    allocate(t: Template): ActorFrame;
+    allocate(t: Template): ActorContext;
     spawn(_: Template): NullSystem;
     identify(_: Actor): Address;
     exec(_: Op): NullSystem;

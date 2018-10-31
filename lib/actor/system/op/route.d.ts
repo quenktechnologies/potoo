@@ -1,7 +1,6 @@
 import { Address } from '../../address';
-import { Frame } from '../state/frame';
-import { Executor } from './';
-import { Op } from './';
+import { Context } from '../state/context';
+import { Op, Executor } from './';
 /**
  * Route instruction.
  */
@@ -11,7 +10,7 @@ export declare class Route extends Op {
     constructor(from: Address, to: Address);
     code: number;
     level: number;
-    exec<F extends Frame>(s: Executor<F>): void;
+    exec<C extends Context>(s: Executor<C>): void;
 }
 /**
  * execRoute
@@ -19,4 +18,4 @@ export declare class Route extends Op {
  * Creates an entry in the system's state to allow messages
  * sent to one address to be forwarded to another actor.
  */
-export declare const execRoute: <F extends Frame>(s: Executor<F>, { from, to }: Route) => void;
+export declare const execRoute: <C extends Context>(s: Executor<C>, { from, to }: Route) => void;

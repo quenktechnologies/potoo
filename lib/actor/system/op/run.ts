@@ -1,7 +1,7 @@
 import * as log from '../log';
 import { tick } from '@quenk/noni/lib/control/timer';
 import { Address } from '../../address';
-import { Frame } from '../state/frame';
+import { Context } from '../state/context';
 import { Executor } from './';
 import { OP_RUN, Op } from './';
 
@@ -20,7 +20,7 @@ export class Run extends Op {
 
     public level = log.INFO;
 
-    exec<F extends Frame>(_: Executor<F>): void {
+    exec<C extends Context>(_: Executor<C>): void {
 
         return execRun(this);
 

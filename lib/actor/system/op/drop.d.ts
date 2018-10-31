@@ -1,5 +1,5 @@
 import { Address } from '../../address';
-import { Frame } from '../state/frame';
+import { Context } from '../state/context';
 import { Executor } from './';
 import { Message } from '../../message';
 import { Op } from './';
@@ -13,5 +13,5 @@ export declare class Drop extends Op {
     constructor(to: Address, from: Address, message: Message);
     code: number;
     level: number;
-    exec<F extends Frame>(_: Executor<F>): void;
+    exec<C extends Context>(_: Executor<C>): void;
 }

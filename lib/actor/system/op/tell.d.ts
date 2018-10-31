@@ -1,8 +1,7 @@
 import { Address } from '../../address';
 import { Message } from '../../message';
-import { Frame } from '../state/frame';
-import { Executor } from './';
-import { Op } from './';
+import { Context } from '../state/context';
+import { Op, Executor } from './';
 /**
  * Tell instruction.
  */
@@ -13,7 +12,7 @@ export declare class Tell extends Op {
     constructor(to: Address, from: Address, message: Message);
     code: number;
     level: number;
-    exec<F extends Frame>(s: Executor<F>): void;
+    exec<C extends Context>(s: Executor<C>): void;
 }
 /**
  * execTell
@@ -26,4 +25,4 @@ export declare class Tell extends Op {
  *
  * The message is dropped otherwise.
  */
-export declare const execTell: <F extends Frame>(s: Executor<F>, op: Tell) => void;
+export declare const execTell: <C extends Context>(s: Executor<C>, op: Tell) => void;

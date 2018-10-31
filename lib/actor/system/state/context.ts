@@ -5,18 +5,18 @@ import { Template } from '../../template';
 import { Flags } from './flags';
 
 /**
- * Frames map.
+ * Contexts map.
  */
-export interface Frames<F extends Frame> {
+export interface Contexts<F extends Context> {
 
     [key: string]: F
 
 }
 
 /**
- * Frame stores all the information a system needs about a spawned actor.
+ * Context stores all the information a system needs about a spawned actor.
  */
-export interface Frame {
+export interface Context {
 
     /**
      * mailbox for the actor.
@@ -48,9 +48,9 @@ export interface Frame {
 }
 
 /**
- * ActorFrame is a Frame instance.
+ * ActorContext is a Context instance.
  */
-export class ActorFrame implements Frame {
+export class ActorContext implements Context {
 
     constructor(
         public mailbox: Maybe<Mailbox>,
@@ -60,10 +60,10 @@ export class ActorFrame implements Frame {
         public template: Template) { }
 
     /**
-     * newFrame constructs a new Frame with default values.
+     * create constructs a new Context with default values.
      */
     static create = (actor: Actor, template: Template) =>
-        new ActorFrame(
+        new ActorContext(
             just([]),
             actor,
             [],

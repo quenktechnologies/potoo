@@ -3,10 +3,10 @@ import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Message } from '../../message';
 import { Envelope } from '../mailbox';
-import { Frame } from '../state/frame';
-import { Executor } from './';
+import { Context } from '../state/context';
+import { getInstance } from '../state';
 import { Drop } from './drop';
-import { OP_TRANSFER, Op } from './';
+import { OP_TRANSFER, Op, Executor } from './';
 
 /**
  * Transfer instruction.
@@ -23,7 +23,7 @@ export class Transfer extends Op {
 
     public level = log.DEBUG;
 
-    exec<F extends Frame>(s: Executor<F>): void {
+    exec<C extends Context>(s: Executor<C>): void {
 
         return execTransfer(s, this);
 
@@ -38,10 +38,8 @@ export class Transfer extends Op {
  * schedules a Read if for the oldest one.
  */
 export const execTransfer =
-    <F extends Frame>(s: Executor<F>, { router, to, from, message }: Transfer) =>
-        s
-            .state
-            .getInstance(router)
+    <C extends Context>(s: Executor<C>, { router, to, from, message }: Transfer) =>
+        getInstance(s.state, router)
             .map(a => a.accept(new Envelope(to, from, message)))
             .orJust(() => s.exec(new Drop(to, from, message)))
             .map(noop)

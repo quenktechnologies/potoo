@@ -2,10 +2,10 @@ import * as log from '../log';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Behaviour } from '../../';
-import { Frame } from '../state/frame';
-import { Executor } from './';
+import { Context } from '../state/context';
+import { get } from '../state';
 import { Check } from './check';
-import { OP_RECEIVE, Op } from './';
+import { OP_RECEIVE, Op, Executor } from './';
 
 /**
  * Receive instruction.
@@ -21,7 +21,7 @@ export class Receive extends Op {
 
     public level = log.INFO;
 
-    exec<F extends Frame>(s: Executor<F>): void {
+    exec<F extends Context>(s: Executor<F>): void {
 
         return execReceive(s, this);
 
@@ -35,10 +35,8 @@ export class Receive extends Op {
  * Currently only one pending receive is allowed at a time.
  */
 export const execReceive =
-    <F extends Frame>(s: Executor<F>, { address, behaviour }: Receive) =>
-        s
-            .state
-            .get(address)
+    <C extends Context>(s: Executor<C>, { address, behaviour }: Receive) =>
+        get(s.state, address)
             .map(f =>
                 f
                     .behaviour

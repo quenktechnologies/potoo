@@ -1,10 +1,9 @@
 import { Actor } from '../../';
 import { Template } from '../../template';
-import { Frame } from '../state/frame';
+import { Context } from '../state/context';
 import { Address } from '../../address';
-import { Executor } from './';
 import { SystemError } from '../error';
-import { Op } from './';
+import { Op, Executor } from './';
 export declare const RUN_START_TAG = "start";
 export declare class InvalidIdError extends SystemError {
     id: string;
@@ -23,7 +22,7 @@ export declare class Spawn extends Op {
     constructor(parent: Actor, template: Template);
     code: number;
     level: number;
-    exec<F extends Frame>(s: Executor<F>): void;
+    exec<C extends Context>(s: Executor<C>): void;
 }
 /**
  * execSpawn instruction.
@@ -34,4 +33,4 @@ export declare class Spawn extends Op {
  * If that is successfull we create and check for a duplicate id
  * then finally add the child to the system.
  */
-export declare const execSpawn: <F extends Frame>(s: Executor<F>, { parent, template }: Spawn) => void;
+export declare const execSpawn: <C extends Context>(s: Executor<C>, { parent, template }: Spawn) => void;
