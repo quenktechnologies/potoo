@@ -26,11 +26,17 @@ export interface Routes {
 /**
  * State contains Frame entries for all actors in the system.
  */
-export class State<F extends Frame> {
+export interface State<F extends Frame> {
 
-    constructor(
-        public frames: Frames<F>,
-        public routes: Routes) { }
+  /**
+   * frames for each actor in the system.
+   */
+  frames: Frames<F>,
+
+  /**
+   * routes configured for transfers.
+   */
+         routes: Routes
 
 }
 

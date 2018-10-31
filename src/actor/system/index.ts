@@ -12,7 +12,7 @@ import { Err } from '../err';
 import { Envelope } from './mailbox';
 import { ActorFrame } from './state/frame';
 import { Initializer } from '../';
-import { State,getAddress } from './state';
+import { State, getAddress } from './state';
 import { Executor } from './op';
 
 /**
@@ -65,7 +65,7 @@ export class ActorSystem implements System, Executor<ActorFrame> {
         public stack: Op[],
         public configuration: config.Configuration) { }
 
-    state: State<ActorFrame> = new State({ $: nullFrame(this) }, {});
+    state: State<ActorFrame> = { frames: { $: nullFrame(this) }, routes: {} };
 
     running: boolean = false;
 
@@ -116,7 +116,7 @@ export class ActorSystem implements System, Executor<ActorFrame> {
 
     identify(actor: Actor): Address {
 
-            return getAddress(this.state, actor)
+        return getAddress(this.state, actor)
             .orJust(() => ADDRESS_DISCARD)
             .get();
 
@@ -145,7 +145,7 @@ export class ActorSystem implements System, Executor<ActorFrame> {
  */
 export class NullSystem implements System {
 
-    state: State<ActorFrame> = new State({ $: nullFrame(this) }, {});
+  state: State<ActorFrame> = { frames: { $: nullFrame(this) }, routes:{}};
 
     configuration = {};
 
