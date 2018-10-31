@@ -49,25 +49,28 @@ export const get = <F extends Frame>(s: State<F>, addr: Address): Maybe<F> =>
 /**
  * getAddress attempts to retrieve the address of an Actor instance.
  */
-export const getAddress = <F extends Frame>(s: State<F>, actor: Actor): Maybe<Address> =>
-    reduce(s.frames, nothing(),
-        (p: Maybe<Address>, c, k) => c.actor === actor ?
-            fromString(k) : p);
+export const getAddress =
+    <F extends Frame>(s: State<F>, actor: Actor): Maybe<Address> =>
+        reduce(s.frames, nothing(),
+            (p: Maybe<Address>, c, k) => c.actor === actor ?
+                fromString(k) : p);
 
 /**
  * getInstance attempts to retrieve an actor given its address.
  */
-export const getInstance = <F extends Frame>(s: State<F>, addr: Address): Maybe<Actor> =>
-    reduce(s.frames, nothing(),
-        (p: Maybe<Actor>, c, k) => k === addr ?
-            fromNullable(c.actor) : p);
+export const getInstance =
+    <F extends Frame>(s: State<F>, addr: Address): Maybe<Actor> =>
+        reduce(s.frames, nothing(),
+            (p: Maybe<Actor>, c, k) => k === addr ?
+                fromNullable(c.actor) : p);
 
 /**
  * getTemplate attempts to retrieve the template for an
  * actor given an address.
  */
-export const getTemplate = <F extends Frame>(s: State<F>, addr: Address): Maybe<Template> =>
-    get(s, addr).map(f => f.template);
+export const getTemplate =
+    <F extends Frame>(s: State<F>, addr: Address): Maybe<Template> =>
+        get(s, addr).map(f => f.template);
 
 /**
  * getMessage attempts to retrieve the next message
@@ -75,27 +78,30 @@ export const getTemplate = <F extends Frame>(s: State<F>, addr: Address): Maybe<
  *
  * If sucessfull, the message will be removed.
  */
-export const getMessage = <F extends Frame>(s: State<F>, addr: Address): Maybe<Envelope> =>
-    get(s, addr)
-        .chain(f => f.mailbox)
-        .chain(m => fromArray(m))
-        .map(m => <Envelope>m.shift());
+export const getMessage =
+    <F extends Frame>(s: State<F>, addr: Address): Maybe<Envelope> =>
+        get(s, addr)
+            .chain(f => f.mailbox)
+            .chain(m => fromArray(m))
+            .map(m => <Envelope>m.shift());
 
 /**
  * getBehaviour attempts to retrieve the behaviour for an 
  * actor given an address.
  */
-export const getBehaviour = <F extends Frame>(s: State<F>, addr: Address): Maybe<Behaviour> =>
-    get(s,addr)
-        .chain(f => fromArray(f.behaviour))
-        .map(b => b[0]);
+export const getBehaviour =
+    <F extends Frame>(s: State<F>, addr: Address): Maybe<Behaviour> =>
+        get(s, addr)
+            .chain(f => fromArray(f.behaviour))
+            .map(b => b[0]);
 
 /**
  * getChildFrames returns the child frames for an address.
  */
-export const getChildFrames = <F extends Frame>(s: State<F>, addr: Address): Frames<F> =>
-    <Frames<F>>partition(s.frames)((_, key) =>
-        (startsWith(getParent(key), addr) && key !== addr))[0];
+export const getChildFrames =
+    <F extends Frame>(s: State<F>, addr: Address): Frames<F> =>
+        <Frames<F>>partition(s.frames)((_, key) =>
+            (startsWith(getParent(key), addr) && key !== addr))[0];
 
 /**
  * getParentFrame of an Address.
@@ -111,9 +117,10 @@ export const getParentFrame =
  * The value returned depends on whether the given 
  * address begins with any of the installed router's address.
  */
-export const getRouter = <F extends Frame>(s: State<F>, addr: Address): Maybe<Address> =>
-    reduce(s.routes, nothing(), (p, k) =>
-        startsWith(addr, k) ? just(k) : p);
+export const getRouter =
+    <F extends Frame>(s: State<F>, addr: Address): Maybe<Address> =>
+        reduce(s.routes, nothing(), (p, k) =>
+            startsWith(addr, k) ? just(k) : p);
 
 /**
  * put a new Frame in the State.
@@ -129,30 +136,32 @@ export const put =
 /**
  * putRoute adds a route to the routing table.
  */
-export const putRoute = <F extends Frame>(s: State<F>, from: Address, to: Address): State<F> => {
+export const putRoute =
+    <F extends Frame>(s: State<F>, from: Address, to: Address): State<F> => {
 
-    s.routes[from] = to;
-    return s;
+        s.routes[from] = to;
+        return s;
 
-}
+    }
 
 /**
  * remove an actor entry.
  */
-export const remove = <F extends Frame>(s: State<F>, addr: Address): State<F> => {
+export const remove =
+    <F extends Frame>(s: State<F>, addr: Address): State<F> => {
 
-    delete s.frames[addr];
+        delete s.frames[addr];
 
-    return s;
+        return s;
 
-}
+    }
 
 /**
  * runInstance attempts to invoke the run code of an actor instance.
  */
-export const runInstance = <F extends Frame>(s: State<F>, addr: Address): void => {
+export const runInstance =
+    <F extends Frame>(s: State<F>, addr: Address): void => {
 
-    getInstance(s, addr).map(a => a.run());
+        getInstance(s, addr).map(a => a.run());
 
-}
-
+    }
