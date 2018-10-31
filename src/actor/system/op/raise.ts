@@ -3,8 +3,8 @@ import * as template from '../../template';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Err } from '../../err';
 import { Address, getParent } from '../../address';
-import { Frame } from '../state/frame';
-import {getTemplate} from '../state';
+import { Context } from '../state/context';
+import { getTemplate } from '../state';
 import { Restart } from './restart';
 import { Stop } from './stop';
 import { OP_RAISE, Op, Executor } from './';
@@ -28,7 +28,7 @@ export class Raise extends Op {
      *
      * 
      */
-    exec<F extends Frame>(s: Executor<F>): void {
+    exec<C extends Context>(s: Executor<C>): void {
 
         return execRaise(s, this);
 
@@ -49,8 +49,8 @@ export class Raise extends Op {
  * If no trap is provided we do 1. until we hit the system actor.
  */
 export const execRaise =
-    <F extends Frame>(s: Executor<F>, { error, src, dest }: Raise) =>
-            getTemplate(s.state, dest)
+    <C extends Context>(s: Executor<C>, { error, src, dest }: Raise) =>
+        getTemplate(s.state, dest)
             .map(t => {
 
                 if (t.trap != null) {

@@ -10,7 +10,7 @@ import { Drop } from './op/drop';
 import { Op, log } from './op';
 import { Err } from '../err';
 import { Envelope } from './mailbox';
-import { ActorFrame } from './state/frame';
+import { ActorContext } from './state/context';
 import { Initializer } from '../';
 import { State, getAddress } from './state';
 import { Executor } from './op';
@@ -59,13 +59,13 @@ class SysT {
  * Implemnation of a System and Executor that spawns
  * various general purpose actors.
  */
-export class ActorSystem implements System, Executor<ActorFrame> {
+export class ActorSystem implements System, Executor<ActorContext> {
 
     constructor(
         public stack: Op[],
         public configuration: config.Configuration) { }
 
-    state: State<ActorFrame> = { frames: { $: nullFrame(this) }, routes: {} };
+    state: State<ActorContext> = { contexts: { $: nullFrame(this) }, routes: {} };
 
     running: boolean = false;
 
@@ -95,14 +95,14 @@ export class ActorSystem implements System, Executor<ActorFrame> {
 
     }
 
-    allocate(t: Template): ActorFrame {
+    allocate(t: Template): ActorContext {
 
         let a = t.create(this);
         let i = a.init();
         let flags = flagDefaults(i[1] || {});
         let stack: Behaviour[] = i[0] ? [<Behaviour>i[0]] : [];
 
-        return new ActorFrame(flags.buffered ? just([]) : nothing(),
+        return new ActorContext(flags.buffered ? just([]) : nothing(),
             a, stack, flags, t);
 
     }
@@ -145,7 +145,7 @@ export class ActorSystem implements System, Executor<ActorFrame> {
  */
 export class NullSystem implements System {
 
-  state: State<ActorFrame> = { frames: { $: nullFrame(this) }, routes:{}};
+    state: State<ActorContext> = { contexts: { $: nullFrame(this) }, routes: {} };
 
     configuration = {};
 
@@ -167,9 +167,9 @@ export class NullSystem implements System {
 
     }
 
-    allocate(t: Template): ActorFrame {
+    allocate(t: Template): ActorContext {
 
-        return new ActorFrame(nothing(), this, [], flagDefaults({}), t);
+        return new ActorContext(nothing(), this, [], flagDefaults({}), t);
 
     }
 
@@ -199,4 +199,4 @@ const flagDefaults = (f: { [key: string]: boolean }) =>
     merge({ buffered: true, immutable: true }, f);
 
 const nullFrame = (s: System) =>
-    new ActorFrame(nothing(), s, [], flagDefaults({}), new SysT());
+    new ActorContext(nothing(), s, [], flagDefaults({}), new SysT());

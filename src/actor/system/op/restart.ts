@@ -1,8 +1,8 @@
 import * as log from '../log';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
-import { Frame } from '../state/frame';
-import { put, runInstance,get } from '../state';
+import { Context } from '../state/context';
+import { put, runInstance, get } from '../state';
 import { Run } from './run';
 import { Tell } from './tell';
 import { OP_RESTART, Op, Executor } from './';
@@ -18,7 +18,7 @@ export class Restart extends Op {
 
     public level = log.INFO;
 
-    exec<F extends Frame>(s: Executor<F>): void {
+    exec<C extends Context>(s: Executor<C>): void {
 
         return execRestart(s, this);
 
@@ -34,14 +34,14 @@ export class Restart extends Op {
  * run method.
  */
 export const execRestart =
-    <F extends Frame>(s: Executor<F>, op: Restart) =>
-            get(s.state, op.address)
+    <C extends Context>(s: Executor<C>, op: Restart) =>
+        get(s.state, op.address)
             .map(doRestart(s, op))
             .orJust(noop)
             .get();
 
 const doRestart =
-    <F extends Frame>(s: Executor<F>, { address }: Restart) => (f: F) => {
+    <C extends Context>(s: Executor<C>, { address }: Restart) => (f: C) => {
 
         f.actor.stop();
 

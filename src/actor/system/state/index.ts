@@ -11,8 +11,8 @@ import { startsWith } from '@quenk/noni/lib/data/string';
 import { Actor, Behaviour } from '../../';
 import { Template } from '../../template';
 import { Envelope } from '../mailbox';
-import { Address, getParent } from '../../address';
-import { Frame, Frames } from './frame';
+import { Address, getParent as getParentAddress } from '../../address';
+import { Context, Contexts } from './context';
 
 /**
  * Routes map.
@@ -24,40 +24,40 @@ export interface Routes {
 }
 
 /**
- * State contains Frame entries for all actors in the system.
+ * State contains Context entries for all actors in the system.
  */
-export interface State<F extends Frame> {
+export interface State<C extends Context> {
 
-  /**
-   * frames for each actor in the system.
-   */
-  frames: Frames<F>,
+    /**
+     * contexts for each actor in the system.
+     */
+    contexts: Contexts<C>,
 
-  /**
-   * routes configured for transfers.
-   */
-         routes: Routes
+    /**
+     * routes configured for transfers.
+     */
+    routes: Routes
 
 }
 
 /**
  * exists tests whether an address exists in the State.
  */
-export const exists = <F extends Frame>(s: State<F>, addr: Address): boolean =>
-    contains(s.frames, addr);
+export const exists = <C extends Context>(s: State<C>, addr: Address): boolean =>
+    contains(s.contexts, addr);
 
 /**
- * get a Frame using an Address.
+ * get a Context using an Address.
  */
-export const get = <F extends Frame>(s: State<F>, addr: Address): Maybe<F> =>
-    fromNullable(s.frames[addr]);
+export const get = <C extends Context>(s: State<C>, addr: Address): Maybe<C> =>
+    fromNullable(s.contexts[addr]);
 
 /**
  * getAddress attempts to retrieve the address of an Actor instance.
  */
 export const getAddress =
-    <F extends Frame>(s: State<F>, actor: Actor): Maybe<Address> =>
-        reduce(s.frames, nothing(),
+    <C extends Context>(s: State<C>, actor: Actor): Maybe<Address> =>
+        reduce(s.contexts, nothing(),
             (p: Maybe<Address>, c, k) => c.actor === actor ?
                 fromString(k) : p);
 
@@ -65,8 +65,8 @@ export const getAddress =
  * getInstance attempts to retrieve an actor given its address.
  */
 export const getInstance =
-    <F extends Frame>(s: State<F>, addr: Address): Maybe<Actor> =>
-        reduce(s.frames, nothing(),
+    <C extends Context>(s: State<C>, addr: Address): Maybe<Actor> =>
+        reduce(s.contexts, nothing(),
             (p: Maybe<Actor>, c, k) => k === addr ?
                 fromNullable(c.actor) : p);
 
@@ -75,7 +75,7 @@ export const getInstance =
  * actor given an address.
  */
 export const getTemplate =
-    <F extends Frame>(s: State<F>, addr: Address): Maybe<Template> =>
+    <C extends Context>(s: State<C>, addr: Address): Maybe<Template> =>
         get(s, addr).map(f => f.template);
 
 /**
@@ -85,7 +85,7 @@ export const getTemplate =
  * If sucessfull, the message will be removed.
  */
 export const getMessage =
-    <F extends Frame>(s: State<F>, addr: Address): Maybe<Envelope> =>
+    <C extends Context>(s: State<C>, addr: Address): Maybe<Envelope> =>
         get(s, addr)
             .chain(f => f.mailbox)
             .chain(m => fromArray(m))
@@ -96,25 +96,25 @@ export const getMessage =
  * actor given an address.
  */
 export const getBehaviour =
-    <F extends Frame>(s: State<F>, addr: Address): Maybe<Behaviour> =>
+    <C extends Context>(s: State<C>, addr: Address): Maybe<Behaviour> =>
         get(s, addr)
             .chain(f => fromArray(f.behaviour))
             .map(b => b[0]);
 
 /**
- * getChildFrames returns the child frames for an address.
+ * getChildren returns the child contexts for an address.
  */
-export const getChildFrames =
-    <F extends Frame>(s: State<F>, addr: Address): Frames<F> =>
-        <Frames<F>>partition(s.frames)((_, key) =>
-            (startsWith(getParent(key), addr) && key !== addr))[0];
+export const getChildren =
+    <C extends Context>(s: State<C>, addr: Address): Contexts<C> =>
+        <Contexts<C>>partition(s.contexts)((_, key) =>
+            (startsWith(getParentAddress(key), addr) && key !== addr))[0];
 
 /**
- * getParentFrame of an Address.
+ * getParent of an Address.
  */
-export const getParentFrame =
-    <F extends Frame>(s: State<F>, addr: Address): Maybe<F> =>
-        fromNullable(s.frames[getParent(addr)]);
+export const getParent =
+    <C extends Context>(s: State<C>, addr: Address): Maybe<C> =>
+        fromNullable(s.contexts[getParentAddress(addr)]);
 
 /**
  * getRouter will attempt to provide the 
@@ -124,17 +124,17 @@ export const getParentFrame =
  * address begins with any of the installed router's address.
  */
 export const getRouter =
-    <F extends Frame>(s: State<F>, addr: Address): Maybe<Address> =>
+    <C extends Context>(s: State<C>, addr: Address): Maybe<Address> =>
         reduce(s.routes, nothing(), (p, k) =>
             startsWith(addr, k) ? just(k) : p);
 
 /**
- * put a new Frame in the State.
+ * put a new Context in the State.
  */
 export const put =
-    <F extends Frame>(s: State<F>, addr: Address, frame: F): State<F> => {
+    <C extends Context>(s: State<C>, addr: Address, context: C): State<C> => {
 
-        s.frames[addr] = frame;
+        s.contexts[addr] = context;
         return s;
 
     }
@@ -143,7 +143,7 @@ export const put =
  * putRoute adds a route to the routing table.
  */
 export const putRoute =
-    <F extends Frame>(s: State<F>, from: Address, to: Address): State<F> => {
+    <C extends Context>(s: State<C>, from: Address, to: Address): State<C> => {
 
         s.routes[from] = to;
         return s;
@@ -154,9 +154,9 @@ export const putRoute =
  * remove an actor entry.
  */
 export const remove =
-    <F extends Frame>(s: State<F>, addr: Address): State<F> => {
+    <C extends Context>(s: State<C>, addr: Address): State<C> => {
 
-        delete s.frames[addr];
+        delete s.contexts[addr];
 
         return s;
 
@@ -166,7 +166,7 @@ export const remove =
  * runInstance attempts to invoke the run code of an actor instance.
  */
 export const runInstance =
-    <F extends Frame>(s: State<F>, addr: Address): void => {
+    <C extends Context>(s: State<C>, addr: Address): void => {
 
         getInstance(s, addr).map(a => a.run());
 

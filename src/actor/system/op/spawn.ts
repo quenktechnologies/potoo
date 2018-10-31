@@ -9,7 +9,7 @@ import { cons, noop } from '@quenk/noni/lib/data/function';
 import { Actor } from '../../';
 import { Template } from '../../template';
 import { exists, getAddress, put, runInstance } from '../state';
-import { Frame } from '../state/frame';
+import { Context } from '../state/context';
 import { Address, isRestricted, make } from '../../address';
 import { SystemError } from '../error';
 import { Raise } from './raise';
@@ -51,7 +51,7 @@ export class Spawn extends Op {
 
     public level = log.INFO;
 
-    exec<F extends Frame>(s: Executor<F>): void {
+    exec<C extends Context>(s: Executor<C>): void {
 
         return execSpawn(s, this);
 
@@ -68,7 +68,7 @@ export class Spawn extends Op {
  * If that is successfull we create and check for a duplicate id
  * then finally add the child to the system.
  */
-export const execSpawn = <F extends Frame>(s: Executor<F>, { parent, template }: Spawn) =>
+export const execSpawn = <C extends Context>(s: Executor<C>, { parent, template }: Spawn) =>
     getAddress(s.state, parent)
         .chain(path =>
             fromBoolean(!isRestricted(template.id))
@@ -89,30 +89,30 @@ export const execSpawn = <F extends Frame>(s: Executor<F>, { parent, template }:
 const makeAddress = (parent: Address) => (template: Template) =>
     fromString(make(parent, template.id))
 
-const checkAddress = <F extends Frame>(s: Executor<F>, addr: Address) =>
+const checkAddress = <C extends Context>(s: Executor<C>, addr: Address) =>
     fromBoolean(!exists(s.state, addr));
 
 const generate =
-    <F extends Frame>(s: Executor<F>, template: Template) => (addr: Address) =>
+    <C extends Context>(s: Executor<C>, template: Template) => (addr: Address) =>
         fromNullable(s.allocate(template))
             .map(f => {
 
                 s.state = put(s.state, addr, f);
 
                 s.exec(new Run(RUN_START_TAG, addr, template.delay || 0,
-                    () => runInstance(s.state,addr)));
+                    () => runInstance(s.state, addr)));
 
                 return f.actor;
 
             });
 
 const spawnChildren =
-    <F extends Frame>(s: Executor<F>, t: Template) => (parent: Actor) =>
+    <C extends Context>(s: Executor<C>, t: Template) => (parent: Actor) =>
         fromNullable(<Template[]>t.children)
             .map(children => children.forEach(c => s.exec(new Spawn(parent, c))));
 
 const raiseInvalidIdError =
-    <F extends Frame>(s: Executor<F>, id: string, parent: Address) => () => {
+    <C extends Context>(s: Executor<C>, id: string, parent: Address) => () => {
 
         s.exec(new Raise(new InvalidIdError(id), parent, parent));
         return nothing();
@@ -120,7 +120,7 @@ const raiseInvalidIdError =
     }
 
 const raiseDuplicateAddressError =
-    <F extends Frame>(s: Executor<F>, parent: Address, addr: Address) => () => {
+    <C extends Context>(s: Executor<C>, parent: Address, addr: Address) => () => {
 
         s.exec(new Raise(
             new DuplicateAddressError(addr), parent, parent));

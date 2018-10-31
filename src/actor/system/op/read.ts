@@ -3,8 +3,8 @@ import { fromArray } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Envelope } from '../mailbox';
-import { Frame } from '../state/frame';
-import {get} from '../state';
+import { Context } from '../state/context';
+import { get } from '../state';
 import { Drop } from './drop';
 import { OP_READ, Op, Executor } from './';
 
@@ -21,7 +21,7 @@ export class Read extends Op {
 
     public level = log.INFO;
 
-    exec<F extends Frame>(s: Executor<F>): void {
+    exec<C extends Context>(s: Executor<C>): void {
 
         return execRead(s, this);
 
@@ -36,14 +36,14 @@ export class Read extends Op {
  * receive is pending.
  */
 export const execRead =
-    <F extends Frame>(s: Executor<F>, { address, envelope }: Read) =>
-            get(s.state,address)
+    <C extends Context>(s: Executor<C>, { address, envelope }: Read) =>
+        get(s.state, address)
             .chain(consume(s, envelope))
             .orJust(noop)
             .map(noop)
             .get();
 
-const consume = <F extends Frame>(s: Executor<F>, e: Envelope) => (f: F) =>
+const consume = <C extends Context>(s: Executor<C>, e: Envelope) => (f: C) =>
     fromArray(f.behaviour)
         .map(([b]) => b)
         .chain(b =>

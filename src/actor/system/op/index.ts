@@ -1,5 +1,5 @@
 import * as logging from '../log';
-import { Frame } from '../state/frame';
+import { Context } from '../state/context';
 import { Template } from '../../template';
 import { State } from '../state';
 import { Logger } from '../log';
@@ -26,7 +26,7 @@ export const OP_TRANSFER = 0xc;
  *
  * Has methods and properties needed for opcode execution.
  */
-export interface Executor<F extends Frame> {
+export interface Executor<F extends Context> {
 
     /**
      * configuration
@@ -39,7 +39,7 @@ export interface Executor<F extends Frame> {
     state: State<F>;
 
     /**
-     * allocate a new Frame for an actor.
+     * allocate a new Context for an actor.
      */
     allocate(t: Template): F;
 
@@ -68,7 +68,7 @@ export abstract class Op {
     /**
      * exec the instruction.
      */
-    public abstract exec<F extends Frame>(s: Executor<F>): void;
+    public abstract exec<F extends Context>(s: Executor<F>): void;
 
 }
 

@@ -2,8 +2,8 @@ import * as log from '../log';
 import { map } from '@quenk/noni/lib/data/record';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
-import { Frame } from '../state/frame';
-import { getChildFrames, remove,get } from '../state';
+import { Context } from '../state/context';
+import { getChildren, remove, get } from '../state';
 import { Restart } from './restart';
 import { OP_STOP, Op, Executor } from './';
 
@@ -18,7 +18,7 @@ export class Stop extends Op {
 
     public level = log.WARN;
 
-    exec<F extends Frame>(s: Executor<F>): void {
+    exec<C extends Context>(s: Executor<C>): void {
 
         return execStop(s, this);
 
@@ -33,11 +33,11 @@ export class Stop extends Op {
  * the actor will be restarted instead.
  * Otherwised it is stopped and ejected from the system.
  */
-export const execStop = <F extends Frame>(s: Executor<F>, { address }: Stop) =>
-        get(s.state, address)
+export const execStop = <C extends Context>(s: Executor<C>, { address }: Stop) =>
+    get(s.state, address)
         .map(f => {
 
-            map(getChildFrames(s.state, address), (_, k) =>
+            map(getChildren(s.state, address), (_, k) =>
                 s.exec(new Stop(k)));
 
             if (f.template.restart) {
