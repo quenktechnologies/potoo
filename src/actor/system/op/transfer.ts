@@ -4,9 +4,9 @@ import { Address } from '../../address';
 import { Message } from '../../message';
 import { Envelope } from '../mailbox';
 import { Frame } from '../state/frame';
-import { Executor } from './';
+import {getInstance} from '../state';
 import { Drop } from './drop';
-import { OP_TRANSFER, Op } from './';
+import { OP_TRANSFER, Op, Executor } from './';
 
 /**
  * Transfer instruction.
@@ -39,9 +39,7 @@ export class Transfer extends Op {
  */
 export const execTransfer =
     <F extends Frame>(s: Executor<F>, { router, to, from, message }: Transfer) =>
-        s
-            .state
-            .getInstance(router)
+  getInstance(s.state, router)
             .map(a => a.accept(new Envelope(to, from, message)))
             .orJust(() => s.exec(new Drop(to, from, message)))
             .map(noop)

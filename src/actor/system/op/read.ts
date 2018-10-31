@@ -3,10 +3,10 @@ import { fromArray } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Envelope } from '../mailbox';
-import { Executor } from './';
 import { Frame } from '../state/frame';
+import {get} from '../state';
 import { Drop } from './drop';
-import { OP_READ, Op } from './';
+import { OP_READ, Op, Executor } from './';
 
 /**
  * Read instruction.
@@ -37,9 +37,7 @@ export class Read extends Op {
  */
 export const execRead =
     <F extends Frame>(s: Executor<F>, { address, envelope }: Read) =>
-        s
-            .state
-            .get(address)
+            get(s.state,address)
             .chain(consume(s, envelope))
             .orJust(noop)
             .map(noop)

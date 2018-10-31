@@ -8,13 +8,13 @@ import {
 import { cons, noop } from '@quenk/noni/lib/data/function';
 import { Actor } from '../../';
 import { Template } from '../../template';
+import { exists, getAddress, put, runInstance } from '../state';
 import { Frame } from '../state/frame';
 import { Address, isRestricted, make } from '../../address';
-import { Executor } from './';
 import { SystemError } from '../error';
 import { Raise } from './raise';
 import { Run } from './run';
-import { Op, OP_SPAWN } from './';
+import { Op, OP_SPAWN, Executor } from './';
 
 export const RUN_START_TAG = 'start';
 
@@ -69,9 +69,7 @@ export class Spawn extends Op {
  * then finally add the child to the system.
  */
 export const execSpawn = <F extends Frame>(s: Executor<F>, { parent, template }: Spawn) =>
-    s
-        .state
-        .getAddress(parent)
+    getAddress(s.state, parent)
         .chain(path =>
             fromBoolean(!isRestricted(template.id))
                 .orElse(raiseInvalidIdError(s, template.id, path))
@@ -92,17 +90,17 @@ const makeAddress = (parent: Address) => (template: Template) =>
     fromString(make(parent, template.id))
 
 const checkAddress = <F extends Frame>(s: Executor<F>, addr: Address) =>
-    fromBoolean(!s.state.exists(addr));
+    fromBoolean(!exists(s.state, addr));
 
 const generate =
     <F extends Frame>(s: Executor<F>, template: Template) => (addr: Address) =>
         fromNullable(s.allocate(template))
             .map(f => {
 
-                s.state.put(addr, f);
+                s.state = put(s.state, addr, f);
 
                 s.exec(new Run(RUN_START_TAG, addr, template.delay || 0,
-                    () => s.state.runInstance(addr)));
+                    () => runInstance(s.state,addr)));
 
                 return f.actor;
 

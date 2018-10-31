@@ -7,11 +7,11 @@ import { Address } from '../../address';
 import { Message } from '../../message';
 import { Mailbox, Envelope } from '../mailbox';
 import { Frame } from '../state/frame';
-import { Executor } from './';
+import { getRouter, get } from '../state';
 import { Check } from './check';
 import { Transfer } from './transfer';
 import { Drop } from './drop';
-import { OP_TELL, Op } from './';
+import { OP_TELL, Op, Executor } from './';
 
 /**
  * Tell instruction.
@@ -47,9 +47,7 @@ export class Tell extends Op {
  * The message is dropped otherwise.
  */
 export const execTell = <F extends Frame>(s: Executor<F>, op: Tell) =>
-    s
-        .state
-        .getRouter(op.to)
+    getRouter(s.state, op.to)
         .map(runTransfer(s, op))
         .orElse(runTell(s, op))
         .orElse(invokeDropHook(s, op))
@@ -62,10 +60,7 @@ const runTransfer = <F extends Frame>
         s.exec(new Transfer(to, from, r, message));
 
 const runTell = <F extends Frame>(s: Executor<F>, op: Tell) => () =>
-    s
-        .state
-        .get(op.to)
-        .chain(doTell(s, op));
+    get(s.state, op.to)        .chain(doTell(s, op));
 
 const doTell = <F extends Frame>(s: Executor<F>, op: Tell) => (f: F) =>
     f

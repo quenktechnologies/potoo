@@ -4,11 +4,11 @@ import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Actor } from '../../';
 import { Frame } from '../state/frame';
-import { Executor } from './';
+import {getAddress} from '../state';
 import { Stop } from './stop';
 import { Raise } from './raise';
 import { SystemError } from '../error';
-import { OP_KILL, Op } from './';
+import { OP_KILL, Op, Executor } from './';
 
 export class IllegalKillSignal extends SystemError {
 
@@ -46,9 +46,7 @@ export class Kill extends Op {
  * actor before killing it.
  */
 export const execKill = <F extends Frame>(s: Executor<F>, { child, actor }: Kill) =>
-    s
-        .state
-        .getAddress(actor)
+        getAddress(s.state, actor)
         .map(addr =>
             s.exec(startsWith(child, addr) ?
                 new Stop(child) :

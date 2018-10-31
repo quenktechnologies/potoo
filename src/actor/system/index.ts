@@ -12,7 +12,7 @@ import { Err } from '../err';
 import { Envelope } from './mailbox';
 import { ActorFrame } from './state/frame';
 import { Initializer } from '../';
-import { State } from './state';
+import { State,getAddress } from './state';
 import { Executor } from './op';
 
 /**
@@ -116,9 +116,7 @@ export class ActorSystem implements System, Executor<ActorFrame> {
 
     identify(actor: Actor): Address {
 
-        return this
-            .state
-            .getAddress(actor)
+            return getAddress(this.state, actor)
             .orJust(() => ADDRESS_DISCARD)
             .get();
 

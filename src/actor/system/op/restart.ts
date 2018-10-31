@@ -2,10 +2,10 @@ import * as log from '../log';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Frame } from '../state/frame';
-import { Executor } from './';
+import { put, runInstance,get } from '../state';
 import { Run } from './run';
 import { Tell } from './tell';
-import { OP_RESTART, Op } from './';
+import { OP_RESTART, Op, Executor } from './';
 
 /**
  * Restart instruction.
@@ -35,9 +35,7 @@ export class Restart extends Op {
  */
 export const execRestart =
     <F extends Frame>(s: Executor<F>, op: Restart) =>
-        s
-            .state
-            .get(op.address)
+            get(s.state, op.address)
             .map(doRestart(s, op))
             .orJust(noop)
             .get();
@@ -47,10 +45,10 @@ const doRestart =
 
         f.actor.stop();
 
-        s.state.put(address, s.allocate(f.template));
+        s.state = put(s.state, address, s.allocate(f.template));
 
         s.exec(new Run(address, 'restart',
-            f.template.delay || 0, () => s.state.runInstance(address)));
+            f.template.delay || 0, () => runInstance(s.state, address)));
 
         f
             .mailbox

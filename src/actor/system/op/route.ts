@@ -1,8 +1,8 @@
 import * as log from '../log';
 import { Address } from '../../address';
 import { Frame } from '../state/frame';
-import { Executor } from './';
-import { OP_ROUTE, Op } from './';
+import {putRoute} from '../state';
+import { OP_ROUTE, Op, Executor } from './';
 
 /**
  * Route instruction.
@@ -32,9 +32,7 @@ export class Route extends Op {
 export const execRoute =
     <F extends Frame>(s: Executor<F>, { from, to }: Route) => {
 
-        s
-            .state
-            .putRoute(from, to);
+        s            .state = putRoute(s.state, from, to);
 
     }
 

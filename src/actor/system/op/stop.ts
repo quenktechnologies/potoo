@@ -3,9 +3,9 @@ import { map } from '@quenk/noni/lib/data/record';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Frame } from '../state/frame';
-import { Executor } from './';
+import { getChildFrames, remove,get } from '../state';
 import { Restart } from './restart';
-import { OP_STOP, Op } from './';
+import { OP_STOP, Op, Executor } from './';
 
 /**
  * Stop instruction.
@@ -34,12 +34,10 @@ export class Stop extends Op {
  * Otherwised it is stopped and ejected from the system.
  */
 export const execStop = <F extends Frame>(s: Executor<F>, { address }: Stop) =>
-    s
-        .state
-        .get(address)
+        get(s.state, address)
         .map(f => {
 
-            map(s.state.getChildFrames(address), (_, k) =>
+            map(getChildFrames(s.state, address), (_, k) =>
                 s.exec(new Stop(k)));
 
             if (f.template.restart) {
@@ -49,7 +47,7 @@ export const execStop = <F extends Frame>(s: Executor<F>, { address }: Stop) =>
             } else {
 
                 f.actor.stop();
-                s.state.remove(address);
+                s.state = remove(s.state, address);
 
             }
         })
