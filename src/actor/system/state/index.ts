@@ -11,7 +11,7 @@ import { startsWith } from '@quenk/noni/lib/data/string';
 import { Actor, Behaviour } from '../../';
 import { Template } from '../../template';
 import { Envelope } from '../mailbox';
-import { Address, getParent as getParentAddress } from '../../address';
+import { ADDRESS_SYSTEM, Address, getParent as getParentAddress } from '../../address';
 import { Context, Contexts } from './context';
 
 /**
@@ -106,8 +106,10 @@ export const getBehaviour =
  */
 export const getChildren =
     <C extends Context>(s: State<C>, addr: Address): Contexts<C> =>
-        <Contexts<C>>partition(s.contexts)((_, key) =>
-            (startsWith(getParentAddress(key), addr) && key !== addr))[0];
+        (addr === ADDRESS_SYSTEM) ?
+            s.contexts :
+            <Contexts<C>>partition(s.contexts)((_, key) =>
+                (startsWith(getParentAddress(key), addr) && key !== addr))[0];
 
 /**
  * getParent of an Address.
