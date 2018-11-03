@@ -61,7 +61,7 @@ export declare const getBehaviour: <C extends Context>(s: State<C>, addr: string
  */
 export declare const getChildren: <C extends Context>(s: State<C>, addr: string) => Contexts<C>;
 /**
- * getParent of an Address.
+ * getParent context using an Address.
  */
 export declare const getParent: <C extends Context>(s: State<C>, addr: string) => Maybe<C>;
 /**
