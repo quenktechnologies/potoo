@@ -109,10 +109,10 @@ export const getChildren =
         (addr === ADDRESS_SYSTEM) ?
             s.contexts :
             <Contexts<C>>partition(s.contexts)((_, key) =>
-                (startsWith(getParentAddress(key), addr) && key !== addr))[0];
+                (startsWith(key, addr) && key !== addr))[0];
 
 /**
- * getParent of an Address.
+ * getParent context using an Address.
  */
 export const getParent =
     <C extends Context>(s: State<C>, addr: Address): Maybe<C> =>
