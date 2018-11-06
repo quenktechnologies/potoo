@@ -3,7 +3,8 @@ import { nothing } from '@quenk/noni/lib/data/maybe';
 import {
     State,
     getParent,
-    getChildren
+    getChildren,
+    getAddress
 } from '../../../../src/actor/system/state';
 import { Initializer } from '../../../../src/actor';
 import { Context } from '../../../../src/actor/system/state/context';
@@ -93,6 +94,18 @@ describe('state', () => {
             must(childs['/path/to/context'].template.id).be('5');
             must(childs['/pizza'].template.id).be('6');
             must(childs['nil']).be(undefined);
+
+        });
+
+    });
+
+    describe('getAddress', () => {
+
+        it('should return the correct address', () => {
+
+            getAddress(state, state.contexts['/path/to'].actor)
+                .map(addr => must(addr).be('/path/to'))
+                .orJust(() => { throw new Error('failed'); });
 
         });
 
