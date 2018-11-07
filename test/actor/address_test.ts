@@ -51,6 +51,12 @@ describe('address', function() {
 
         })
 
+        it('should not mess up paths with one seperator', () => {
+
+            must(getParent('/path')).be('/');
+
+        });
+
     })
 
     describe('getId', () => {
