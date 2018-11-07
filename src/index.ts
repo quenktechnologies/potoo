@@ -7,4 +7,4 @@ import { ActorSystem } from './actor/system';
  * configuration.
  */
 export const system = (conf: config.Configuration): ActorSystem =>
-    new ActorSystem([], rmerge(conf, config.defaults()));
+    new ActorSystem([], rmerge(config.defaults(), conf));
