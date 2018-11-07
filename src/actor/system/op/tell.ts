@@ -5,8 +5,8 @@ import { noop } from '@quenk/noni/lib/data/function';
 import { fromNullable } from '@quenk/noni/lib/data/maybe';
 import { Address } from '../../address';
 import { Message } from '../../message';
-import { Mailbox, Envelope } from '../mailbox';
-import { Context } from '../state/context';
+import { Mailbox, Envelope } from '../../mailbox';
+import { Context } from '../../context';
 import { getRouter, get } from '../state';
 import { Check } from './check';
 import { Transfer } from './transfer';
@@ -16,7 +16,7 @@ import { OP_TELL, Op, Executor } from './';
 /**
  * Tell instruction.
  */
-export class Tell extends Op {
+export class Tell<C extends Context> extends Op<C> {
 
     constructor(
         public to: Address,
@@ -27,7 +27,7 @@ export class Tell extends Op {
 
     public level = log.INFO;
 
-    exec<C extends Context>(s: Executor<C>): void {
+    exec(s: Executor<C>): void {
 
         return execTell(s, this);
 
@@ -46,7 +46,7 @@ export class Tell extends Op {
  *
  * The message is dropped otherwise.
  */
-export const execTell = <C extends Context>(s: Executor<C>, op: Tell) =>
+export const execTell = <C extends Context>(s: Executor<C>, op: Tell<C>) =>
     getRouter(s.state, op.to)
         .map(runTransfer(s, op))
         .orElse(runTell(s, op))
@@ -56,20 +56,20 @@ export const execTell = <C extends Context>(s: Executor<C>, op: Tell) =>
         .get();
 
 const runTransfer = <C extends Context>
-    (s: Executor<C>, { to, from, message }: Tell) => (r: Address) =>
+    (s: Executor<C>, { to, from, message }: Tell<C>) => (r: Address) =>
         s.exec(new Transfer(to, from, r, message));
 
-const runTell = <C extends Context>(s: Executor<C>, op: Tell) => () =>
+const runTell = <C extends Context>(s: Executor<C>, op: Tell<C>) => () =>
     get(s.state, op.to).chain(doTell(s, op));
 
-const doTell = <C extends Context>(s: Executor<C>, op: Tell) => (f: C) =>
+const doTell = <C extends Context>(s: Executor<C>, op: Tell<C>) => (f: C) =>
     f
         .mailbox
         .map(doTellMailbox(s, op))
         .orJust(() => f.actor.accept(toEnvelope(op)));
 
 const doTellMailbox = <C extends Context>
-    (s: Executor<C>, { to, from, message }: Tell) => (m: Mailbox) =>
+    (s: Executor<C>, { to, from, message }: Tell<C>) => (m: Mailbox) =>
         tick(() => {
 
             m.push(new Envelope(to, from, message));
@@ -77,14 +77,14 @@ const doTellMailbox = <C extends Context>
 
         });
 
-const invokeDropHook = <C extends Context>(s: Executor<C>, op: Tell) => () =>
+const invokeDropHook = <C extends Context>(s: Executor<C>, op: Tell<C>) => () =>
     fromNullable(s.configuration.hooks)
         .chain((h: hooks.Hooks) => fromNullable(h.drop))
         .map((f: hooks.Drop) => f(toEnvelope(op)));
 
 const justDrop =
-    <C extends Context>(s: Executor<C>, { to, from, message }: Tell) => () =>
+    <C extends Context>(s: Executor<C>, { to, from, message }: Tell<C>) => () =>
         s.exec(new Drop(to, from, message));
 
-const toEnvelope = ({ to, from, message }: Tell) =>
+const toEnvelope = <C extends Context>({ to, from, message }: Tell<C>) =>
     new Envelope(to, from, message);

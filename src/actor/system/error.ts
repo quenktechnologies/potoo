@@ -1,4 +1,4 @@
-import { Err } from '../err';
+import { Err } from '@quenk/noni/lib/control/error';
 
 /**
  * SystemError

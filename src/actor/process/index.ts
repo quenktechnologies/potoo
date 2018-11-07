@@ -10,10 +10,11 @@ import { Kill } from '../system/op/kill';
 import { Drop } from '../system/op/drop';
 import { Tell } from '../system/op/tell';
 import { Route } from '../system/op/route';
-import { Envelope } from '../system/mailbox';
+import { Context } from '../context';
+import { Envelope } from '../mailbox';
 import { Message } from '../message';
 import { Address, getId } from '../address';
-import { Actor, Initializer } from '../';
+import { Actor } from '../';
 
 export const SCRIPT_PATH = `${__dirname}/../../../lib/actor/process/script.js`;
 
@@ -62,19 +63,23 @@ export type Path = string;
  * We use node's builtin child_process API to monitor and receive
  * messages from the child process.
  */
-export class Process implements Actor {
+export class Process<C extends Context> implements Actor<C> {
 
-    constructor(public module: Path, public system: System) { }
+    constructor(public module: Path, public system: System<C>) { }
 
     handle: Maybe<ChildProcess> = nothing();
 
-    init(): Initializer {
+    self = () => this.system.identify(this);
 
-        return [undefined, { immutable: true, buffered: false }];
+    init(c: C): C {
+
+        c.flags.immutable = true;
+        c.flags.buffered = false;
+        return c;
 
     }
 
-    accept(e: Envelope): Process {
+    accept(e: Envelope): Process<C> {
 
         this
             .handle
@@ -103,21 +108,19 @@ export class Process implements Actor {
                 .map(handleMessages(this))
                 .map(handleExit(this));
 
-        this.system.exec(new Route(self(this), self(this)));
+        this.system.exec(new Route(this.self(), this.self()));
 
     }
 
 }
 
-const self = (p: Process) => p.system.identify(p);
-
-const spawn = (p: Process) => fork(resolve(SCRIPT_PATH), [], {
+const spawn = <C extends Context>(p: Process<C>) => fork(resolve(SCRIPT_PATH), [], {
 
     env: {
 
-        POTOO_ACTOR_ID: getId(self(p)),
+        POTOO_ACTOR_ID: getId(p.self()),
 
-        POTOO_ACTOR_ADDRESS: self(p),
+        POTOO_ACTOR_ADDRESS: p.self(),
 
         POTOO_ACTOR_MODULE: p.module
 
@@ -125,26 +128,27 @@ const spawn = (p: Process) => fork(resolve(SCRIPT_PATH), [], {
 
 })
 
-const handleMessages = (p: Process) => (c: ChildProcess) =>
+const handleMessages = <C extends Context>(p: Process<C>) => (c: ChildProcess) =>
     c.on('message', (m: Message) => match(m)
         .caseOf(tellShape, handleTellMessage(p))
         .caseOf(raiseShape, handleRaiseMessage(p))
-        .orElse((m: Message) => p.system.exec(new Drop(self(p), self(p), m)))
+        .orElse((m: Message) => p.system.exec(new Drop(p.self(), p.self(), m)))
         .end());
 
-const handleTellMessage = (p: Process) => ({ to, from, message }
+const handleTellMessage = <C extends Context>(p: Process<C>) => ({ to, from, message }
     : { to: Address, from: Address, message: Message }) =>
     p.system.exec(new Tell(to, from, message));
 
-const handleRaiseMessage = (p: Process) => ({ error: { message }, src, dest }
-    : { error: { message: string }, src: string, dest: string }) =>
-    p.system.exec(new Raise(new Error(message), src, dest));
+const handleRaiseMessage =
+    <C extends Context>(p: Process<C>) => ({ error: { message }, src, dest }
+        : { error: { message: string }, src: string, dest: string }) =>
+        p.system.exec(new Raise(new Error(message), src, dest));
 
-const handleErrors = (p: Process) => (c: ChildProcess) =>
+const handleErrors = <C extends Context>(p: Process<C>) => (c: ChildProcess) =>
     c.on('error', raise(p))
 
-const raise = (p: Process) => (e: Error) =>
-    p.system.exec(new Raise(e, self(p), self(p)));
+const raise = <C extends Context>(p: Process<C>) => (e: Error) =>
+    p.system.exec(new Raise(e, p.self(), p.self()));
 
-const handleExit = (p: Process) => (c: ChildProcess) =>
-    c.on('exit', () => p.system.exec(new Kill(self(p), p)));
+const handleExit = <C extends Context>(p: Process<C>) => (c: ChildProcess) =>
+    c.on('exit', () => p.system.exec(new Kill(p.self(), p)));

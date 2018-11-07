@@ -6,13 +6,12 @@ import {
     getChildren,
     getAddress
 } from '../../../../src/actor/system/state';
-import { Initializer } from '../../../../src/actor';
-import { Context } from '../../../../src/actor/system/state/context';
-import { Envelope } from '../../../../src/actor/system/mailbox';
+import { Context } from '../../../../src/actor/context';
+import { Envelope } from '../../../../src/actor/mailbox';
 
 class Act {
 
-    init(): Initializer { return [undefined, undefined]; }
+  init(c:Context): Context { return c; }
 
     accept(_: Envelope) { return this; }
 

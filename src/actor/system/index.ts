@@ -1,17 +1,14 @@
 import * as address from '../address';
 import * as config from './configuration';
-import { just, nothing } from '@quenk/noni/lib/data/maybe';
-import { merge } from '@quenk/noni/lib/data/record';
+import { Err } from '@quenk/noni/lib/control/error';
 import { ADDRESS_DISCARD, Address } from '../address';
 import { Template } from '../template';
-import { Actor, Behaviour } from '../';
+import { Actor } from '../';
 import { Spawn } from './op/spawn';
 import { Drop } from './op/drop';
 import { Op, log } from './op';
-import { Err } from '../err';
-import { Envelope } from './mailbox';
-import { ActorContext } from './state/context';
-import { Initializer } from '../';
+import { Envelope } from '../mailbox';
+import { Context, newContext } from '../context';
 import { State, getAddress } from './state';
 import { Executor } from './op';
 
@@ -19,19 +16,19 @@ import { Executor } from './op';
  * System represents a dynamic collection of actors that 
  * share the JS event loop.
  */
-export interface System extends Actor {
+export interface System<C extends Context> extends Actor<C> {
 
     /**
      * identify an actor instance.
      *
      * If the actor is unknown the ADDRESS_DISCARD should be returned.
      */
-    identify(a: Actor): Address;
+    identify(a: Actor<C>): Address;
 
     /**
      * exec queses up an Op to be executed by the System.
      */
-    exec(code: Op): System;
+    exec(code: Op<C>): System<C>;
 
 }
 
@@ -58,23 +55,33 @@ class SysT {
  * Implemnation of a System and Executor that spawns
  * various general purpose actors.
  */
-export class ActorSystem implements System, Executor<ActorContext> {
+export class ActorSystem implements System<Context>, Executor<Context> {
 
     constructor(
-        public stack: Op[],
+        public stack: Op<Context>[],
         public configuration: config.Configuration) { }
 
-    state: State<ActorContext> = { contexts: { $: nullFrame(this) }, routes: {} };
+    state: State<Context> = {
+
+        contexts: {
+
+            $: newContext(this, new SysT())
+
+        },
+
+        routes: {}
+
+    };
 
     running: boolean = false;
 
-    init(): Initializer {
+    init(c: Context): Context {
 
-        return [undefined, { immutable: true, buffered: false }];
+        return c;
 
     }
 
-    exec(code: Op): ActorSystem {
+    exec(code: Op<Context>): ActorSystem {
 
         this.stack.push(code);
         this.run();
@@ -94,26 +101,21 @@ export class ActorSystem implements System, Executor<ActorContext> {
 
     }
 
-    allocate(t: Template): ActorContext {
+  allocate(t: Template<Context>): Context {
 
-        let a = t.create(this);
-        let i = a.init();
-        let flags = flagDefaults(i[1] || {});
-        let stack: Behaviour[] = i[0] ? [<Behaviour>i[0]] : [];
-
-        return new ActorContext(flags.buffered ? just([]) : nothing(),
-            a, stack, flags, t);
+        let act = t.create(this);
+        return act.init(newContext(act, t));
 
     }
 
-    spawn(t: Template): ActorSystem {
+  spawn(t: Template<Context>): ActorSystem {
 
         this.exec(new Spawn(this, t));
         return this;
 
     }
 
-    identify(actor: Actor): Address {
+    identify(actor: Actor<Context>): Address {
 
         return getAddress(this.state, actor)
             .orJust(() => ADDRESS_DISCARD)
@@ -130,7 +132,7 @@ export class ActorSystem implements System, Executor<ActorContext> {
         this.running = true;
 
         while (this.stack.length > 0)
-            log(level || 0, logger || console, <Op>this.stack.pop()).exec(this);
+            log(level || 0, logger || console, <Op<Context>>this.stack.pop()).exec(this);
 
         this.running = false;
 
@@ -142,21 +144,17 @@ export class ActorSystem implements System, Executor<ActorContext> {
  * NullSystem is used by stopped actors to avoid side-effect caused
  * communication.
  */
-export class NullSystem implements System {
+export class NullSystem<C extends Context> implements System<C> {
 
-    state: State<ActorContext> = { contexts: { $: nullFrame(this) }, routes: {} };
+    init(c: C): C {
 
-    configuration = {};
-
-    init(): Initializer {
-
-        return [undefined, undefined];
+        return c;
 
     }
 
-    accept({ to, from, message }: Envelope): NullSystem {
+    accept(_: Envelope): NullSystem<C> {
 
-        return this.exec(new Drop(to, from, message));
+        return this;
 
     }
 
@@ -166,25 +164,13 @@ export class NullSystem implements System {
 
     }
 
-    allocate(t: Template): ActorContext {
-
-        return new ActorContext(nothing(), this, [], flagDefaults({}), t);
-
-    }
-
-    spawn(_: Template): NullSystem {
-
-        return this;
-
-    }
-
-    identify(_: Actor): Address {
+    identify(_: Actor<Context>): Address {
 
         return ADDRESS_DISCARD;
 
     }
 
-    exec(_: Op): NullSystem {
+    exec(_: Op<C>): NullSystem<C> {
 
         return this;
 
@@ -193,9 +179,3 @@ export class NullSystem implements System {
     run(): void { }
 
 }
-
-const flagDefaults = (f: { [key: string]: boolean }) =>
-    merge({ buffered: true, immutable: true }, f);
-
-const nullFrame = (s: System) =>
-    new ActorContext(nothing(), s, [], flagDefaults({}), new SysT());

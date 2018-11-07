@@ -1,5 +1,6 @@
 import * as must from 'must/register';
 import { system } from '../../src';
+import { Context } from '../../src/actor/context';
 import { System } from '../../src/actor/system';
 import {
     AbstractResident,
@@ -8,9 +9,17 @@ import {
     Case
 } from '../../src/actor/resident';
 
-class Killer extends AbstractResident {
+class Killer extends AbstractResident<Context> {
 
-    constructor(public s: System, public done: (k: Killer) => void) { super(s); }
+    constructor(public s: System<Context>, public done: (k: Killer) => void) { super(s); }
+
+    init(c: Context): Context {
+
+        c.flags.immutable = true;
+        c.flags.buffered = true;
+        return c;
+
+    }
 
     select<T>(_: Case<T>[]): Killer {
 
@@ -27,7 +36,7 @@ class Killer extends AbstractResident {
 
 }
 
-class Killable extends Mutable<void> {
+class Killable extends Mutable<void, Context> {
 
     receive = [];
 
@@ -45,7 +54,7 @@ class Killable extends Mutable<void> {
 
 }
 
-class Victim extends Immutable<void> {
+class Victim extends Immutable<void, Context> {
 
     receive = []
 
@@ -53,9 +62,17 @@ class Victim extends Immutable<void> {
 
 }
 
-class Exiter extends AbstractResident {
+class Exiter extends AbstractResident<Context> {
 
-    constructor(public s: System, public done: () => void) { super(s); }
+    constructor(public s: System<Context>, public done: () => void) { super(s); }
+
+    init(c: Context): Context {
+
+        c.flags.immutable = true;
+        c.flags.buffered = true;
+        return c;
+
+    }
 
     select<T>(_: Case<T>[]): Killer {
 
@@ -78,9 +95,9 @@ class Exiter extends AbstractResident {
 
 }
 
-class ShouldWork extends Mutable<void> {
+class ShouldWork extends Mutable<void, Context> {
 
-    constructor(public s: System, public done: () => void) {
+    constructor(public s: System<Context>, public done: () => void) {
 
         super(s);
 
@@ -112,9 +129,9 @@ class ShouldWork extends Mutable<void> {
 
 }
 
-class MutableSelfTalk extends Mutable<string> {
+class MutableSelfTalk extends Mutable<string, Context> {
 
-    constructor(public s: System, public done: () => void) { super(s); }
+    constructor(public s: System<Context>, public done: () => void) { super(s); }
 
     count = 0;
 
@@ -156,9 +173,9 @@ class MutableSelfTalk extends Mutable<string> {
 
 }
 
-class ImmutableSelfTalk extends Immutable<string> {
+class ImmutableSelfTalk extends Immutable<string, Context> {
 
-    constructor(public s: System, public done: () => void) { super(s); }
+    constructor(public s: System<Context>, public done: () => void) { super(s); }
 
     count = 0;
 
@@ -207,7 +224,7 @@ describe('resident', () => {
                         id: 'a',
                         create: sys => new Killer(sys, k => {
 
-                            must(s.state.frames['a/targets']).not.be(undefined);
+                            must(s.state.contexts['a/targets']).not.be(undefined);
                             setTimeout(() => k.kill('a/targets'), 100);
 
                         })
@@ -215,7 +232,7 @@ describe('resident', () => {
 
                 setTimeout(() => {
 
-                    must(s.state.frames['a/targets']).be(undefined);
+                    must(s.state.contexts['a/targets']).be(undefined);
                     done();
 
                 }, 200);
@@ -231,7 +248,7 @@ describe('resident', () => {
 
 
                             setTimeout(() =>
-                                must(s.state.frames['a/targets/a'])
+                                must(s.state.contexts['a/targets/a'])
                                     .not.be(undefined), 200);
 
                             setTimeout(() => k.kill('a/targets/a'), 300);
@@ -241,7 +258,7 @@ describe('resident', () => {
 
                 setTimeout(() => {
 
-                    must(s.state.frames['a/targets/a']).be(undefined);
+                    must(s.state.contexts['a/targets/a']).be(undefined);
                     done();
 
                 }, 400);
@@ -253,7 +270,7 @@ describe('resident', () => {
 
             it('should work', done => {
 
-               let s =  system({ log: { level: 1 } })
+                let s = system({ log: { level: 1 } })
                     .spawn({
 
                         id: 'a',
@@ -261,11 +278,11 @@ describe('resident', () => {
 
 
                             setTimeout(() =>
-                                must(s.state.frames['a']).not.be(undefined), 100);
+                                must(s.state.contexts['a']).not.be(undefined), 100);
 
                             setTimeout(() => {
 
-                                must(s.state.frames['a']).be(undefined);
+                                must(s.state.contexts['a']).be(undefined);
                                 done();
 
                             }, 300);
@@ -284,7 +301,7 @@ describe('resident', () => {
 
             it('should work', done => {
 
-                system({ log: { level: 1 } })
+                system({ log: { level: 8 } })
                     .spawn({
                         id: 'selector',
                         create: s => new ShouldWork(s, done)

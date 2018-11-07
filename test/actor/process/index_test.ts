@@ -1,13 +1,14 @@
 import * as must from 'must/register';
 import { system } from '../../../src';
 import { Mutable, Case } from '../../../src/actor/resident';
+import { Context } from '../../../src/actor/context';
 import { Process } from '../../../src/actor/process';
 import { System } from '../../../src/actor/system';
 
-class Sender extends Mutable<String> {
+class Sender extends Mutable<String, Context> {
 
     constructor(
-        public system: System,
+        public system: System<Context>,
         public done: () => void) { super(system); }
 
     receive = [
@@ -46,7 +47,7 @@ describe('process', () => {
 
         it('should be spawnable', done => {
 
-            system({ log: { level:1 } })
+            system({ log: { level: 8 } })
 
                 .spawn({
 

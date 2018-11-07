@@ -1,8 +1,9 @@
 import * as must from 'must/register';
 import { Immutable, Mutable, Case } from '../../../src/actor/resident';
+import {Context} from '../../../src/actor/context';
 import { system } from '../../../src/';
 
-class A1 extends Mutable<void> {
+class A1 extends Mutable<void,Context> {
 
     receive = [];
 
@@ -10,7 +11,7 @@ class A1 extends Mutable<void> {
 
 }
 
-class A2 extends Mutable<void> {
+class A2 extends Mutable<void,Context> {
 
     receive = [];
 
@@ -18,7 +19,7 @@ class A2 extends Mutable<void> {
 
 }
 
-class A3 extends Immutable<String> {
+class A3 extends Immutable<String,Context> {
 
     receive = [
 
@@ -35,7 +36,7 @@ class A3 extends Immutable<String> {
 
 }
 
-class A3A extends Immutable<any> {
+class A3A extends Immutable<any,Context> {
 
     receive = [
 
@@ -60,12 +61,12 @@ describe('system', function() {
                     .spawn({ id: 'a2', create: s => new A2(s) })
                     .spawn({ id: 'a3', create: s => new A3(s) });
 
-                must(s.state.frames['a1'].actor).be.instanceOf(Mutable);
-                must(s.state.frames['a2'].actor).be.instanceOf(Mutable);
-                must(s.state.frames['a3'].actor).be.instanceOf(Immutable);
+                must(s.state.contexts['a1'].actor).be.instanceOf(Mutable);
+                must(s.state.contexts['a2'].actor).be.instanceOf(Mutable);
+                must(s.state.contexts['a3'].actor).be.instanceOf(Immutable);
 
                 setTimeout(() => {
-                    must(s.state.frames['a3/a3a'].actor).be.instanceOf(Immutable);
+                    must(s.state.contexts['a3/a3a'].actor).be.instanceOf(Immutable);
                     done();
                 }, 200);
 

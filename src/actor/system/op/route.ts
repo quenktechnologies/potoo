@@ -1,13 +1,13 @@
 import * as log from '../log';
 import { Address } from '../../address';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { putRoute } from '../state';
 import { OP_ROUTE, Op, Executor } from './';
 
 /**
  * Route instruction.
  */
-export class Route extends Op {
+export class Route<C extends Context> extends Op<C> {
 
     constructor(public from: Address, public to: Address) { super(); }
 
@@ -30,7 +30,7 @@ export class Route extends Op {
  * sent to one address to be forwarded to another actor.
  */
 export const execRoute =
-    <C extends Context>(s: Executor<C>, { from, to }: Route) => {
+  <C extends Context>(s: Executor<C>, { from, to }: Route<C>) => {
 
         s.state = putRoute(s.state, from, to);
 
