@@ -2,7 +2,7 @@ import * as log from '../log';
 import { map } from '@quenk/noni/lib/data/record';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { getChildren, remove, get } from '../state';
 import { Restart } from './restart';
 import { OP_STOP, Op, Executor } from './';
@@ -10,7 +10,7 @@ import { OP_STOP, Op, Executor } from './';
 /**
  * Stop instruction.
  */
-export class Stop extends Op {
+export class Stop<C extends Context> extends Op<C> {
 
     constructor(public address: Address) { super(); }
 
@@ -18,7 +18,7 @@ export class Stop extends Op {
 
     public level = log.WARN;
 
-    exec<C extends Context>(s: Executor<C>): void {
+    exec(s: Executor<C>): void {
 
         return execStop(s, this);
 
@@ -33,7 +33,7 @@ export class Stop extends Op {
  * the actor will be restarted instead.
  * Otherwised it is stopped and ejected from the system.
  */
-export const execStop = <C extends Context>(s: Executor<C>, { address }: Stop) =>
+export const execStop = <C extends Context>(s: Executor<C>, { address }: Stop<C>) =>
     get(s.state, address)
         .map(f => {
 

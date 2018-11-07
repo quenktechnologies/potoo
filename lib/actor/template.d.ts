@@ -1,6 +1,7 @@
-import { Actor } from './';
+import { Err } from '@quenk/noni/lib/control/error';
 import { System } from './system';
-import { Err } from './err';
+import { Context } from './context';
+import { Actor } from './';
 export declare const ACTION_RAISE = -1;
 export declare const ACTION_IGNORE = 0;
 export declare const ACTION_RESTART = 1;
@@ -20,7 +21,7 @@ export declare type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * CreateFunc is applied to produce an instance of an actor.
  */
-export declare type CreateFunc = (s: System) => Actor;
+export declare type CreateFunc<C extends Context> = (s: System<C>) => Actor<C>;
 /**
  * DelayMilliseconds type.
  */
@@ -37,7 +38,7 @@ export declare type TrapFunc = (e: Err) => TrapAction;
  * to the system.represents the minimum amount of information required to create
  * a new actor instance.
  */
-export interface Template {
+export interface Template<C extends Context> {
     /**
      * id of the actor used when constructing its address.
      */
@@ -45,7 +46,7 @@ export interface Template {
     /**
      * create function.
      */
-    create: CreateFunc;
+    create: CreateFunc<C>;
     /**
      * trap is used to take action when the spanwed
      * action encounters an error.
@@ -63,5 +64,5 @@ export interface Template {
     /**
      * children is list of child actors that will automatically be spawned.
      */
-    children?: Template[];
+    children?: Template<C>[];
 }

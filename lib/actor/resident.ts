@@ -1,9 +1,10 @@
 import { test } from '@quenk/noni/lib/data/type';
 import { fromBoolean } from '@quenk/noni/lib/data/either';
+import { just } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
 import { ADDRESS_DISCARD, Address, isRestricted, make } from './address';
 import { Message } from './message';
-import { Envelope } from './system/mailbox';
+import { Envelope } from './mailbox';
 import { Spawn } from './system/op/spawn';
 import { Tell } from './system/op/tell';
 import { Kill } from './system/op/kill';
@@ -11,7 +12,8 @@ import { Drop } from './system/op/drop';
 import { Receive } from './system/op/receive';
 import { System, NullSystem } from './system';
 import { Template } from './template';
-import { Actor, Initializer } from './';
+import { Context } from './context';
+import { Actor } from './';
 
 /**
  * Ref function type.
@@ -99,7 +101,7 @@ export abstract class AbstractCase<T> extends Case<T> {
 /**
  * Resident is an actor that exists in the current runtime.
  */
-export interface Resident extends Actor {
+export interface Resident<C extends Context> extends Actor<C> {
 
     /**
      * ref provides a handle for sending mesages to an address.
@@ -114,23 +116,23 @@ export interface Resident extends Actor {
     /**
      * spawn a new child actor.
      */
-    spawn(t: Template): Address;
+    spawn(t: Template<C>): Address;
 
     /**
      * tell a message to an actor address.
      */
-    tell<M>(ref: string, m: M): Resident;
+    tell<M>(ref: string, m: M): Resident<C>;
 
     /**
      * select the next message to be processed, applying each Case 
      * until one matches.
      */
-    select<T>(c: Case<T>[]): Resident;
+    select<T>(c: Case<T>[]): Resident<C>;
 
     /**
      * kill a child actor.
      */
-    kill(addr: Address): Resident;
+    kill(addr: Address): Resident<C>;
 
     /**
      * exit instructs the system to kill off this actor.
@@ -142,19 +144,15 @@ export interface Resident extends Actor {
 /**
  * AbstractResident impleemntation.
  */
-export abstract class AbstractResident implements Resident {
+export abstract class AbstractResident<C extends Context> implements Resident<C> {
 
-    constructor(public system: System) { }
+    constructor(public system: System<C>) { }
 
     ref = (addr: Address) => (m: Message) => this.tell(addr, m);
 
     self = () => this.system.identify(this);
 
-    init(): Initializer {
-
-        return [undefined, undefined];
-
-    }
+    abstract init(c: C): C;
 
     accept({ to, from, message }: Envelope) {
 
@@ -163,7 +161,7 @@ export abstract class AbstractResident implements Resident {
 
     }
 
-    spawn(t: Template): Address {
+    spawn(t: Template<C>): Address {
 
         this.system.exec(new Spawn(this, t));
 
@@ -173,16 +171,16 @@ export abstract class AbstractResident implements Resident {
 
     }
 
-    tell<M>(ref: Address, m: M): AbstractResident {
+    tell<M>(ref: Address, m: M): AbstractResident<C> {
 
         this.system.exec(new Tell(ref, this.self(), m));
         return this;
 
     }
 
-    abstract select<T>(_: Case<T>[]): AbstractResident;
+    abstract select<T>(_: Case<T>[]): AbstractResident<C>;
 
-    kill(addr: Address): AbstractResident {
+    kill(addr: Address): AbstractResident<C> {
 
         this.system.exec(new Kill(addr, this));
         return this;
@@ -212,7 +210,7 @@ export abstract class AbstractResident implements Resident {
  * Once the receive property is provided, all messages will be
  * filtered by it.
  */
-export abstract class Immutable<T> extends AbstractResident {
+export abstract class Immutable<T, C extends Context> extends AbstractResident<C> {
 
     /**
      * receive is a static list of Case classes 
@@ -220,16 +218,20 @@ export abstract class Immutable<T> extends AbstractResident {
      */
     abstract receive: Case<T>[];
 
-    init(): Initializer {
+    init(c: C): C {
 
-        return [ibehaviour(this), { immutable: true, buffered: true }];
+        c.behaviour.push(ibehaviour(this));
+      c.mailbox = just([]);
+        c.flags.immutable = true;
+        c.flags.buffered = true;
+        return c;
 
     }
 
     /**
      * select noop.
      */
-    select<M>(_: Case<M>[]): Immutable<T> {
+    select<M>(_: Case<M>[]): Immutable<T, C> {
 
         return this;
 
@@ -240,7 +242,7 @@ export abstract class Immutable<T> extends AbstractResident {
 /**
  * Mutable actors can change their behaviour after message processing.
  */
-export abstract class Mutable<T> extends AbstractResident {
+export abstract class Mutable<T, C extends Context> extends AbstractResident<C> {
 
     /**
      * receive is a static list of Case classes 
@@ -248,21 +250,23 @@ export abstract class Mutable<T> extends AbstractResident {
      */
     abstract receive: Case<T>[];
 
-    init(): Initializer {
+    init(c: C): C {
 
-        return [
+        if (this.receive.length > 0)
+            c.behaviour = [mbehaviour(this.receive)];
 
-            (this.receive.length > 0) ? mbehaviour(this.receive) : undefined,
-            { immutable: false, buffered: true }
+        c.mailbox = just([]);
+        c.flags.immutable = false;
+        c.flags.buffered = true;
 
-        ];
+        return c;
 
     }
 
     /**
      * select allows for selectively receiving messages based on Case classes.
      */
-    select<M>(cases: Case<M>[]): Mutable<T> {
+    select<M>(cases: Case<M>[]): Mutable<T, C> {
 
         this.system.exec(new Receive(this.self(), false, mbehaviour(cases)));
         return this;
@@ -276,7 +280,7 @@ const mbehaviour = <T>(cases: Case<T>[]) => (m: Message) =>
         .lmap(() => m)
         .map(noop);
 
-const ibehaviour = <T>(i: Immutable<T>) => (m: Message) =>
+const ibehaviour = <T, C extends Context>(i: Immutable<T, C>) => (m: Message) =>
     fromBoolean(i.receive.some(c => c.match(m)))
         .lmap(() => m)
         .map(noop);

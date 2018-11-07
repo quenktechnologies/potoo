@@ -2,8 +2,9 @@
 import { ChildProcess } from 'child_process';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { System } from '../system';
-import { Envelope } from '../system/mailbox';
-import { Actor, Initializer } from '../';
+import { Context } from '../context';
+import { Envelope } from '../mailbox';
+import { Actor } from '../';
 export declare const SCRIPT_PATH: string;
 /**
  * Path to the actor process.
@@ -25,13 +26,14 @@ export declare type Path = string;
  * We use node's builtin child_process API to monitor and receive
  * messages from the child process.
  */
-export declare class Process implements Actor {
+export declare class Process<C extends Context> implements Actor<C> {
     module: Path;
-    system: System;
-    constructor(module: Path, system: System);
+    system: System<C>;
+    constructor(module: Path, system: System<C>);
     handle: Maybe<ChildProcess>;
-    init(): Initializer;
-    accept(e: Envelope): Process;
+    self: () => string;
+    init(c: C): C;
+    accept(e: Envelope): Process<C>;
     stop(): void;
     run(): void;
 }

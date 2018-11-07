@@ -1,6 +1,6 @@
 import { Actor } from '../../';
 import { Template } from '../../template';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { Address } from '../../address';
 import { SystemError } from '../error';
 import { Op, Executor } from './';
@@ -16,13 +16,13 @@ export declare class DuplicateAddressError extends SystemError {
 /**
  * Spawn instruction.
  */
-export declare class Spawn extends Op {
-    parent: Actor;
-    template: Template;
-    constructor(parent: Actor, template: Template);
+export declare class Spawn<C extends Context> extends Op<C> {
+    parent: Actor<C>;
+    template: Template<C>;
+    constructor(parent: Actor<C>, template: Template<C>);
     code: number;
     level: number;
-    exec<C extends Context>(s: Executor<C>): void;
+    exec(s: Executor<C>): void;
 }
 /**
  * execSpawn instruction.
@@ -33,4 +33,4 @@ export declare class Spawn extends Op {
  * If that is successfull we create and check for a duplicate id
  * then finally add the child to the system.
  */
-export declare const execSpawn: <C extends Context>(s: Executor<C>, { parent, template }: Spawn) => void;
+export declare const execSpawn: <C extends Context>(s: Executor<C>, { parent, template }: Spawn<C>) => void;

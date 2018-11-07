@@ -1,5 +1,5 @@
 import * as logging from '../log';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { Template } from '../../template';
 import { State } from '../state';
 import { Configuration } from '../configuration';
@@ -22,7 +22,7 @@ export declare const OP_TRANSFER = 12;
  *
  * Has methods and properties needed for opcode execution.
  */
-export interface Executor<F extends Context> {
+export interface Executor<C extends Context> {
     /**
      * configuration
      */
@@ -30,20 +30,20 @@ export interface Executor<F extends Context> {
     /**
      * state serves as a table of actors within the system.
      */
-    state: State<F>;
+    state: State<C>;
     /**
      * allocate a new Context for an actor.
      */
-    allocate(t: Template): F;
+    allocate(t: Template<C>): C;
     /**
      * exec an op code.
      */
-    exec(code: Op): Executor<F>;
+    exec(code: Op<C>): Executor<C>;
 }
 /**
  * Op is an instruction executed by a System/Executor.
  */
-export declare abstract class Op {
+export declare abstract class Op<C extends Context> {
     /**
      * code for the Op.
      */
@@ -55,9 +55,9 @@ export declare abstract class Op {
     /**
      * exec the instruction.
      */
-    abstract exec<F extends Context>(s: Executor<F>): void;
+    abstract exec(s: Executor<C>): void;
 }
 /**
  * log an Op to the Executor's logger.
  */
-export declare const log: (level: number, logger: logging.Logger, o: Op) => Op;
+export declare const log: <C extends Context>(level: number, logger: logging.Logger, o: Op<C>) => Op<C>;

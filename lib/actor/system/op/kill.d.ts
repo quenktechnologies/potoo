@@ -1,6 +1,6 @@
 import { Address } from '../../address';
 import { Actor } from '../../';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { SystemError } from '../error';
 import { Op, Executor } from './';
 export declare class IllegalKillSignal extends SystemError {
@@ -11,13 +11,13 @@ export declare class IllegalKillSignal extends SystemError {
 /**
  * Kill instruction.
  */
-export declare class Kill extends Op {
+export declare class Kill<C extends Context> extends Op<C> {
     child: Address;
-    actor: Actor;
-    constructor(child: Address, actor: Actor);
+    actor: Actor<Context>;
+    constructor(child: Address, actor: Actor<Context>);
     code: number;
     level: number;
-    exec<F extends Context>(s: Executor<F>): void;
+    exec(s: Executor<C>): void;
 }
 /**
  * execKill
@@ -25,4 +25,4 @@ export declare class Kill extends Op {
  * Verify the target child is somewhere in the hierachy of the requesting
  * actor before killing it.
  */
-export declare const execKill: <F extends Context>(s: Executor<F>, { child, actor }: Kill) => void | Executor<F>;
+export declare const execKill: <C extends Context>(s: Executor<C>, { child, actor }: Kill<C>) => void | Executor<C>;

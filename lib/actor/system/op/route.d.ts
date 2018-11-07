@@ -1,10 +1,10 @@
 import { Address } from '../../address';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { Op, Executor } from './';
 /**
  * Route instruction.
  */
-export declare class Route extends Op {
+export declare class Route<C extends Context> extends Op<C> {
     from: Address;
     to: Address;
     constructor(from: Address, to: Address);
@@ -18,4 +18,4 @@ export declare class Route extends Op {
  * Creates an entry in the system's state to allow messages
  * sent to one address to be forwarded to another actor.
  */
-export declare const execRoute: <C extends Context>(s: Executor<C>, { from, to }: Route) => void;
+export declare const execRoute: <C extends Context>(s: Executor<C>, { from, to }: Route<C>) => void;

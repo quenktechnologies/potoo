@@ -1,4 +1,4 @@
-import { Envelope } from './mailbox';
+import { Envelope } from '../mailbox';
 
 /**
  * Drop hook;

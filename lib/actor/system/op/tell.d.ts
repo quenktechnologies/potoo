@@ -1,18 +1,18 @@
 import { Address } from '../../address';
 import { Message } from '../../message';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { Op, Executor } from './';
 /**
  * Tell instruction.
  */
-export declare class Tell extends Op {
+export declare class Tell<C extends Context> extends Op<C> {
     to: Address;
     from: Address;
     message: Message;
     constructor(to: Address, from: Address, message: Message);
     code: number;
     level: number;
-    exec<C extends Context>(s: Executor<C>): void;
+    exec(s: Executor<C>): void;
 }
 /**
  * execTell
@@ -25,4 +25,4 @@ export declare class Tell extends Op {
  *
  * The message is dropped otherwise.
  */
-export declare const execTell: <C extends Context>(s: Executor<C>, op: Tell) => void;
+export declare const execTell: <C extends Context>(s: Executor<C>, op: Tell<C>) => void;

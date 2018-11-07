@@ -1,11 +1,11 @@
-import { Err } from '../../err';
+import { Err } from '@quenk/noni/lib/control/error';
 import { Address } from '../../address';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { Op, Executor } from './';
 /**
  * Raise instruction.
  */
-export declare class Raise extends Op {
+export declare class Raise<C extends Context> extends Op<C> {
     error: Err;
     src: Address;
     dest: Address;
@@ -14,10 +14,8 @@ export declare class Raise extends Op {
     level: number;
     /**
      * exec Raise
-     *
-     *
      */
-    exec<C extends Context>(s: Executor<C>): void;
+    exec(s: Executor<C>): void;
 }
 /**
  * execRaise
@@ -31,4 +29,4 @@ export declare class Raise extends Op {
  *
  * If no trap is provided we do 1. until we hit the system actor.
  */
-export declare const execRaise: <C extends Context>(s: Executor<C>, { error, src, dest }: Raise) => void;
+export declare const execRaise: <C extends Context>(s: Executor<C>, { error, src, dest }: Raise<C>) => void;

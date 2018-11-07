@@ -1,6 +1,6 @@
 import * as log from '../log';
 import { Address } from '../../address';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { Executor } from './';
 import { Message } from '../../message';
 import { OP_DROP, Op } from './';
@@ -8,7 +8,7 @@ import { OP_DROP, Op } from './';
 /**
  * Drop instruction.
  */
-export class Drop extends Op {
+export class Drop<C extends Context> extends Op<C> {
 
     constructor(
         public to: Address,
@@ -19,7 +19,6 @@ export class Drop extends Op {
 
     public level = log.WARN;
 
-    exec<C extends Context>(_: Executor<C>): void {    }
+    exec<C extends Context>(_: Executor<C>): void { }
 
 }
-

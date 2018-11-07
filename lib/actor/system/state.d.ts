@@ -1,9 +1,9 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Actor, Behaviour } from '../../';
-import { Template } from '../../template';
+import { Actor, Behaviour } from '../';
+import { Template } from '../template';
 import { Envelope } from '../mailbox';
-import { Address } from '../../address';
-import { Context, Contexts } from './context';
+import { Address } from '../address';
+import { Context, Contexts } from '../context';
 /**
  * Routes map.
  */
@@ -34,16 +34,16 @@ export declare const get: <C extends Context>(s: State<C>, addr: string) => Mayb
 /**
  * getAddress attempts to retrieve the address of an Actor instance.
  */
-export declare const getAddress: <C extends Context>(s: State<C>, actor: Actor) => Maybe<string>;
+export declare const getAddress: <C extends Context>(s: State<C>, actor: Actor<C>) => Maybe<string>;
 /**
  * getInstance attempts to retrieve an actor given its address.
  */
-export declare const getInstance: <C extends Context>(s: State<C>, addr: string) => Maybe<Actor>;
+export declare const getInstance: <C extends Context>(s: State<C>, addr: string) => Maybe<Actor<C>>;
 /**
  * getTemplate attempts to retrieve the template for an
  * actor given an address.
  */
-export declare const getTemplate: <C extends Context>(s: State<C>, addr: string) => Maybe<Template>;
+export declare const getTemplate: <C extends Context>(s: State<C>, addr: string) => Maybe<Template<C>>;
 /**
  * getMessage attempts to retrieve the next message
  * from an actors mailbox.

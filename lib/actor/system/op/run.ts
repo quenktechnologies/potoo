@@ -1,14 +1,14 @@
 import * as log from '../log';
 import { tick } from '@quenk/noni/lib/control/timer';
 import { Address } from '../../address';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { Executor } from './';
 import { OP_RUN, Op } from './';
 
 /**
  * Run instruction.
  */
-export class Run extends Op {
+export class Run<C extends Context> extends Op<C> {
 
     constructor(
         public tag: string,
@@ -34,7 +34,7 @@ export class Run extends Op {
  * Runs a side-effectfull function in the "next-tick" or after
  * the duration provided.
  */
-export const execRun = ({ func, delay }: Run) => {
+export const execRun = <C extends Context>({ func, delay }: Run<C>) => {
 
     if (delay === 0)
         tick(func)

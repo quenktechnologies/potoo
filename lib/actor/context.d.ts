@@ -1,7 +1,7 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Mailbox } from '../mailbox';
-import { Actor, Behaviour } from '../../';
-import { Template } from '../../template';
+import { Mailbox } from './mailbox';
+import { Actor, Behaviour } from './';
+import { Template } from './template';
 /**
  * Flags used to indicate a Frame's state.
  */
@@ -18,15 +18,15 @@ export interface Flags {
     buffered: boolean;
 }
 /**
- * Frames map.
+ * Contexts map.
  */
-export interface Frames<F extends Frame> {
-    [key: string]: F;
+export interface Contexts<C extends Context> {
+    [key: string]: C;
 }
 /**
- * Frame stores all the information a system needs about a spawned actor.
+ * Context stores all the information a system needs about a spawned actor.
  */
-export interface Frame {
+export interface Context {
     /**
      * mailbox for the actor.
      *
@@ -36,7 +36,7 @@ export interface Frame {
     /**
      * actor instance.
      */
-    actor: Actor;
+    actor: Actor<this>;
     /**
      * behaviour stack for the actor.
      */
@@ -48,20 +48,9 @@ export interface Frame {
     /**
      * template used to create new instances of the actor.
      */
-    template: Template;
+    template: Template<this>;
 }
 /**
- * ActorFrame is a Frame instance.
+ * newContext creates a new Context with default values.
  */
-export declare class ActorFrame implements Frame {
-    mailbox: Maybe<Mailbox>;
-    actor: Actor;
-    behaviour: Behaviour[];
-    flags: Flags;
-    template: Template;
-    constructor(mailbox: Maybe<Mailbox>, actor: Actor, behaviour: Behaviour[], flags: Flags, template: Template);
-    /**
-     * newFrame constructs a new Frame with default values.
-     */
-    static create: (actor: Actor, template: Template) => ActorFrame;
-}
+export declare const newContext: (actor: Actor<Context>, template: Template<Context>) => Context;

@@ -1,11 +1,11 @@
 import { Address } from '../../address';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { Executor } from './';
 import { Op } from './';
 /**
  * Run instruction.
  */
-export declare class Run extends Op {
+export declare class Run<C extends Context> extends Op<C> {
     tag: string;
     actor: Address;
     delay: number;
@@ -21,4 +21,4 @@ export declare class Run extends Op {
  * Runs a side-effectfull function in the "next-tick" or after
  * the duration provided.
  */
-export declare const execRun: ({ func, delay }: Run) => void;
+export declare const execRun: <C extends Context>({ func, delay }: Run<C>) => void;

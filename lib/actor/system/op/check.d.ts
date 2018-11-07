@@ -1,15 +1,15 @@
 import { Address } from '../../address';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { Op, Executor } from './';
 /**
  * Check instruction.
  */
-export declare class Check extends Op {
+export declare class Check<C extends Context> extends Op<C> {
     address: Address;
     constructor(address: Address);
     code: number;
     level: number;
-    exec<C extends Context>(s: Executor<C>): void;
+    exec(s: Executor<C>): void;
 }
 /**
  * execCheck
@@ -17,4 +17,4 @@ export declare class Check extends Op {
  * Peeks at the actors mailbox for new messages and
  * schedules a Read if for the oldest one.
  */
-export declare const execCheck: <C extends Context>(s: Executor<C>, { address }: Check) => void;
+export declare const execCheck: <C extends Context>(s: Executor<C>, { address }: Check<C>) => void;

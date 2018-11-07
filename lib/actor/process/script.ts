@@ -6,7 +6,8 @@ import { Tell } from '../system/op/tell';
 import { Drop } from '../system/op/drop';
 import { System } from '../system';
 import { Message } from '../message';
-import {Envelope} from '../system/mailbox';
+import { Envelope } from '../mailbox';
+import {Context} from '../context';
 
 const id = <string>process.env.POTOO_ACTOR_ID;
 
@@ -23,22 +24,22 @@ const tellShape = {
 }
 
 const sys = system({
-  
-  hooks: { 
-    
-    drop: ({to,from,message}: Envelope) => 
-    (<any>process).send(new Tell(to,from,message) )
-  
-  }
+
+    hooks: {
+
+        drop: ({ to, from, message }: Envelope) =>
+            (<any>process).send(new Tell(to, from, message))
+
+    }
 
 });
 
-const filter = (s: System) => (m: Message) => match(m)
+const filter = <C extends Context>(s: System<C>) => (m: Message) => match(m)
     .caseOf(tellShape, filterTell(s))
     .orElse((m: Message) => s.exec(new Drop(address, address, m)))
     .end();
 
-const filterTell = (s: System) => ({ to, from, message }
+const filterTell = <C extends Context>(s: System<C>) => ({ to, from, message }
     : { to: string, from: string, message: Message }) =>
     s.exec(new Tell(to, from, message));
 

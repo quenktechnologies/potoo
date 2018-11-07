@@ -1,12 +1,12 @@
 import { Address } from '../../address';
-import { Context } from '../state/context';
+import { Context } from '../../context';
 import { Executor } from './';
 import { Message } from '../../message';
 import { Op } from './';
 /**
  * Drop instruction.
  */
-export declare class Drop extends Op {
+export declare class Drop<C extends Context> extends Op<C> {
     to: Address;
     from: Address;
     message: Message;

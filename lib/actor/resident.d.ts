@@ -1,9 +1,10 @@
 import { Address } from './address';
 import { Message } from './message';
-import { Envelope } from './system/mailbox';
+import { Envelope } from './mailbox';
 import { System } from './system';
 import { Template } from './template';
-import { Actor, Initializer } from './';
+import { Context } from './context';
+import { Actor } from './';
 /**
  * Ref function type.
  */
@@ -65,7 +66,7 @@ export declare abstract class AbstractCase<T> extends Case<T> {
 /**
  * Resident is an actor that exists in the current runtime.
  */
-export interface Resident extends Actor {
+export interface Resident<C extends Context> extends Actor<C> {
     /**
      * ref provides a handle for sending mesages to an address.
      */
@@ -77,20 +78,20 @@ export interface Resident extends Actor {
     /**
      * spawn a new child actor.
      */
-    spawn(t: Template): Address;
+    spawn(t: Template<C>): Address;
     /**
      * tell a message to an actor address.
      */
-    tell<M>(ref: string, m: M): Resident;
+    tell<M>(ref: string, m: M): Resident<C>;
     /**
      * select the next message to be processed, applying each Case
      * until one matches.
      */
-    select<T>(c: Case<T>[]): Resident;
+    select<T>(c: Case<T>[]): Resident<C>;
     /**
      * kill a child actor.
      */
-    kill(addr: Address): Resident;
+    kill(addr: Address): Resident<C>;
     /**
      * exit instructs the system to kill off this actor.
      */
@@ -99,17 +100,17 @@ export interface Resident extends Actor {
 /**
  * AbstractResident impleemntation.
  */
-export declare abstract class AbstractResident implements Resident {
-    system: System;
-    constructor(system: System);
-    ref: (addr: string) => (m: any) => AbstractResident;
+export declare abstract class AbstractResident<C extends Context> implements Resident<C> {
+    system: System<C>;
+    constructor(system: System<C>);
+    ref: (addr: string) => (m: any) => AbstractResident<C>;
     self: () => string;
-    init(): Initializer;
+    abstract init(c: C): C;
     accept({to, from, message}: Envelope): this;
-    spawn(t: Template): Address;
-    tell<M>(ref: Address, m: M): AbstractResident;
-    abstract select<T>(_: Case<T>[]): AbstractResident;
-    kill(addr: Address): AbstractResident;
+    spawn(t: Template<C>): Address;
+    tell<M>(ref: Address, m: M): AbstractResident<C>;
+    abstract select<T>(_: Case<T>[]): AbstractResident<C>;
+    kill(addr: Address): AbstractResident<C>;
     exit(): void;
     stop(): void;
     abstract run(): void;
@@ -121,30 +122,30 @@ export declare abstract class AbstractResident implements Resident {
  * Once the receive property is provided, all messages will be
  * filtered by it.
  */
-export declare abstract class Immutable<T> extends AbstractResident {
+export declare abstract class Immutable<T, C extends Context> extends AbstractResident<C> {
     /**
      * receive is a static list of Case classes
      * that the actor will always use to process messages.
      */
     abstract receive: Case<T>[];
-    init(): Initializer;
+    init(c: C): C;
     /**
      * select noop.
      */
-    select<M>(_: Case<M>[]): Immutable<T>;
+    select<M>(_: Case<M>[]): Immutable<T, C>;
 }
 /**
  * Mutable actors can change their behaviour after message processing.
  */
-export declare abstract class Mutable<T> extends AbstractResident {
+export declare abstract class Mutable<T, C extends Context> extends AbstractResident<C> {
     /**
      * receive is a static list of Case classes
      * that the actor will always use to process messages.
      */
     abstract receive: Case<T>[];
-    init(): Initializer;
+    init(c: C): C;
     /**
      * select allows for selectively receiving messages based on Case classes.
      */
-    select<M>(cases: Case<M>[]): Mutable<T>;
+    select<M>(cases: Case<M>[]): Mutable<T, C>;
 }
