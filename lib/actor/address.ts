@@ -48,14 +48,24 @@ export const getParent = (addr: Address): Address => {
 
     } else {
 
-        let a = addr
-            .split(SEPERATOR)
-            .reverse()
-            .slice(1)
-            .reverse()
-            .join(SEPERATOR);
+        let b4 = addr.split(SEPERATOR);
 
-        return a === ADDRESS_EMPTY ? ADDRESS_SYSTEM : a;
+        if ((b4.length === 2) && (b4[0] === '')) {
+
+            return SEPERATOR;
+
+        } else {
+
+            let a = b4
+                .reverse()
+                .slice(1)
+                .reverse()
+                .join(SEPERATOR);
+
+            return a === ADDRESS_EMPTY ? ADDRESS_SYSTEM : a;
+
+
+        }
 
     }
 
@@ -68,7 +78,7 @@ export const getId = (addr: Address): string =>
     ((addr === ADDRESS_SYSTEM) ||
         (addr === ADDRESS_DISCARD) ||
         (addr === ADDRESS_EMPTY) ||
-       (addr === SEPERATOR)) ?
+        (addr === SEPERATOR)) ?
         addr :
         tail(addr.split(SEPERATOR));
 
