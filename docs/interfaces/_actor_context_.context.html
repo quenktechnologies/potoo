@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Routes | @quenk/potoo</title>
+	<title>Context | @quenk/potoo</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -908,52 +908,33 @@ img { max-width: 100%; }
 <nav class="tsd-navigation secondary">
 	<ul>
 		<li class="current tsd-kind-interface tsd-parent-kind-external-module">
-			<a href="_actor_system_state_index_.routes.html" class="tsd-kind-icon">Routes</a>
+			<a href="_actor_context_.context.html" class="tsd-kind-icon">Context</a>
+			<ul>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="_actor_context_.context.html#actor" class="tsd-kind-icon">actor</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="_actor_context_.context.html#behaviour" class="tsd-kind-icon">behaviour</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="_actor_context_.context.html#flags" class="tsd-kind-icon">flags</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="_actor_context_.context.html#mailbox" class="tsd-kind-icon">mailbox</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="_actor_context_.context.html#template" class="tsd-kind-icon">template</a>
+				</li>
+			</ul>
 		</li>
 		<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="_actor_system_state_index_.state.html" class="tsd-kind-icon">State</a>
+			<a href="_actor_context_.contexts.html" class="tsd-kind-icon">Contexts</a>
 		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#exists" class="tsd-kind-icon">exists</a>
+		<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+			<a href="_actor_context_.flags.html" class="tsd-kind-icon">Flags</a>
 		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#get" class="tsd-kind-icon">get</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#getaddress" class="tsd-kind-icon">get<wbr>Address</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#getbehaviour" class="tsd-kind-icon">get<wbr>Behaviour</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#getchildren" class="tsd-kind-icon">get<wbr>Children</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#getinstance" class="tsd-kind-icon">get<wbr>Instance</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#getmessage" class="tsd-kind-icon">get<wbr>Message</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#getparent" class="tsd-kind-icon">get<wbr>Parent</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#getrouter" class="tsd-kind-icon">get<wbr>Router</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#gettemplate" class="tsd-kind-icon">get<wbr>Template</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#put" class="tsd-kind-icon">put</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#putroute" class="tsd-kind-icon">put<wbr>Route</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#remove" class="tsd-kind-icon">remove</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_state_index_.html#runinstance" class="tsd-kind-icon">run<wbr>Instance</a>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module">
+			<a href="../modules/_actor_context_.html#newcontext" class="tsd-kind-icon">new<wbr>Context</a>
 		</li>
 	</ul>
 </nav>
@@ -962,7 +943,7 @@ img { max-width: 100%; }
 		<section class="tsd-panel tsd-comment">
 			<div class="tsd-comment tsd-typography">
 				<div class="lead">
-					<p>Routes map.</p>
+					<p>Context stores all the information a system needs about a spawned actor.</p>
 				</div>
 			</div>
 		</section>
@@ -970,18 +951,105 @@ img { max-width: 100%; }
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<span class="target">Routes</span>
+					<span class="target">Context</span>
 				</li>
 			</ul>
 		</section>
-		<section class="tsd-panel tsd-kind-interface tsd-parent-kind-external-module">
-			<h3 class="tsd-before-signature">Indexable</h3>
-			<div class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">[</span>key: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a></div>
-			<div class="tsd-comment tsd-typography">
-				<div class="lead">
-					<p>Routes map.</p>
+		<section class="tsd-panel-group tsd-index-group">
+			<h2>Index</h2>
+			<section class="tsd-panel tsd-index-panel">
+				<div class="tsd-index-content">
+					<section class="tsd-index-section ">
+						<h3>Properties</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actor_context_.context.html#actor" class="tsd-kind-icon">actor</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actor_context_.context.html#behaviour" class="tsd-kind-icon">behaviour</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actor_context_.context.html#flags" class="tsd-kind-icon">flags</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actor_context_.context.html#mailbox" class="tsd-kind-icon">mailbox</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_actor_context_.context.html#template" class="tsd-kind-icon">template</a></li>
+						</ul>
+					</section>
 				</div>
-			</div>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Properties</h2>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="actor" class="tsd-anchor"></a>
+				<h3>actor</h3>
+				<div class="tsd-signature tsd-kind-icon">actor<span class="tsd-signature-symbol">:</span> <a href="_actor_index_.actor.html" class="tsd-signature-type">Actor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/883592e/lib/actor/context.ts#L50">actor/context.ts:50</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>actor instance.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="behaviour" class="tsd-anchor"></a>
+				<h3>behaviour</h3>
+				<div class="tsd-signature tsd-kind-icon">behaviour<span class="tsd-signature-symbol">:</span> <a href="../modules/_actor_index_.html#behaviour" class="tsd-signature-type">Behaviour</a><span class="tsd-signature-symbol">[]</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/883592e/lib/actor/context.ts#L55">actor/context.ts:55</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>behaviour stack for the actor.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="flags" class="tsd-anchor"></a>
+				<h3>flags</h3>
+				<div class="tsd-signature tsd-kind-icon">flags<span class="tsd-signature-symbol">:</span> <a href="_actor_context_.flags.html" class="tsd-signature-type">Flags</a></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/883592e/lib/actor/context.ts#L60">actor/context.ts:60</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>flags currently enabled for the actor.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="mailbox" class="tsd-anchor"></a>
+				<h3>mailbox</h3>
+				<div class="tsd-signature tsd-kind-icon">mailbox<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_actor_mailbox_.html#mailbox" class="tsd-signature-type">Mailbox</a><span class="tsd-signature-symbol">&gt;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/883592e/lib/actor/context.ts#L45">actor/context.ts:45</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>mailbox for the actor.</p>
+					</div>
+					<p>Some actors may not use mailboxes and instead accept messages directly.</p>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="template" class="tsd-anchor"></a>
+				<h3>template</h3>
+				<div class="tsd-signature tsd-kind-icon">template<span class="tsd-signature-symbol">:</span> <a href="_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/883592e/lib/actor/context.ts#L65">actor/context.ts:65</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>template used to create new instances of the actor.</p>
+					</div>
+				</div>
+			</section>
 		</section>
 		<footer class="with-border-bottom">
 			<div class="container">
