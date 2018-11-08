@@ -47,7 +47,7 @@ describe('process', () => {
 
         it('should be spawnable', done => {
 
-            system({ log: { level: 8 } })
+            system({ log: { level: 1 } })
 
                 .spawn({
 

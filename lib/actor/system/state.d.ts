@@ -1,5 +1,5 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Actor, Behaviour } from '../';
+import { Instance, Behaviour } from '../';
 import { Template } from '../template';
 import { Envelope } from '../mailbox';
 import { Address } from '../address';
@@ -34,11 +34,11 @@ export declare const get: <C extends Context>(s: State<C>, addr: string) => Mayb
 /**
  * getAddress attempts to retrieve the address of an Actor instance.
  */
-export declare const getAddress: <C extends Context>(s: State<C>, actor: Actor<C>) => Maybe<string>;
+export declare const getAddress: <C extends Context>(s: State<C>, actor: Instance) => Maybe<string>;
 /**
  * getInstance attempts to retrieve an actor given its address.
  */
-export declare const getInstance: <C extends Context>(s: State<C>, addr: string) => Maybe<Actor<C>>;
+export declare const getInstance: <C extends Context>(s: State<C>, addr: string) => Maybe<Instance>;
 /**
  * getTemplate attempts to retrieve the template for an
  * actor given an address.

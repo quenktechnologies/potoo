@@ -8,7 +8,7 @@ import {
 } from '@quenk/noni/lib/data/maybe';
 import { reduce, contains, partition } from '@quenk/noni/lib/data/record';
 import { startsWith } from '@quenk/noni/lib/data/string';
-import { Actor, Behaviour } from '../';
+import {  Instance, Behaviour } from '../';
 import { Template } from '../template';
 import { Envelope } from '../mailbox';
 import { ADDRESS_SYSTEM, Address, getParent as getParentAddress } from '../address';
@@ -56,7 +56,7 @@ export const get = <C extends Context>(s: State<C>, addr: Address): Maybe<C> =>
  * getAddress attempts to retrieve the address of an Actor instance.
  */
 export const getAddress =
-    <C extends Context>(s: State<C>, actor: Actor<C>): Maybe<Address> =>
+    <C extends Context>(s: State<C>, actor: Instance): Maybe<Address> =>
         reduce(s.contexts, nothing(),
             (p: Maybe<Address>, c, k) => c.actor === actor ?
                 fromString(k) : p);
@@ -65,9 +65,9 @@ export const getAddress =
  * getInstance attempts to retrieve an actor given its address.
  */
 export const getInstance =
-    <C extends Context>(s: State<C>, addr: Address): Maybe<Actor<C>> =>
+    <C extends Context>(s: State<C>, addr: Address): Maybe<Instance> =>
         reduce(s.contexts, nothing(),
-          (p: Maybe<Actor<C>>, c, k) => k === addr ?
+            (p: Maybe<Instance>, c, k) => k === addr ?
                 fromNullable(c.actor) : p);
 
 /**
@@ -75,7 +75,7 @@ export const getInstance =
  * actor given an address.
  */
 export const getTemplate =
-  <C extends Context>(s: State<C>, addr: Address): Maybe<Template<C>> =>
+    <C extends Context>(s: State<C>, addr: Address): Maybe<Template<C>> =>
         get(s, addr).map(f => f.template);
 
 /**

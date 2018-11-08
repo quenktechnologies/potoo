@@ -1,4 +1,4 @@
-import { Actor } from '../../';
+import { Instance } from '../../';
 import { Template } from '../../template';
 import { Context } from '../../context';
 import { Address } from '../../address';
@@ -17,9 +17,9 @@ export declare class DuplicateAddressError extends SystemError {
  * Spawn instruction.
  */
 export declare class Spawn<C extends Context> extends Op<C> {
-    parent: Actor<C>;
+    parent: Instance;
     template: Template<C>;
-    constructor(parent: Actor<C>, template: Template<C>);
+    constructor(parent: Instance, template: Template<C>);
     code: number;
     level: number;
     exec(s: Executor<C>): void;

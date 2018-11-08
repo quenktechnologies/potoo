@@ -1,6 +1,6 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Mailbox } from './mailbox';
-import { Actor, Behaviour } from './';
+import { Behaviour, Instance } from './';
 import { Template } from './template';
 /**
  * Flags used to indicate a Frame's state.
@@ -36,7 +36,7 @@ export interface Context {
     /**
      * actor instance.
      */
-    actor: Actor<this>;
+    actor: Instance;
     /**
      * behaviour stack for the actor.
      */
@@ -47,10 +47,14 @@ export interface Context {
     flags: Flags;
     /**
      * template used to create new instances of the actor.
+     *
+     * XXX: We use the any type here because the this effectively
+     * a cyclical constraint. In the future we may refactor to find a
+     * way around this.
      */
-    template: Template<this>;
+    template: Template<any>;
 }
 /**
  * newContext creates a new Context with default values.
  */
-export declare const newContext: (actor: Actor<Context>, template: Template<Context>) => Context;
+export declare const newContext: (actor: Instance, template: Template<Context>) => Context;

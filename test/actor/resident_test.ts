@@ -301,7 +301,7 @@ describe('resident', () => {
 
             it('should work', done => {
 
-                system({ log: { level: 8 } })
+                system({ log: { level: 1 } })
                     .spawn({
                         id: 'selector',
                         create: s => new ShouldWork(s, done)

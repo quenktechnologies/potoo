@@ -1,6 +1,6 @@
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Mailbox } from './mailbox';
-import { Actor, Behaviour } from './';
+import { Behaviour, Instance } from './';
 import { Template } from './template';
 
 /**
@@ -47,7 +47,7 @@ export interface Context {
     /**
      * actor instance.
      */
-    actor: Actor<this>,
+    actor: Instance,
 
     /**
      * behaviour stack for the actor.
@@ -61,16 +61,21 @@ export interface Context {
 
     /**
      * template used to create new instances of the actor.
+     *
+     * XXX: We use the any type here because the this effectively
+     * a cyclical constraint. In the future we may refactor to find a 
+     * way around this.
      */
-    template: Template<this>
+    template: Template<any>
 
 }
+
 
 /**
  * newContext creates a new Context with default values.
  */
 export const newContext =
-    (actor: Actor<Context>, template: Template<Context>): Context => ({
+    (actor: Instance, template: Template<Context>): Context => ({
 
         mailbox: nothing(),
 
