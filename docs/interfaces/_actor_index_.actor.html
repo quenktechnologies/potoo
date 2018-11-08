@@ -910,22 +910,31 @@ img { max-width: 100%; }
 		<li class="current tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
 			<a href="_actor_index_.actor.html" class="tsd-kind-icon">Actor</a>
 			<ul>
-				<li class=" tsd-kind-method tsd-parent-kind-interface">
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 					<a href="_actor_index_.actor.html#accept" class="tsd-kind-icon">accept</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-interface">
 					<a href="_actor_index_.actor.html#init" class="tsd-kind-icon">init</a>
 				</li>
-				<li class=" tsd-kind-method tsd-parent-kind-interface">
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 					<a href="_actor_index_.actor.html#run" class="tsd-kind-icon">run</a>
 				</li>
-				<li class=" tsd-kind-method tsd-parent-kind-interface">
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 					<a href="_actor_index_.actor.html#stop" class="tsd-kind-icon">stop</a>
 				</li>
 			</ul>
 		</li>
+		<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_actor_index_.contexts.html" class="tsd-kind-icon">Contexts</a>
+		</li>
+		<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+			<a href="_actor_index_.instance.html" class="tsd-kind-icon">Instance</a>
+		</li>
 		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 			<a href="../modules/_actor_index_.html#behaviour" class="tsd-kind-icon">Behaviour</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module">
+			<a href="../modules/_actor_index_.html#newcontext" class="tsd-kind-icon">new<wbr>Context</a>
 		</li>
 	</ul>
 </nav>
@@ -952,13 +961,18 @@ img { max-width: 100%; }
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<span class="target">Actor</span>
+					<a href="_actor_index_.instance.html" class="tsd-signature-type">Instance</a>
 					<ul class="tsd-hierarchy">
 						<li>
-							<a href="_actor_system_index_.system.html" class="tsd-signature-type">System</a>
-						</li>
-						<li>
-							<a href="_actor_resident_.resident.html" class="tsd-signature-type">Resident</a>
+							<span class="target">Actor</span>
+							<ul class="tsd-hierarchy">
+								<li>
+									<a href="_actor_system_index_.system.html" class="tsd-signature-type">System</a>
+								</li>
+								<li>
+									<a href="_actor_resident_.resident.html" class="tsd-signature-type">Resident</a>
+								</li>
+							</ul>
 						</li>
 					</ul>
 				</li>
@@ -977,10 +991,10 @@ img { max-width: 100%; }
 					<section class="tsd-index-section ">
 						<h3>Methods</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_actor_index_.actor.html#accept" class="tsd-kind-icon">accept</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_actor_index_.actor.html#accept" class="tsd-kind-icon">accept</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_actor_index_.actor.html#init" class="tsd-kind-icon">init</a></li>
-							<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_actor_index_.actor.html#run" class="tsd-kind-icon">run</a></li>
-							<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_actor_index_.actor.html#stop" class="tsd-kind-icon">stop</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_actor_index_.actor.html#run" class="tsd-kind-icon">run</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_actor_index_.actor.html#stop" class="tsd-kind-icon">stop</a></li>
 						</ul>
 					</section>
 				</div>
@@ -988,17 +1002,18 @@ img { max-width: 100%; }
 		</section>
 		<section class="tsd-panel-group tsd-member-group ">
 			<h2>Methods</h2>
-			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 				<a name="accept" class="tsd-anchor"></a>
 				<h3>accept</h3>
-				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-					<li class="tsd-signature tsd-kind-icon">accept<span class="tsd-signature-symbol">(</span>e<span class="tsd-signature-symbol">: </span><a href="../classes/_actor_mailbox_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_index_.actor.html" class="tsd-signature-type">Actor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">accept<span class="tsd-signature-symbol">(</span>e<span class="tsd-signature-symbol">: </span><a href="../classes/_actor_mailbox_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_index_.instance.html" class="tsd-signature-type">Instance</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
+							<p>Inherited from <a href="_actor_index_.instance.html">Instance</a>.<a href="_actor_index_.instance.html#accept">accept</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/883592e/lib/actor/index.ts#L36">actor/index.ts:36</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/index.ts#L54">actor/index.ts:54</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1014,7 +1029,7 @@ img { max-width: 100%; }
 								<h5>e: <a href="../classes/_actor_mailbox_.envelope.html" class="tsd-signature-type">Envelope</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_actor_index_.actor.html" class="tsd-signature-type">Actor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_actor_index_.instance.html" class="tsd-signature-type">Instance</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1028,7 +1043,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/883592e/lib/actor/index.ts#L28">actor/index.ts:28</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/index.ts#L82">actor/index.ts:82</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1048,39 +1063,41 @@ img { max-width: 100%; }
 					</li>
 				</ul>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 				<a name="run" class="tsd-anchor"></a>
 				<h3>run</h3>
-				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 					<li class="tsd-signature tsd-kind-icon">run<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
+							<p>Inherited from <a href="_actor_index_.instance.html">Instance</a>.<a href="_actor_index_.instance.html#run">run</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/883592e/lib/actor/index.ts#L41">actor/index.ts:41</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/index.ts#L59">actor/index.ts:59</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
-								<p>run this actor.</p>
+								<p>run this actor instance.</p>
 							</div>
 						</div>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 					</li>
 				</ul>
 			</section>
-			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 				<a name="stop" class="tsd-anchor"></a>
 				<h3>stop</h3>
-				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 					<li class="tsd-signature tsd-kind-icon">stop<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
+							<p>Inherited from <a href="_actor_index_.instance.html">Instance</a>.<a href="_actor_index_.instance.html#stop">stop</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/883592e/lib/actor/index.ts#L46">actor/index.ts:46</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/index.ts#L64">actor/index.ts:64</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
