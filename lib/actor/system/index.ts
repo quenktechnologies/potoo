@@ -59,7 +59,7 @@ export class ActorSystem implements System<Context>, Executor<Context> {
 
     constructor(
         public stack: Op<Context>[],
-      public configuration: config.Configuration={}) { }
+        public configuration: config.Configuration = {}) { }
 
     state: State<Context> = {
 
@@ -125,14 +125,15 @@ export class ActorSystem implements System<Context>, Executor<Context> {
 
     run(): void {
 
-        let { level, logger } = <config.LogPolicy>this.configuration.log;
+      let policy = <config.LogPolicy>(this.configuration.log||{});
 
         if (this.running) return;
 
         this.running = true;
 
         while (this.stack.length > 0)
-            log(level || 0, logger || console, <Op<Context>>this.stack.pop()).exec(this);
+      log(policy.level || 0, policy.logger || console,
+        <Op<Context>>this.stack.pop()).exec(this);
 
         this.running = false;
 
