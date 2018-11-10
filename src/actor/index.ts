@@ -1,7 +1,5 @@
-import { nothing } from '@quenk/noni/lib/data/maybe';
 import { Either } from '@quenk/noni/lib/data/either';
 import { Envelope } from './mailbox';
-import { Template } from './template';
 import { Context } from './context';
 
 /**
@@ -21,24 +19,6 @@ export interface Contexts<C extends Context> {
     [key: string]: C
 
 }
-/**
- * newContext creates a new Context with default values.
- */
-export const newContext =
-    (actor: Instance, template: Template<Context>): Context => ({
-
-        mailbox: nothing(),
-
-        actor,
-
-        behaviour: [],
-
-        flags: { immutable: false, buffered: false },
-
-        template
-
-    });
-
 
 /**
  * Instance is a running actor that has already initialized its context.
