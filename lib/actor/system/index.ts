@@ -1,14 +1,11 @@
-import * as address from '../address';
 import * as config from './configuration';
-import { Err } from '@quenk/noni/lib/control/error';
 import { ADDRESS_DISCARD, Address } from '../address';
 import { Template } from '../template';
 import { Actor } from '../';
-import { Spawn } from './op/spawn';
 import { Drop } from './op/drop';
 import { Op, log } from './op';
 import { Envelope } from '../mailbox';
-import { Context, newContext } from '../context';
+import { Context } from '../context';
 import { State, getAddress } from './state';
 import { Executor } from './op';
 
@@ -33,55 +30,23 @@ export interface System<C extends Context> extends Actor<C> {
 }
 
 /**
- * @private
- */
-class SysT {
-
-    public id = address.ADDRESS_SYSTEM;
-
-    public create = () => { throw new Error('Illegal attempt to restart system!'); }
-
-    public trap = (e: Err) => {
-
-        if (e instanceof Error) { throw e; } else { throw new Error(e.message); }
-
-    }
-
-}
-
-/**
- * ActorSystem
+ * AbstractSystem
  *
  * Implemnation of a System and Executor that spawns
  * various general purpose actors.
  */
-export class ActorSystem implements System<Context>, Executor<Context> {
+export abstract class AbstractSystem<C extends Context>
+    implements System<C>, Executor<C> {
 
-    constructor(
-        public stack: Op<Context>[],
-        public configuration: config.Configuration = {}) { }
+    constructor(public configuration: config.Configuration = {}) { }
 
-    state: State<Context> = {
-
-        contexts: {
-
-            $: newContext(this, new SysT())
-
-        },
-
-        routes: {}
-
-    };
+    stack: Op<C>[] = [];
 
     running: boolean = false;
 
-    init(c: Context): Context {
+    abstract state: State<C>;
 
-        return c;
-
-    }
-
-    exec(code: Op<Context>): ActorSystem {
+    exec(code: Op<C>): AbstractSystem<C> {
 
         this.stack.push(code);
         this.run();
@@ -89,31 +54,7 @@ export class ActorSystem implements System<Context>, Executor<Context> {
 
     }
 
-    accept({ to, from, message }: Envelope): ActorSystem {
-
-        return this.exec(new Drop(to, from, message));
-
-    }
-
-    stop(): void {
-
-        throw new Error('The system has been stopped!');
-
-    }
-
-    allocate(t: Template<Context>): Context {
-
-        let act = t.create(this);
-        return act.init(newContext(act, t));
-
-    }
-
-    spawn(t: Template<Context>): ActorSystem {
-
-        this.exec(new Spawn(this, t));
-        return this;
-
-    }
+    abstract allocate(t: Template<C>): C;
 
     identify(actor: Actor<Context>): Address {
 
@@ -123,17 +64,31 @@ export class ActorSystem implements System<Context>, Executor<Context> {
 
     }
 
+    init(c: C): C {
+
+        return c;
+
+    }
+
+    accept({ to, from, message }: Envelope): AbstractSystem<C> {
+
+        return this.exec(new Drop(to, from, message));
+
+    }
+
+    stop(): void { }
+
     run(): void {
 
-      let policy = <config.LogPolicy>(this.configuration.log||{});
+        let policy = <config.LogPolicy>(this.configuration.log || {});
 
         if (this.running) return;
 
         this.running = true;
 
         while (this.stack.length > 0)
-      log(policy.level || 0, policy.logger || console,
-        <Op<Context>>this.stack.pop()).exec(this);
+            log(policy.level || 0, policy.logger || console,
+                <Op<C>>this.stack.pop()).exec(this);
 
         this.running = false;
 

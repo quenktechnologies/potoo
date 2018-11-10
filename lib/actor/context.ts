@@ -1,4 +1,4 @@
-import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Mailbox } from './mailbox';
 import { Behaviour, Instance } from './';
 import { Template } from './template';
@@ -69,22 +69,3 @@ export interface Context {
     template: Template<any>
 
 }
-
-
-/**
- * newContext creates a new Context with default values.
- */
-export const newContext =
-    (actor: Instance, template: Template<Context>): Context => ({
-
-        mailbox: nothing(),
-
-        actor,
-
-        behaviour: [],
-
-        flags: { immutable: false, buffered: false },
-
-        template
-
-    });

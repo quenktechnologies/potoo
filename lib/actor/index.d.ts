@@ -1,6 +1,5 @@
 import { Either } from '@quenk/noni/lib/data/either';
 import { Envelope } from './mailbox';
-import { Template } from './template';
 import { Context } from './context';
 /**
  * Behaviour of an actor.
@@ -16,10 +15,6 @@ export declare type Behaviour = <M>(m: M) => Either<M, void>;
 export interface Contexts<C extends Context> {
     [key: string]: C;
 }
-/**
- * newContext creates a new Context with default values.
- */
-export declare const newContext: (actor: Instance, template: Template<Context>) => Context;
 /**
  * Instance is a running actor that has already initialized its context.
  */

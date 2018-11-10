@@ -24,24 +24,23 @@ export interface System<C extends Context> extends Actor<C> {
     exec(code: Op<C>): System<C>;
 }
 /**
- * ActorSystem
+ * AbstractSystem
  *
  * Implemnation of a System and Executor that spawns
  * various general purpose actors.
  */
-export declare class ActorSystem implements System<Context>, Executor<Context> {
-    stack: Op<Context>[];
+export declare abstract class AbstractSystem<C extends Context> implements System<C>, Executor<C> {
     configuration: config.Configuration;
-    constructor(stack: Op<Context>[], configuration?: config.Configuration);
-    state: State<Context>;
+    constructor(configuration?: config.Configuration);
+    stack: Op<C>[];
     running: boolean;
-    init(c: Context): Context;
-    exec(code: Op<Context>): ActorSystem;
-    accept({to, from, message}: Envelope): ActorSystem;
-    stop(): void;
-    allocate(t: Template<Context>): Context;
-    spawn(t: Template<Context>): ActorSystem;
+    abstract state: State<C>;
+    exec(code: Op<C>): AbstractSystem<C>;
+    abstract allocate(t: Template<C>): C;
     identify(actor: Actor<Context>): Address;
+    init(c: C): C;
+    accept({to, from, message}: Envelope): AbstractSystem<C>;
+    stop(): void;
     run(): void;
 }
 /**

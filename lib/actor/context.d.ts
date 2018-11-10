@@ -54,7 +54,3 @@ export interface Context {
      */
     template: Template<any>;
 }
-/**
- * newContext creates a new Context with default values.
- */
-export declare const newContext: (actor: Instance, template: Template<Context>) => Context;
