@@ -59,7 +59,7 @@ export class ActorSystem implements System<Context>, Executor<Context> {
 
     constructor(
         public stack: Op<Context>[],
-        public configuration: config.Configuration) { }
+        public configuration: config.Configuration = {}) { }
 
     state: State<Context> = {
 
@@ -101,14 +101,14 @@ export class ActorSystem implements System<Context>, Executor<Context> {
 
     }
 
-  allocate(t: Template<Context>): Context {
+    allocate(t: Template<Context>): Context {
 
         let act = t.create(this);
         return act.init(newContext(act, t));
 
     }
 
-  spawn(t: Template<Context>): ActorSystem {
+    spawn(t: Template<Context>): ActorSystem {
 
         this.exec(new Spawn(this, t));
         return this;

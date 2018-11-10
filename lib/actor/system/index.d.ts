@@ -32,7 +32,7 @@ export interface System<C extends Context> extends Actor<C> {
 export declare class ActorSystem implements System<Context>, Executor<Context> {
     stack: Op<Context>[];
     configuration: config.Configuration;
-    constructor(stack: Op<Context>[], configuration: config.Configuration);
+    constructor(stack: Op<Context>[], configuration?: config.Configuration);
     state: State<Context>;
     running: boolean;
     init(c: Context): Context;
