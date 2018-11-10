@@ -151,4 +151,4 @@ const raise = <C extends Context>(p: Process<C>) => (e: Error) =>
     p.system.exec(new Raise(e, p.self(), p.self()));
 
 const handleExit = <C extends Context>(p: Process<C>) => (c: ChildProcess) =>
-    c.on('exit', () => p.system.exec(new Kill(p.self(), p)));
+    c.on('exit', () => p.system.exec(new Kill(p, p.self())));

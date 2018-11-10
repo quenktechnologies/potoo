@@ -182,7 +182,7 @@ export abstract class AbstractResident<C extends Context> implements Resident<C>
 
     kill(addr: Address): AbstractResident<C> {
 
-        this.system.exec(new Kill(addr, this));
+        this.system.exec(new Kill( this, addr));
         return this;
 
     }
@@ -221,7 +221,7 @@ export abstract class Immutable<T, C extends Context> extends AbstractResident<C
     init(c: C): C {
 
         c.behaviour.push(ibehaviour(this));
-      c.mailbox = just([]);
+        c.mailbox = just([]);
         c.flags.immutable = true;
         c.flags.buffered = true;
         return c;

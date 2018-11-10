@@ -1,5 +1,5 @@
 import { Address } from '../../address';
-import { Actor } from '../../';
+import { Instance } from '../../';
 import { Context } from '../../context';
 import { SystemError } from '../error';
 import { Op, Executor } from './';
@@ -12,9 +12,9 @@ export declare class IllegalKillSignal extends SystemError {
  * Kill instruction.
  */
 export declare class Kill<C extends Context> extends Op<C> {
+    actor: Instance;
     child: Address;
-    actor: Actor<Context>;
-    constructor(child: Address, actor: Actor<Context>);
+    constructor(actor: Instance, child: Address);
     code: number;
     level: number;
     exec(s: Executor<C>): void;

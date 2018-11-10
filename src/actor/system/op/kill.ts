@@ -2,7 +2,7 @@ import * as log from '../log';
 import { startsWith } from '@quenk/noni/lib/data/string';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
-import { Actor } from '../../';
+import { Instance } from '../../';
 import { Context } from '../../context';
 import { getAddress } from '../state';
 import { Stop } from './stop';
@@ -25,7 +25,7 @@ export class IllegalKillSignal extends SystemError {
  */
 export class Kill<C extends Context> extends Op<C> {
 
-    constructor(public child: Address, public actor: Actor<Context>) { super(); }
+    constructor(public actor:Instance, public child: Address) { super(); }
 
     public code = OP_KILL;
 
