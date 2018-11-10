@@ -923,6 +923,9 @@ img { max-width: 100%; }
 			<a href="_actor_system_op_index_.html#op_flags" class="tsd-kind-icon">OP_<wbr>FLAGS</a>
 		</li>
 		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+			<a href="_actor_system_op_index_.html#op_forward" class="tsd-kind-icon">OP_<wbr>FORWARD</a>
+		</li>
+		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 			<a href="_actor_system_op_index_.html#op_kill" class="tsd-kind-icon">OP_<wbr>KILL</a>
 		</li>
 		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
@@ -936,9 +939,6 @@ img { max-width: 100%; }
 		</li>
 		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 			<a href="_actor_system_op_index_.html#op_restart" class="tsd-kind-icon">OP_<wbr>RESTART</a>
-		</li>
-		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
-			<a href="_actor_system_op_index_.html#op_route" class="tsd-kind-icon">OP_<wbr>ROUTE</a>
 		</li>
 		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 			<a href="_actor_system_op_index_.html#op_run" class="tsd-kind-icon">OP_<wbr>RUN</a>
@@ -984,12 +984,12 @@ img { max-width: 100%; }
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_check" class="tsd-kind-icon">OP_<wbr>CHECK</a></li>
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_drop" class="tsd-kind-icon">OP_<wbr>DROP</a></li>
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_flags" class="tsd-kind-icon">OP_<wbr>FLAGS</a></li>
+							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_forward" class="tsd-kind-icon">OP_<wbr>FORWARD</a></li>
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_kill" class="tsd-kind-icon">OP_<wbr>KILL</a></li>
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_raise" class="tsd-kind-icon">OP_<wbr>RAISE</a></li>
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_read" class="tsd-kind-icon">OP_<wbr>READ</a></li>
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_receive" class="tsd-kind-icon">OP_<wbr>RECEIVE</a></li>
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_restart" class="tsd-kind-icon">OP_<wbr>RESTART</a></li>
-							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_route" class="tsd-kind-icon">OP_<wbr>ROUTE</a></li>
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_run" class="tsd-kind-icon">OP_<wbr>RUN</a></li>
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_spawn" class="tsd-kind-icon">OP_<wbr>SPAWN</a></li>
 							<li class="tsd-kind-variable tsd-parent-kind-external-module"><a href="_actor_system_op_index_.html#op_stop" class="tsd-kind-icon">OP_<wbr>STOP</a></li>
@@ -1014,7 +1014,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>CHECK<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">7</span><span class="tsd-signature-symbol"> =&nbsp;7</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L17">actor/system/op/index.ts:17</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L17">actor/system/op/index.ts:17</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1024,7 +1024,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>DROP<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">5</span><span class="tsd-signature-symbol"> =&nbsp;5</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L15">actor/system/op/index.ts:15</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L15">actor/system/op/index.ts:15</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1034,7 +1034,17 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>FLAGS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">10</span><span class="tsd-signature-symbol"> =&nbsp;10</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L20">actor/system/op/index.ts:20</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L20">actor/system/op/index.ts:20</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
+				<a name="op_forward" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> OP_<wbr>FORWARD</h3>
+				<div class="tsd-signature tsd-kind-icon">OP_<wbr>FORWARD<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">11</span><span class="tsd-signature-symbol"> =&nbsp;11</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L21">actor/system/op/index.ts:21</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1044,7 +1054,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>KILL<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">9</span><span class="tsd-signature-symbol"> =&nbsp;9</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L19">actor/system/op/index.ts:19</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L19">actor/system/op/index.ts:19</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1054,7 +1064,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>RAISE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">100</span><span class="tsd-signature-symbol"> =&nbsp;100</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L9">actor/system/op/index.ts:9</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L9">actor/system/op/index.ts:9</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1064,7 +1074,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>READ<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">8</span><span class="tsd-signature-symbol"> =&nbsp;8</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L18">actor/system/op/index.ts:18</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L18">actor/system/op/index.ts:18</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1074,7 +1084,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>RECEIVE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">6</span><span class="tsd-signature-symbol"> =&nbsp;6</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L16">actor/system/op/index.ts:16</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L16">actor/system/op/index.ts:16</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1084,17 +1094,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>RESTART<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">3</span><span class="tsd-signature-symbol"> =&nbsp;3</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L13">actor/system/op/index.ts:13</a></li>
-					</ul>
-				</aside>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module">
-				<a name="op_route" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> OP_<wbr>ROUTE</h3>
-				<div class="tsd-signature tsd-kind-icon">OP_<wbr>ROUTE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">11</span><span class="tsd-signature-symbol"> =&nbsp;11</span></div>
-				<aside class="tsd-sources">
-					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L21">actor/system/op/index.ts:21</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L13">actor/system/op/index.ts:13</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1104,7 +1104,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>RUN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">1</span><span class="tsd-signature-symbol"> =&nbsp;1</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L11">actor/system/op/index.ts:11</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L11">actor/system/op/index.ts:11</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1114,7 +1114,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>SPAWN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">2</span><span class="tsd-signature-symbol"> =&nbsp;2</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L12">actor/system/op/index.ts:12</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L12">actor/system/op/index.ts:12</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1124,7 +1124,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>STOP<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">0</span><span class="tsd-signature-symbol"> =&nbsp;0</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L10">actor/system/op/index.ts:10</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L10">actor/system/op/index.ts:10</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1134,7 +1134,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>TELL<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">4</span><span class="tsd-signature-symbol"> =&nbsp;4</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L14">actor/system/op/index.ts:14</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L14">actor/system/op/index.ts:14</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1144,7 +1144,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">OP_<wbr>TRANSFER<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">12</span><span class="tsd-signature-symbol"> =&nbsp;12</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L22">actor/system/op/index.ts:22</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L22">actor/system/op/index.ts:22</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1161,7 +1161,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/0e27132/lib/actor/system/op/index.ts#L78">actor/system/op/index.ts:78</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L78">actor/system/op/index.ts:78</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
