@@ -18,7 +18,7 @@ export const OP_CHECK = 0x7;
 export const OP_READ = 0x8;
 export const OP_KILL = 0x9;
 export const OP_FLAGS = 0xa;
-export const OP_ROUTE = 0xb;
+export const OP_FORWARD = 0xb;
 export const OP_TRANSFER = 0xc;
 
 /**

@@ -15,7 +15,7 @@ export declare const OP_CHECK = 7;
 export declare const OP_READ = 8;
 export declare const OP_KILL = 9;
 export declare const OP_FLAGS = 10;
-export declare const OP_ROUTE = 11;
+export declare const OP_FORWARD = 11;
 export declare const OP_TRANSFER = 12;
 /**
  * Executor interface.

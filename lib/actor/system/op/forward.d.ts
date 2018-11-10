@@ -2,9 +2,9 @@ import { Address } from '../../address';
 import { Context } from '../../context';
 import { Op, Executor } from './';
 /**
- * Route instruction.
+ * Forward instruction.
  */
-export declare class Route<C extends Context> extends Op<C> {
+export declare class Forward<C extends Context> extends Op<C> {
     from: Address;
     to: Address;
     constructor(from: Address, to: Address);
@@ -13,9 +13,9 @@ export declare class Route<C extends Context> extends Op<C> {
     exec<C extends Context>(s: Executor<C>): void;
 }
 /**
- * execRoute
+ * execForward
  *
  * Creates an entry in the system's state to allow messages
  * sent to one address to be forwarded to another actor.
  */
-export declare const execRoute: <C extends Context>(s: Executor<C>, { from, to }: Route<C>) => void;
+export declare const execForward: <C extends Context>(s: Executor<C>, { from, to }: Forward<C>) => void;

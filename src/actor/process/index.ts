@@ -9,7 +9,7 @@ import { Raise } from '../system/op/raise';
 import { Kill } from '../system/op/kill';
 import { Drop } from '../system/op/drop';
 import { Tell } from '../system/op/tell';
-import { Route } from '../system/op/route';
+import { Forward } from '../system/op/forward';
 import { Context } from '../context';
 import { Envelope } from '../mailbox';
 import { Message } from '../message';
@@ -108,7 +108,7 @@ export class Process<C extends Context> implements Actor<C> {
                 .map(handleMessages(this))
                 .map(handleExit(this));
 
-        this.system.exec(new Route(this.self(), this.self()));
+        this.system.exec(new Forward(this.self(), this.self()));
 
     }
 
