@@ -1,4 +1,4 @@
-import * as must from 'must/register';
+import {must} from '@quenk/must';
 import { nothing } from '@quenk/noni/lib/data/maybe';
 import {
     State,
@@ -65,7 +65,7 @@ describe('state', () => {
         it('should return the correct parent', () => {
 
             getParent(state, '/path/to/context')
-                .map(p => must(p.template.id).be('3'))
+                .map(p => must(p.template.id).equal('3'))
                 .orJust(() => { throw new Error('404!'); })
 
         });
@@ -78,8 +78,8 @@ describe('state', () => {
 
             let childs = getChildren(state, '/path/to')
 
-            must(childs['/path/to/actor'].template.id).be('4');
-            must(childs['/path/to/context'].template.id).be('5');
+            must(childs['/path/to/actor'].template.id).equal('4');
+            must(childs['/path/to/context'].template.id).equal('5');
 
         });
 
@@ -87,12 +87,12 @@ describe('state', () => {
 
             let childs = getChildren(state, '/');
 
-            must(childs['/path'].template.id).be('2');
-            must(childs['/path/to'].template.id).be('3');
-            must(childs['/path/to/actor'].template.id).be('4');
-            must(childs['/path/to/context'].template.id).be('5');
-            must(childs['/pizza'].template.id).be('6');
-            must(childs['nil']).be(undefined);
+            must(childs['/path'].template.id).equal('2');
+            must(childs['/path/to'].template.id).equal('3');
+            must(childs['/path/to/actor'].template.id).equal('4');
+            must(childs['/path/to/context'].template.id).equal('5');
+            must(childs['/pizza'].template.id).equal('6');
+            must(childs['nil']).equal(undefined);
 
         });
 
@@ -103,7 +103,7 @@ describe('state', () => {
         it('should return the correct address', () => {
 
             getAddress(state, state.contexts['/path/to'].actor)
-                .map(addr => must(addr).be('/path/to'))
+                .map(addr => must(addr).equal('/path/to'))
                 .orJust(() => { throw new Error('failed'); });
 
         });

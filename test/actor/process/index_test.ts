@@ -1,4 +1,4 @@
-import * as must from 'must/register';
+import {must} from '@quenk/must';
 import { system } from '../../../src';
 import { Mutable, Case } from '../../../src/actor/resident';
 import { Context } from '../../../src/actor/context';
@@ -15,7 +15,7 @@ class Sender extends Mutable<String, Context> {
 
         new Case(String, (m: string) => {
 
-            must(m).be('hi');
+            must(m).equal('hi');
 
             this.done()
 
@@ -31,7 +31,7 @@ class Sender extends Mutable<String, Context> {
 
             new Case(String, (m: string) => {
 
-                must(m).be('hi');
+                must(m).equal('hi');
 
                 this.done();
 

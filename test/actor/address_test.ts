@@ -1,4 +1,4 @@
-import * as must from 'must/register';
+import {must} from '@quenk/must';
 import {
     isRestricted,
     make,
@@ -12,13 +12,13 @@ describe('address', function() {
 
         it('should not allow path seperators', () => {
 
-            must(isRestricted('/path/to/actor')).be(true);
+            must(isRestricted('/path/to/actor')).equal(true);
 
         })
 
         it('should allow a single /', () => {
 
-            must(isRestricted('/')).be(false);
+            must(isRestricted('/')).equal(false);
 
         })
 
@@ -28,13 +28,13 @@ describe('address', function() {
 
         it('should be $ aware', () => {
 
-            must(make('$', 'foobar')).be('foobar');
+            must(make('$', 'foobar')).equal('foobar');
 
         });
 
         it('should be / aware', () => {
 
-            must(make('/', 'foobar')).be('/foobar');
+            must(make('/', 'foobar')).equal('/foobar');
 
         })
 
@@ -44,16 +44,16 @@ describe('address', function() {
 
         it('should return $ in some cases', () => {
 
-            must(getParent('')).be('$');
-            must(getParent('/')).be('$');
-            must(getParent('?')).be('$');
-            must(getParent('selector')).be('$');
+            must(getParent('')).equal('$');
+            must(getParent('/')).equal('$');
+            must(getParent('?')).equal('$');
+            must(getParent('selector')).equal('$');
 
         })
 
         it('should not mess up paths with one seperator', () => {
 
-            must(getParent('/path')).be('/');
+            must(getParent('/path')).equal('/');
 
         });
 
@@ -63,16 +63,16 @@ describe('address', function() {
 
         it('should recognize special addresses', () => {
 
-            must(getId('')).be('');
-            must(getId('/')).be('/');
-            must(getId('?')).be('?');
-            must(getId('$')).be('$')
+            must(getId('')).equal('');
+            must(getId('/')).equal('/');
+            must(getId('?')).equal('?');
+            must(getId('$')).equal('$')
 
         })
 
         it('should return the id part', () => {
 
-            must(getId('path/to/id')).be('id');
+            must(getId('path/to/id')).equal('id');
 
         })
 

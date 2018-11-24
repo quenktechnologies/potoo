@@ -11,10 +11,10 @@
     "test": "./node_modules/.bin/mocha --opts mocha.opts test"
   },
   "devDependencies": {
+    "@quenk/must": "^1.0.4",
     "@types/mocha": "^2.2.48",
     "@types/node": "^8.9.3",
     "mocha": "^3.5.3",
-    "must": "^0.13.4",
     "ts-node": "^3.0.2",
     "typedoc": "^0.11.1",
     "typescript": "^2.7.2"
