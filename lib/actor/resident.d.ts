@@ -106,7 +106,7 @@ export declare abstract class AbstractResident<C extends Context> implements Res
     ref: (addr: string) => (m: any) => AbstractResident<C>;
     self: () => string;
     abstract init(c: C): C;
-    accept({to, from, message}: Envelope): this;
+    accept({ to, from, message }: Envelope): this;
     spawn(t: Template<C>): Address;
     tell<M>(ref: Address, m: M): AbstractResident<C>;
     abstract select<T>(_: Case<T>[]): AbstractResident<C>;

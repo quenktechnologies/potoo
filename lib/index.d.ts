@@ -13,7 +13,7 @@ import { AbstractSystem } from './actor/system';
 export declare class ActorSystem extends AbstractSystem<Context> {
     state: State<Context>;
     running: boolean;
-    accept({to, from, message}: Envelope): ActorSystem;
+    accept({ to, from, message }: Envelope): ActorSystem;
     allocate(t: Template<Context>): Context;
     /**
      * spawn a new actor from a template.

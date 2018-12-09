@@ -39,7 +39,7 @@ export declare abstract class AbstractSystem<C extends Context> implements Syste
     abstract allocate(t: Template<C>): C;
     identify(actor: Actor<Context>): Address;
     init(c: C): C;
-    accept({to, from, message}: Envelope): AbstractSystem<C>;
+    accept({ to, from, message }: Envelope): AbstractSystem<C>;
     stop(): void;
     run(): void;
 }
