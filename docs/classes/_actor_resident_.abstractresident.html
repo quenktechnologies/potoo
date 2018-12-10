@@ -1001,6 +1001,9 @@ img { max-width: 100%; }
 				<li>
 					<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_context_.context.html" class="tsd-signature-type">Context</a></h4>
 				</li>
+				<li>
+					<h4>S<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+				</li>
 			</ul>
 		</section>
 		<section class="tsd-panel tsd-hierarchy">
@@ -1022,7 +1025,7 @@ img { max-width: 100%; }
 		<section class="tsd-panel">
 			<h3>Implements</h3>
 			<ul class="tsd-hierarchy">
-				<li><a href="../interfaces/_actor_resident_.resident.html" class="tsd-signature-type">Resident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+				<li><a href="../interfaces/_actor_resident_.resident.html" class="tsd-signature-type">Resident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
 			</ul>
 		</section>
 		<section class="tsd-panel-group tsd-index-group">
@@ -1072,7 +1075,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L147">actor/resident.ts:147</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L149">actor/resident.ts:149</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1094,7 +1097,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">system<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_actor_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L149">actor/resident.ts:149</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L151">actor/resident.ts:151</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1111,7 +1114,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L157">actor/resident.ts:157</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L159">actor/resident.ts:159</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1137,7 +1140,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_actor_resident_.resident.html">Resident</a>.<a href="../interfaces/_actor_resident_.resident.html#exit">exit</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L190">actor/resident.ts:190</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L192">actor/resident.ts:192</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -1155,7 +1158,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_actor_resident_.resident.html">Resident</a>.<a href="../interfaces/_actor_resident_.resident.html#init">init</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L155">actor/resident.ts:155</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L157">actor/resident.ts:157</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1172,14 +1175,14 @@ img { max-width: 100%; }
 				<a name="kill" class="tsd-anchor"></a>
 				<h3>kill</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">kill<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">kill<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_actor_resident_.resident.html">Resident</a>.<a href="../interfaces/_actor_resident_.resident.html#kill">kill</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L183">actor/resident.ts:183</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L185">actor/resident.ts:185</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1188,7 +1191,7 @@ img { max-width: 100%; }
 								<h5>addr: <a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -1202,7 +1205,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L151">actor/resident.ts:151</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L153">actor/resident.ts:153</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1226,7 +1229,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_actor_resident_.resident.html">Resident</a>.<a href="../interfaces/_actor_resident_.resident.html#run">run</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L202">actor/resident.ts:202</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L204">actor/resident.ts:204</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -1237,14 +1240,14 @@ img { max-width: 100%; }
 				<a name="select" class="tsd-anchor"></a>
 				<h3><span class="tsd-flag ts-flagAbstract">Abstract</span> select</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-					<li class="tsd-signature tsd-kind-icon">select&lt;T&gt;<span class="tsd-signature-symbol">(</span>_<span class="tsd-signature-symbol">: </span><a href="_actor_resident_.case.html" class="tsd-signature-type">Case</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">select&lt;T&gt;<span class="tsd-signature-symbol">(</span>_<span class="tsd-signature-symbol">: </span><a href="_actor_resident_.case.html" class="tsd-signature-type">Case</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_actor_resident_.resident.html">Resident</a>.<a href="../interfaces/_actor_resident_.resident.html#select">select</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L181">actor/resident.ts:181</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L183">actor/resident.ts:183</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -1259,7 +1262,7 @@ img { max-width: 100%; }
 								<h5>_: <a href="_actor_resident_.case.html" class="tsd-signature-type">Case</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -1273,7 +1276,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L153">actor/resident.ts:153</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L155">actor/resident.ts:155</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -1284,20 +1287,20 @@ img { max-width: 100%; }
 				<a name="spawn" class="tsd-anchor"></a>
 				<h3>spawn</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">spawn<span class="tsd-signature-symbol">(</span>t<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a></li>
+					<li class="tsd-signature tsd-kind-icon">spawn<span class="tsd-signature-symbol">(</span>t<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_actor_resident_.resident.html">Resident</a>.<a href="../interfaces/_actor_resident_.resident.html#spawn">spawn</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L164">actor/resident.ts:164</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L166">actor/resident.ts:166</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>t: <a href="../interfaces/_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>t: <a href="../interfaces/_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a></h4>
@@ -1315,7 +1318,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_actor_resident_.resident.html">Resident</a>.<a href="../interfaces/_actor_resident_.resident.html#stop">stop</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L196">actor/resident.ts:196</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L198">actor/resident.ts:198</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -1326,13 +1329,13 @@ img { max-width: 100%; }
 				<a name="tell" class="tsd-anchor"></a>
 				<h3>tell</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-					<li class="tsd-signature tsd-kind-icon">tell&lt;M&gt;<span class="tsd-signature-symbol">(</span>ref<span class="tsd-signature-symbol">: </span><a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a>, m<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">M</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">tell&lt;M&gt;<span class="tsd-signature-symbol">(</span>ref<span class="tsd-signature-symbol">: </span><a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a>, m<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">M</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/resident.ts#L174">actor/resident.ts:174</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/resident.ts#L176">actor/resident.ts:176</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -1350,7 +1353,7 @@ img { max-width: 100%; }
 								<h5>m: <span class="tsd-signature-type">M</span></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_actor_resident_.abstractresident.html" class="tsd-signature-type">AbstractResident</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>

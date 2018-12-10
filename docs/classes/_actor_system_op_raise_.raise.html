@@ -933,9 +933,6 @@ img { max-width: 100%; }
 				</li>
 			</ul>
 		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_op_raise_.html#execraise" class="tsd-kind-icon">exec<wbr>Raise</a>
-		</li>
 	</ul>
 </nav>
 <div class="container container-main">
@@ -945,6 +942,18 @@ img { max-width: 100%; }
 				<div class="lead">
 					<p>Raise instruction.</p>
 				</div>
+				<p>Raises an error within the system.
+					If the actor template for the source actor came with a trap function,
+				we apply it to determine what action to take next.</p>
+				<p>Which can be one of:</p>
+				<ol>
+					<li>Elevate the error to the parent actor.</li>
+					<li>Ignore the error.</li>
+					<li>Restart the actor.</li>
+					<li>Stop the actor completely.</li>
+				</ol>
+				<p>If no trap is provided we do 1 until we hit the system actor which results
+				in the whole system crashing.</p>
 			</div>
 		</section>
 		<section class="tsd-panel tsd-type-parameters">
@@ -953,13 +962,16 @@ img { max-width: 100%; }
 				<li>
 					<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_context_.context.html" class="tsd-signature-type">Context</a></h4>
 				</li>
+				<li>
+					<h4>S<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+				</li>
 			</ul>
 		</section>
 		<section class="tsd-panel tsd-hierarchy">
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<a href="_actor_system_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>
+					<a href="_actor_system_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span>
 					<ul class="tsd-hierarchy">
 						<li>
 							<span class="target">Raise</span>
@@ -1009,7 +1021,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/raise.ts#L15">actor/system/op/raise.ts:15</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/raise.ts#L29">actor/system/op/raise.ts:29</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1038,7 +1050,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Overrides <a href="_actor_system_op_index_.op.html">Op</a>.<a href="_actor_system_op_index_.op.html#code">code</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/raise.ts#L22">actor/system/op/raise.ts:22</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/raise.ts#L36">actor/system/op/raise.ts:36</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1048,7 +1060,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">dest<span class="tsd-signature-symbol">:</span> <a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/raise.ts#L20">actor/system/op/raise.ts:20</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/raise.ts#L34">actor/system/op/raise.ts:34</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1058,7 +1070,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">error<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Err</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/raise.ts#L18">actor/system/op/raise.ts:18</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/raise.ts#L32">actor/system/op/raise.ts:32</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1069,7 +1081,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Overrides <a href="_actor_system_op_index_.op.html">Op</a>.<a href="_actor_system_op_index_.op.html#level">level</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/raise.ts#L24">actor/system/op/raise.ts:24</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/raise.ts#L38">actor/system/op/raise.ts:38</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1079,7 +1091,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">src<span class="tsd-signature-symbol">:</span> <a href="../modules/_actor_address_.html#address" class="tsd-signature-type">Address</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/raise.ts#L19">actor/system/op/raise.ts:19</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/raise.ts#L33">actor/system/op/raise.ts:33</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1090,25 +1102,20 @@ img { max-width: 100%; }
 				<a name="exec" class="tsd-anchor"></a>
 				<h3>exec</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Overrides <a href="_actor_system_op_index_.op.html">Op</a>.<a href="_actor_system_op_index_.op.html#exec">exec</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/raise.ts#L29">actor/system/op/raise.ts:29</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/raise.ts#L40">actor/system/op/raise.ts:40</a></li>
 							</ul>
 						</aside>
-						<div class="tsd-comment tsd-typography">
-							<div class="lead">
-								<p>exec Raise</p>
-							</div>
-						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>s: <a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>s: <a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>

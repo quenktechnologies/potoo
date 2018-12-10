@@ -939,9 +939,6 @@ img { max-width: 100%; }
 		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
 			<a href="../modules/_actor_system_op_spawn_.html#run_start_tag" class="tsd-kind-icon">RUN_<wbr>START_<wbr>TAG</a>
 		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../modules/_actor_system_op_spawn_.html#execspawn" class="tsd-kind-icon">exec<wbr>Spawn</a>
-		</li>
 	</ul>
 </nav>
 <div class="container container-main">
@@ -951,6 +948,10 @@ img { max-width: 100%; }
 				<div class="lead">
 					<p>Spawn instruction.</p>
 				</div>
+				<p>Enters a child actor in the system.</p>
+				<p>We first ensure the parent is still in the system then validate
+					the child id. After that we check for dupicated ids then finally
+				setup the new child.</p>
 			</div>
 		</section>
 		<section class="tsd-panel tsd-type-parameters">
@@ -959,13 +960,16 @@ img { max-width: 100%; }
 				<li>
 					<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_context_.context.html" class="tsd-signature-type">Context</a></h4>
 				</li>
+				<li>
+					<h4>S<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+				</li>
 			</ul>
 		</section>
 		<section class="tsd-panel tsd-hierarchy">
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<a href="_actor_system_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>
+					<a href="_actor_system_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span>
 					<ul class="tsd-hierarchy">
 						<li>
 							<span class="target">Spawn</span>
@@ -1008,13 +1012,13 @@ img { max-width: 100%; }
 				<a name="constructor" class="tsd-anchor"></a>
 				<h3>constructor</h3>
 				<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">new <wbr>Spawn<span class="tsd-signature-symbol">(</span>parent<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_index_.instance.html" class="tsd-signature-type">Instance</a>, template<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_system_op_spawn_.spawn.html" class="tsd-signature-type">Spawn</a></li>
+					<li class="tsd-signature tsd-kind-icon">new <wbr>Spawn<span class="tsd-signature-symbol">(</span>parent<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_index_.instance.html" class="tsd-signature-type">Instance</a>, template<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_actor_system_op_spawn_.spawn.html" class="tsd-signature-type">Spawn</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/spawn.ts#L44">actor/system/op/spawn.ts:44</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/spawn.ts#L51">actor/system/op/spawn.ts:51</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1023,7 +1027,7 @@ img { max-width: 100%; }
 								<h5>parent: <a href="../interfaces/_actor_index_.instance.html" class="tsd-signature-type">Instance</a></h5>
 							</li>
 							<li>
-								<h5>template: <a href="../interfaces/_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>template: <a href="../interfaces/_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <a href="_actor_system_op_spawn_.spawn.html" class="tsd-signature-type">Spawn</a></h4>
@@ -1040,7 +1044,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Overrides <a href="_actor_system_op_index_.op.html">Op</a>.<a href="_actor_system_op_index_.op.html#code">code</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/spawn.ts#L50">actor/system/op/spawn.ts:50</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/spawn.ts#L57">actor/system/op/spawn.ts:57</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1051,7 +1055,7 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Overrides <a href="_actor_system_op_index_.op.html">Op</a>.<a href="_actor_system_op_index_.op.html#level">level</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/spawn.ts#L52">actor/system/op/spawn.ts:52</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/spawn.ts#L59">actor/system/op/spawn.ts:59</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1061,17 +1065,17 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">parent<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_actor_index_.instance.html" class="tsd-signature-type">Instance</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/spawn.ts#L47">actor/system/op/spawn.ts:47</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/spawn.ts#L54">actor/system/op/spawn.ts:54</a></li>
 					</ul>
 				</aside>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 				<a name="template" class="tsd-anchor"></a>
 				<h3>template</h3>
-				<div class="tsd-signature tsd-kind-icon">template<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<div class="tsd-signature tsd-kind-icon">template<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_actor_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/spawn.ts#L48">actor/system/op/spawn.ts:48</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/spawn.ts#L55">actor/system/op/spawn.ts:55</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1082,20 +1086,20 @@ img { max-width: 100%; }
 				<a name="exec" class="tsd-anchor"></a>
 				<h3>exec</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Overrides <a href="_actor_system_op_index_.op.html">Op</a>.<a href="_actor_system_op_index_.op.html#exec">exec</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/spawn.ts#L54">actor/system/op/spawn.ts:54</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/spawn.ts#L61">actor/system/op/spawn.ts:61</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>s: <a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>s: <a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>

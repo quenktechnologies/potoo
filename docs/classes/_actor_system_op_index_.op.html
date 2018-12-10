@@ -976,7 +976,7 @@ img { max-width: 100%; }
 		<section class="tsd-panel tsd-comment">
 			<div class="tsd-comment tsd-typography">
 				<div class="lead">
-					<p>Op is an instruction executed by a System/Executor.</p>
+					<p>Op code class.</p>
 				</div>
 			</div>
 		</section>
@@ -985,6 +985,9 @@ img { max-width: 100%; }
 			<ul class="tsd-type-parameters">
 				<li>
 					<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_context_.context.html" class="tsd-signature-type">Context</a></h4>
+				</li>
+				<li>
+					<h4>S<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
 				</li>
 			</ul>
 		</section>
@@ -995,10 +998,10 @@ img { max-width: 100%; }
 					<span class="target">Op</span>
 					<ul class="tsd-hierarchy">
 						<li>
-							<a href="_actor_system_op_drop_.drop.html" class="tsd-signature-type">Drop</a>
+							<a href="_actor_system_op_run_.run.html" class="tsd-signature-type">Run</a>
 						</li>
 						<li>
-							<a href="_actor_system_op_run_.run.html" class="tsd-signature-type">Run</a>
+							<a href="_actor_system_op_discard_.discard.html" class="tsd-signature-type">Discard</a>
 						</li>
 						<li>
 							<a href="_actor_system_op_read_.read.html" class="tsd-signature-type">Read</a>
@@ -1065,7 +1068,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">code<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L61">actor/system/op/index.ts:61</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/index.ts#L64">actor/system/op/index.ts:64</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1080,7 +1083,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">level<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L66">actor/system/op/index.ts:66</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/index.ts#L69">actor/system/op/index.ts:69</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1096,13 +1099,13 @@ img { max-width: 100%; }
 				<a name="exec" class="tsd-anchor"></a>
 				<h3><span class="tsd-flag ts-flagAbstract">Abstract</span> exec</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/365e70a/lib/actor/system/op/index.ts#L71">actor/system/op/index.ts:71</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/fdd95ea/lib/actor/system/op/index.ts#L74">actor/system/op/index.ts:74</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1113,7 +1116,7 @@ img { max-width: 100%; }
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>s: <a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>s: <a href="../interfaces/_actor_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>

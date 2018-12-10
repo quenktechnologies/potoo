@@ -929,8 +929,7 @@ img { max-width: 100%; }
 			exported for this purpose:</p>
 			<h2 id="example">Example</h2>
 			<pre><code class="lang-typescript">
-<span class="hljs-keyword">import</span> {Immutable, Mutable, Case} <span class="hljs-keyword">from</span> <span class="hljs-string">'@quenk/potoo/lib/actor/resident'</span>;
-<span class="hljs-keyword">import</span> {system} <span class="hljs-keyword">from</span> <span class="hljs-string">'@quenk/potoo'</span>;
+<span class="hljs-keyword">import</span> {Immutable, Mutable, Case, system} <span class="hljs-keyword">from</span> <span class="hljs-string">'@quenk/potoo'</span>;
 
 <span class="hljs-keyword">class</span> Server <span class="hljs-keyword">extends</span> Immutable&lt;<span class="hljs-built_in">string</span>&gt; {
 
@@ -946,7 +945,7 @@ img { max-width: 100%; }
 
 }
 
-<span class="hljs-keyword">class</span> Client <span class="hljs-keyword">extends</span> Mutable&lt;<span class="hljs-built_in">string</span>&gt; {
+<span class="hljs-keyword">class</span> Client <span class="hljs-keyword">extends</span> Mutable {
 
   receive = [
 
@@ -1012,13 +1011,17 @@ system({log:{level:<span class="hljs-number">8</span>}})
 							<li class="tsd-kind-external-module"><a href="modules/_actor_process_index_.html" class="tsd-kind-icon">"actor/process/index"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_process_script_.html" class="tsd-kind-icon">"actor/process/script"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_resident_.html" class="tsd-kind-icon">"actor/resident"</a></li>
+							<li class="tsd-kind-external-module"><a href="modules/_actor_system_abstract_.html" class="tsd-kind-icon">"actor/system/abstract"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_system_configuration_.html" class="tsd-kind-icon">"actor/system/configuration"</a></li>
+							<li class="tsd-kind-external-module"><a href="modules/_actor_system_default_actors_resident_.html" class="tsd-kind-icon">"actor/system/default/actors/resident"</a></li>
+							<li class="tsd-kind-external-module"><a href="modules/_actor_system_default_index_.html" class="tsd-kind-icon">"actor/system/default/index"</a></li>
+							<li class="tsd-kind-external-module"><a href="modules/_actor_system_detached_.html" class="tsd-kind-icon">"actor/system/detached"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_system_error_.html" class="tsd-kind-icon">"actor/system/error"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_system_hooks_.html" class="tsd-kind-icon">"actor/system/hooks"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_system_index_.html" class="tsd-kind-icon">"actor/system/index"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_system_log_.html" class="tsd-kind-icon">"actor/system/log"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_check_.html" class="tsd-kind-icon">"actor/system/op/check"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_drop_.html" class="tsd-kind-icon">"actor/system/op/drop"</a></li>
+							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_discard_.html" class="tsd-kind-icon">"actor/system/op/discard"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_forward_.html" class="tsd-kind-icon">"actor/system/op/forward"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_index_.html" class="tsd-kind-icon">"actor/system/op/index"</a></li>
 							<li class="tsd-kind-external-module"><a href="modules/_actor_system_op_kill_.html" class="tsd-kind-icon">"actor/system/op/kill"</a></li>
