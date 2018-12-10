@@ -4,13 +4,19 @@ import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Context } from '../../context';
 import { getChildren, remove, get } from '../state';
+import {System} from '../';
 import { Restart } from './restart';
 import { OP_STOP, Op, Executor } from './';
 
 /**
  * Stop instruction.
+ *
+ * Halts an actor and removes it from the system.
+ *
+ * If the template has the restart flag set,
+ * the actor will be restarted instead.
  */
-export class Stop<C extends Context> extends Op<C> {
+export class Stop<C extends Context, S extends System<C>> extends Op<C,S> {
 
     constructor(public address: Address) { super(); }
 
@@ -18,7 +24,7 @@ export class Stop<C extends Context> extends Op<C> {
 
     public level = log.WARN;
 
-    exec(s: Executor<C>): void {
+    exec(s: Executor<C,S>): void {
 
         return execStop(s, this);
 
@@ -26,14 +32,8 @@ export class Stop<C extends Context> extends Op<C> {
 
 }
 
-/**
- * execStop
- *
- * If the template has the restart flag set,
- * the actor will be restarted instead.
- * Otherwised it is stopped and ejected from the system.
- */
-export const execStop = <C extends Context>(s: Executor<C>, { address }: Stop<C>) =>
+const execStop = <C extends Context, S extends System<C>>
+  (s: Executor<C,S>, { address }: Stop<C,S>) =>
     get(s.state, address)
         .map(f => {
 

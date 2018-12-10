@@ -4,12 +4,16 @@ import { Address } from '../../address';
 import { Context } from '../../context';
 import { getMessage, getBehaviour } from '../state';
 import { Read } from './read';
+import { System } from '../';
 import { OP_CHECK, Op, Executor } from './';
 
 /**
  * Check instruction.
+ *
+ * Peeks at the actors mailbox for new messages and 
+ * schedules a Read if any found.
  */
-export class Check<C extends Context> extends Op<C> {
+export class Check<C extends Context, S extends System<C>> extends Op<C, S> {
 
     constructor(public address: Address) { super(); }
 
@@ -17,7 +21,7 @@ export class Check<C extends Context> extends Op<C> {
 
     public level = log.INFO;
 
-    exec(s: Executor<C>): void {
+    exec(s: Executor<C, S>): void {
 
         return execCheck(s, this);
 
@@ -25,17 +29,11 @@ export class Check<C extends Context> extends Op<C> {
 
 }
 
-/**
- * execCheck 
- *
- * Peeks at the actors mailbox for new messages and 
- * schedules a Read if for the oldest one.
- */
-export const execCheck = <C extends Context>(s: Executor<C>, { address }: Check<C>) =>
+const execCheck = <C extends Context, S extends System<C>>
+    (s: Executor<C, S>, { address }: Check<C, S>) =>
     getBehaviour(s.state, address)
         .chain(() => getMessage(s.state, address))
         .map(e => s.exec(new Read(address, e)))
         .map(noop)
         .orJust(noop)
         .get();
-
