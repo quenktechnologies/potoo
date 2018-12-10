@@ -10,7 +10,8 @@ import { Tell } from './system/op/tell';
 import { Kill } from './system/op/kill';
 import { Discard } from './system/op/discard';
 import { Receive } from './system/op/receive';
-import { System, NullSystem } from './system';
+import {  DetachedSystem } from './system/detached';
+import { System  } from './system';
 import { Template } from './template';
 import { Context } from './context';
 import { Actor } from './';
@@ -196,7 +197,7 @@ export abstract class AbstractResident<C extends Context, S extends System<C>>
 
     stop(): void {
 
-        this.system = new NullSystem();
+        this.system = new DetachedSystem();
 
     }
 
