@@ -1,11 +1,11 @@
 import {must} from '@quenk/must';
-import { system } from '../../../src';
+import { ActorSystem, system } from '../../../src';
 import { Mutable, Case } from '../../../src/actor/resident';
 import { Context } from '../../../src/actor/context';
 import { Process } from '../../../src/actor/process';
 import { System } from '../../../src/actor/system';
 
-class Sender extends Mutable<String, Context> {
+class Sender extends Mutable<String, Context, ActorSystem> {
 
     constructor(
         public system: System<Context>,

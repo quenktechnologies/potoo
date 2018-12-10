@@ -1,17 +1,9 @@
 import {must} from '@quenk/must';
 import { Immutable, Mutable, Case } from '../../../src/actor/resident';
 import {Context} from '../../../src/actor/context';
-import { system } from '../../../src/';
+import {ActorSystem, system } from '../../../src/';
 
-class A1 extends Mutable<void,Context> {
-
-    receive = [];
-
-    run() { }
-
-}
-
-class A2 extends Mutable<void,Context> {
+class A1 extends Mutable<void,Context,ActorSystem> {
 
     receive = [];
 
@@ -19,7 +11,15 @@ class A2 extends Mutable<void,Context> {
 
 }
 
-class A3 extends Immutable<String,Context> {
+class A2 extends Mutable<void,Context, ActorSystem> {
+
+    receive = [];
+
+    run() { }
+
+}
+
+class A3 extends Immutable<String,Context,ActorSystem> {
 
     receive = [
 
@@ -36,7 +36,7 @@ class A3 extends Immutable<String,Context> {
 
 }
 
-class A3A extends Immutable<any,Context> {
+class A3A extends Immutable<any,Context,ActorSystem> {
 
     receive = [
 

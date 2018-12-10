@@ -1,5 +1,4 @@
 import { must } from '@quenk/must';
-import { system } from '../../src';
 import { Context } from '../../src/actor/context';
 import { System } from '../../src/actor/system';
 import {
@@ -8,8 +7,9 @@ import {
     Immutable,
     Case
 } from '../../src/actor/resident';
+import { ActorSystem, system } from '../../src';
 
-class Killer extends AbstractResident<Context> {
+class Killer extends AbstractResident<Context,ActorSystem> {
 
     constructor(public s: System<Context>, public done: (k: Killer) => void) { super(s); }
 
@@ -36,7 +36,7 @@ class Killer extends AbstractResident<Context> {
 
 }
 
-class Killable extends Mutable<void, Context> {
+class Killable extends Mutable<void, Context, ActorSystem> {
 
     receive = [];
 
@@ -54,7 +54,7 @@ class Killable extends Mutable<void, Context> {
 
 }
 
-class Victim extends Immutable<void, Context> {
+class Victim extends Immutable<void, Context, ActorSystem> {
 
     receive = []
 
@@ -62,7 +62,7 @@ class Victim extends Immutable<void, Context> {
 
 }
 
-class Exiter extends AbstractResident<Context> {
+class Exiter extends AbstractResident<Context, ActorSystem> {
 
     constructor(public s: System<Context>, public done: () => void) { super(s); }
 
@@ -95,7 +95,7 @@ class Exiter extends AbstractResident<Context> {
 
 }
 
-class ShouldWork extends Mutable<void, Context> {
+class ShouldWork extends Mutable<void, Context, ActorSystem> {
 
     constructor(public s: System<Context>, public done: () => void) {
 
@@ -129,7 +129,7 @@ class ShouldWork extends Mutable<void, Context> {
 
 }
 
-class MutableSelfTalk extends Mutable<string, Context> {
+class MutableSelfTalk extends Mutable<string, Context, ActorSystem> {
 
     constructor(public s: System<Context>, public done: () => void) { super(s); }
 
@@ -173,7 +173,7 @@ class MutableSelfTalk extends Mutable<string, Context> {
 
 }
 
-class ImmutableSelfTalk extends Immutable<string, Context> {
+class ImmutableSelfTalk extends Immutable<string, Context, ActorSystem> {
 
     constructor(public s: System<Context>, public done: () => void) { super(s); }
 
