@@ -1,7 +1,7 @@
 import { Envelope } from '../mailbox';
 
 /**
- * Drop hook;
+ * Drop hook.
  */
 export type Drop = (e: Envelope) => void;
 
@@ -10,13 +10,13 @@ export type Drop = (e: Envelope) => void;
  */
 export interface Hooks {
 
-        /**
-         * drop hook
-         *
-         * Can be invoked to intercept dropped messages.
-         */
-drop ?: Drop
+    /**
+     * drop hook
+     *
+     * Can be invoked to intercept dropped messages.
+     */
+    drop?: Drop
 
 
-    }
+}
 

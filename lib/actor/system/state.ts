@@ -13,6 +13,7 @@ import { Template } from '../template';
 import { Envelope } from '../mailbox';
 import { ADDRESS_SYSTEM, Address, getParent as getParentAddress } from '../address';
 import { Context, Contexts } from '../context';
+import {System} from './';
 
 /**
  * Routes map.
@@ -74,8 +75,8 @@ export const getInstance =
  * getTemplate attempts to retrieve the template for an
  * actor given an address.
  */
-export const getTemplate =
-    <C extends Context>(s: State<C>, addr: Address): Maybe<Template<C>> =>
+export const getTemplate =  <C extends Context, S extends System<C>>
+  (s: State<C>, addr: Address): Maybe<Template<C,S>> =>
         get(s, addr).map(f => f.template);
 
 /**

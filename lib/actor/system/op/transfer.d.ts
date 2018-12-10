@@ -1,11 +1,14 @@
 import { Address } from '../../address';
 import { Message } from '../../message';
 import { Context } from '../../context';
+import { System } from '../';
 import { Op, Executor } from './';
 /**
  * Transfer instruction.
+ *
+ * Transfers a message.
  */
-export declare class Transfer<C extends Context> extends Op<C> {
+export declare class Transfer<C extends Context, S extends System<C>> extends Op<C, S> {
     to: Address;
     from: Address;
     router: Address;
@@ -13,12 +16,5 @@ export declare class Transfer<C extends Context> extends Op<C> {
     constructor(to: Address, from: Address, router: Address, message: Message);
     code: number;
     level: number;
-    exec(s: Executor<C>): void;
+    exec(s: Executor<C, S>): void;
 }
-/**
- * execTransfer
- *
- * Peeks at the actors mailbox for new messages and
- * schedules a Read if for the oldest one.
- */
-export declare const execTransfer: <C extends Context>(s: Executor<C>, { router, to, from, message }: Transfer<C>) => void;

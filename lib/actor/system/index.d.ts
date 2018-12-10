@@ -21,7 +21,7 @@ export interface System<C extends Context> extends Actor<C> {
     /**
      * exec queses up an Op to be executed by the System.
      */
-    exec(code: Op<C>): System<C>;
+    exec(code: Op<C, System<C>>): System<C>;
 }
 /**
  * AbstractSystem
@@ -29,14 +29,14 @@ export interface System<C extends Context> extends Actor<C> {
  * Implemnation of a System and Executor that spawns
  * various general purpose actors.
  */
-export declare abstract class AbstractSystem<C extends Context> implements System<C>, Executor<C> {
+export declare abstract class AbstractSystem<C extends Context> implements System<C>, Executor<C, System<C>> {
     configuration: config.Configuration;
     constructor(configuration?: config.Configuration);
-    stack: Op<C>[];
+    stack: Op<C, System<C>>[];
     running: boolean;
     abstract state: State<C>;
-    exec(code: Op<C>): AbstractSystem<C>;
-    abstract allocate(t: Template<C>): C;
+    exec(code: Op<C, AbstractSystem<C>>): AbstractSystem<C>;
+    abstract allocate(t: Template<C, AbstractSystem<C>>): C;
     identify(actor: Actor<Context>): Address;
     init(c: C): C;
     accept({ to, from, message }: Envelope): AbstractSystem<C>;
@@ -52,6 +52,6 @@ export declare class NullSystem<C extends Context> implements System<C> {
     accept(_: Envelope): NullSystem<C>;
     stop(): void;
     identify(_: Actor<Context>): Address;
-    exec(_: Op<C>): NullSystem<C>;
+    exec(_: Op<C, NullSystem<C>>): NullSystem<C>;
     run(): void;
 }

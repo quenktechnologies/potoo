@@ -3,14 +3,17 @@ import { noop } from '@quenk/noni/lib/data/function';
 import { Address } from '../../address';
 import { Context } from '../../context';
 import { put, runInstance, get } from '../state';
+import { System } from '../';
 import { Run } from './run';
 import { Tell } from './tell';
 import { OP_RESTART, Op, Executor } from './';
 
 /**
  * Restart instruction.
+ *
+ * Re-creates a new instance of an actor maintaining the state of its mailbox.
  */
-export class Restart<C extends Context> extends Op<C> {
+export class Restart<C extends Context, S extends System<C>> extends Op<C, S> {
 
     constructor(public address: Address) { super(); }
 
@@ -18,7 +21,7 @@ export class Restart<C extends Context> extends Op<C> {
 
     public level = log.INFO;
 
-    exec(s: Executor<C>): void {
+    exec(s: Executor<C, S>): void {
 
         return execRestart(s, this);
 
@@ -26,22 +29,15 @@ export class Restart<C extends Context> extends Op<C> {
 
 }
 
-/**
- * execRestart
- *
- * Retains the actor's mailbox and stops the current instance.
- * It is then restart by creating a new instance and invoking its
- * run method.
- */
-export const execRestart =
-  <C extends Context>(s: Executor<C>, op: Restart<C>) =>
-        get(s.state, op.address)
-            .map(doRestart(s, op))
-            .orJust(noop)
-            .get();
+const execRestart = <C extends Context, S extends System<C>>
+    (s: Executor<C, S>, op: Restart<C, S>) =>
+    get(s.state, op.address)
+        .map(doRestart(s, op))
+        .orJust(noop)
+        .get();
 
-const doRestart =
-  <C extends Context>(s: Executor<C>, { address }: Restart<C>) => (f: C) => {
+const doRestart =    <C extends Context, S extends System<C>>
+  (s: Executor<C,S>, { address }: Restart<C,S>) => (f: C) => {
 
         f.actor.stop();
 

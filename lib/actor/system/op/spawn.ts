@@ -6,7 +6,7 @@ import {
     nothing
 } from '@quenk/noni/lib/data/maybe';
 import { cons, noop } from '@quenk/noni/lib/data/function';
-import {  Instance } from '../../';
+import { Instance } from '../../';
 import { Template } from '../../template';
 import { exists, getAddress, put, runInstance } from '../state';
 import { Context } from '../../context';
@@ -14,6 +14,7 @@ import { Address, isRestricted, make } from '../../address';
 import { SystemError } from '../error';
 import { Raise } from './raise';
 import { Run } from './run';
+import { System } from '../';
 import { Op, OP_SPAWN, Executor } from './';
 
 export const RUN_START_TAG = 'start';
@@ -40,61 +41,60 @@ export class DuplicateAddressError extends SystemError {
 
 /**
  * Spawn instruction.
+ *
+ * Enters a child actor in the system.
+ *
+ * We first ensure the parent is still in the system then validate
+ * the child id. After that we check for dupicated ids then finally
+ * setup the new child.
  */
-export class Spawn<C extends Context> extends Op<C> {
+export class Spawn<C extends Context, S extends System<C>> extends Op<C, S> {
 
     constructor(
         public parent: Instance,
-        public template: Template<C>) { super(); }
+        public template: Template<C, S>) { super(); }
 
     public code = OP_SPAWN;
 
     public level = log.INFO;
 
-    exec(s: Executor<C>): void {
+    exec(s: Executor<C, S>): void {
 
-        return execSpawn(s, <Spawn<C>>this);
+        return execSpawn(s, <Spawn<C, S>>this);
 
     }
 
 }
 
-/**
- * execSpawn instruction.
- *
- * Here we ensure the parent is still in the system then validate
- * the child id.
- *
- * If that is successfull we create and check for a duplicate id
- * then finally add the child to the system.
- */
-export const execSpawn =
-    <C extends Context>(s: Executor<C>, { parent, template }: Spawn<C>) =>
-        getAddress(s.state, parent)
-            .chain(path =>
-                fromBoolean(!isRestricted(template.id))
-                    .orElse(raiseInvalidIdError(s, template.id, path))
-                    .map(() => template)
-                    .chain(makeAddress(path))
-                    .chain(addr =>
-                        checkAddress(s, addr)
-                            .orElse(raiseDuplicateAddressError(s, path, addr))
-                            .map(cons(addr))
-                            .chain(generate(s, template))
-                            .chain(spawnChildren(s, template))
-                            .map(() => { })))
-            .map(noop)
-            .orJust(noop)
-            .get();
+ const execSpawn = <C extends Context, S extends System<C>>
+    (s: Executor<C, S>, { parent, template }: Spawn<C, S>) =>
+    getAddress(s.state, parent)
+        .chain(path =>
+            fromBoolean(!isRestricted(template.id))
+                .orElse(raiseInvalidIdError(s, template.id, path))
+                .map(() => template)
+                .chain(makeAddress(path))
+                .chain(addr =>
+                    checkAddress(s, addr)
+                        .orElse(raiseDuplicateAddressError(s, path, addr))
+                        .map(cons(addr))
+                        .chain(generate(s, template))
+                        .chain(spawnChildren(s, template))
+                        .map(() => { })))
+        .map(noop)
+        .orJust(noop)
+        .get();
 
-const makeAddress = <C extends Context>(parent: Address) => (template: Template<C>) =>
-    fromString(make(parent, template.id))
+const makeAddress = <C extends Context, S extends System<C>>
+    (parent: Address) => (template: Template<C, S>) =>
+        fromString(make(parent, template.id))
 
-const checkAddress = <C extends Context>(s: Executor<C>, addr: Address) =>
+const checkAddress = <C extends Context, S extends System<C>>
+    (s: Executor<C, S>, addr: Address) =>
     fromBoolean(!exists(s.state, addr));
 
-const generate =
-    <C extends Context>(s: Executor<C>, template: Template<C>) => (addr: Address) =>
+const generate = <C extends Context, S extends System<C>>
+    (s: Executor<C, S>, template: Template<C, S>) => (addr: Address) =>
         fromNullable(s.allocate(template))
             .map(f => {
 
@@ -107,21 +107,21 @@ const generate =
 
             });
 
-const spawnChildren =
-    <C extends Context>(s: Executor<C>, t: Template<C>) => (parent: Instance) =>
-        fromNullable(<Template<C>[]>t.children)
+const spawnChildren = <C extends Context, S extends System<C>>
+    (s: Executor<C, S>, t: Template<C, S>) => (parent: Instance) =>
+        fromNullable(<Template<C, S>[]>t.children)
             .map(children => children.forEach(c => s.exec(new Spawn(parent, c))));
 
-const raiseInvalidIdError =
-    <C extends Context>(s: Executor<C>, id: string, parent: Address) => () => {
+const raiseInvalidIdError = <C extends Context, S extends System<C>>
+    (s: Executor<C, S>, id: string, parent: Address) => () => {
 
         s.exec(new Raise(new InvalidIdError(id), parent, parent));
         return nothing();
 
     }
 
-const raiseDuplicateAddressError =
-    <C extends Context>(s: Executor<C>, parent: Address, addr: Address) => () => {
+const raiseDuplicateAddressError = <C extends Context, S extends System<C>>
+    (s: Executor<C, S>, parent: Address, addr: Address) => () => {
 
         s.exec(new Raise(
             new DuplicateAddressError(addr), parent, parent));

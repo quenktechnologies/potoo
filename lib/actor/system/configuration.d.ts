@@ -25,10 +25,13 @@ export interface LogPolicy {
     /**
      * logger is the actual logging implemention.
      *
-     * It MUST correspond to the basic info,warn and error api of the javascript console.
+     * It MUST correspond to the console logging usually provided by browsers.
      */
     logger?: log.Logger;
 }
+/**
+ * defaults for logging policy.
+ */
 export declare const defaults: () => {
     log: {
         level: number;

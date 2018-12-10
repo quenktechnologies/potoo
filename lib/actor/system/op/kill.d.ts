@@ -2,27 +2,26 @@ import { Address } from '../../address';
 import { Instance } from '../../';
 import { Context } from '../../context';
 import { SystemError } from '../error';
+import { System } from '../';
 import { Op, Executor } from './';
-export declare class IllegalKillSignal extends SystemError {
+/**
+ * IllegalKillSignalError
+ */
+export declare class IllegalKillSignalError extends SystemError {
     child: string;
     parent: string;
     constructor(child: string, parent: string);
 }
 /**
  * Kill instruction.
+ *
+ * An actor can only kill actors it is directly or indirectly the parent of.
  */
-export declare class Kill<C extends Context> extends Op<C> {
+export declare class Kill<C extends Context, S extends System<C>> extends Op<C, S> {
     actor: Instance;
     child: Address;
     constructor(actor: Instance, child: Address);
     code: number;
     level: number;
-    exec(s: Executor<C>): void;
+    exec(s: Executor<C, S>): void;
 }
-/**
- * execKill
- *
- * Verify the target child is somewhere in the hierachy of the requesting
- * actor before killing it.
- */
-export declare const execKill: <C extends Context>(s: Executor<C>, { child, actor }: Kill<C>) => void | Executor<C>;

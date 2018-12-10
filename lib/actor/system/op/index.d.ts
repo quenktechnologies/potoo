@@ -3,6 +3,7 @@ import { Context } from '../../context';
 import { Template } from '../../template';
 import { State } from '../state';
 import { Configuration } from '../configuration';
+import { System } from '../';
 export declare const OP_RAISE = 100;
 export declare const OP_STOP = 0;
 export declare const OP_RUN = 1;
@@ -20,9 +21,11 @@ export declare const OP_TRANSFER = 12;
 /**
  * Executor interface.
  *
- * Has methods and properties needed for opcode execution.
+ * Used internally by Op codes during their execution.
+ * This interface also exists to reduce some of the requirements
+ * for implementing the System interface.
  */
-export interface Executor<C extends Context> {
+export interface Executor<C extends Context, S extends System<C>> {
     /**
      * configuration
      */
@@ -34,16 +37,16 @@ export interface Executor<C extends Context> {
     /**
      * allocate a new Context for an actor.
      */
-    allocate(t: Template<C>): C;
+    allocate(t: Template<C, S>): C;
     /**
      * exec an op code.
      */
-    exec(code: Op<C>): Executor<C>;
+    exec(code: Op<C, S>): Executor<C, S>;
 }
 /**
- * Op is an instruction executed by a System/Executor.
+ * Op code class.
  */
-export declare abstract class Op<C extends Context> {
+export declare abstract class Op<C extends Context, S extends System<C>> {
     /**
      * code for the Op.
      */
@@ -55,9 +58,9 @@ export declare abstract class Op<C extends Context> {
     /**
      * exec the instruction.
      */
-    abstract exec(s: Executor<C>): void;
+    abstract exec(s: Executor<C, S>): void;
 }
 /**
  * log an Op to the Executor's logger.
  */
-export declare const log: <C extends Context>(level: number, logger: logging.Logger, o: Op<C>) => Op<C>;
+export declare const log: <C extends Context, S extends System<C>>(level: number, logger: logging.Logger, o: Op<C, S>) => Op<C, S>;

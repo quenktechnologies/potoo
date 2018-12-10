@@ -48,9 +48,9 @@ export interface Context {
     /**
      * template used to create new instances of the actor.
      *
-     * XXX: We use the any type here because the this effectively
+     * XXX: We use the any type here because this is
      * a cyclical constraint. In the future we may refactor to find a
-     * way around this.
+     * way around this but for now it keeps things going.
      */
-    template: Template<any>;
+    template: Template<any, any>;
 }

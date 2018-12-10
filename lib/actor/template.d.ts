@@ -8,7 +8,7 @@ export declare const ACTION_RESTART = 1;
 export declare const ACTION_STOP = 2;
 /**
  * TrapAction represents each one of the actions that can be taken after
- * an error is trapped.
+ * an error has been trapped.
  *
  * These are:
  *
@@ -21,7 +21,7 @@ export declare type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * CreateFunc is applied to produce an instance of an actor.
  */
-export declare type CreateFunc<C extends Context> = (s: System<C>) => Actor<C>;
+export declare type CreateFunc<C extends Context, S extends System<C>> = (s: S) => Actor<C>;
 /**
  * DelayMilliseconds type.
  */
@@ -35,10 +35,12 @@ export declare type TrapFunc = (e: Err) => TrapAction;
  * Template of an actor.
  *
  * Actors are created using templates that describe how to spawn and manage them
- * to the system.represents the minimum amount of information required to create
+ * to the system.
+ *
+ * The are the minimum amount of information required to create
  * a new actor instance.
  */
-export interface Template<C extends Context> {
+export interface Template<C extends Context, S extends System<C>> {
     /**
      * id of the actor used when constructing its address.
      */
@@ -46,7 +48,7 @@ export interface Template<C extends Context> {
     /**
      * create function.
      */
-    create: CreateFunc<C>;
+    create: CreateFunc<C, S>;
     /**
      * trap is used to take action when the spanwed
      * action encounters an error.
@@ -64,5 +66,5 @@ export interface Template<C extends Context> {
     /**
      * children is list of child actors that will automatically be spawned.
      */
-    children?: Template<C>[];
+    children?: Template<C, S>[];
 }

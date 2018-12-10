@@ -1,21 +1,19 @@
 import { Address } from '../../address';
 import { Context } from '../../context';
+import { System } from '../';
 import { Op, Executor } from './';
 /**
  * Forward instruction.
+ *
+ * Creates an entry in the system's routing table to allow
+ * any messages bound for a address prefix to be forwarded to
+ * another actor.
  */
-export declare class Forward<C extends Context> extends Op<C> {
+export declare class Forward<C extends Context, S extends System<C>> extends Op<C, S> {
     from: Address;
     to: Address;
     constructor(from: Address, to: Address);
     code: number;
     level: number;
-    exec<C extends Context>(s: Executor<C>): void;
+    exec(s: Executor<C, S>): void;
 }
-/**
- * execForward
- *
- * Creates an entry in the system's state to allow messages
- * sent to one address to be forwarded to another actor.
- */
-export declare const execForward: <C extends Context>(s: Executor<C>, { from, to }: Forward<C>) => void;

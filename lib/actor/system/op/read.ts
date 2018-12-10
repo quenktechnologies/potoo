@@ -5,13 +5,17 @@ import { Address } from '../../address';
 import { Envelope } from '../../mailbox';
 import { Context } from '../../context';
 import { get } from '../state';
-import { Drop } from './drop';
+import { Discard } from './discard';
+import { System} from '../';
 import { OP_READ, Op, Executor } from './';
 
 /**
  * Read instruction.
+ *
+ * Applies the actor behaviour in the "next tick" if a 
+ * pending receive is discovered.
  */
-export class Read<C extends Context> extends Op<C> {
+export class Read<C extends Context, S extends System<C>> extends Op<C,S> {
 
     constructor(
         public address: Address,
@@ -21,7 +25,7 @@ export class Read<C extends Context> extends Op<C> {
 
     public level = log.INFO;
 
-    exec(s: Executor<C>): void {
+    exec(s: Executor<C,S>): void {
 
         return execRead(s, this);
 
@@ -29,21 +33,16 @@ export class Read<C extends Context> extends Op<C> {
 
 }
 
-/**
- * execRead 
- *
- * Applies the actor behaviour in the "next tick" if a 
- * receive is pending.
- */
-export const execRead =
-  <C extends Context>(s: Executor<C>, { address, envelope }: Read<C>) =>
+ const execRead = <C extends Context, S extends System<C>>
+  (s: Executor<C,S>, { address, envelope }: Read<C,S>) =>
         get(s.state, address)
             .chain(consume(s, envelope))
             .orJust(noop)
             .map(noop)
             .get();
 
-const consume = <C extends Context>(s: Executor<C>, e: Envelope) => (f: C) =>
+const consume = <C extends Context, S extends System<C>>
+  (s: Executor<C,S>, e: Envelope) => (f: C) =>
     fromArray(f.behaviour)
         .map(([b]) => b)
         .chain(b =>
@@ -56,7 +55,7 @@ const consume = <C extends Context>(s: Executor<C>, e: Envelope) => (f: C) =>
                 })
                 .orRight(() => {
 
-                    s.exec(new Drop(e.to, e.from, e.message));
+                    s.exec(new Discard(e.to, e.from, e.message));
 
                 })
                 .toMaybe())

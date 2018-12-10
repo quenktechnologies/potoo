@@ -1,6 +1,6 @@
 import { Envelope } from '../mailbox';
 /**
- * Drop hook;
+ * Drop hook.
  */
 export declare type Drop = (e: Envelope) => void;
 /**

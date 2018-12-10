@@ -1,21 +1,19 @@
 import { Address } from '../../address';
 import { Context } from '../../context';
+import { System } from '../';
 import { Op, Executor } from './';
 /**
  * Stop instruction.
+ *
+ * Halts an actor and removes it from the system.
+ *
+ * If the template has the restart flag set,
+ * the actor will be restarted instead.
  */
-export declare class Stop<C extends Context> extends Op<C> {
+export declare class Stop<C extends Context, S extends System<C>> extends Op<C, S> {
     address: Address;
     constructor(address: Address);
     code: number;
     level: number;
-    exec(s: Executor<C>): void;
+    exec(s: Executor<C, S>): void;
 }
-/**
- * execStop
- *
- * If the template has the restart flag set,
- * the actor will be restarted instead.
- * Otherwised it is stopped and ejected from the system.
- */
-export declare const execStop: <C extends Context>(s: Executor<C>, { address }: Stop<C>) => void;
