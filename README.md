@@ -27,8 +27,7 @@ exported for this purpose:
 
 ```typescript
 
-import {Immutable, Mutable, Case} from '@quenk/potoo/lib/actor/resident';
-import {system} from '@quenk/potoo';
+import {Immutable, Mutable, Case, system} from '@quenk/potoo';
 
 class Server extends Immutable<string> {
 
@@ -44,7 +43,7 @@ class Server extends Immutable<string> {
 
 }
 
-class Client extends Mutable<string> {
+class Client extends Mutable {
 
   receive = [
   
