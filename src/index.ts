@@ -4,7 +4,7 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { rmerge } from '@quenk/noni/lib/data/record';
 import { nothing } from '@quenk/noni/lib/data/maybe';
 import { Spawn } from './actor/system/op/spawn';
-import { Drop } from './actor/system/op/drop';
+import { Discard } from './actor/system/op/discard';
 import { State } from './actor/system/state';
 import { Envelope } from './actor/mailbox';
 import { Context } from './actor/context';
@@ -53,11 +53,11 @@ export class ActorSystem extends AbstractSystem<Context> {
 
     accept({ to, from, message }: Envelope): ActorSystem {
 
-        return <ActorSystem>this.exec(new Drop(to, from, message));
+        return <ActorSystem>this.exec(new Discard(to, from, message));
 
     }
 
-    allocate(t: Template<Context>): Context {
+    allocate(t: Template<Context, ActorSystem>): Context {
 
         let act = t.create(this);
         return act.init(newContext(act, t));
@@ -67,7 +67,7 @@ export class ActorSystem extends AbstractSystem<Context> {
     /**
      * spawn a new actor from a template.
      */
-    spawn(t: Template<Context>): ActorSystem {
+    spawn(t: Template<Context,ActorSystem>): ActorSystem {
 
         this.exec(new Spawn(this, t));
         return this;
@@ -84,7 +84,7 @@ export const system = (conf: config.Configuration): ActorSystem =>
     new ActorSystem(rmerge(config.defaults(), conf));
 
 const newContext =
-    (actor: Instance, template: Template<Context>): Context => ({
+    (actor: Instance, template: Template<Context,ActorSystem>): Context => ({
 
         mailbox: nothing(),
 

@@ -2,7 +2,7 @@ import * as config from './configuration';
 import { ADDRESS_DISCARD, Address } from '../address';
 import { Template } from '../template';
 import { Actor } from '../';
-import { Drop } from './op/drop';
+import { Discard } from './op/discard';
 import { Op, log } from './op';
 import { Envelope } from '../mailbox';
 import { Context } from '../context';
@@ -25,7 +25,7 @@ export interface System<C extends Context> extends Actor<C> {
     /**
      * exec queses up an Op to be executed by the System.
      */
-    exec(code: Op<C>): System<C>;
+    exec(code: Op<C, System<C>>): System<C>;
 
 }
 
@@ -36,17 +36,17 @@ export interface System<C extends Context> extends Actor<C> {
  * various general purpose actors.
  */
 export abstract class AbstractSystem<C extends Context>
-    implements System<C>, Executor<C> {
+    implements System<C>, Executor<C, System<C>> {
 
     constructor(public configuration: config.Configuration = {}) { }
 
-    stack: Op<C>[] = [];
+    stack: Op<C, System<C>>[] = [];
 
     running: boolean = false;
 
     abstract state: State<C>;
 
-    exec(code: Op<C>): AbstractSystem<C> {
+    exec(code: Op<C, AbstractSystem<C>>): AbstractSystem<C> {
 
         this.stack.push(code);
         this.run();
@@ -54,7 +54,7 @@ export abstract class AbstractSystem<C extends Context>
 
     }
 
-    abstract allocate(t: Template<C>): C;
+    abstract allocate(t: Template<C, AbstractSystem<C>>): C;
 
     identify(actor: Actor<Context>): Address {
 
@@ -72,7 +72,7 @@ export abstract class AbstractSystem<C extends Context>
 
     accept({ to, from, message }: Envelope): AbstractSystem<C> {
 
-        return this.exec(new Drop(to, from, message));
+        return this.exec(new Discard(to, from, message));
 
     }
 
@@ -88,7 +88,7 @@ export abstract class AbstractSystem<C extends Context>
 
         while (this.stack.length > 0)
             log(policy.level || 0, policy.logger || console,
-                <Op<C>>this.stack.pop()).exec(this);
+                <Op<C, System<C>>>this.stack.pop()).exec(this);
 
         this.running = false;
 
@@ -126,7 +126,7 @@ export class NullSystem<C extends Context> implements System<C> {
 
     }
 
-    exec(_: Op<C>): NullSystem<C> {
+  exec(_: Op<C, NullSystem<C>>): NullSystem<C> {
 
         return this;
 
