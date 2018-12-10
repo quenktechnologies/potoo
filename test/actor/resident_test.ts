@@ -9,7 +9,7 @@ import {
 } from '../../src/actor/resident';
 import { ActorSystem, system } from '../../src';
 
-class Killer extends AbstractResident<Context,ActorSystem> {
+class Killer extends AbstractResident<Context, ActorSystem> {
 
     constructor(public s: System<Context>, public done: (k: Killer) => void) { super(s); }
 
@@ -36,7 +36,7 @@ class Killer extends AbstractResident<Context,ActorSystem> {
 
 }
 
-class Killable extends Mutable<void, Context, ActorSystem> {
+class Killable extends Mutable<Context, ActorSystem> {
 
     receive = [];
 
@@ -95,7 +95,7 @@ class Exiter extends AbstractResident<Context, ActorSystem> {
 
 }
 
-class ShouldWork extends Mutable<void, Context, ActorSystem> {
+class ShouldWork extends Mutable<Context, ActorSystem> {
 
     constructor(public s: System<Context>, public done: () => void) {
 
@@ -129,18 +129,18 @@ class ShouldWork extends Mutable<void, Context, ActorSystem> {
 
 }
 
-class MutableSelfTalk extends Mutable<string, Context, ActorSystem> {
+class MutableSelfTalk extends Mutable<Context, ActorSystem> {
 
     constructor(public s: System<Context>, public done: () => void) { super(s); }
 
     count = 0;
 
-    receive = [
+    blocks = [
 
         new Case('ping', () => {
 
             this.tell(this.self(), 'pong');
-            this.select(this.receive);
+            this.select(this.blocks);
 
         }),
 
@@ -149,13 +149,13 @@ class MutableSelfTalk extends Mutable<string, Context, ActorSystem> {
             if (this.count === 3) {
 
                 this.tell(this.self(), 'end');
-                this.select(this.receive);
+                this.select(this.blocks);
 
             } else {
 
                 this.tell(this.self(), 'ping');
                 this.count = this.count + 1;
-                this.select(this.receive);
+                this.select(this.blocks);
 
             }
 
@@ -167,6 +167,7 @@ class MutableSelfTalk extends Mutable<string, Context, ActorSystem> {
 
     run() {
 
+        this.select(this.blocks);
         this.tell(this.self(), 'ping');
 
     }

@@ -244,19 +244,12 @@ export abstract class Immutable<T, C extends Context, S extends System<C>>
 /**
  * Mutable actors can change their behaviour after message processing.
  */
-export abstract class Mutable<T, C extends Context, S extends System<C>> 
-  extends AbstractResident<C, S> {
+export abstract class Mutable<C extends Context, S extends System<C>>
+    extends AbstractResident<C, S> {
 
-    /**
-     * receive is a static list of Case classes 
-     * that the actor will always use to process messages.
-     */
-    abstract receive: Case<T>[];
+    receive: Case<void>[] = [];
 
     init(c: C): C {
-
-        if (this.receive.length > 0)
-            c.behaviour = [mbehaviour(this.receive)];
 
         c.mailbox = just([]);
         c.flags.immutable = false;
@@ -269,7 +262,7 @@ export abstract class Mutable<T, C extends Context, S extends System<C>>
     /**
      * select allows for selectively receiving messages based on Case classes.
      */
-    select<M>(cases: Case<M>[]): Mutable<T, C, S> {
+    select<M>(cases: Case<M>[]): Mutable<C, S> {
 
         this.system.exec(new Receive(this.self(), false, mbehaviour(cases)));
         return this;
@@ -284,7 +277,7 @@ const mbehaviour = <T>(cases: Case<T>[]) => (m: Message) =>
         .map(noop);
 
 const ibehaviour = <T, C extends Context, S extends System<C>>
-  (i: Immutable<T, C, S>) => (m: Message) =>
-    fromBoolean(i.receive.some(c => c.match(m)))
-        .lmap(() => m)
-        .map(noop);
+    (i: Immutable<T, C, S>) => (m: Message) =>
+        fromBoolean(i.receive.some(c => c.match(m)))
+            .lmap(() => m)
+            .map(noop);

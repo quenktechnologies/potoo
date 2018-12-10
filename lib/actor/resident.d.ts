@@ -137,15 +137,11 @@ export declare abstract class Immutable<T, C extends Context, S extends System<C
 /**
  * Mutable actors can change their behaviour after message processing.
  */
-export declare abstract class Mutable<T, C extends Context, S extends System<C>> extends AbstractResident<C, S> {
-    /**
-     * receive is a static list of Case classes
-     * that the actor will always use to process messages.
-     */
-    abstract receive: Case<T>[];
+export declare abstract class Mutable<C extends Context, S extends System<C>> extends AbstractResident<C, S> {
+    receive: Case<void>[];
     init(c: C): C;
     /**
      * select allows for selectively receiving messages based on Case classes.
      */
-    select<M>(cases: Case<M>[]): Mutable<T, C, S>;
+    select<M>(cases: Case<M>[]): Mutable<C, S>;
 }
