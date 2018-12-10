@@ -7,7 +7,7 @@ import { Any } from '@quenk/noni/lib/data/type';
 import { System } from '../system';
 import { Raise } from '../system/op/raise';
 import { Kill } from '../system/op/kill';
-import { Drop } from '../system/op/drop';
+import { Discard } from '../system/op/discard';
 import { Tell } from '../system/op/tell';
 import { Forward } from '../system/op/forward';
 import { Context } from '../context';
@@ -84,7 +84,7 @@ export class Process<C extends Context> implements Actor<C> {
         this
             .handle
             .map(p => p.send(new Tell(e.to, e.from, e.message)))
-            .orJust(() => new Drop(e.to, e.from, e.message))
+            .orJust(() => new Discard(e.to, e.from, e.message))
 
         return this;
 
@@ -128,19 +128,21 @@ const spawn = <C extends Context>(p: Process<C>) => fork(resolve(SCRIPT_PATH), [
 
 })
 
-const handleMessages = <C extends Context>(p: Process<C>) => (c: ChildProcess) =>
+const handleMessages = <C extends Context>
+  (p: Process<C>) => (c: ChildProcess) =>
     c.on('message', (m: Message) => match(m)
         .caseOf(tellShape, handleTellMessage(p))
         .caseOf(raiseShape, handleRaiseMessage(p))
-        .orElse((m: Message) => p.system.exec(new Drop(p.self(), p.self(), m)))
+        .orElse((m: Message) => p.system.exec(new Discard(p.self(), p.self(), m)))
         .end());
 
-const handleTellMessage = <C extends Context>(p: Process<C>) => ({ to, from, message }
+const handleTellMessage = <C extends Context>
+  (p: Process<C>) => ({ to, from, message }
     : { to: Address, from: Address, message: Message }) =>
     p.system.exec(new Tell(to, from, message));
 
-const handleRaiseMessage =
-    <C extends Context>(p: Process<C>) => ({ error: { message }, src, dest }
+const handleRaiseMessage = <C extends Context>
+  (p: Process<C>) => ({ error: { message }, src, dest }
         : { error: { message: string }, src: string, dest: string }) =>
         p.system.exec(new Raise(new Error(message), src, dest));
 

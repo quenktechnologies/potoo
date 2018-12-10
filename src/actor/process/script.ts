@@ -3,7 +3,7 @@ import { Any } from '@quenk/noni/lib/data/type';
 import { system } from '../../';
 import { Raise } from '../system/op/raise';
 import { Tell } from '../system/op/tell';
-import { Drop } from '../system/op/drop';
+import { Discard } from '../system/op/discard';
 import { System } from '../system';
 import { Message } from '../message';
 import { Envelope } from '../mailbox';
@@ -36,7 +36,7 @@ const sys = system({
 
 const filter = <C extends Context>(s: System<C>) => (m: Message) => match(m)
     .caseOf(tellShape, filterTell(s))
-    .orElse((m: Message) => s.exec(new Drop(address, address, m)))
+    .orElse((m: Message) => s.exec(new Discard(address, address, m)))
     .end();
 
 const filterTell = <C extends Context>(s: System<C>) => ({ to, from, message }
