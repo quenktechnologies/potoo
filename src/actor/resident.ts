@@ -2,6 +2,7 @@ import { test } from '@quenk/noni/lib/data/type';
 import { fromBoolean } from '@quenk/noni/lib/data/either';
 import { just } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
+import {Type} from '@quenk/noni/lib/data/type';
 import { ADDRESS_DISCARD, Address, isRestricted, make } from './address';
 import { Message } from './message';
 import { Envelope } from './mailbox';
@@ -86,7 +87,7 @@ export class Case<T> {
  */
 export abstract class AbstractCase<T> extends Case<T> {
 
-    constructor(public pattern: Message) {
+    constructor(public pattern: Type) {
 
         super(pattern, (m: Message) => this.apply(m));
 
@@ -95,7 +96,7 @@ export abstract class AbstractCase<T> extends Case<T> {
     /**
      * apply consumes a successfully matched message.
      */
-    abstract apply(m: T): void;
+  abstract apply<V>(m: T): V;
 
 }
 

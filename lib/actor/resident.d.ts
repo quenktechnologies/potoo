@@ -1,3 +1,4 @@
+import { Type } from '@quenk/noni/lib/data/type';
 import { Address } from './address';
 import { Message } from './message';
 import { Envelope } from './mailbox';
@@ -56,12 +57,12 @@ export declare class Case<T> {
  * new instances.
  */
 export declare abstract class AbstractCase<T> extends Case<T> {
-    pattern: Message;
-    constructor(pattern: Message);
+    pattern: Type;
+    constructor(pattern: Type);
     /**
      * apply consumes a successfully matched message.
      */
-    abstract apply(m: T): void;
+    abstract apply<V>(m: T): V;
 }
 /**
  * Resident is an actor that exists in the current runtime.
