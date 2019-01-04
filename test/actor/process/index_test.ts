@@ -1,6 +1,6 @@
 import { must } from '@quenk/must';
 import { ActorSystem, system } from '../../../src';
-import { Mutable, Case } from '../../../src/actor/resident';
+import { Mutable, CaseClass } from '../../../src/actor/resident';
 import { Context } from '../../../src/actor/context';
 import { Process } from '../../../src/actor/process';
 import { System } from '../../../src/actor/system';
@@ -17,7 +17,7 @@ class Sender extends Mutable< Context, ActorSystem> {
 
         this.select([
 
-            new Case(String, (m: string) => {
+            new CaseClass(String, (m: string) => {
 
                 must(m).equal('hi');
 

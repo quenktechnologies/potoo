@@ -1,4 +1,5 @@
-import { Type } from '@quenk/noni/lib/data/type';
+import { Constructor } from '@quenk/noni/lib/data/type/constructor';
+import { Pattern } from '@quenk/noni/lib/data/type';
 import { Address } from './address';
 import { Message } from './message';
 import { Envelope } from './mailbox';
@@ -18,25 +19,42 @@ export declare type Self = () => Address;
  * Reference to an actor address.
  */
 export declare type Reference = (m: Message) => void;
-export declare type Cons<T> = {
-    new (...args: Message[]): T;
-};
-/**
- * Pattern supported by Case classes.
- */
-export declare type Pattern = any;
 /**
  * Handler function type for Cases.
  */
 export declare type Handler<T> = (t: T) => void;
 /**
- * Case allows for the selective matching of patterns
+ * Case is provided for situations where
+ * it is better to extend the Case class instead of creating
+ * new instances.
+ */
+export declare abstract class Case<T> {
+    pattern: Pattern<T>;
+    constructor(pattern: Pattern<T>);
+    /**
+     * match a message against a pattern.
+     *
+     * A successful match results in a side effect.
+     */
+    match(m: Message): boolean;
+    /**
+     * apply consumes a successfully matched message.
+     */
+    abstract apply<V>(m: T): V;
+    abstract apply<V>(m: object): V;
+    abstract apply<V>(m: string): V;
+    abstract apply<V>(m: number): V;
+    abstract apply<V>(m: boolean): V;
+    abstract apply<V>(m: Message): V;
+}
+/**
+ * CaseClass allows for the selective matching of patterns
  * for processing messages
  */
-export declare class Case<T> {
-    pattern: Pattern;
+export declare class CaseClass<T> extends Case<T> {
+    pattern: Pattern<T>;
     handler: Handler<T>;
-    constructor(pattern: Cons<T>, f: (value: T) => void);
+    constructor(pattern: Constructor<T>, f: (value: T) => void);
     constructor(pattern: NumberConstructor, f: (value: number) => void);
     constructor(pattern: BooleanConstructor, f: (value: boolean) => void);
     constructor(pattern: StringConstructor, f: (value: string) => void);
@@ -46,23 +64,7 @@ export declare class Case<T> {
     constructor(pattern: string, f: (value: string) => void);
     constructor(pattern: number, f: (value: number) => void);
     constructor(pattern: boolean, f: (value: boolean) => void);
-    /**
-     * match checks if the supplied type satisfies this Case
-     */
-    match(m: Message): boolean;
-}
-/**
- * AbstractCase is provided for situations where
- * it is better to extend the Case class instead of creating
- * new instances.
- */
-export declare abstract class AbstractCase<T> extends Case<T> {
-    pattern: Type;
-    constructor(pattern: Type);
-    /**
-     * apply consumes a successfully matched message.
-     */
-    abstract apply<V>(m: T): V;
+    apply(m: Message): void;
 }
 /**
  * Resident is an actor that exists in the current runtime.
@@ -78,8 +80,9 @@ export interface Resident<C extends Context, S extends System<C>> extends Actor<
     self: Self;
     /**
      * spawn a new child actor.
-     */
+     *
     spawn(t: Template<C, S>): Address;
+
     /**
      * tell a message to an actor address.
      */
@@ -99,7 +102,7 @@ export interface Resident<C extends Context, S extends System<C>> extends Actor<
     exit(): void;
 }
 /**
- * AbstractResident impleemntation.
+ * AbstractResident implementation.
  */
 export declare abstract class AbstractResident<C extends Context, S extends System<C>> implements Resident<C, S> {
     system: System<C>;

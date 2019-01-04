@@ -1,5 +1,5 @@
 const Immutable = require('../../../lib/actor/resident').Immutable;
-const Case = require('../../../lib/actor/resident').Case;
+const Case = require('../../../lib/actor/resident').CaseClass;
 
 function Echo (s) {
 

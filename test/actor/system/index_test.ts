@@ -1,9 +1,9 @@
 import {must} from '@quenk/must';
-import { Immutable, Mutable, Case } from '../../../src/actor/resident';
+import { Immutable, Mutable, CaseClass } from '../../../src/actor/resident';
 import {Context} from '../../../src/actor/context';
 import {ActorSystem, system } from '../../../src/';
 
-class A1 extends Mutable<void,Context,ActorSystem> {
+class A1 extends Mutable<Context,ActorSystem> {
 
     receive = [];
 
@@ -11,7 +11,7 @@ class A1 extends Mutable<void,Context,ActorSystem> {
 
 }
 
-class A2 extends Mutable<void,Context, ActorSystem> {
+class A2 extends Mutable<Context, ActorSystem> {
 
     receive = [];
 
@@ -23,7 +23,7 @@ class A3 extends Immutable<String,Context,ActorSystem> {
 
     receive = [
 
-        new Case(String, (m: string) => { must(m).equal('You said : \'Hello!\'') })
+        new CaseClass(String, (m: string) => { must(m).equal('You said : \'Hello!\'') })
 
     ]
 
@@ -40,7 +40,7 @@ class A3A extends Immutable<any,Context,ActorSystem> {
 
     receive = [
 
-        new Case(String, (m: string) => { this.tell('a3', `You said : '${m}'`) })
+        new CaseClass(String, (m: string) => { this.tell('a3', `You said : '${m}'`) })
 
     ]
 
