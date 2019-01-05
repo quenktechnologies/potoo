@@ -1,5 +1,6 @@
 import {must} from '@quenk/must';
-import { Immutable, Mutable, CaseClass } from '../../../src/actor/resident';
+import { CaseClass } from '../../../src/actor/resident/case';
+import { Immutable, Mutable  } from '../../../src/actor/resident';
 import {Context} from '../../../src/actor/context';
 import {ActorSystem, system } from '../../../src/';
 

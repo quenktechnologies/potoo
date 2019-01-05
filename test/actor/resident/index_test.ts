@@ -1,19 +1,19 @@
 import { must } from '@quenk/must';
-import { Context } from '../../src/actor/context';
-import { System } from '../../src/actor/system';
+import { Context } from '../../../src/actor/context';
+import { System } from '../../../src/actor/system';
 import {
     AbstractResident,
     Mutable,
     Immutable,
-    CaseClass
-} from '../../src/actor/resident';
-import { ActorSystem, system } from '../../src';
+} from '../../../src/actor/resident';
+import {   CaseClass} from '../../../src/actor/resident/case';
+import { ActorSystem, system } from '../../../src';
 
 class Killer extends AbstractResident<Context, ActorSystem> {
 
-  constructor(
-    public s: System<Context>, 
-    public done: (k: Killer) => void) { super(s); }
+    constructor(
+        public s: System<Context>,
+        public done: (k: Killer) => void) { super(s); }
 
     init(c: Context): Context {
 
