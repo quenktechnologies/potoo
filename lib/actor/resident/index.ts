@@ -15,64 +15,13 @@ import { Template } from '../template';
 import { Context } from '../context';
 import { Case } from './case';
 import { Actor } from '../';
-
-/**
- * Ref function type.
- */
-export type Ref = (addr: Address) => Reference;
-
-/**
- * Self function type.
- */
-export type Self = () => Address;
-
-/**
- * Reference to an actor address.
- */
-export type Reference = (m: Message) => void;
+import { Api } from './api';
 
 /**
  * Resident is an actor that exists in the current runtime.
  */
-export interface Resident<C extends Context, S extends System<C>> extends Actor<C> {
-
-    /**
-     * ref provides a handle for sending mesages to an address.
-     */
-    ref: Ref;
-
-    /**
-     * self retrieves the path of this actor from the system.
-     */
-    self: Self;
-
-    /**
-     * spawn a new child actor.
-     *
-    spawn(t: Template<C, S>): Address;
-
-    /**
-     * tell a message to an actor address.
-     */
-    tell<M>(ref: string, m: M): Resident<C, S>;
-
-    /**
-     * select the next message to be processed, applying each Case 
-     * until one matches.
-     */
-    select<T>(c: Case<T>[]): Resident<C, S>;
-
-    /**
-     * kill a child actor.
-     */
-    kill(addr: Address): Resident<C, S>;
-
-    /**
-     * exit instructs the system to kill off this actor.
-     */
-    exit(): void;
-
-}
+export interface Resident<C extends Context, S extends System<C>>
+    extends Api<C, S>, Actor<C> { }
 
 /**
  * AbstractResident implementation.
