@@ -14,7 +14,15 @@ export type Handler<T> = (t: T) => void;
  */
 export abstract class Case<T> {
 
-    constructor(public pattern: Pattern<T>) { }
+    constructor(pattern: NumberConstructor, f: (value: number) => void)
+    constructor(pattern: BooleanConstructor, f: (value: boolean) => void)
+    constructor(pattern: StringConstructor, f: (value: string) => void)
+    constructor(pattern: object, f: (value: { [P in keyof T]: Message }) => void)
+    constructor(pattern: string, f: (value: string) => void)
+    constructor(pattern: number, f: (value: number) => void)
+    constructor(pattern: boolean, f: (value: boolean) => void)
+    constructor(pattern: Constructor<T>, f: (value: T) => void)
+  constructor(public pattern: Pattern<T>, public handler: Handler<T>) {}
 
     /**
      * match a message against a pattern.
@@ -25,7 +33,7 @@ export abstract class Case<T> {
 
         if (test(m, this.pattern)) {
 
-            this.apply(m);
+            this.handler(m);
             return true;
 
         } else {
@@ -36,39 +44,29 @@ export abstract class Case<T> {
 
     }
 
-    /**
-     * apply consumes a successfully matched message.
-     *
-     * Note that the parameter to this method breaks type safety.
-     * Care must be taken to avoid unexpected runtime crashes.
-     */
-    abstract apply(m: Message): void;
-
 }
 
 /**
- * CaseClass allows for the selective matching of patterns
+ * ClassCase allows for the selective matching of patterns
  * for processing messages
  */
-export class CaseClass<T> extends Case<T> {
+export class ClassCase<T> extends Case<T> {}
 
-    constructor(pattern: NumberConstructor, f: (value: number) => void)
-    constructor(pattern: BooleanConstructor, f: (value: boolean) => void)
-    constructor(pattern: StringConstructor, f: (value: string) => void)
-    constructor(pattern: object, f: (value: { [P in keyof T]: Message }) => void)
-    constructor(pattern: string, f: (value: string) => void)
-    constructor(pattern: number, f: (value: number) => void)
-    constructor(pattern: boolean, f: (value: boolean) => void)
-    constructor(pattern: Constructor<T>, f: (value: T) => void)
-    constructor(public pattern: Pattern<T>, public handler: Handler<T>) {
+/**
+ * DefaultCase matches any message value.
+ */
+export class DefaultCase<T> extends Case<T> {
 
-        super(pattern);
+    constructor(public handler: Handler<T>) {
+
+        super(Object, handler);
 
     }
 
-    apply(m: any): any {
+    match(m: Message): boolean {
 
-        return this.handler(m);
+        this.handler(m);
+        return true;
 
     }
 

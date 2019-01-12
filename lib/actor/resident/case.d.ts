@@ -11,27 +11,6 @@ export declare type Handler<T> = (t: T) => void;
  */
 export declare abstract class Case<T> {
     pattern: Pattern<T>;
-    constructor(pattern: Pattern<T>);
-    /**
-     * match a message against a pattern.
-     *
-     * A successful match results in a side effect.
-     */
-    match(m: Message): boolean;
-    /**
-     * apply consumes a successfully matched message.
-     *
-     * Note that the parameter to this method breaks type safety.
-     * Care must be taken to avoid unexpected runtime crashes.
-     */
-    abstract apply(m: Message): void;
-}
-/**
- * CaseClass allows for the selective matching of patterns
- * for processing messages
- */
-export declare class CaseClass<T> extends Case<T> {
-    pattern: Pattern<T>;
     handler: Handler<T>;
     constructor(pattern: NumberConstructor, f: (value: number) => void);
     constructor(pattern: BooleanConstructor, f: (value: boolean) => void);
@@ -43,5 +22,24 @@ export declare class CaseClass<T> extends Case<T> {
     constructor(pattern: number, f: (value: number) => void);
     constructor(pattern: boolean, f: (value: boolean) => void);
     constructor(pattern: Constructor<T>, f: (value: T) => void);
-    apply(m: any): any;
+    /**
+     * match a message against a pattern.
+     *
+     * A successful match results in a side effect.
+     */
+    match(m: Message): boolean;
+}
+/**
+ * ClassCase allows for the selective matching of patterns
+ * for processing messages
+ */
+export declare class ClassCase<T> extends Case<T> {
+}
+/**
+ * DefaultCase matches any message value.
+ */
+export declare class DefaultCase<T> extends Case<T> {
+    handler: Handler<T>;
+    constructor(handler: Handler<T>);
+    match(m: Message): boolean;
 }

@@ -1,6 +1,6 @@
 import { match } from '@quenk/noni/lib/control/match';
 import { Any } from '@quenk/noni/lib/data/type';
-import { system } from '../../';
+import { system } from '../../actor/system/default';
 import { Raise } from '../system/op/raise';
 import { Tell } from '../system/op/tell';
 import { Discard } from '../system/op/discard';

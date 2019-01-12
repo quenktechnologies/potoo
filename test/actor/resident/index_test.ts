@@ -6,8 +6,8 @@ import {
     Mutable,
     Immutable,
 } from '../../../src/actor/resident';
-import {   CaseClass} from '../../../src/actor/resident/case';
-import { ActorSystem, system } from '../../../src';
+import {   ClassCase} from '../../../src/actor/resident/case';
+import { ActorSystem, system } from '../../../src/actor/system/default';
 
 class Killer extends AbstractResident<Context, ActorSystem> {
 
@@ -23,7 +23,7 @@ class Killer extends AbstractResident<Context, ActorSystem> {
 
     }
 
-    select<T>(_: CaseClass<T>[]): Killer {
+    select<T>(_: ClassCase<T>[]): Killer {
 
         return this;
 
@@ -42,7 +42,7 @@ class Killable extends Mutable<Context, ActorSystem> {
 
     receive = [];
 
-    select<T>(_: CaseClass<T>[]): Killable {
+    select<T>(_: ClassCase<T>[]): Killable {
 
         return this;
 
@@ -76,7 +76,7 @@ class Exiter extends AbstractResident<Context, ActorSystem> {
 
     }
 
-    select<T>(_: CaseClass<T>[]): Killer {
+    select<T>(_: ClassCase<T>[]): Killer {
 
         return this;
 
@@ -111,12 +111,12 @@ class ShouldWork extends Mutable<Context, ActorSystem> {
 
         let bucket: any = [];
 
-        let cases: CaseClass<string>[] = [
+        let cases: ClassCase<string>[] = [
 
-            new CaseClass('one', () => (bucket.push(1), this.select(cases))),
-            new CaseClass('two', () => (bucket.push(2), this.select(cases))),
-            new CaseClass('three', () => (bucket.push(3), this.select(cases))),
-            new CaseClass('done', () => { must(bucket.join(',')).equate('1,2,3'); this.done(); })
+            new ClassCase('one', () => (bucket.push(1), this.select(cases))),
+            new ClassCase('two', () => (bucket.push(2), this.select(cases))),
+            new ClassCase('three', () => (bucket.push(3), this.select(cases))),
+            new ClassCase('done', () => { must(bucket.join(',')).equate('1,2,3'); this.done(); })
 
         ];
 
@@ -139,14 +139,14 @@ class MutableSelfTalk extends Mutable<Context, ActorSystem> {
 
     blocks = [
 
-        new CaseClass('ping', () => {
+        new ClassCase('ping', () => {
 
             this.tell(this.self(), 'pong');
             this.select(this.blocks);
 
         }),
 
-        new CaseClass('pong', () => {
+        new ClassCase('pong', () => {
 
             if (this.count === 3) {
 
@@ -163,7 +163,7 @@ class MutableSelfTalk extends Mutable<Context, ActorSystem> {
 
         }),
 
-        new CaseClass('end', () => { must(this.count).equate(3); this.done(); })
+        new ClassCase('end', () => { must(this.count).equate(3); this.done(); })
 
     ]
 
@@ -184,9 +184,9 @@ class ImmutableSelfTalk extends Immutable<string, Context, ActorSystem> {
 
     receive = [
 
-        new CaseClass('ping', () => this.tell(this.self(), 'pong')),
+        new ClassCase('ping', () => this.tell(this.self(), 'pong')),
 
-        new CaseClass('pong', () => {
+        new ClassCase('pong', () => {
 
             if (this.count === 3) {
 
@@ -201,7 +201,7 @@ class ImmutableSelfTalk extends Immutable<string, Context, ActorSystem> {
 
         }),
 
-        new CaseClass('end', () => { must(this.count).equal(3); this.done(); })
+        new ClassCase('end', () => { must(this.count).equal(3); this.done(); })
 
     ]
 
