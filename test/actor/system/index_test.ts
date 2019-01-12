@@ -1,5 +1,5 @@
 import {must} from '@quenk/must';
-import { ClassCase } from '../../../src/actor/resident/case';
+import { Case } from '../../../src/actor/resident/case';
 import { Immutable, Mutable  } from '../../../src/actor/resident';
 import {Context} from '../../../src/actor/context';
 import {ActorSystem, system } from '../../../src/actor/system/default';
@@ -24,7 +24,7 @@ class A3 extends Immutable<String,Context,ActorSystem> {
 
     receive = [
 
-        new ClassCase(String, (m: string) => { must(m).equal('You said : \'Hello!\'') })
+        new Case(String, (m: string) => { must(m).equal('You said : \'Hello!\'') })
 
     ]
 
@@ -41,7 +41,7 @@ class A3A extends Immutable<any,Context,ActorSystem> {
 
     receive = [
 
-        new ClassCase(String, (m: string) => { this.tell('a3', `You said : '${m}'`) })
+        new Case(String, (m: string) => { this.tell('a3', `You said : '${m}'`) })
 
     ]
 

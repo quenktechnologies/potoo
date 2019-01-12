@@ -12,7 +12,7 @@ export type Handler<T> = (t: T) => void;
  * Case is provided for situations where it is better to extend 
  * the Case class instead of creating new instances.
  */
-export abstract class Case<T> {
+export class Case<T> {
 
     constructor(pattern: NumberConstructor, f: (value: number) => void)
     constructor(pattern: BooleanConstructor, f: (value: boolean) => void)
@@ -47,15 +47,9 @@ export abstract class Case<T> {
 }
 
 /**
- * ClassCase allows for the selective matching of patterns
- * for processing messages
+ * Default matches any message value.
  */
-export class ClassCase<T> extends Case<T> {}
-
-/**
- * DefaultCase matches any message value.
- */
-export class DefaultCase<T> extends Case<T> {
+export class Default<T> extends Case<T> {
 
     constructor(public handler: Handler<T>) {
 

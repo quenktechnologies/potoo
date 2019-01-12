@@ -1,5 +1,5 @@
 import { must } from '@quenk/must';
-import { Case, ClassCase, DefaultCase } from '../../../src/actor/resident/case';
+import {  Case, Default } from '../../../src/actor/resident/case';
 
 class Flag { constructor(public value: boolean) { } }
 
@@ -21,13 +21,13 @@ describe('case', () => {
 
     });
 
-    describe('ClassCase', () => {
+    describe('Case', () => {
 
         it('must match', () => {
 
             let x = 0;
             let f = (n: number) => { x = n }
-            let c = new ClassCase(12, f);
+            let c = new Case(12, f);
 
             must(c.match(12)).equal(true);
             must(x).equal(12);
@@ -36,13 +36,13 @@ describe('case', () => {
 
     });
 
-    describe('DefaultCase', () => {
+    describe('Default', () => {
 
         it('must match', () => {
 
             let x = 0;
             let f = (_: any) => { x++ }
-            let c = new DefaultCase(f);
+            let c = new Default(f);
 
             must(c.match(1)).equal(true);
             must(c.match('12')).equal(true);
