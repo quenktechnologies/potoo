@@ -1,34 +1,17 @@
 import { Address } from '../address';
-import { Message } from '../message';
 import { System } from '../system';
 import { Template } from '../template';
 import { Context } from '../context';
 import { Case } from './case';
-/**
- * Ref function type.
- */
-export declare type Ref = (addr: Address) => Reference;
-/**
- * Self function type.
- */
-export declare type Self = () => Address;
-/**
- * Reference to an actor address.
- */
-export declare type Reference = (m: Message) => void;
 /**
  * Api describes the api for implementing an actor independant
  * of the system level methods.
  */
 export interface Api<C extends Context, S extends System<C>> {
     /**
-     * ref provides a handle for sending mesages to an address.
-     */
-    ref: Ref;
-    /**
      * self retrieves the path of this actor from the system.
      */
-    self: Self;
+    self(): string;
     /**
      * spawn a new child actor.
      */

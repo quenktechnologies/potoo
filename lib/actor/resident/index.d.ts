@@ -1,4 +1,5 @@
 import { Address } from '../address';
+import { Message } from '../message';
 import { Envelope } from '../mailbox';
 import { System } from '../system';
 import { Template } from '../template';
@@ -6,6 +7,10 @@ import { Context } from '../context';
 import { Case } from './case';
 import { Actor } from '../';
 import { Api } from './api';
+/**
+ * Reference to an actor address.
+ */
+export declare type Reference = (m: Message) => void;
 /**
  * Resident is an actor that exists in the current runtime.
  */
@@ -17,9 +22,8 @@ export interface Resident<C extends Context, S extends System<C>> extends Api<C,
 export declare abstract class AbstractResident<C extends Context, S extends System<C>> implements Resident<C, S> {
     system: System<C>;
     constructor(system: System<C>);
-    ref: (addr: string) => (m: any) => AbstractResident<C, S>;
-    self: () => string;
     abstract init(c: C): C;
+    self(): string;
     accept({ to, from, message }: Envelope): this;
     spawn(t: Template<C, S>): Address;
     tell<M>(ref: Address, m: M): AbstractResident<C, S>;
@@ -59,3 +63,7 @@ export declare abstract class Mutable<C extends Context, S extends System<C>> ex
      */
     select<M>(cases: Case<M>[]): Mutable<C, S>;
 }
+/**
+ * ref produces a function for sending messages to an actor address.
+ */
+export declare const ref: <C extends Context, S extends System<C>>(res: Resident<C, S>, addr: string) => Reference;

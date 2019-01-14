@@ -18,6 +18,11 @@ import { Actor } from '../';
 import { Api } from './api';
 
 /**
+ * Reference to an actor address.
+ */
+export type Reference = (m: Message) => void;
+
+/**
  * Resident is an actor that exists in the current runtime.
  */
 export interface Resident<C extends Context, S extends System<C>>
@@ -31,11 +36,13 @@ export abstract class AbstractResident<C extends Context, S extends System<C>>
 
     constructor(public system: System<C>) { }
 
-    ref = (addr: Address) => (m: Message) => this.tell(addr, m);
-
-    self = () => this.system.identify(this);
-
     abstract init(c: C): C;
+
+    self() {
+
+        return this.system.identify(this);
+
+    }
 
     accept({ to, from, message }: Envelope) {
 
@@ -163,3 +170,12 @@ const ibehaviour = <T, C extends Context, S extends System<C>>
         fromBoolean(i.receive.some(c => c.match(m)))
             .lmap(() => m)
             .map(noop);
+
+/**
+ * ref produces a function for sending messages to an actor address.
+ */
+export const ref = <C extends Context, S extends System<C>>
+  (res: Resident<C, S>, addr: Address): Reference =>
+  (m: Message) =>
+  res.tell(addr, m);
+
