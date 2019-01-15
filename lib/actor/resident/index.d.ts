@@ -51,6 +51,7 @@ export declare abstract class Immutable<T, C extends Context, S extends System<C
      * select noop.
      */
     select<M>(_: Case<M>[]): Immutable<T, C, S>;
+    run(): void;
 }
 /**
  * Mutable actors can change their behaviour after message processing.

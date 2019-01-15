@@ -128,6 +128,8 @@ export abstract class Immutable<T, C extends Context, S extends System<C>>
 
     }
 
+      run() {}
+
 }
 
 /**
@@ -175,7 +177,7 @@ const ibehaviour = <T, C extends Context, S extends System<C>>
  * ref produces a function for sending messages to an actor address.
  */
 export const ref = <C extends Context, S extends System<C>>
-  (res: Resident<C, S>, addr: Address): Reference =>
-  (m: Message) =>
-  res.tell(addr, m);
+    (res: Resident<C, S>, addr: Address): Reference =>
+    (m: Message) =>
+        res.tell(addr, m);
 
