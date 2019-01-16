@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@quenk/potoo | @quenk/potoo</title>
+	<title>Spawn | @quenk/potoo</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -879,7 +879,7 @@ img { max-width: 100%; }
 		<div class="container">
 			<div class="table-wrap">
 				<div class="table-cell">
-					<strong><a href="index.html">@quenk/potoo</a></strong>
+					<strong><a href="../index.html">@quenk/potoo</a></strong>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -907,141 +907,204 @@ img { max-width: 100%; }
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
+		<li class=" tsd-kind-class tsd-parent-kind-external-module">
+			<a href="_system_op_spawn_.duplicateaddresserror.html" class="tsd-kind-icon">Duplicate<wbr>Address<wbr>Error</a>
+		</li>
+		<li class=" tsd-kind-class tsd-parent-kind-external-module">
+			<a href="_system_op_spawn_.invalididerror.html" class="tsd-kind-icon">Invalid<wbr>IdError</a>
+		</li>
+		<li class="current tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_op_spawn_.spawn.html" class="tsd-kind-icon">Spawn</a>
+			<ul>
+				<li class=" tsd-kind-constructor tsd-parent-kind-class">
+					<a href="_system_op_spawn_.spawn.html#constructor" class="tsd-kind-icon">constructor</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_op_spawn_.spawn.html#code" class="tsd-kind-icon">code</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_op_spawn_.spawn.html#level" class="tsd-kind-icon">level</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-class">
+					<a href="_system_op_spawn_.spawn.html#parent" class="tsd-kind-icon">parent</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-class">
+					<a href="_system_op_spawn_.spawn.html#template" class="tsd-kind-icon">template</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_op_spawn_.spawn.html#exec" class="tsd-kind-icon">exec</a>
+				</li>
+			</ul>
+		</li>
+		<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+			<a href="../modules/_system_op_spawn_.html#run_start_tag" class="tsd-kind-icon">RUN_<wbr>START_<wbr>TAG</a>
+		</li>
 	</ul>
 </nav>
 <div class="container container-main">
 	<div class="content-wrap">
-		<div class="tsd-panel tsd-typography">
-			<h1 id="potoo">Potoo</h1>
-			<p>Actor library for client and server side projects.</p>
-			<h1 id="installation">Installation</h1>
-			<pre><code class="lang-sh">npm install --save @quenk/potoo
-
-</code></pre>
-			<h1 id="usage">Usage</h1>
-			<p>According to &quot;Actor Model of Computation: Scalable Robust Information Systems&quot;:
-				&quot;The Actor Model is a mathematical theory that treats “Actors” as the universal
-			primitives of digital computation.&quot; </p>
-			<p>As far as this library is concerned, actors are a clean way to
-			communicate between modules of a program through message passing.</p>
-			<p>Actors that communicate which each other are part of a system. To begin
-				using this library you have to create one. A single function <code>system</code> is
-			exported for this purpose:</p>
-			<h2 id="example">Example</h2>
-			<pre><code class="lang-typescript">
-<span class="hljs-keyword">import</span> {Immutable, Mutable, Case, system} <span class="hljs-keyword">from</span> <span class="hljs-string">'@quenk/potoo'</span>;
-
-<span class="hljs-keyword">class</span> Server <span class="hljs-keyword">extends</span> Immutable&lt;<span class="hljs-built_in">string</span>&gt; {
-
-  receive = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'connect'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.tell(<span class="hljs-string">'client'</span>, <span class="hljs-string">'connected'</span>)),
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'time'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.tell(<span class="hljs-string">'client'</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>())),
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'close'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.tell(<span class="hljs-string">'client'</span>, <span class="hljs-string">'bye!'</span>))
-
-  ]
-
-}
-
-<span class="hljs-keyword">class</span> Client <span class="hljs-keyword">extends</span> Mutable {
-
-  receive = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'start'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.connect())
-
-  ]
-
-  connecting = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'connected'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> 
-      <span class="hljs-keyword">this</span>
-        .tell(<span class="hljs-string">'server'</span>, <span class="hljs-string">'time'</span>)
-        .select(<span class="hljs-keyword">this</span>.connected))
-
-  ]
-
-  connected = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-built_in">Date</span>, <span class="hljs-function">(<span class="hljs-params">d:date</span>)=&gt;</span> {
-
-      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Today is <span class="hljs-subst">${d}</span>.`</span>);
-
-      <span class="hljs-keyword">this</span>
-        .tell(<span class="hljs-string">'server'</span>, <span class="hljs-string">'close'</span>)
-        .select(connected);
-
-    }),
-
-  ]
-
-  connect() {
-
-    <span class="hljs-keyword">this</span>
-    .tell(<span class="hljs-string">'server'</span>, <span class="hljs-string">'connect'</span>)
-    .select(<span class="hljs-keyword">this</span>.connecting);
-
-  }
-
-}
-
-<span class="hljs-comment">//start the system and spawn the actors</span>
-system({log:{level:<span class="hljs-number">8</span>}})
-.spawn({id: <span class="hljs-string">'server'</span>, <span class="hljs-function"><span class="hljs-params">s</span> =&gt;</span> <span class="hljs-keyword">new</span> Server(s)})
-.spawn({id: <span class="hljs-string">'client'</span>, <span class="hljs-function"><span class="hljs-params">s</span> =&gt;</span> <span class="hljs-keyword">new</span> Client(s)})
-
-</code></pre>
-			<h1 id="license">License</h1>
-			<p>Apache-2.0 (C) Quenk Technologies Limited</p>
-		</div>
-		<div style="position:relative;"><a name="typedoc-main-index" class="tsd-anchor"></a></div>
+		<section class="tsd-panel tsd-comment">
+			<div class="tsd-comment tsd-typography">
+				<div class="lead">
+					<p>Spawn instruction.</p>
+				</div>
+				<p>Enters a child actor in the system.</p>
+				<p>We first ensure the parent is still in the system then validate
+					the child id. After that we check for dupicated ids then finally
+				setup the new child.</p>
+			</div>
+		</section>
+		<section class="tsd-panel tsd-type-parameters">
+			<h3>Type parameters</h3>
+			<ul class="tsd-type-parameters">
+				<li>
+					<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+				</li>
+				<li>
+					<h4>S<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+				</li>
+			</ul>
+		</section>
+		<section class="tsd-panel tsd-hierarchy">
+			<h3>Hierarchy</h3>
+			<ul class="tsd-hierarchy">
+				<li>
+					<a href="_system_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span>
+					<ul class="tsd-hierarchy">
+						<li>
+							<span class="target">Spawn</span>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</section>
 		<section class="tsd-panel-group tsd-index-group">
 			<h2>Index</h2>
 			<section class="tsd-panel tsd-index-panel">
 				<div class="tsd-index-content">
 					<section class="tsd-index-section ">
-						<h3>External modules</h3>
+						<h3>Constructors</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-external-module"><a href="modules/_address_.html" class="tsd-kind-icon">"address"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_context_.html" class="tsd-kind-icon">"context"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_index_.html" class="tsd-kind-icon">"index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_mailbox_.html" class="tsd-kind-icon">"mailbox"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_message_.html" class="tsd-kind-icon">"message"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_process_index_.html" class="tsd-kind-icon">"process/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_process_script_.html" class="tsd-kind-icon">"process/script"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_resident_api_.html" class="tsd-kind-icon">"resident/api"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_resident_case_.html" class="tsd-kind-icon">"resident/case"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_resident_index_.html" class="tsd-kind-icon">"resident/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_abstract_index_.html" class="tsd-kind-icon">"system/abstract/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_abstract_test_.html" class="tsd-kind-icon">"system/abstract/test"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_configuration_.html" class="tsd-kind-icon">"system/configuration"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_default_actor_resident_.html" class="tsd-kind-icon">"system/default/actor/resident"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_default_index_.html" class="tsd-kind-icon">"system/default/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_detached_.html" class="tsd-kind-icon">"system/detached"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_error_.html" class="tsd-kind-icon">"system/error"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_hooks_.html" class="tsd-kind-icon">"system/hooks"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_index_.html" class="tsd-kind-icon">"system/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_log_.html" class="tsd-kind-icon">"system/log"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_check_.html" class="tsd-kind-icon">"system/op/check"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_discard_.html" class="tsd-kind-icon">"system/op/discard"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_forward_.html" class="tsd-kind-icon">"system/op/forward"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_index_.html" class="tsd-kind-icon">"system/op/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_kill_.html" class="tsd-kind-icon">"system/op/kill"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_raise_.html" class="tsd-kind-icon">"system/op/raise"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_read_.html" class="tsd-kind-icon">"system/op/read"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_receive_.html" class="tsd-kind-icon">"system/op/receive"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_restart_.html" class="tsd-kind-icon">"system/op/restart"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_run_.html" class="tsd-kind-icon">"system/op/run"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_spawn_.html" class="tsd-kind-icon">"system/op/spawn"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_stop_.html" class="tsd-kind-icon">"system/op/stop"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_tell_.html" class="tsd-kind-icon">"system/op/tell"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_transfer_.html" class="tsd-kind-icon">"system/op/transfer"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_state_.html" class="tsd-kind-icon">"system/state"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_template_.html" class="tsd-kind-icon">"template"</a></li>
+							<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_system_op_spawn_.spawn.html#constructor" class="tsd-kind-icon">constructor</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
+						<h3>Properties</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite"><a href="_system_op_spawn_.spawn.html#code" class="tsd-kind-icon">code</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite"><a href="_system_op_spawn_.spawn.html#level" class="tsd-kind-icon">level</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class"><a href="_system_op_spawn_.spawn.html#parent" class="tsd-kind-icon">parent</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class"><a href="_system_op_spawn_.spawn.html#template" class="tsd-kind-icon">template</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
+						<h3>Methods</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_system_op_spawn_.spawn.html#exec" class="tsd-kind-icon">exec</a></li>
 						</ul>
 					</section>
 				</div>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Constructors</h2>
+			<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+				<a name="constructor" class="tsd-anchor"></a>
+				<h3>constructor</h3>
+				<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+					<li class="tsd-signature tsd-kind-icon">new <wbr>Spawn<span class="tsd-signature-symbol">(</span>parent<span class="tsd-signature-symbol">: </span><a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a>, template<span class="tsd-signature-symbol">: </span><a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_op_spawn_.spawn.html" class="tsd-signature-type">Spawn</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/op/spawn.ts#L51">system/op/spawn.ts:51</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>parent: <a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a></h5>
+							</li>
+							<li>
+								<h5>template: <a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="_system_op_spawn_.spawn.html" class="tsd-signature-type">Spawn</a></h4>
+					</li>
+				</ul>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Properties</h2>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
+				<a name="code" class="tsd-anchor"></a>
+				<h3>code</h3>
+				<div class="tsd-signature tsd-kind-icon">code<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;OP_SPAWN</span></div>
+				<aside class="tsd-sources">
+					<p>Overrides <a href="_system_op_index_.op.html">Op</a>.<a href="_system_op_index_.op.html#code">code</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/op/spawn.ts#L57">system/op/spawn.ts:57</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
+				<a name="level" class="tsd-anchor"></a>
+				<h3>level</h3>
+				<div class="tsd-signature tsd-kind-icon">level<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;log.INFO</span></div>
+				<aside class="tsd-sources">
+					<p>Overrides <a href="_system_op_index_.op.html">Op</a>.<a href="_system_op_index_.op.html#level">level</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/op/spawn.ts#L59">system/op/spawn.ts:59</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<a name="parent" class="tsd-anchor"></a>
+				<h3>parent</h3>
+				<div class="tsd-signature tsd-kind-icon">parent<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/op/spawn.ts#L54">system/op/spawn.ts:54</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<a name="template" class="tsd-anchor"></a>
+				<h3>template</h3>
+				<div class="tsd-signature tsd-kind-icon">template<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/op/spawn.ts#L55">system/op/spawn.ts:55</a></li>
+					</ul>
+				</aside>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Methods</h2>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+				<a name="exec" class="tsd-anchor"></a>
+				<h3>exec</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Overrides <a href="_system_op_index_.op.html">Op</a>.<a href="_system_op_index_.op.html#exec">exec</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/op/spawn.ts#L61">system/op/spawn.ts:61</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_op_index_.executor.html" class="tsd-signature-type">Executor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
 			</section>
 		</section>
 		<footer class="with-border-bottom">

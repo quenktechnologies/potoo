@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@quenk/potoo | @quenk/potoo</title>
+	<title>&quot;system/state&quot; | @quenk/potoo</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -879,7 +879,7 @@ img { max-width: 100%; }
 		<div class="container">
 			<div class="table-wrap">
 				<div class="table-cell">
-					<strong><a href="index.html">@quenk/potoo</a></strong>
+					<strong><a href="../index.html">@quenk/potoo</a></strong>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -907,141 +907,626 @@ img { max-width: 100%; }
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
+		<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+			<a href="../interfaces/_system_state_.routes.html" class="tsd-kind-icon">Routes</a>
+		</li>
+		<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../interfaces/_system_state_.state.html" class="tsd-kind-icon">State</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#exists" class="tsd-kind-icon">exists</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#get" class="tsd-kind-icon">get</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#getaddress" class="tsd-kind-icon">get<wbr>Address</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#getbehaviour" class="tsd-kind-icon">get<wbr>Behaviour</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#getchildren" class="tsd-kind-icon">get<wbr>Children</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#getinstance" class="tsd-kind-icon">get<wbr>Instance</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#getmessage" class="tsd-kind-icon">get<wbr>Message</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#getparent" class="tsd-kind-icon">get<wbr>Parent</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#getrouter" class="tsd-kind-icon">get<wbr>Router</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#gettemplate" class="tsd-kind-icon">get<wbr>Template</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#put" class="tsd-kind-icon">put</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#putroute" class="tsd-kind-icon">put<wbr>Route</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#remove" class="tsd-kind-icon">remove</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_state_.html#runinstance" class="tsd-kind-icon">run<wbr>Instance</a>
+		</li>
 	</ul>
 </nav>
 <div class="container container-main">
 	<div class="content-wrap">
-		<div class="tsd-panel tsd-typography">
-			<h1 id="potoo">Potoo</h1>
-			<p>Actor library for client and server side projects.</p>
-			<h1 id="installation">Installation</h1>
-			<pre><code class="lang-sh">npm install --save @quenk/potoo
-
-</code></pre>
-			<h1 id="usage">Usage</h1>
-			<p>According to &quot;Actor Model of Computation: Scalable Robust Information Systems&quot;:
-				&quot;The Actor Model is a mathematical theory that treats “Actors” as the universal
-			primitives of digital computation.&quot; </p>
-			<p>As far as this library is concerned, actors are a clean way to
-			communicate between modules of a program through message passing.</p>
-			<p>Actors that communicate which each other are part of a system. To begin
-				using this library you have to create one. A single function <code>system</code> is
-			exported for this purpose:</p>
-			<h2 id="example">Example</h2>
-			<pre><code class="lang-typescript">
-<span class="hljs-keyword">import</span> {Immutable, Mutable, Case, system} <span class="hljs-keyword">from</span> <span class="hljs-string">'@quenk/potoo'</span>;
-
-<span class="hljs-keyword">class</span> Server <span class="hljs-keyword">extends</span> Immutable&lt;<span class="hljs-built_in">string</span>&gt; {
-
-  receive = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'connect'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.tell(<span class="hljs-string">'client'</span>, <span class="hljs-string">'connected'</span>)),
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'time'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.tell(<span class="hljs-string">'client'</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>())),
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'close'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.tell(<span class="hljs-string">'client'</span>, <span class="hljs-string">'bye!'</span>))
-
-  ]
-
-}
-
-<span class="hljs-keyword">class</span> Client <span class="hljs-keyword">extends</span> Mutable {
-
-  receive = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'start'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> <span class="hljs-keyword">this</span>.connect())
-
-  ]
-
-  connecting = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-string">'connected'</span>, <span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span> 
-      <span class="hljs-keyword">this</span>
-        .tell(<span class="hljs-string">'server'</span>, <span class="hljs-string">'time'</span>)
-        .select(<span class="hljs-keyword">this</span>.connected))
-
-  ]
-
-  connected = [
-
-    <span class="hljs-keyword">new</span> Case(<span class="hljs-built_in">Date</span>, <span class="hljs-function">(<span class="hljs-params">d:date</span>)=&gt;</span> {
-
-      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Today is <span class="hljs-subst">${d}</span>.`</span>);
-
-      <span class="hljs-keyword">this</span>
-        .tell(<span class="hljs-string">'server'</span>, <span class="hljs-string">'close'</span>)
-        .select(connected);
-
-    }),
-
-  ]
-
-  connect() {
-
-    <span class="hljs-keyword">this</span>
-    .tell(<span class="hljs-string">'server'</span>, <span class="hljs-string">'connect'</span>)
-    .select(<span class="hljs-keyword">this</span>.connecting);
-
-  }
-
-}
-
-<span class="hljs-comment">//start the system and spawn the actors</span>
-system({log:{level:<span class="hljs-number">8</span>}})
-.spawn({id: <span class="hljs-string">'server'</span>, <span class="hljs-function"><span class="hljs-params">s</span> =&gt;</span> <span class="hljs-keyword">new</span> Server(s)})
-.spawn({id: <span class="hljs-string">'client'</span>, <span class="hljs-function"><span class="hljs-params">s</span> =&gt;</span> <span class="hljs-keyword">new</span> Client(s)})
-
-</code></pre>
-			<h1 id="license">License</h1>
-			<p>Apache-2.0 (C) Quenk Technologies Limited</p>
-		</div>
-		<div style="position:relative;"><a name="typedoc-main-index" class="tsd-anchor"></a></div>
 		<section class="tsd-panel-group tsd-index-group">
 			<h2>Index</h2>
 			<section class="tsd-panel tsd-index-panel">
 				<div class="tsd-index-content">
 					<section class="tsd-index-section ">
-						<h3>External modules</h3>
+						<h3>Interfaces</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-external-module"><a href="modules/_address_.html" class="tsd-kind-icon">"address"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_context_.html" class="tsd-kind-icon">"context"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_index_.html" class="tsd-kind-icon">"index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_mailbox_.html" class="tsd-kind-icon">"mailbox"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_message_.html" class="tsd-kind-icon">"message"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_process_index_.html" class="tsd-kind-icon">"process/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_process_script_.html" class="tsd-kind-icon">"process/script"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_resident_api_.html" class="tsd-kind-icon">"resident/api"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_resident_case_.html" class="tsd-kind-icon">"resident/case"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_resident_index_.html" class="tsd-kind-icon">"resident/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_abstract_index_.html" class="tsd-kind-icon">"system/abstract/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_abstract_test_.html" class="tsd-kind-icon">"system/abstract/test"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_configuration_.html" class="tsd-kind-icon">"system/configuration"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_default_actor_resident_.html" class="tsd-kind-icon">"system/default/actor/resident"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_default_index_.html" class="tsd-kind-icon">"system/default/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_detached_.html" class="tsd-kind-icon">"system/detached"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_error_.html" class="tsd-kind-icon">"system/error"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_hooks_.html" class="tsd-kind-icon">"system/hooks"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_index_.html" class="tsd-kind-icon">"system/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_log_.html" class="tsd-kind-icon">"system/log"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_check_.html" class="tsd-kind-icon">"system/op/check"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_discard_.html" class="tsd-kind-icon">"system/op/discard"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_forward_.html" class="tsd-kind-icon">"system/op/forward"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_index_.html" class="tsd-kind-icon">"system/op/index"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_kill_.html" class="tsd-kind-icon">"system/op/kill"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_raise_.html" class="tsd-kind-icon">"system/op/raise"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_read_.html" class="tsd-kind-icon">"system/op/read"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_receive_.html" class="tsd-kind-icon">"system/op/receive"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_restart_.html" class="tsd-kind-icon">"system/op/restart"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_run_.html" class="tsd-kind-icon">"system/op/run"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_spawn_.html" class="tsd-kind-icon">"system/op/spawn"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_stop_.html" class="tsd-kind-icon">"system/op/stop"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_tell_.html" class="tsd-kind-icon">"system/op/tell"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_op_transfer_.html" class="tsd-kind-icon">"system/op/transfer"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_system_state_.html" class="tsd-kind-icon">"system/state"</a></li>
-							<li class="tsd-kind-external-module"><a href="modules/_template_.html" class="tsd-kind-icon">"template"</a></li>
+							<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_system_state_.routes.html" class="tsd-kind-icon">Routes</a></li>
+							<li class="tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter"><a href="../interfaces/_system_state_.state.html" class="tsd-kind-icon">State</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
+						<h3>Functions</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#exists" class="tsd-kind-icon">exists</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#get" class="tsd-kind-icon">get</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#getaddress" class="tsd-kind-icon">get<wbr>Address</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#getbehaviour" class="tsd-kind-icon">get<wbr>Behaviour</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#getchildren" class="tsd-kind-icon">get<wbr>Children</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#getinstance" class="tsd-kind-icon">get<wbr>Instance</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#getmessage" class="tsd-kind-icon">get<wbr>Message</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#getparent" class="tsd-kind-icon">get<wbr>Parent</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#getrouter" class="tsd-kind-icon">get<wbr>Router</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#gettemplate" class="tsd-kind-icon">get<wbr>Template</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#put" class="tsd-kind-icon">put</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#putroute" class="tsd-kind-icon">put<wbr>Route</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#remove" class="tsd-kind-icon">remove</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_system_state_.html#runinstance" class="tsd-kind-icon">run<wbr>Instance</a></li>
 						</ul>
 					</section>
 				</div>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Functions</h2>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="exists" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> exists</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">exists&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L47">system/state.ts:47</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>exists tests whether an address exists in the State.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="get" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">get&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L53">system/state.ts:53</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>get a Context using an Address.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="getaddress" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Address</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Address&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, actor<span class="tsd-signature-symbol">: </span><a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L59">system/state.ts:59</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>getAddress attempts to retrieve the address of an Actor instance.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>actor: <a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="getbehaviour" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Behaviour</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Behaviour&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_index_.html#behaviour" class="tsd-signature-type">Behaviour</a><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L99">system/state.ts:99</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>getBehaviour attempts to retrieve the behaviour for an
+								actor given an address.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_index_.html#behaviour" class="tsd-signature-type">Behaviour</a><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="getchildren" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Children</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Children&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.contexts.html" class="tsd-signature-type">Contexts</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L108">system/state.ts:108</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>getChildren returns the child contexts for an address.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../interfaces/_context_.contexts.html" class="tsd-signature-type">Contexts</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="getinstance" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Instance</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Instance&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L68">system/state.ts:68</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>getInstance attempts to retrieve an actor given its address.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="getmessage" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Message</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Message&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../classes/_mailbox_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L88">system/state.ts:88</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>getMessage attempts to retrieve the next message
+								from an actors mailbox.</p>
+							</div>
+							<p>If sucessfull, the message will be removed.</p>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../classes/_mailbox_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="getparent" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Parent</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Parent&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L118">system/state.ts:118</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>getParent context using an Address.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="getrouter" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Router</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Router&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L129">system/state.ts:129</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>getRouter will attempt to provide the
+								routing actor for an Address.</p>
+							</div>
+							<p>The value returned depends on whether the given
+							address begins with any of the installed router&#39;s address.</p>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="gettemplate" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Template</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Template&lt;C, S&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L78">system/state.ts:78</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>getTemplate attempts to retrieve the template for an
+								actor given an address.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+							<li>
+								<h4>S<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="put" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> put</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">put&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a>, context<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L137">system/state.ts:137</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>put a new Context in the State.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+							<li>
+								<h5>context: <span class="tsd-signature-type">C</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="putroute" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> put<wbr>Route</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">put<wbr>Route&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, from<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a>, to<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L148">system/state.ts:148</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>putRoute adds a route to the routing table.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>from: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+							<li>
+								<h5>to: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="remove" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> remove</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">remove&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L159">system/state.ts:159</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>remove an actor entry.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+				<a name="runinstance" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> run<wbr>Instance</h3>
+				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+					<li class="tsd-signature tsd-kind-icon">run<wbr>Instance&lt;C&gt;<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, addr<span class="tsd-signature-symbol">: </span><a href="_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/system/state.ts#L171">system/state.ts:171</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>runInstance attempts to invoke the run code of an actor instance.</p>
+							</div>
+						</div>
+						<h4 class="tsd-type-parameters-title">Type parameters</h4>
+						<ul class="tsd-type-parameters">
+							<li>
+								<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+							</li>
+						</ul>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>s: <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>addr: <a href="_address_.html#address" class="tsd-signature-type">Address</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
 			</section>
 		</section>
 		<footer class="with-border-bottom">
