@@ -113,7 +113,7 @@ export abstract class AbstractSystem<C extends Context>
 
         while (this.stack.length > 0)
             log(policy.level || 0, policy.logger || console,
-                <Op<C, System<C>>>this.stack.pop()).exec(this);
+                <Op<C, System<C>>>this.stack.shift()).exec(this);
 
         this.running = false;
 
