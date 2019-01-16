@@ -74,7 +74,7 @@ export abstract class AbstractSystem<C extends Context>
     /**
      * spawn a new actor from a template.
      */
-      spawn(t: ActorTemplate<C, AbstractSystem<C>>): AbstractSystem<C> {
+    spawn(t: ActorTemplate<C, AbstractSystem<C>>): AbstractSystem<C> {
 
         this.exec(new Spawn(this, t));
         return this;

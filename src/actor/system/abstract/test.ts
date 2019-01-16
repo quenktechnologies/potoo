@@ -15,7 +15,7 @@ import { AbstractSystem } from './';
  * of the AbstractSystem.
  */
 export abstract class TestAbstractSystem<C extends Context>
-  extends AbstractSystem<C> {
+    extends AbstractSystem<C> {
 
     constructor(public configuration: config.Configuration = {}) {
 
@@ -37,7 +37,7 @@ export abstract class TestAbstractSystem<C extends Context>
 
     identify(actor: Actor<Context>): Address {
 
-        return this.MOCK.record('identify', [actor], this.identify(actor));
+        return this.MOCK.record('identify', [actor], super.identify(actor));
 
     }
 
