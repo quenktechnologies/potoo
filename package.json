@@ -22,6 +22,7 @@
   "author": "Quenk Technologies Limited",
   "license": "Apache-2.0",
   "dependencies": {
-    "@quenk/noni": "^1.14.0"
+    "@quenk/noni": "^1.14.0",
+    "@quenk/test": "^2.0.0"
   }
 }

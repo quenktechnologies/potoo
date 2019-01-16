@@ -1,14 +1,14 @@
-import * as config from './configuration';
-import { ADDRESS_DISCARD, Address } from '../address';
-import { Template } from '../template';
-import { Actor } from '../';
-import { Discard } from './op/discard';
-import { Op, log } from './op';
-import { Envelope } from '../mailbox';
-import { Context } from '../context';
-import { State, getAddress } from './state';
-import { Executor } from './op';
-import {System} from './';
+import * as config from '../configuration';
+import { ADDRESS_DISCARD, Address } from '../../address';
+import { Template } from '../../template';
+import { Actor } from '../../';
+import { Discard } from '../op/discard';
+import { Op, log } from '../op';
+import { Envelope } from '../../mailbox';
+import { Context } from '../../context';
+import { State, getAddress } from '../state';
+import { Executor } from '../op';
+import {System} from '../';
 
 /**
  * AbstractSystem
