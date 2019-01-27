@@ -13,13 +13,14 @@ describe('store', () => {
             it('should create a local entry from the stack', () => {
 
                 let e = new ExecutorImpl(
-                    new Frame(new Script(), newContext(), [], [
+                    new Frame('self', newContext(), new Script(), [], [
 
-                        12, Type.Template, Location.Constants
+                      Location.Constants, Type.Template,12
 
                     ]));
 
                 new Store(2).exec(e);
+
                 assert(e.current.locals[2]).
                     equate([12, Type.Template, Location.Constants]);
 

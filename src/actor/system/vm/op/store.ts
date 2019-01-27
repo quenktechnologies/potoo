@@ -12,9 +12,9 @@ export const OP_CODE_STORE = 0x11;
  * Pops:
  * 1. Operand to store.
  */
-export class Store<C extends Context, S extends System<C>> extends Op<C, S> {
+export class Store<C extends Context, S extends System<C>> implements Op<C, S> {
 
-    constructor(public index: number) { super(); }
+    constructor(public index: number) { }
 
     code = OP_CODE_STORE;
 
@@ -28,7 +28,7 @@ export class Store<C extends Context, S extends System<C>> extends Op<C, S> {
 
     toLog(): string {
 
-        return `store ${this.index}`;
+        return `store $${this.index}`;
 
     }
 

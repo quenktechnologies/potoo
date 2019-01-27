@@ -17,13 +17,14 @@ describe('load', () => {
             it('', () => {
 
                 let e = new ExecutorImpl(
-                    new Frame(new Script(), newContext(), [], [], [
+                    new Frame('self', newContext(), new Script(), [], [], [
 
-                        [12, Type.Template, Location.Constants]
+                        [Location.Constants, Type.Template, 12]
 
                     ]));
 
                 new Load(0).exec(e);
+
                 assert([e.current.data[0], e.current.data[1], e.current.data[2]]).
                     equate([12, Type.Template, Location.Constants]);
 

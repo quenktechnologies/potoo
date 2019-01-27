@@ -12,10 +12,12 @@ describe('push', () => {
 
             it('should push a number onto the stack', () => {
 
-                let e = new ExecutorImpl(new Frame(new Script(), newContext()));
+              let e = new ExecutorImpl(new Frame('self', newContext(),
+                new Script()));
 
                 new push.PushNum(12).exec(e);
-                assert(e.current.data).equate([12, Type.Number, Location.Literal]);
+
+                assert(e.current.data).equate([Location.Literal, Type.Number, 12]);
 
             });
 
@@ -29,10 +31,30 @@ describe('push', () => {
 
             it('should push a string onto the stack', () => {
 
-                let e = new ExecutorImpl(new Frame(new Script(), newContext()));
+              let e = new ExecutorImpl(new Frame('self', newContext(), 
+                new Script(), ));
 
-                new push.PushStr(1).exec(e);
-                assert(e.current.data).equate([1, Type.String, Location.Constants]);
+                new push.PushStr(12).exec(e);
+                assert(e.current.data).equate([Location.Constants, Type.String, 12]);
+
+            });
+
+        });
+
+    });
+
+    describe('PushFunc', () => {
+
+        describe('exec', () => {
+
+            it('should push a function onto the stack', () => {
+
+              let e = new ExecutorImpl(new Frame('self', newContext(),
+                new Script(), ));
+
+                new push.PushFunc(12).exec(e);
+
+                assert(e.current.data).equate([Location.Constants, Type.Function, 12]);
 
             });
 
@@ -46,10 +68,31 @@ describe('push', () => {
 
             it('should push a template onto the stack', () => {
 
-                let e = new ExecutorImpl(new Frame(new Script(), newContext()));
+              let e = new ExecutorImpl(new Frame('self', newContext(),
+                new Script(), ));
 
-                new push.PushTemp(1).exec(e);
-                assert(e.current.data).equate([1, Type.Template, Location.Constants]);
+                new push.PushTemp(12).exec(e);
+
+                assert(e.current.data).equate([Location.Constants, Type.Template, 12]);
+
+            });
+
+        });
+
+    });
+
+    describe('PushMsg', () => {
+
+        describe('exec', () => {
+
+            it('should push a message onto the stack', () => {
+
+              let e = new ExecutorImpl(new Frame('self', newContext(),
+                new Script()));
+
+                new push.PushMsg(12).exec(e);
+
+                assert(e.current.data).equate([Location.Constants, Type.Message, 12]);
 
             });
 
