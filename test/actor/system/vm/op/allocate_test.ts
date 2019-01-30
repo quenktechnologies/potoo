@@ -35,7 +35,7 @@ describe('allocate', () => {
 
         describe('exec', () => {
 
-            it('should put a new context in the system', cb => {
+            it('should put a new context in the system', () => {
 
                 let c: Constants = [[], ['/'], [], [withoutChild], [], []];
 
@@ -51,15 +51,6 @@ describe('allocate', () => {
 
                 assert(e.contexts['/act1']).be.object();
 
-                setTimeout(() => {
-
-                    assert((<any>e.contexts['/act1'].actor).MOCK.called())
-                        .equate(['run']);
-
-                    cb();
-
-                }, 100);
-
             });
 
             it('should not allow duplicates', () => {
@@ -71,13 +62,13 @@ describe('allocate', () => {
                         [Location.Constants, Type.Template, 0,
                         Location.Constants, Type.String, 0]
 
-                     ));
+                    ));
 
                 e.contexts['/act1'] = newContext();
 
                 new Allocate().exec(e);
 
-                assert(e.MOCK.called()).equate(['getContext', 'raise']);
+                assert(e.MOCK.called()).equate(['current', 'getContext', 'raise']);
 
             });
 
@@ -90,13 +81,36 @@ describe('allocate', () => {
                         [Location.Constants, Type.Template, 0,
                         Location.Constants, Type.String, 0]
 
-                   ));
+                    ));
 
                 e.contexts['/act1'] = newContext();
 
                 new Allocate().exec(e);
 
-                assert(e.MOCK.called()).equate(['raise']);
+                assert(e.MOCK.called()).equate(['current', 'raise']);
+
+            });
+
+        });
+
+        describe('toLog', () => {
+
+            it('should work', () => {
+
+                let c: Constants = [[], ['/'], [], [withoutChild], [], []];
+
+                let f = new Frame('self', newContext(), new Script(c), [],
+
+                    [Location.Constants, Type.Template, 0,
+                    Location.Constants, Type.String, 0]
+
+                );
+
+                assert(new Allocate().toLog(f))
+                    .equate(['allocate', [], [
+                        [0, Type.String, Location.Constants],
+                        [0, Type.Template, Location.Constants]]
+                    ]);
 
             });
 

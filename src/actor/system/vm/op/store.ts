@@ -1,7 +1,8 @@
 import { Context } from '../../../context';
 import { System } from '../../';
+import { Type, Location, Frame } from '../frame';
 import { Executor } from '../';
-import { Level, Op } from './';
+import { Log,Level, Op } from './';
 
 export const OP_CODE_STORE = 0x11;
 
@@ -22,13 +23,15 @@ export class Store<C extends Context, S extends System<C>> implements Op<C, S> {
 
     exec(e: Executor<C, S>): void {
 
-        e.current.locals[this.index] = e.current.pop();
+        let curr = e.current().get();
+
+        curr.locals[this.index] = curr.pop();
 
     }
 
-    toLog(): string {
+    toLog(f: Frame<C, S>): Log {
 
-        return `store $${this.index}`;
+        return ['store', [this.index, Type.Number, Location.Literal], [f.peek()]];
 
     }
 

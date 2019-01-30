@@ -1,7 +1,8 @@
 import { Context } from '../../../context';
 import { System } from '../../';
+import { Frame } from '../frame';
 import { Executor } from '../';
-import { Op, Level } from './';
+import { Log, Op, Level } from './';
 
 export const OP_CODE_RAISE = 0x21;
 
@@ -32,17 +33,18 @@ export class Raise<C extends Context, S extends System<C>> implements Op<C, S> {
 
     exec(e: Executor<C, S>): void {
 
-        e
-            .current
-            .resolveMessage(e.current.pop())
+        let curr = e.current().get();
+
+        curr
+            .resolveMessage(curr.pop())
             .map(m => e.raise(m))
             .lmap(err => e.raise(err));
 
     }
 
-    toLog(): string {
+    toLog(f: Frame<C, S>): Log {
 
-        return 'raise';
+      return ['raise', [], [f.peek()]];
 
     }
 

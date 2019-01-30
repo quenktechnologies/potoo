@@ -5,6 +5,17 @@ import { System } from '../';
 import { Op } from './op';
 
 /**
+ * Value correspond to the types of the VM's type system.
+ */
+export type Value<C extends Context, S extends System<C>>
+    = number
+    | string
+    | Function<C, S>
+    | Template<C, S>
+    | Message
+    ;
+
+/**
  * Constants is a tuple of immutable values available to a
  * Script at runtime.
  *
@@ -12,7 +23,14 @@ import { Op } from './op';
  * then the following index within the type's table.
  */
 export type Constants<C extends Context, S extends System<C>>
-    = [number[], string[], Template<C, S>[], Message[], Function<C, S>[]]
+    = [
+        number[],
+        string[],
+        Function<C, S>[],
+        Template<C, S>[],
+        Message[],
+        Foreign<C, S>[]
+    ]
     ;
 
 /**
@@ -20,6 +38,13 @@ export type Constants<C extends Context, S extends System<C>>
  */
 export type Function<C extends Context, S extends System<C>>
     = () => Op<C, S>[]
+    ;
+
+/**
+ * Foreign function type.
+ */
+export type Foreign<C extends Context, S extends System<C>>
+    = (...arg: Value<C, S>) => Value<C, S>
     ;
 
 /**
@@ -32,7 +57,7 @@ export type Function<C extends Context, S extends System<C>>
 export class Script<C extends Context, S extends System<C>>  {
 
     constructor(
-        public constants: Constants<C, S> = [[],[],[],[],[]],
+        public constants: Constants<C, S> = [[], [], [], [], [],[]],
         public code: Op<C, S>[] = []) { }
 
 }

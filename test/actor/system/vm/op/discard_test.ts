@@ -1,10 +1,6 @@
 import { assert } from '@quenk/test/lib/assert';
 import { Script } from '../../../../../src/actor/system/vm/script';
-import {
-    Type,
-    Location,
-    Frame
-} from '../../../../../src/actor/system/vm/frame';
+import {    Frame} from '../../../../../src/actor/system/vm/frame';
 import {
     ExecutorImpl,
     newContext
@@ -22,11 +18,11 @@ describe('discard', () => {
                 let e = new ExecutorImpl(
                     new Frame('self', newContext(), new Script()));
 
-                e.current.context.mailbox.get().push(12, 24, 48);
+                e.current().get().context.mailbox.get().push(12, 24, 48);
 
                 new Discard().exec(e);
 
-                assert(e.current.context.mailbox.get()).equate([24, 48]);
+                assert(e.current().get().context.mailbox.get()).equate([24, 48]);
 
             });
 

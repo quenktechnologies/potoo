@@ -67,7 +67,7 @@ describe('tempcc', () => {
 
                 new TempCC().exec(e);
 
-                assert(e.current.data).equate([3, Type.Number, Location.Literal]);
+                assert(e.current().get().data).equate([3, Type.Number, Location.Literal]);
 
             });
 

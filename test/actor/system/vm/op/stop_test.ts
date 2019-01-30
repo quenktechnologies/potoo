@@ -14,7 +14,7 @@ describe('stop', () => {
 
                 let c: Constants = [[], ['/'], [], [], [], []];
 
-                let e = new ExecutorImpl(new Frame('self', newContext(),
+              let e = new ExecutorImpl(new Frame('/', newContext(),
                     new Script(c), [], [Location.Constants, Type.String, 0]));
 
                 let one = newContext();
@@ -28,13 +28,34 @@ describe('stop', () => {
 
             })
 
+            it('should not stop actors outside its branch', () => {
+
+              let c: Constants = [[], ['/bar'], [], [], [], []];
+                let slash = newContext();
+                let foo = newContext();
+                let bar = newContext();
+
+              let e = new ExecutorImpl(new Frame('/foo', foo,
+                    new Script(c), [], [Location.Constants, Type.String, 0]));
+
+                e.putContext('/', slash);
+                e.putContext('/foo', foo);
+              e.putContext('/bar', bar);
+
+                new Stop().exec(e);
+
+                assert((<any>bar.actor).MOCK.called()).equate([]);
+                assert(Object.keys(e.contexts).length).equal(3);
+
+            })
+
             it('should stop children first', () => {
 
-              let c: Constants = [[], ['/'], [], [], [],[]];
+                let c: Constants = [[], ['/'], [], [], [], []];
 
 
-              let e = new ExecutorImpl(new Frame('self', newContext(),
-                new Script(c), [],                    [Location.Constants, Type.String, 0]));
+              let e = new ExecutorImpl(new Frame('/', newContext(),
+                    new Script(c), [], [Location.Constants, Type.String, 0]));
 
                 let one = newContext();
                 let two = newContext();

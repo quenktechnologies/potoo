@@ -21,10 +21,10 @@ describe('store', () => {
 
                 new Store(2).exec(e);
 
-                assert(e.current.locals[2]).
+                assert(e.current().get().locals[2]).
                     equate([12, Type.Template, Location.Constants]);
 
-                assert(e.current.data.length).be.equal(0);
+                assert(e.current().get().data.length).be.equal(0);
 
             });
 

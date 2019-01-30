@@ -38,11 +38,11 @@ describe('receive', () => {
 
                     ]));
 
-                e.current.context.mailbox.get().push('u', 'are', 'special');
+                e.current().get().context.mailbox.get().push('u', 'are', 'special');
 
                 new Receive().exec(e);
 
-                assert(e.current.context.behaviour.length).equal(1);
+                assert(e.current().get().context.behaviour.length).equal(1);
 
             })
 
@@ -58,11 +58,11 @@ describe('receive', () => {
 
                     ]));
 
-                e.current.context.mailbox.get().push('u');
+              e.current().get().context.mailbox.get().push('u');
 
                 new Receive().exec(e);
 
-              assert((<any>e.current.context.actor).MOCK.called())
+              assert((<any>e.current().get().context.actor).MOCK.called())
                 .be.equate(['notify']);
 
             });

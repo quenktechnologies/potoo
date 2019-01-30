@@ -1,8 +1,8 @@
 import { Context } from '../../../context';
 import { System } from '../../';
-import { Frame } from '../frame';
+import { Type, Location, Frame } from '../frame';
 import { Executor } from '../';
-import { Op, Level } from './';
+import { Log, Op, Level } from './';
 
 export const OP_CODE_CALL = 0x17;
 
@@ -23,16 +23,13 @@ export class Call<C extends Context, S extends System<C>> implements Op<C, S> {
 
     exec(e: Executor<C, S>): void {
 
-        let work = e
-            .current
-            .resolveFunction(e.current.pop())
-            .map(f => new Frame(
-              e.current.actor,
-                e.current.context,
-                e.current.script,
-                f(),
-                [],
-                e.current.heap));
+        let curr = e.current().get();
+        let { actor, context, script, heap } = curr;
+
+        let work =
+            curr
+                .resolveFunction(curr.pop())
+                .map(f => new Frame(actor, context, script, f(), [], heap));
 
         if (work.isLeft())
             return e.raise(work.takeLeft());
@@ -41,18 +38,27 @@ export class Call<C extends Context, S extends System<C>> implements Op<C, S> {
 
         for (let i = 0; i < this.args; i++) {
 
-            let [value, type, location] = e.current.pop();
+            let [value, type, location] = curr.pop();
             frm.push(value, type, location);
 
         }
 
         e.push(frm);
 
+        let [value, type, location] = frm.pop();
+
+        curr.push(value, type, location); //return
+
     }
 
-    toLog(): string {
+    toLog(f: Frame<C, S>): Log {
 
-        return `call`;
+        let data = [f.peek()];
+
+        for (let i = 1; i <= this.args; i++)
+            data.push((f.peek(i)));
+
+        return ['call', [this.args, Type.Number, Location.Literal], data];
 
     }
 

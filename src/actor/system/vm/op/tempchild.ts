@@ -2,8 +2,9 @@ import * as error from '../error';
 import { right, left } from '@quenk/noni/lib/data/either';
 import { Context } from '../../../context';
 import { System } from '../../';
+import {Frame} from '../frame';
 import { Executor } from '../';
-import { Op, Level } from './';
+import { Log, Op, Level } from './';
 
 export const OP_CODE_TEMP_CHILD = 0x16;
 
@@ -22,21 +23,21 @@ export class TempChild<C extends Context, S extends System<C>> implements Op<C, 
 
     exec(e: Executor<C, S>): void {
 
-        e
-            .current
-            .resolveTemplate(e.current.pop())
+      let curr = e.current().get();
+
+            curr
+            .resolveTemplate(curr.pop())
             .chain(t =>
-                e
-                    .current
-                    .resolveNumber(e.current.pop())
+                    curr
+                    .resolveNumber(curr.pop())
                     .chain(n => {
 
                         if ((t.children && t.children.length > n) && (n > 0)) {
 
                             let [value, type, location] =
-                                e.current.allocateTemplate(t.children[n]);
+                                curr.allocateTemplate(t.children[n]);
 
-                            return right(e.current.push(value, type, location));
+                            return right(curr.push(value, type, location));
 
                         } else {
 
@@ -49,9 +50,9 @@ export class TempChild<C extends Context, S extends System<C>> implements Op<C, 
 
     }
 
-    toLog(): string {
+  toLog(f: Frame<C,S>): Log {
 
-        return `tempchild`;
+        return ['tempchild', [], [f.peek(), f.peek(1)]];
 
     }
 

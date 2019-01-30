@@ -1,7 +1,8 @@
 import { Context } from '../../../context';
 import { System } from '../../';
+import { Frame } from '../frame';
 import { Executor } from '../';
-import { Op, Level } from './';
+import { Log, Op, Level } from './';
 
 export const OP_CODE_QUERY = 0xc;
 
@@ -22,22 +23,29 @@ export class Query<C extends Context, S extends System<C>> implements Op<C, S> {
 
     exec(e: Executor<C, S>): void {
 
-      //TODO: support routers
-        e
-            .current
-            .resolveAddress(e.current.pop())
-            .map(addr =>
-                e
-                    .getContext(addr)
-                    .map(() => e.current.pushNumber(1))
-                    .orJust(() => e.current.pushNumber(0)))
-            .lmap(err => e.raise(err));
+        let curr = e.current().get();
+
+        let eitherAddr = curr.resolveAddress(curr.pop());
+
+        if (eitherAddr.isLeft())
+            return e.raise(eitherAddr.takeLeft());
+
+        let addr = eitherAddr.takeRight();
+
+        let maybe = e
+            .getRouter(addr)
+            .orElse(() => e.getContext(addr));
+
+        if (maybe.isJust())
+            curr.pushNumber(1)
+        else
+            curr.pushNumber(0);
 
     }
 
-    toLog(): string {
+    toLog(f: Frame<C, S>): Log {
 
-        return `query`;
+      return ['query', [], f.peek()];
 
     }
 

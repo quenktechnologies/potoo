@@ -1,10 +1,10 @@
 import * as error from '../error';
-import { tick } from '@quenk/noni/lib/control/timer';
 import { Context } from '../../../context';
 import { isRestricted, make } from '../../../address';
 import { System } from '../../';
+import { Frame } from '../frame';
 import { Executor } from '../';
-import { Op, Level } from './';
+import { Log, Op, Level } from './';
 
 export const OP_CODE_ALLOCATE = 0x5;
 
@@ -28,8 +28,9 @@ export class Allocate<C extends Context, S extends System<C>> implements Op<C, S
 
     exec(e: Executor<C, S>): void {
 
-        let parent = e.current.resolveAddress(e.current.pop());
-        let temp = e.current.resolveTemplate(e.current.pop());
+        let curr = e.current().get();
+        let parent = curr.resolveAddress(curr.pop());
+        let temp = curr.resolveTemplate(curr.pop());
 
         if (parent.isLeft())
             return e.raise(parent.takeLeft());
@@ -48,17 +49,15 @@ export class Allocate<C extends Context, S extends System<C>> implements Op<C, S
         if (e.getContext(addr).isJust())
             return e.raise(new error.DuplicateAddressErr(addr));
 
-        e.putContext(addr, e.allocate(t));
+        e.putContext(addr, e.allocate(addr, t));
 
-        tick(() => e.getContext(addr).map(c => c.actor.run()));
-
-        e.current.pushAddress(addr);
+        curr.pushAddress(addr);
 
     }
 
-    toLog(): string {
+    toLog(f: Frame<C, S>): Log {
 
-        return `allocate`;
+        return ['allocate', [], [f.peek(), f.peek(1)]];
 
     }
 

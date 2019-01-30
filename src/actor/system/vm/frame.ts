@@ -5,9 +5,10 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Context } from '../../context';
 import { Message } from '../../message';
 import { Template } from '../../template';
+import { Address } from '../../address';
 import { System } from '../';
 import { Operand, Op } from './op';
-import { Function, Script } from './script';
+import { Value, Function, Foreign, Script } from './script';
 
 //Type indicators.
 export const TYPE_NUMBER = 0x0;
@@ -15,6 +16,7 @@ export const TYPE_STRING = 0x1;
 export const TYPE_FUNCTION = 0x2;
 export const TYPE_TEMPLATE = 0x3;
 export const TYPE_MESSAGE = 0x4;
+export const TYPE_FOREIGN = 0x5;
 
 //Storage locations.
 export const LOCATION_LITERAL = 0x0;
@@ -37,7 +39,9 @@ export enum Type {
 
     Template = TYPE_TEMPLATE,
 
-    Message = TYPE_MESSAGE
+    Message = TYPE_MESSAGE,
+
+    Foreign = TYPE_FOREIGN
 
 }
 
@@ -61,11 +65,11 @@ export enum Location {
  */
 export enum Field {
 
-  Value = 0,
+    Value = 0,
 
-  Type = 1,
+    Type = 1,
 
-  Location = 2
+    Location = 2
 
 }
 
@@ -81,24 +85,14 @@ export enum Field {
 export type Data = [number, Type, Location];
 
 /**
- * Value correspond to the types of the VM's type system.
- */
-export type Value<C extends Context, S extends System<C>>
-    = number
-    | string
-    | Function<C, S>
-    | Template<C, S>
-    | Message
-    ;
-
-/**
  * Frame of execution.
  */
 export class Frame<C extends Context, S extends System<C>> {
 
     constructor(
-        public script: Script<C, S>,
+        public actor: Address,
         public context: Context,
+        public script: Script<C, S>,
         public code: Op<C, S>[] = [],
         public data: Operand[] = [],
         public locals: Data[] = [],
@@ -106,11 +100,81 @@ export class Frame<C extends Context, S extends System<C>> {
         public ip = 0) { }
 
     /**
+     * seek advances the Frame's ip to the location specified.
+     *
+     * Generates an error if the seek is out of the code block's bounds.
+     */
+    seek(location: number): Either<Err, Frame<C, S>> {
+
+        if ((location < 0) || (location >= this.code.length))
+            return left(new error.JumpOutOfBoundsErr(location, this.code.length));
+
+        this.ip = location;
+
+        return right(this);
+
+    }
+
+    /**
+     * end advances the Frame's ip beyond the last instruction to terminate
+     * execution.
+     */
+    end(): void {
+
+        this.ip = this.code.length;
+
+    }
+
+    /**
+     * allocate space on the heap for a value.
+     */
+    allocate(value: Value<C, S>, typ: Type): Data {
+
+        this.heap.push(value);
+        return [this.heap.length - 1, typ, Location.Heap];
+
+    }
+
+    /**
+     * allocateTemplate
+     */
+    allocateTemplate(t: Template<C, S>): Data {
+
+        return this.allocate(t, Type.Template);
+
+    }
+
+    /**
      * push onto the stack an Operand, indicating its type and storage location.
      */
     push(value: Operand, type: Type, location: Location): Frame<C, S> {
 
-        this.data.push(value, type, location);
+        this.data.push(location);
+        this.data.push(type);
+        this.data.push(value);
+        return this;
+
+    }
+
+    /**
+     * pushNumber onto the stack.
+     */
+    pushNumber(n: number): Frame<C, S> {
+
+        this.data.push(n, Type.Number, Location.Literal);
+        return this;
+
+    }
+
+    /**
+     * pushAddress onto the stack.
+     *
+     * (Value is stored on the heap)
+     */
+    pushAddress(addr: Address): Frame<C, S> {
+
+        this.heap.push(addr);
+        this.data.push(this.heap.length - 1, Type.String, Location.Heap);
         return this;
 
     }
@@ -120,11 +184,24 @@ export class Frame<C extends Context, S extends System<C>> {
      */
     pop(): Data {
 
-        return <Data>[
-            <Location>this.data.pop(),
+        return [
+            <number>this.data.pop(),
             <Type>this.data.pop(),
-            <number>this.data.pop()
-        ].reverse();
+            <Location>this.data.pop()
+        ];
+
+    }
+
+    peek(n=0): Data {
+
+        let len = this.data.length;
+      let offset = n * 3;
+
+        return [
+            <number>this.data[len - (1 + offset)],
+            <Type>this.data[len - (2+offset)],
+            <Location>this.data[len - (3+offset)]
+        ];
 
     }
 
@@ -142,9 +219,9 @@ export class Frame<C extends Context, S extends System<C>> {
                 return right(data[Field.Value]);
 
             case Location.Constants:
-            return fromNullable(this.script.constants[data[Field.Type]])
-              .chain(typ => fromNullable(typ[data[Field.Value]]))
-              .map(v => right<Err,  Value<C,S>>(v))
+                return fromNullable(this.script.constants[data[Field.Type]])
+                    .chain(typ => fromNullable(typ[data[Field.Value]]))
+                    .map(v => right<Err, Value<C, S>>(v))
                     .orJust(nullErr)
                     .get();
 
@@ -163,6 +240,78 @@ export class Frame<C extends Context, S extends System<C>> {
                 return nullErr();
 
         }
+
+    }
+
+    /**
+     * resolveNumber
+     */
+    resolveNumber(data: Data): Either<Err, number> {
+
+        if (data[Field.Type] !== Type.Number)
+            return left(new error.TypeErr(Type.Number, data[Field.Type]));
+
+        return this.resolve(data);
+
+    }
+
+    /**
+     * resolveAddress
+     */
+    resolveAddress(data: Data): Either<Err, Address> {
+
+        if (data[Field.Type] !== Type.String)
+            return left(new error.TypeErr(Type.String, data[Field.Type]));
+
+        return this.resolve(data);
+
+    }
+
+    /**
+     * resolveFunction
+     */
+    resolveFunction(data: Data): Either<Err, Function<C, S>> {
+
+        if (data[Field.Type] !== Type.Function)
+            return left(new error.TypeErr(Type.Function, data[Field.Type]));
+
+        return this.resolve(data);
+
+    }
+
+    /**
+     * resolveTemplate
+     */
+    resolveTemplate(data: Data): Either<Err, Template<C, S>> {
+
+        if (data[Field.Type] !== Type.Template)
+            return left(new error.TypeErr(Type.Template, data[Field.Type]));
+
+        return this.resolve(data);
+
+    }
+
+    /**
+     * resolveMessage
+     */
+    resolveMessage(data: Data): Either<Err, Message> {
+
+        if (data[Field.Type] !== Type.Message)
+            return left(new error.TypeErr(Type.Message, data[Field.Type]));
+
+        return this.resolve(data);
+
+    }
+
+    /**
+     * resolveForeign
+     */
+    resolveForeign(data: Data): Either<Err, Foreign<C, S>> {
+
+        if (data[Field.Type] !== Type.Foreign)
+            return left(new error.TypeErr(Type.Foreign, data[Field.Type]));
+
+        return this.resolve(data);
 
     }
 

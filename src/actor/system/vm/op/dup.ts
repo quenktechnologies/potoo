@@ -1,7 +1,8 @@
 import { Context } from '../../../context';
 import { System } from '../../';
+import { Frame } from '../frame';
 import { Executor } from '../';
-import { Op, Level } from './';
+import { Log, Op, Level } from './';
 
 export const OP_CODE_DUP = 0x6;
 
@@ -16,16 +17,17 @@ export class Dup<C extends Context, S extends System<C>> implements Op<C, S> {
 
     exec(e: Executor<C, S>): void {
 
-        let [value, type, location] = e.current.pop();
+        let curr = e.current().get();
+        let [value, type, location] = curr.pop();
 
-        e.current.push(value, type, location);
-        e.current.push(value, type, location);
+        curr.push(value, type, location);
+        curr.push(value, type, location);
 
     }
 
-    toLog(): string {
+    toLog(f: Frame<C, S>): Log {
 
-        return `dup`;
+      return ['dup', [], [f.peek()]];
 
     }
 

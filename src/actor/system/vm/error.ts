@@ -80,9 +80,9 @@ export class NullFunctionPointerErr extends Error {
  */
 export class JumpOutOfBoundsErr extends Error {
 
-    constructor(public location: number) {
+    constructor(public location: number, public size:number) {
 
-        super(`Cannot jump to location "${location}"!`);
+      super(`Cannot jump to location "${location}"! Max location: ${size}!`);
 
     }
 
@@ -92,7 +92,7 @@ export class NullPointerErr extends Error {
 
     constructor(public data: number[]) {
 
-        super(`Reference: ${data}`);
+        super(`Reference: [${data}]`);
 
     }
 
@@ -100,10 +100,23 @@ export class NullPointerErr extends Error {
 
 export class TypeErr extends Error {
 
-  constructor(public expected:number, public got:number) {
+    constructor(public expected: number, public got: number) {
 
-    super(`Expected: ${expected}, Received: ${got}`);
+        super(`Expected: ${expected}, Received: ${got}`);
 
-  }
+    }
+
+}
+
+/**
+ * IllegalStopErr
+ */
+export class IllegalStopErr extends Error {
+
+    constructor(public parent: string,public child: string  ) {
+
+        super(`The actor at address "${parent}" can not kill "${child}"!`);
+
+    }
 
 }

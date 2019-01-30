@@ -73,8 +73,8 @@ describe('tempchild', () => {
 
                 new TempChild().exec(e);
 
-                assert(e.current.data).equate([
-                     Location.Heap, Type.Template, 0
+                assert(e.current().get().data).equate([
+                    Location.Heap, Type.Template, 0
                 ]);
 
             });
@@ -97,7 +97,7 @@ describe('tempchild', () => {
 
                 new TempChild().exec(e);
 
-                assert(e.MOCK.called()).equate(['raise']);
+                assert(e.MOCK.called()).equate(['current', 'raise']);
 
             });
 

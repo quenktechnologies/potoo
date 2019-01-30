@@ -1,7 +1,8 @@
 import { Context } from '../../../context';
 import { System } from '../../';
+import {Frame} from '../frame';
 import { Executor } from '../';
-import { Level } from './';
+import { Log,Level } from './';
 
 export const OP_CODE_TEMP_CC = 0x13;
 
@@ -20,18 +21,19 @@ export class TempCC<C extends Context, S extends System<C>>  {
 
     exec(e: Executor<C, S>): void {
 
-        e
-            .current
-            .resolveTemplate(e.current.pop())
+      let curr = e.current().get();
+
+            curr
+            .resolveTemplate(curr.pop())
             .map(temp => temp.children && temp.children.length || 0)
-            .map(count => e.current.pushNumber(count))
+            .map(count => curr.pushNumber(count))
             .lmap(err => e.raise(err));
 
     }
 
-    toLog(): string {
+  toLog(f:Frame<C,S>): Log {
 
-        return `tempcc`;
+        return ['tempcc', [], [f.peek()]];
 
     }
 

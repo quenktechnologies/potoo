@@ -1,9 +1,8 @@
-import { show } from '@quenk/noni/lib/data/type';
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Executor } from '../';
-import { Type, Location, Frame } from '../frame';
-import { Level } from './';
+import { Type, Location  } from '../frame';
+import { Log, Level } from './';
 
 export const OP_CODE_PUSH_NUM = 0x1;
 export const OP_CODE_PUSH_STR = 0x2;
@@ -24,13 +23,13 @@ export class PushNum<C extends Context, S extends System<C>> {
 
     exec(e: Executor<C, S>): void {
 
-        e.current.push(this.index, Type.Number, Location.Literal);
+        e.current().get().push(this.index, Type.Number, Location.Literal);
 
     }
 
-    toLog() {
+    toLog(): Log {
 
-        return `pushnum ${this.index}`;
+        return ['pushnum', [this.index, Type.Number, Location.Literal], []];
 
     }
 
@@ -49,14 +48,13 @@ export class PushStr<C extends Context, S extends System<C>> {
 
     exec(e: Executor<C, S>): void {
 
-        e.current.push(this.index, Type.String, Location.Constants);
+        e.current().get().push(this.index, Type.String, Location.Constants);
 
     }
 
-    toLog(f: Frame<C, S>): string {
+    toLog(): Log {
 
-        return `pushstr ${this.index} ` +
-            `// ${f.script.constants[Type.String][this.index]}`;
+        return ['pushstr', [this.index, Type.String, Location.Constants], []];
 
     }
 
@@ -75,13 +73,13 @@ export class PushFunc<C extends Context, S extends System<C>> {
 
     exec(e: Executor<C, S>): void {
 
-        e.current.push(this.index, Type.Function, Location.Constants);
+        e.current().get().push(this.index, Type.Function, Location.Constants);
 
     }
 
-    toLog(): string {
+    toLog(): Log {
 
-        return `pushfunc ${this.index}`;
+        return ['pushfunc', [this.index, Type.Function, Location.Constants], []];
 
     }
 
@@ -100,14 +98,13 @@ export class PushTemp<C extends Context, S extends System<C>> {
 
     exec(e: Executor<C, S>): void {
 
-        e.current.push(this.index, Type.Template, Location.Constants);
+        e.current().get().push(this.index, Type.Template, Location.Constants);
 
     }
 
-    toLog(f: Frame<C, S>): string {
+    toLog(): Log {
 
-        return `pushtemp ${this.index} ` +
-            `// ${show(f.script.constants[Type.Template][this.index])}`;
+        return ['pushtemp', [this.index, Type.Template, Location.Constants], []];
 
     }
 
@@ -126,13 +123,13 @@ export class PushMsg<C extends Context, S extends System<C>> {
 
     exec(e: Executor<C, S>): void {
 
-        e.current.push(this.index, Type.Message, Location.Constants);
+        e.current().get().push(this.index, Type.Message, Location.Constants);
 
     }
 
-    toLog(): string {
+    toLog(): Log {
 
-        return `pushmessage ${this.index}`;
+        return ['pushmsg', [this.index, Type.Message, Location.Constants], []];
 
     }
 

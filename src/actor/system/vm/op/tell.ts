@@ -1,10 +1,10 @@
-import { Address } from '../../../address';
 import { Message } from '../../../message';
 import { Envelope } from '../../../mailbox';
 import { Context } from '../../../context';
 import { System } from '../../';
+import {Frame} from '../frame';
 import { Executor } from '../';
-import { Op, Level } from './';
+import { Log, Op, Level } from './';
 
 export const OP_CODE_TELL = 0x7;
 
@@ -15,8 +15,6 @@ export const OP_CODE_TELL = 0x7;
  * Pops:
  * 1. Address
  * 2. Message
- *
- * TODO: explicitly support routers, give dropped messages to ?
  */
 export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
 
@@ -26,40 +24,57 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
 
     exec(e: Executor<C, S>): void {
 
-        e
-            .current
-            .resolveAddress(e.current.pop())
-            .chain(addr =>
-                e
-                    .current
-                    .resolveMessage(e.current.pop())
-                    .map(m => {
+        let curr = e.current().get();
 
-                        let maybeCtx = e.getContext(addr);
+        let eitherAddr = curr.resolveAddress(curr.pop());
 
-                        if (maybeCtx.isNothing())
-                            return // do nothing, maybe drop in future?
+        if (eitherAddr.isLeft())
+            return e.raise(eitherAddr.takeLeft());
 
-                        let ctx = maybeCtx.get();
+        let eitherMsg = curr.resolveMessage(curr.pop());
 
-                        ctx
-                            .mailbox
-                            .map(mbox => mbox.push(m))
-                            .orJust(() => ctx.actor.accept(envelope(addr, '', m)));
+        if (eitherMsg.isLeft())
+            return e.raise(eitherMsg.takeRight());
 
-                    })
-                    .orRight(err => e.raise(err)));
+        let addr = eitherAddr.takeRight();
+
+        let msg = eitherMsg.takeRight();
+
+        let maybeRouter = e.getRouter(addr);
+
+        if (maybeRouter.isJust()) {
+
+            deliver(maybeRouter.get(), new Envelope(addr, curr.actor, msg));
+
+        } else {
+
+            let maybeCtx = e.getContext(addr);
+
+            if (maybeCtx.isJust()) {
+
+                deliver(maybeCtx.get(), msg);
+
+            } else {
+
+                //send to "?"
+
+            }
+
+        }
+
 
     }
 
-    toLog(): string {
+  toLog(f: Frame<C,S>): Log {
 
-        return `tell`;
+        return ['tell', [],[f.peek(), f.peek(1)]];
 
     }
 
 }
 
-const envelope = (to: Address, from: Address, msg: Message) =>
-    new Envelope(to, from, msg);
-
+const deliver = <C extends Context>(ctx: C, msg: Message) =>
+    ctx
+        .mailbox
+        .map(mbox => mbox.push(msg))
+        .orJust(() => ctx.actor.accept(msg));

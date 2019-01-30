@@ -1,10 +1,35 @@
 import { assert } from '@quenk/test/lib/assert';
-import { nothing } from '@quenk/noni/lib/data/maybe';
-import { Context } from '../../../../src/actor/context';
-import { Constants, Script } from '../../../../src/actor/system/vm/script';
-import { NullPointerErr } from '../../../../src/actor/system/vm/error';
+import { Script } from '../../../../src/actor/system/vm/script';
+import { NullPointerErr, TypeErr } from '../../../../src/actor/system/vm/error';
 import { Type, Location, Frame } from '../../../../src/actor/system/vm/frame';
-import { SystemImpl, newContext } from '../../../fixtures/mocks';
+import {
+    Constants,
+    SystemImpl,
+    InstanceImpl,
+    newContext
+} from '../../../fixtures/mocks';
+
+class Int {
+
+    code = 1000;
+
+    level = 7;
+
+    exec(): void {
+
+
+    }
+
+    toLog() {
+
+        return 'int';
+
+    }
+
+}
+
+const frame = (c: Constants) =>
+    new Frame('self', newContext(), new Script(c));
 
 describe('frame', () => {
 
@@ -12,43 +37,43 @@ describe('frame', () => {
 
         describe('push', () => {
 
-            it('should push the right type onto the stack', () => {
+            it('should push values onto the stack', () => {
 
-                let newF = () => new Frame(new Script(), newContext());
+                let newF = () => new Frame('self', newContext(), new Script());
 
                 assert(newF().push(1, Type.Number, Location.Literal).data)
                     .equate([
-                        1,
+                        Location.Literal,
                         Type.Number,
-                        Location.Literal
+                        1
                     ]);
 
                 assert(newF().push(1, Type.String, Location.Constants).data)
                     .equate([
-                        1,
+                        Location.Constants,
                         Type.String,
-                        Location.Constants
+                        1
                     ]);
 
                 assert(newF().push(1, Type.Function, Location.Constants).data)
                     .equate([
-                        1,
+                        Location.Constants,
                         Type.Function,
-                        Location.Constants
+                        1
                     ]);
 
                 assert(newF().push(1, Type.Template, Location.Constants).data)
                     .equate([
-                        1,
+                        Location.Constants,
                         Type.Template,
-                        Location.Constants
+                        1
                     ]);
 
                 assert(newF().push(1, Type.Message, Location.Constants).data)
                     .equate([
-                        1,
+                        Location.Constants,
                         Type.Message,
-                        Location.Constants
+                        1
                     ]);
 
             });
@@ -59,7 +84,7 @@ describe('frame', () => {
 
             it('should return literals', () => {
 
-                let f = new Frame(new Script(), newContext());
+                let f = new Frame('self', newContext(), new Script());
                 assert(f.resolve([12, Type.Number, Location.Literal]).takeRight())
                     .equate(12);
 
@@ -67,8 +92,8 @@ describe('frame', () => {
 
             it('should return constants', () => {
 
-                let c: Constants<Context, SystemImpl> = [[], ['hello'], [], [], []];
-                let f = new Frame(new Script(c), newContext());
+                let c: Constants = [[], ['hello'], [], [], [], []];
+                let f = frame(c);
 
                 assert(f.resolve([0, Type.String, Location.Constants]).takeRight())
                     .equate('hello');
@@ -77,11 +102,11 @@ describe('frame', () => {
 
             it('should resolve locals', () => {
 
-                let c: Constants<Context, SystemImpl> = [
-                    [], ['hello', 'world'], [], [], []
+                let c: Constants = [
+                    [], ['hello', 'world'], [], [], [], []
                 ];
 
-                let f = new Frame(new Script(c), newContext(), [], [
+                let f = new Frame('self', newContext(), new Script(c), [], [
                     1, Type.String, Location.Local
                 ]);
 
@@ -92,7 +117,7 @@ describe('frame', () => {
 
             it('should resolve from the heap', () => {
 
-                let f = new Frame(new Script(), newContext(), [], [], [], [
+                let f = new Frame('self', newContext(), new Script(), [], [], [], [
                     Date
                 ]);
 
@@ -103,9 +128,104 @@ describe('frame', () => {
 
             it('should return an error if the reference does not exist', () => {
 
-                let f = new Frame(new Script(), newContext());
+                let f = new Frame('self', newContext(), new Script());
                 assert(f.resolve([12, 1, 1]).takeLeft())
                     .be.instance.of(NullPointerErr);
+
+            });
+
+        });
+
+        describe('resolveNumber', function() {
+
+            it('should resolve numbers', () => {
+
+                let f = frame(<Constants>[[], [], [], [], [], []]);
+
+                assert(f.resolveNumber([12, Type.Number, Location.Literal])
+                    .takeRight()).equal(12);
+
+            });
+
+            it('should raise otherwise', () => {
+
+                let f = frame(<Constants>[[], [], [], [], [], []]);
+
+                assert(f.resolveNumber([12, Type.String, Location.Literal])
+                    .takeLeft()).be.instance.of(TypeErr);
+
+            });
+
+        });
+
+        describe('resolveAddress', function() {
+
+            const c: Constants = [[], ['q', 'b'], [], [], [], []];
+
+            it('should resolve strings', () => {
+
+                let f = frame(c);
+
+                assert(f.resolveAddress([1, Type.String, Location.Constants])
+                    .takeRight()).equal('b');
+
+            });
+
+            it('should raise otherwise', () => {
+
+                let f = frame(c);;
+
+                assert(f.resolveAddress([1, Type.Number, Location.Constants])
+                    .takeLeft()).be.instance.of(TypeErr);
+
+            });
+
+        });
+
+        describe('resolveFunction', function() {
+
+            const c: Constants = [[], [], [() => [new Int()]], [], [], []];
+
+            it('should resolve functions', () => {
+
+                let f = frame(c);
+
+                assert(f.resolveFunction([0, Type.Function, Location.Constants])
+                    .takeRight()).equal(c[2][0]);
+
+            });
+
+            it('should raise otherwise', () => {
+
+                let f = frame(c);;
+
+                assert(f.resolveFunction([0, Type.Template, Location.Constants])
+                    .takeLeft()).be.instance.of(TypeErr);
+
+            });
+
+        });
+
+        describe('resolveTemplate', function() {
+
+            const temp = { id: 'foo', create: (_: SystemImpl) => new InstanceImpl() };
+            const c: Constants = [[], [], [], [temp], [], []];
+
+            it('should resolve templates', () => {
+
+                let f = frame(c);
+
+                assert(f.resolveTemplate([0, Type.Template, Location.Constants])
+                    .takeRight()).equal(c[3][0]);
+
+            });
+
+            it('should raise otherwise', () => {
+
+                let f = frame(c);;
+
+                assert(f.resolveTemplate([0, Type.Function, Location.Constants])
+                    .takeLeft()).be.instance.of(TypeErr);
 
             });
 

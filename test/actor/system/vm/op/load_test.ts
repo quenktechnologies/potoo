@@ -25,7 +25,11 @@ describe('load', () => {
 
                 new Load(0).exec(e);
 
-                assert([e.current.data[0], e.current.data[1], e.current.data[2]]).
+                assert([
+                    e.current().get().data[0],
+                    e.current().get().data[1],
+                  e.current().get().data[2]
+                ]).
                     equate([12, Type.Template, Location.Constants]);
 
             });

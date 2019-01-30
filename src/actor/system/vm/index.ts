@@ -1,10 +1,35 @@
+import * as config from '../configuration';
+import * as template from '../../template';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe'
-import { Context } from '../../context';
-import { Template } from '../../template';
+import { Contexts, Context } from '../../context';
 import { Address } from '../../address';
+import { State } from '../state';
 import { System } from '../';
 import { Frame } from './frame';
+import { Script } from './script';
+
+/**
+ * Environment
+ */
+export interface Environment<C extends Context, S extends System<C>> {
+
+  /**
+   * configuration of the Environment.
+   */
+  configuration: config.Configuration
+
+    /**
+     * state serves as a table of actors within the system.
+     */
+    state: State<C,S>;
+
+    /**
+     * allocate a new Context for an actor.
+     */
+    allocate(self: Address, t: template.Template<C, S>): C;
+
+}
 
 /**
  * Executor interface.
@@ -15,14 +40,9 @@ import { Frame } from './frame';
 export interface Executor<C extends Context, S extends System<C>> {
 
     /**
-     * current is the current Frame being executed.
+     * current provides the Frame being executed (if any).
      */
-    current: Frame<C, S>
-
-    /**
-     * stack 
-     */
-    stack: Frame<C, S>[]
+    current(): Maybe<Frame<C, S>>
 
     /**
      * raise is invoked by Op codes to trigger the error
@@ -33,12 +53,22 @@ export interface Executor<C extends Context, S extends System<C>> {
     /**
      * allocate a new Context for an actor.
      */
-    allocate(t: Template<C, S>): C
+    allocate(self: Address, t: template.Template<C, S>): C
 
     /**
      * getContext from the system given its address.
      */
     getContext(addr: Address): Maybe<C>
+
+    /**
+     * getRouter attempts to retrieve a router for the address specified.
+     */
+    getRouter(addr: Address): Maybe<C>
+
+    /**
+     * getChildren provides the children context's for an address.
+     */
+    getChildren(addr: Address): Maybe<Contexts<C>>
 
     /**
      * putContext in the system at the specified address.
@@ -55,5 +85,10 @@ export interface Executor<C extends Context, S extends System<C>> {
      * its execution.
      */
     push(f: Frame<C, S>): Executor<C, S>
+
+    /**
+     * exec a script on behalf of the actor.
+     */
+    exec(s: Script<C, S>): void
 
 }

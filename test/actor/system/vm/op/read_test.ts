@@ -38,15 +38,15 @@ describe('read', () => {
 
                     ]));
 
-                e.current.context.mailbox.get().push('u', 'are', 'special');
+                e.current().get().context.mailbox.get().push('u', 'are', 'special');
 
-                e.current.context.behaviour.push(b);
+                e.current().get().context.behaviour.push(b);
 
                 new Read().exec(e);
 
                 assert(called).be.true();
 
-                assert(e.current.context.mailbox.get().length).equal(2);
+                assert(e.current().get().context.mailbox.get().length).equal(2);
 
             });
 

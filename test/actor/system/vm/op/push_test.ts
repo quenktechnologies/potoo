@@ -17,7 +17,7 @@ describe('push', () => {
 
                 new push.PushNum(12).exec(e);
 
-                assert(e.current.data).equate([Location.Literal, Type.Number, 12]);
+                assert(e.current().get().data).equate([Location.Literal, Type.Number, 12]);
 
             });
 
@@ -35,7 +35,7 @@ describe('push', () => {
                 new Script(), ));
 
                 new push.PushStr(12).exec(e);
-                assert(e.current.data).equate([Location.Constants, Type.String, 12]);
+                assert(e.current().get().data).equate([Location.Constants, Type.String, 12]);
 
             });
 
@@ -54,7 +54,7 @@ describe('push', () => {
 
                 new push.PushFunc(12).exec(e);
 
-                assert(e.current.data).equate([Location.Constants, Type.Function, 12]);
+                assert(e.current().get().data).equate([Location.Constants, Type.Function, 12]);
 
             });
 
@@ -73,7 +73,7 @@ describe('push', () => {
 
                 new push.PushTemp(12).exec(e);
 
-                assert(e.current.data).equate([Location.Constants, Type.Template, 12]);
+                assert(e.current().get().data).equate([Location.Constants, Type.Template, 12]);
 
             });
 
@@ -92,7 +92,7 @@ describe('push', () => {
 
                 new push.PushMsg(12).exec(e);
 
-                assert(e.current.data).equate([Location.Constants, Type.Message, 12]);
+                assert(e.current().get().data).equate([Location.Constants, Type.Message, 12]);
 
             });
 

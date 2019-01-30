@@ -1,8 +1,15 @@
 import * as log from '../../log';
+import { Type } from '@quenk/noni/lib/data/type';
 import { Context } from '../../../context';
 import { System } from '../../';
-import {Frame} from '../frame';
+import { Data, Frame } from '../frame';
 import { Executor } from '../';
+
+/**
+ * Log describes an Op code's execution in a format that can
+ * be logged.
+ */
+export type Log = [string, Data|[], Type[]];
 
 /**
  * Levels allowed for ops.
@@ -19,7 +26,7 @@ export enum Level {
 /**
  * Operand used during Op code execution.
  */
-export type Operand = number; 
+export type Operand = number;
 
 /**
  * Op code.
@@ -27,7 +34,7 @@ export type Operand = number;
  * Implementations of this class carry out a single task
  * in the Executor's context.
  */
-export  interface Op<C extends Context, S extends System<C>> {
+export interface Op<C extends Context, S extends System<C>> {
 
     /**
      * code for the Op.
@@ -37,17 +44,17 @@ export  interface Op<C extends Context, S extends System<C>> {
     /**
      * level of the instruction used for logging.
      */
-     level: Level;
+    level: Level;
 
     /**
      * exec the instruction.
      */
-  exec(s: Executor<C, S>): void;
+    exec(s: Executor<C, S>): void;
 
-  /**
-   * toLog turns the instruction into a loggable string.
-   */
-  toLog(f:Frame<C,S>) : string;
+    /**
+     * toLog turns the instruction into a loggable string.
+     */
+    toLog(f: Frame<C, S>): Log;
 
 }
 

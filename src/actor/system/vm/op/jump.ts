@@ -1,8 +1,9 @@
-import {right} from '@quenk/noni/lib/data/either';
+import { right } from '@quenk/noni/lib/data/either';
 import { Context } from '../../../context';
 import { System } from '../../';
+import {Type, Location} from '../frame';
 import { Executor } from '../';
-import { Level } from './';
+import { Log, Level, Op } from './';
 
 export const OP_CODE_JUMP_IF_ZERO = 0x8;
 
@@ -16,7 +17,8 @@ export const OP_CODE_JUMP_IF_ZERO = 0x8;
  * Raises:
  * JumpOutOfBoundsErr
  */
-export class JumpIfZero<C extends Context, S extends System<C>> {
+export class JumpIfZero<C extends Context, S extends System<C>>
+    implements Op<C, S>{
 
     constructor(public location: number) { }
 
@@ -26,24 +28,25 @@ export class JumpIfZero<C extends Context, S extends System<C>> {
 
     exec(e: Executor<C, S>): void {
 
-              e
-                .current
-                .resolveNumber(e.current.pop())
-                .chain(n => {
+        let curr = e.current().get();
 
-                    if (n === 0)
-                    return e.current.seek(this.location);
+        curr
+            .resolveNumber(curr.pop())
+            .chain(n => {
 
-                  return right(e.current);
+                if (n === 0)
+                    return curr.seek(this.location);
 
-                })
-                .lmap(err => e.raise(err));
+                return right(curr);
 
-        }
+            })
+            .lmap(err => e.raise(err));
 
-    toLog(): string {
+    }
 
-        return `jump ${this.location}`
+    toLog(): Log {
+
+        return ['jump', [this.location, Type.Number, Location.Literal], []];
 
     }
 

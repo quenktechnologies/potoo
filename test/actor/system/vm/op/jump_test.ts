@@ -1,5 +1,6 @@
 import { assert } from '@quenk/test/lib/assert';
 import { Script } from '../../../../../src/actor/system/vm/script';
+import {Log} from '../../../../../src/actor/system/vm/op';
 import { Frame, Type, Location } from '../../../../../src/actor/system/vm/frame';
 import { ExecutorImpl, newContext } from '../../../../fixtures/mocks';
 import { JumpIfZero } from '../../../../../src/actor/system/vm/op/jump';
@@ -18,9 +19,9 @@ class Hit {
 
     }
 
-    toLog() {
+    toLog() : Log{
 
-        return 'hit';
+        return ['hit', [], []];
 
     }
 
@@ -38,16 +39,16 @@ describe('jump', () => {
                 let two = new Hit();
                 let three = new Hit();
 
-              let e = new ExecutorImpl(new Frame('self', newContext(),
-                new Script(),  [
-                    one,
-                    two,
-                    three
-                ], [0, Type.Number, Location.Literal]));
+                let e = new ExecutorImpl(new Frame('self', newContext(),
+                    new Script(), [
+                        one,
+                        two,
+                        three
+                    ], [0, Type.Number, Location.Literal]));
 
                 new JumpIfZero(1).exec(e);
 
-                assert(e.current.ip).equal(1);
+                assert(e.current().get().ip).equal(1);
 
             });
 
@@ -57,28 +58,28 @@ describe('jump', () => {
                 let two = new Hit();
                 let three = new Hit();
 
-              let e = new ExecutorImpl(new Frame('self', newContext(),
-                new Script(),  [
-                    one,
-                    two,
-                    three
-                ], [1, Type.Number, Location.Literal]));
+                let e = new ExecutorImpl(new Frame('self', newContext(),
+                    new Script(), [
+                        one,
+                        two,
+                        three
+                    ], [1, Type.Number, Location.Literal]));
 
                 new JumpIfZero(1).exec(e);
 
-                assert(e.current.ip).equal(0);
+                assert(e.current().get().ip).equal(0);
 
             })
 
             it('should raise if jump is out of bounds', () => {
 
-              let e = new ExecutorImpl(new Frame('self', newContext(),
-                new Script(),  [
-                ], [0, Type.Number, Location.Literal]));
+                let e = new ExecutorImpl(new Frame('self', newContext(),
+                    new Script(), [
+                    ], [0, Type.Number, Location.Literal]));
 
                 new JumpIfZero(1).exec(e);
 
-                assert(e.MOCK.called()).equate(['raise']);
+                assert(e.MOCK.called()).equate(['current', 'raise']);
 
             })
 

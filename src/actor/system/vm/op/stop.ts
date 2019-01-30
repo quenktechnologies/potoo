@@ -1,8 +1,13 @@
+import * as error from '../error';
 import { map } from '@quenk/noni/lib/data/record';
+import { left, right } from '@quenk/noni/lib/data/either';
+import { Err } from '@quenk/noni/lib/control/error';
+import { isChild } from '../../../address';
 import { Context } from '../../../context';
 import { System } from '../../';
+import {Frame} from '../frame';
 import { Executor } from '../';
-import { Op, Level } from './';
+import {Log, Op, Level } from './';
 
 export const OP_CODE_STOP = 0x9;
 
@@ -14,17 +19,26 @@ export const OP_CODE_STOP = 0x9;
  */
 export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
 
-    constructor() { }
-
     public code = OP_CODE_STOP;
 
     public level = Level.Control;
 
     exec(e: Executor<C, S>): void {
 
-        e
-            .current
-            .resolveAddress(e.current.pop())
+        let curr = e.current().get();
+
+        curr
+            .resolveAddress(curr.pop())
+            .chain(addr => {
+
+                if ((!isChild(curr.actor, addr)) &&
+                    (addr !== curr.actor))
+                    return left<Err, string>(new error.IllegalStopErr(
+                        curr.actor, addr));
+
+                return right<Err, string>(addr);
+
+            })
             .map(addr =>
                 e
                     .getChildren(addr)
@@ -36,14 +50,22 @@ export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
 
                         }))
                     .orJust(() => { })
-                    .map(() => e.removeContext(addr)))
+                    .map(() => 
+                        e
+                            .getContext(addr)
+                            .map(ctx => {
+
+                                ctx.actor.stop();
+                                e.removeContext(addr);
+
+                            })))
             .lmap(err => e.raise(err));
 
     }
 
-    toLog(): string {
+  toLog(f: Frame<C,S>): Log {
 
-        return 'stop';
+        return ['stop', [], [f.peek()]];
 
     }
 

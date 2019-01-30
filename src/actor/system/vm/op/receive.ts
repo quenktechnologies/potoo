@@ -1,7 +1,8 @@
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Executor } from '../';
-import { Op, Level } from './';
+import { Frame } from '../frame';
+import { Log, Op, Level } from './';
 
 export const OP_CODE_RECEIVE = 0x12;
 
@@ -21,20 +22,20 @@ export class Receive<C extends Context, S extends System<C>> implements Op<C, S>
 
     exec(e: Executor<C, S>): void {
 
-        e
-            .current
-            .resolveForeign(e.current.pop())
-            .map(f => e.current.context.behaviour.push(f))
+        let curr = e.current().get();
+
+        curr
+            .resolveForeign(curr.pop())
+            .map(f => curr.context.behaviour.push(f))
             .map(() => {
 
-                e
-                    .current
+                curr
                     .context
                     .mailbox
                     .map(box => {
 
                         if (box.length > 0)
-                            e.current.context.actor.notify();
+                            curr.context.actor.notify();
 
                     })
 
@@ -43,9 +44,9 @@ export class Receive<C extends Context, S extends System<C>> implements Op<C, S>
 
     }
 
-    toLog(): string {
+    toLog(f: Frame<C, S>): Log {
 
-        return 'receive';
+      return ['receive', [], [f.peek()]];
 
     }
 
