@@ -2,6 +2,7 @@ import { assert } from '@quenk/test/lib/assert';
 import { Script } from '../../../../../src/actor/system/vm/script';
 import { Frame, Type, Location } from '../../../../../src/actor/system/vm/frame';
 import { Constants, ExecutorImpl, newContext } from '../../../../fixtures/mocks';
+import { Log } from '../../../../../src/actor/system/vm/op';
 import { Call } from '../../../../../src/actor/system/vm/op/call';
 
 class Int {
@@ -15,9 +16,9 @@ class Int {
 
     }
 
-    toLog() {
+    toLog(): Log {
 
-        return 'int';
+        return ['int', [], []];
 
     }
 
@@ -106,15 +107,15 @@ describe('call', () => {
                     ])
 
                 assert(new Call(3).toLog(f))
-                .equate([
-                  'call', [3,Type.Number, Location.Literal], 
-                  [
-                    [0,Type.Function, Location.Constants],
-                    [1,Type.Number, Location.Constants],
-                    [2,Type.Number, Location.Constants],
-                    [3,Type.Number, Location.Constants]
-                  ]
-                ]);
+                    .equate([
+                        'call', [3, Type.Number, Location.Literal],
+                        [
+                            [0, Type.Function, Location.Constants],
+                            [1, Type.Number, Location.Literal],
+                            [2, Type.Number, Location.Literal],
+                            [3, Type.Number, Location.Literal]
+                        ]
+                    ]);
 
 
             });
