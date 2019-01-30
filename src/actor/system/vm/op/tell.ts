@@ -2,11 +2,9 @@ import { Message } from '../../../message';
 import { Envelope } from '../../../mailbox';
 import { Context } from '../../../context';
 import { System } from '../../';
-import {Frame} from '../frame';
+import { Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_TELL = 0x7;
+import { OP_CODE_TELL, Log, Op, Level } from './';
 
 /**
  * Tell delivers the first message in the outbox queue to the address
@@ -65,9 +63,9 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
 
     }
 
-  toLog(f: Frame<C,S>): Log {
+    toLog(f: Frame<C, S>): Log {
 
-        return ['tell', [],[f.peek(), f.peek(1)]];
+        return ['tell', [], [f.peek(), f.peek(1)]];
 
     }
 

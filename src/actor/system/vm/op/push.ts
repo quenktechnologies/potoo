@@ -1,14 +1,15 @@
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Executor } from '../';
-import { Type, Location  } from '../frame';
-import { Log, Level } from './';
-
-export const OP_CODE_PUSH_NUM = 0x1;
-export const OP_CODE_PUSH_STR = 0x2;
-export const OP_CODE_PUSH_FUNC = 0x3;
-export const OP_CODE_PUSH_TEMP = 0x4;
-export const OP_CODE_PUSH_MSG = 0x5;
+import { Type, Location } from '../frame';
+import { 
+OP_CODE_PUSH_NUM,
+OP_CODE_PUSH_STR,
+OP_CODE_PUSH_FUNC,
+OP_CODE_PUSH_TEMP,
+OP_CODE_PUSH_MSG,
+  Log,
+  Level } from './';
 
 /**
  * PushNum pushes a literal number onto the stack.

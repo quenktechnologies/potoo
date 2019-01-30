@@ -1,28 +1,51 @@
 import { right } from '@quenk/noni/lib/data/either';
 import { Context } from '../../../context';
 import { System } from '../../';
-import {Type, Location} from '../frame';
+import { Type, Location, Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Level, Op } from './';
-
-export const OP_CODE_JUMP_IF_ZERO = 0x8;
+import { OP_CODE_JUMP, OP_CODE_JUMP_IF_ONE,Log, Level, Op } from './';
 
 /**
- * JumpIfZero changes the Context's instruction pointer to the value supplied
- * if the top of the stack is strictly equal to zero
+ * Jump to a new location.
+ */
+export class Jump<C extends Context, S extends System<C>> implements Op<C, S> {
+
+    constructor(public location: number) { }
+
+    public code = OP_CODE_JUMP;
+
+    public level = Level.Base;
+
+    exec(e: Executor<C, S>) {
+
+        let curr = e.current().get();
+
+        curr
+            .seek(this.location)
+            .lmap(err => e.raise(err));
+
+    }
+
+    toLog(): Log {
+
+        return ['jump', [this.location, Type.Number, Location.Literal], []];
+
+    }
+
+}
+
+/**
+ * JumpIfOne changes the current Frame's ip if the top value is one.
  *
  * Pops
  * 1. value to test.
- *
- * Raises:
- * JumpOutOfBoundsErr
  */
-export class JumpIfZero<C extends Context, S extends System<C>>
+export class JumpIfOne<C extends Context, S extends System<C>>
     implements Op<C, S>{
 
     constructor(public location: number) { }
 
-    code = OP_CODE_JUMP_IF_ZERO;
+    code = OP_CODE_JUMP_IF_ONE;
 
     level = Level.Base;
 
@@ -34,7 +57,7 @@ export class JumpIfZero<C extends Context, S extends System<C>>
             .resolveNumber(curr.pop())
             .chain(n => {
 
-                if (n === 0)
+                if (n === 1)
                     return curr.seek(this.location);
 
                 return right(curr);
@@ -44,9 +67,10 @@ export class JumpIfZero<C extends Context, S extends System<C>>
 
     }
 
-    toLog(): Log {
+    toLog(f: Frame<C, S>): Log {
 
-        return ['jump', [this.location, Type.Number, Location.Literal], []];
+        return ['jumpifone', [this.location, Type.Number, Location.Literal],
+            [f.peek()]];
 
     }
 

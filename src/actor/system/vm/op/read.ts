@@ -4,9 +4,7 @@ import { Message } from '../../../message';
 import { Behaviour } from '../../../';
 import { System } from '../../';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_READ = 0x10;
+import { OP_CODE_READ, Log, Op, Level } from './';
 
 /**
  * Read consumes the next message in the current actor's mailbox.
@@ -53,7 +51,7 @@ export class Read<C extends Context, S extends System<C>> implements Op<C, S> {
 
     toLog(): Log {
 
-        return ['read', [],[]];
+        return ['read', [], []];
 
     }
 

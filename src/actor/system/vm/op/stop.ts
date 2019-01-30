@@ -5,11 +5,9 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { isChild } from '../../../address';
 import { Context } from '../../../context';
 import { System } from '../../';
-import {Frame} from '../frame';
+import { Frame } from '../frame';
 import { Executor } from '../';
-import {Log, Op, Level } from './';
-
-export const OP_CODE_STOP = 0x9;
+import { OP_CODE_STOP, Log, Op, Level } from './';
 
 /**
  * Stop an actor, all of it's children will also be stopped.
@@ -50,7 +48,7 @@ export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
 
                         }))
                     .orJust(() => { })
-                    .map(() => 
+                    .map(() =>
                         e
                             .getContext(addr)
                             .map(ctx => {
@@ -63,7 +61,7 @@ export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
 
     }
 
-  toLog(f: Frame<C,S>): Log {
+    toLog(f: Frame<C, S>): Log {
 
         return ['stop', [], [f.peek()]];
 

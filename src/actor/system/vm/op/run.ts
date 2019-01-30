@@ -3,9 +3,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_RUN = 0x22;
+import {OP_CODE_RUN, Log, Op, Level } from './';
 
 /**
  * Run invokes the run method of an actor given the address.
@@ -36,7 +34,7 @@ export class Run<C extends Context, S extends System<C>> implements Op<C, S> {
 
     toLog(f: Frame<C, S>): Log {
 
-      return ['run', [], [f.peek()]];
+        return ['run', [], [f.peek()]];
 
     }
 

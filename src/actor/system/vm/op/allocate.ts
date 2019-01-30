@@ -4,9 +4,7 @@ import { isRestricted, make } from '../../../address';
 import { System } from '../../';
 import { Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_ALLOCATE = 0x5;
+import { OP_CODE_ALLOCATE, Log, Op, Level } from './';
 
 /**
  * Allocate a new Context frame for an actor from a template.

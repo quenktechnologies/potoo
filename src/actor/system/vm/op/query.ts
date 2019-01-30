@@ -2,9 +2,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_QUERY = 0xc;
+import { OP_CODE_QUERY,Log, Op, Level } from './';
 
 /**
  * Query verifies whether an address has a valid Context within the system. 
@@ -45,7 +43,7 @@ export class Query<C extends Context, S extends System<C>> implements Op<C, S> {
 
     toLog(f: Frame<C, S>): Log {
 
-      return ['query', [], f.peek()];
+        return ['query', [], f.peek()];
 
     }
 

@@ -2,9 +2,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Executor } from '../';
 import { Frame } from '../frame';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_RECEIVE = 0x12;
+import { OP_CODE_RECEIVE, Log, Op, Level } from './';
 
 /**
  * Receive schedules a handler for a resident actor to receive the next
@@ -46,7 +44,7 @@ export class Receive<C extends Context, S extends System<C>> implements Op<C, S>
 
     toLog(f: Frame<C, S>): Log {
 
-      return ['receive', [], [f.peek()]];
+        return ['receive', [], [f.peek()]];
 
     }
 

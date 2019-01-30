@@ -1,9 +1,7 @@
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_DISCARD = 0xb;
+import {OP_CODE_DISCARD, Log, Op, Level } from './';
 
 /**
  * Discard removes and discards the first message in a Context's mailbox.
@@ -22,7 +20,7 @@ export class Discard<C extends Context, S extends System<C>> implements Op<C, S>
 
     toLog(): Log {
 
-        return ['discard',[],[]];
+        return ['discard', [], []];
 
     }
 

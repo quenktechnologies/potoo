@@ -2,9 +2,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Level } from './';
-
-export const OP_CODE_LOAD = 0x12;
+import {OP_CODE_LOAD, Log, Level } from './';
 
 /**
  * Load the local stored at index onto the stack.
@@ -30,7 +28,7 @@ export class Load<C extends Context, S extends System<C>> {
 
     toLog(f: Frame<C, S>): Log {
 
-        return ['load', [this.index, Type.Number, Location.Literal],[f.peek()]];
+        return ['load', [this.index, Type.Number, Location.Literal], [f.peek()]];
 
     }
 

@@ -2,9 +2,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
 import { Executor } from '../';
-import { Log,Level, Op } from './';
-
-export const OP_CODE_STORE = 0x11;
+import {OP_CODE_STORE, Log, Level, Op } from './';
 
 /**
  * Store the top most value on the stack in the locals array at the 

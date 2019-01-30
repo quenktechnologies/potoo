@@ -2,9 +2,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_CALL = 0x17;
+import {OP_CODE_CALL, Log, Op, Level } from './';
 
 /**
  * Call a function.

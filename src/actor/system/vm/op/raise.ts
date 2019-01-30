@@ -2,9 +2,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_RAISE = 0x21;
+import { OP_CODE_RAISE,Log, Op, Level } from './';
 
 /**
  * Raise instruction.
@@ -44,7 +42,7 @@ export class Raise<C extends Context, S extends System<C>> implements Op<C, S> {
 
     toLog(f: Frame<C, S>): Log {
 
-      return ['raise', [], [f.peek()]];
+        return ['raise', [], [f.peek()]];
 
     }
 

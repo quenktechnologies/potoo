@@ -2,9 +2,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_RESTART = 0x23;
+import { OP_CODE_RESTART, Log, Op, Level } from './';
 
 /**
  * Restart the current or a child actor.
@@ -46,7 +44,7 @@ export class Restart<C extends Context, S extends System<C>> implements Op<C, S>
 
     toLog(f: Frame<C, S>): Log {
 
-      return ['restart', [], [f.peek()]];
+        return ['restart', [], [f.peek()]];
 
     }
 

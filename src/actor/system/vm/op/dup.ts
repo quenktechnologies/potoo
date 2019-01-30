@@ -2,9 +2,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_DUP = 0x6;
+import { OP_CODE_DUP, Log, Op, Level } from './';
 
 /**
  * Dup duplicates the current value at the top of the stack.
@@ -27,7 +25,7 @@ export class Dup<C extends Context, S extends System<C>> implements Op<C, S> {
 
     toLog(f: Frame<C, S>): Log {
 
-      return ['dup', [], [f.peek()]];
+        return ['dup', [], [f.peek()]];
 
     }
 

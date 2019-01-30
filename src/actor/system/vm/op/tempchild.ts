@@ -2,11 +2,9 @@ import * as error from '../error';
 import { right, left } from '@quenk/noni/lib/data/either';
 import { Context } from '../../../context';
 import { System } from '../../';
-import {Frame} from '../frame';
+import { Frame } from '../frame';
 import { Executor } from '../';
-import { Log, Op, Level } from './';
-
-export const OP_CODE_TEMP_CHILD = 0x16;
+import { OP_CODE_TEMP_CHILD, Log, Op, Level } from './';
 
 /**
  * TempChild copies a template's child onto the heap.
@@ -23,12 +21,12 @@ export class TempChild<C extends Context, S extends System<C>> implements Op<C, 
 
     exec(e: Executor<C, S>): void {
 
-      let curr = e.current().get();
+        let curr = e.current().get();
 
-            curr
+        curr
             .resolveTemplate(curr.pop())
             .chain(t =>
-                    curr
+                curr
                     .resolveNumber(curr.pop())
                     .chain(n => {
 
@@ -50,7 +48,7 @@ export class TempChild<C extends Context, S extends System<C>> implements Op<C, 
 
     }
 
-  toLog(f: Frame<C,S>): Log {
+    toLog(f: Frame<C, S>): Log {
 
         return ['tempchild', [], [f.peek(), f.peek(1)]];
 
