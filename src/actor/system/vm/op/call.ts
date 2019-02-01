@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import {OP_CODE_CALL, Log, Op, Level } from './';
 
 /**
@@ -19,7 +19,7 @@ export class Call<C extends Context, S extends System<C>> implements Op<C, S> {
 
     public level = Level.Control;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         let curr = e.current().get();
         let { actor, context, script, heap } = curr;

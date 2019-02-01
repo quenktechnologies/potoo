@@ -1,6 +1,6 @@
 import { Context } from '../../../context';
 import { System } from '../../';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import {OP_CODE_DISCARD, Log, Op, Level } from './';
 
 /**
@@ -12,7 +12,7 @@ export class Discard<C extends Context, S extends System<C>> implements Op<C, S>
 
     public level = Level.Actor;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         e.current().get().context.mailbox.map(box => box.shift());
 

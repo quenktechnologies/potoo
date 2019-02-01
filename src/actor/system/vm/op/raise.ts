@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Frame } from '../frame';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import { OP_CODE_RAISE,Log, Op, Level } from './';
 
 /**
@@ -29,7 +29,7 @@ export class Raise<C extends Context, S extends System<C>> implements Op<C, S> {
 
     public level = Level.System;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         let curr = e.current().get();
 

@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Frame } from '../frame';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import { OP_CODE_DUP, Log, Op, Level } from './';
 
 /**
@@ -13,7 +13,7 @@ export class Dup<C extends Context, S extends System<C>> implements Op<C, S> {
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         let curr = e.current().get();
         let [value, type, location] = curr.pop();

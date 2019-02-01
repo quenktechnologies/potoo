@@ -1,9 +1,10 @@
+import { tick } from '@quenk/noni/lib/control/timer';
 import { Message } from '../../../message';
 import { Envelope } from '../../../mailbox';
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Frame } from '../frame';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import { OP_CODE_TELL, Log, Op, Level } from './';
 
 /**
@@ -13,6 +14,10 @@ import { OP_CODE_TELL, Log, Op, Level } from './';
  * Pops:
  * 1. Address
  * 2. Message
+ *
+ * Pushes:
+ *
+ * 1 if delivery is successful, 0 otherwise.
  */
 export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
 
@@ -20,7 +25,7 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
 
     public level = Level.Actor;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         let curr = e.current().get();
 
@@ -43,6 +48,7 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
         if (maybeRouter.isJust()) {
 
             deliver(maybeRouter.get(), new Envelope(addr, curr.actor, msg));
+            curr.pushNumber(1);
 
         } else {
 
@@ -51,15 +57,15 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
             if (maybeCtx.isJust()) {
 
                 deliver(maybeCtx.get(), msg);
+                curr.pushNumber(1);
 
             } else {
 
-                //send to "?"
+                curr.pushNumber(0);
 
             }
 
         }
-
 
     }
 
@@ -75,4 +81,5 @@ const deliver = <C extends Context>(ctx: C, msg: Message) =>
     ctx
         .mailbox
         .map(mbox => mbox.push(msg))
+        .map(() => tick(() => ctx.actor.notify()))
         .orJust(() => ctx.actor.accept(msg));

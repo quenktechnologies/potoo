@@ -3,7 +3,7 @@ import { Context } from '../../../context';
 import { isRestricted, make } from '../../../address';
 import { System } from '../../';
 import { Frame } from '../frame';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import { OP_CODE_ALLOCATE, Log, Op, Level } from './';
 
 /**
@@ -24,7 +24,7 @@ export class Allocate<C extends Context, S extends System<C>> implements Op<C, S
 
     public level = Level.Actor;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         let curr = e.current().get();
         let parent = curr.resolveAddress(curr.pop());

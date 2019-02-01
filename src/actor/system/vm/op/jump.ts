@@ -2,7 +2,7 @@ import { right } from '@quenk/noni/lib/data/either';
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import { OP_CODE_JUMP, OP_CODE_JUMP_IF_ONE,Log, Level, Op } from './';
 
 /**
@@ -16,7 +16,7 @@ export class Jump<C extends Context, S extends System<C>> implements Op<C, S> {
 
     public level = Level.Base;
 
-    exec(e: Executor<C, S>) {
+    exec(e: Runtime<C, S>) {
 
         let curr = e.current().get();
 
@@ -49,7 +49,7 @@ export class JumpIfOne<C extends Context, S extends System<C>>
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         let curr = e.current().get();
 

@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Frame } from '../frame';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import { OP_CODE_TEMP_CC, Log, Level } from './';
 
 /**
@@ -17,7 +17,7 @@ export class TempCC<C extends Context, S extends System<C>>  {
 
     public level = Level.Control;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         let curr = e.current().get();
 

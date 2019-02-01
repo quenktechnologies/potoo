@@ -3,7 +3,7 @@ import { Context } from '../../../context';
 import { Message } from '../../../message';
 import { Behaviour } from '../../../';
 import { System } from '../../';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import { OP_CODE_READ, Log, Op, Level } from './';
 
 /**
@@ -19,7 +19,7 @@ export class Read<C extends Context, S extends System<C>> implements Op<C, S> {
 
     public level = Level.Actor;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         let curr = e.current().get();
 

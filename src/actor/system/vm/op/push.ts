@@ -1,15 +1,17 @@
 import { Context } from '../../../context';
 import { System } from '../../';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import { Type, Location } from '../frame';
-import { 
-OP_CODE_PUSH_NUM,
-OP_CODE_PUSH_STR,
-OP_CODE_PUSH_FUNC,
-OP_CODE_PUSH_TEMP,
-OP_CODE_PUSH_MSG,
+import {
+    OP_CODE_PUSH_NUM,
+    OP_CODE_PUSH_STR,
+    OP_CODE_PUSH_FUNC,
+    OP_CODE_PUSH_TEMP,
+    OP_CODE_PUSH_MSG,
+    OP_CODE_PUSH_FOREIGN,
   Log,
-  Level } from './';
+    Level
+} from './';
 
 /**
  * PushNum pushes a literal number onto the stack.
@@ -22,7 +24,7 @@ export class PushNum<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         e.current().get().push(this.index, Type.Number, Location.Literal);
 
@@ -47,7 +49,7 @@ export class PushStr<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         e.current().get().push(this.index, Type.String, Location.Constants);
 
@@ -72,7 +74,7 @@ export class PushFunc<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         e.current().get().push(this.index, Type.Function, Location.Constants);
 
@@ -97,7 +99,7 @@ export class PushTemp<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         e.current().get().push(this.index, Type.Template, Location.Constants);
 
@@ -122,7 +124,7 @@ export class PushMsg<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         e.current().get().push(this.index, Type.Message, Location.Constants);
 
@@ -131,6 +133,31 @@ export class PushMsg<C extends Context, S extends System<C>> {
     toLog(): Log {
 
         return ['pushmsg', [this.index, Type.Message, Location.Constants], []];
+
+    }
+
+}
+
+/**
+ * PushForeign pushes a foreign function onto the stack.
+ */
+export class PushForeign<C extends Context, S extends System<C>> {
+
+    constructor(public index: number) { }
+
+    code = OP_CODE_PUSH_FOREIGN;
+
+    level = Level.Base;
+
+    exec(e: Runtime<C, S>): void {
+
+        e.current().get().push(this.index, Type.Foreign, Location.Constants);
+
+    }
+
+    toLog(): Log {
+
+        return ['pushmsg', [this.index, Type.Foreign, Location.Constants], []];
 
     }
 

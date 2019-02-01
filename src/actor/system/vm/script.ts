@@ -48,7 +48,7 @@ export type Foreign<C extends Context, S extends System<C>>
     ;
 
 /**
- * Script is a "program" an actor submits to the Executor run execute.
+ * Script is a "program" an actor submits to the Runtime run execute.
  *
  * It consists of the following sections:
  * 1. constants - Static values referenced in the code section.

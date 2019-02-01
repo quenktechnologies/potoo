@@ -1,14 +1,10 @@
 import { Context } from '../../../context';
 import { System } from '../../';
-import { Frame } from '../frame';
-import { Executor } from '../';
+import { Runtime } from '../runtime';
 import { OP_CODE_RESTART, Log, Op, Level } from './';
 
 /**
- * Restart the current or a child actor.
- *
- * Pops:
- * 1. Address of the actor to restart.
+ * Restart the current actor.
  */
 export class Restart<C extends Context, S extends System<C>> implements Op<C, S> {
 
@@ -16,35 +12,30 @@ export class Restart<C extends Context, S extends System<C>> implements Op<C, S>
 
     public level = Level.Control;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
         let curr = e.current().get();
 
-        curr
-            .resolveAddress(curr.pop())
-            .map(addr => {
-
                 e
-                    .getContext(addr)
+                    .getContext(curr.actor)
                     .map(ctx => {
 
                         ctx.actor.stop();
 
-                        let nctx = e.allocate(addr, ctx.template);
+                        let nctx = e.allocate(curr.actor, ctx.template);
 
                         nctx.mailbox = ctx.mailbox;
 
-                        e.putContext(addr, nctx);
+                        e.putContext(curr.actor, nctx);
 
                     });
 
-            })
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(): Log {
 
-        return ['restart', [], [f.peek()]];
+        return ['restart', [], []];
 
     }
 
