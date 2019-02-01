@@ -1,13 +1,12 @@
 import { match } from '@quenk/noni/lib/control/match';
 import { Any } from '@quenk/noni/lib/data/type';
-import { system } from '../../actor/system/default';
-import { Raise } from '../system/op/raise';
-import { Tell } from '../system/op/tell';
-import { Discard } from '../system/op/discard';
+import { system } from '../system/default';
+import { Handle } from '../system/vm/handle';
 import { System } from '../system';
+import { DropScript, TellScript } from '../resident/scripts';
 import { Message } from '../message';
 import { Envelope } from '../mailbox';
-import {Context} from '../context';
+import { Context } from '../context';
 
 const id = <string>process.env.POTOO_ACTOR_ID;
 
@@ -27,24 +26,28 @@ const sys = system({
 
     hooks: {
 
-        drop: ({ to, from, message }: Envelope) =>
-            (<any>process).send(new Tell(to, from, message))
+        drop: (e: Envelope) => (<any>process).send(e)
 
     }
 
 });
 
-const filter = <C extends Context>(s: System<C>) => (m: Message) => match(m)
-    .caseOf(tellShape, filterTell(s))
-    .orElse((m: Message) => s.exec(new Discard(address, address, m)))
-    .end();
+const filter = <C extends Context>(s: Handle<C, System<C>>) => (m: Message) =>
+    match(m)
+        .caseOf(tellShape, filterTell(s))
+        .orElse(fitlerDrop(s))
+        .end();
 
-const filterTell = <C extends Context>(s: System<C>) => ({ to, from, message }
-    : { to: string, from: string, message: Message }) =>
-    s.exec(new Tell(to, from, message));
+const filterTell = <C extends Context>(s: Handle<C, System<C>>) =>
+    ({ to, message }: { to: string, from: string, message: Message }) =>
+        s.exec(new TellScript(to, message));
+
+
+const fitlerDrop = <C extends Context>(s: Handle<C, System<C>>) => (m: Message) =>
+    s.exec(new DropScript(m));
 
 process.on('uncaughtException', e =>
-    (<any>process.send)(new Raise({ message: <string>e.stack }, address, address)));
+    (<any>process.send)(<string>e.stack, address));
 
 sys.spawn({
 

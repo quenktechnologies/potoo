@@ -1,26 +1,25 @@
-import * as op from '../system/op';
 import { resolve } from 'path';
 import { ChildProcess, fork } from 'child_process';
 import { Maybe, nothing, just } from '@quenk/noni/lib/data/maybe';
 import { match } from '@quenk/noni/lib/control/match';
 import { Any } from '@quenk/noni/lib/data/type';
+import { Handle } from '../system/vm/handle';
 import { System } from '../system';
-import { Raise } from '../system/op/raise';
-import { Kill } from '../system/op/kill';
-import { Discard } from '../system/op/discard';
-import { Tell } from '../system/op/tell';
-import { Forward } from '../system/op/forward';
+import { AcceptScript as DropScript, TellScript } from '../resident/scripts';
+import { StopScript } from '../system/vm/runtime/scripts';
+import { OP_CODE_RAISE, OP_CODE_TELL } from '../system/vm/op';
 import { Context } from '../context';
 import { Envelope } from '../mailbox';
 import { Message } from '../message';
 import { Address, getId } from '../address';
 import { Actor } from '../';
+import { RaiseScript } from './scripts';
 
 export const SCRIPT_PATH = `${__dirname}/../../../lib/actor/process/script.js`;
 
 const raiseShape = {
 
-    code: op.OP_RAISE,
+    code: OP_CODE_RAISE,
 
     src: String,
 
@@ -32,7 +31,7 @@ const raiseShape = {
 
 const tellShape = {
 
-    code: op.OP_TELL,
+    code: OP_CODE_TELL,
 
     to: String,
 
@@ -46,6 +45,21 @@ const tellShape = {
  * Path to the actor process.
  */
 export type Path = string;
+
+interface TellMsg {
+
+    to: Address,
+
+    message: Message
+}
+
+interface RaiseMsg {
+
+    error: { message: string },
+
+    src: string
+
+}
 
 /**
  * Process actor.
@@ -65,56 +79,67 @@ export type Path = string;
  */
 export class Process<C extends Context> implements Actor<C> {
 
-    constructor(public module: Path, public system: System<C>) { }
+  constructor(
+    public module: Path,
+    public handle: Handle<C, System<C>>,
+   public script = SCRIPT_PATH) { }
 
-    handle: Maybe<ChildProcess> = nothing();
+    process: Maybe<ChildProcess> = nothing();
 
-    self = () => this.system.identify(this);
+    self = () => this.handle.self;
 
     init(c: C): C {
 
         c.flags.immutable = true;
         c.flags.buffered = false;
+        c.flags.router = true;
         return c;
 
     }
 
     accept(e: Envelope): Process<C> {
 
-        this
-            .handle
-            .map(p => p.send(new Tell(e.to, e.from, e.message)))
-            .orJust(() => new Discard(e.to, e.from, e.message))
+        if (this.process.isJust()) {
+
+            this.process.get().send(e);
+
+        } else {
+
+            this.handle.exec(new DropScript(e));
+
+        }
 
         return this;
 
     }
 
+    notify() { }
+
     stop() {
 
-        this.handle =
-            this
-                .handle
-                .map(p => p.kill())
-                .chain(() => nothing());
+        if (this.process.isJust()) {
+
+            this.process.get().kill();
+
+            this.process = nothing();
+
+        }
 
     }
 
     run() {
 
-        this.handle =
-            just(spawn(this))
+        this.process =
+            just(fork(resolve(this.script), [], spawnOpts(this)))
                 .map(handleErrors(this))
                 .map(handleMessages(this))
                 .map(handleExit(this));
-
-        this.system.exec(new Forward(this.self(), this.self()));
 
     }
 
 }
 
-const spawn = <C extends Context>(p: Process<C>) => fork(resolve(SCRIPT_PATH), [], {
+const spawnOpts = <C extends Context>(p: Process<C>) => ({
 
     env: {
 
@@ -126,31 +151,33 @@ const spawn = <C extends Context>(p: Process<C>) => fork(resolve(SCRIPT_PATH), [
 
     }
 
-})
+});
 
-const handleMessages = <C extends Context>
-  (p: Process<C>) => (c: ChildProcess) =>
-    c.on('message', (m: Message) => match(m)
-        .caseOf(tellShape, handleTellMessage(p))
-        .caseOf(raiseShape, handleRaiseMessage(p))
-        .orElse((m: Message) => p.system.exec(new Discard(p.self(), p.self(), m)))
-        .end());
+const handleMessages = <C extends Context>(p: Process<C>) => (c: ChildProcess) =>
+    c.on('message', filterMessage(p));
 
-const handleTellMessage = <C extends Context>
-  (p: Process<C>) => ({ to, from, message }
-    : { to: Address, from: Address, message: Message }) =>
-    p.system.exec(new Tell(to, from, message));
+const filterMessage = <C extends Context>(p: Process<C>) => (m: Message) =>
+    match(m)
+        .caseOf(tellShape, handleTell(p))
+        .caseOf(raiseShape, handleRaise(p))
+        .orElse(handleUnknown(p))
+        .end();
 
-const handleRaiseMessage = <C extends Context>
-  (p: Process<C>) => ({ error: { message }, src, dest }
-        : { error: { message: string }, src: string, dest: string }) =>
-        p.system.exec(new Raise(new Error(message), src, dest));
+const handleUnknown = <C extends Context>(p: Process<C>) => (m: Message) =>
+    p.handle.exec(new DropScript(m));
+
+const handleTell = <C extends Context>(p: Process<C>) => (m: TellMsg) =>
+    p.handle.exec(new TellScript(m.to, m.message));
+
+const handleRaise = <C extends Context>
+    (p: Process<C>) => ({ error: { message }, src }: RaiseMsg) =>
+        p.handle.exec(new RaiseScript(`Error message from ${src}: ${message}`));
 
 const handleErrors = <C extends Context>(p: Process<C>) => (c: ChildProcess) =>
     c.on('error', raise(p))
 
 const raise = <C extends Context>(p: Process<C>) => (e: Error) =>
-    p.system.exec(new Raise(e, p.self(), p.self()));
+    p.handle.exec(new RaiseScript(e.message));
 
 const handleExit = <C extends Context>(p: Process<C>) => (c: ChildProcess) =>
-    c.on('exit', () => p.system.exec(new Kill(p, p.self())));
+    c.on('exit', () => p.handle.exec(new StopScript(p.self())));
