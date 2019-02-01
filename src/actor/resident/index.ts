@@ -1,21 +1,18 @@
 import { fromBoolean } from '@quenk/noni/lib/data/either';
 import { just } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
-import { ADDRESS_DISCARD, Address, isRestricted, make } from '../address';
-import { Spawn } from '../system/op/spawn';
-import { Tell } from '../system/op/tell';
-import { Kill } from '../system/op/kill';
-import { Discard } from '../system/op/discard';
-import { Receive } from '../system/op/receive';
-import { DetachedSystem } from '../system/detached';
-import { Message } from '../message';
-import { Envelope } from '../mailbox';
+import { StopScript } from '../system/vm/runtime/scripts';
+import { SpawnScript } from '../system/framework/scripts';
+import { Handle, Void } from '../system/vm/handle';
 import { System } from '../system';
+import { ADDRESS_DISCARD, Address, isRestricted, make } from '../address';
+import { Message } from '../message';
 import { Template } from '../template';
 import { Context } from '../context';
-import { Case } from './case';
 import { Actor } from '../';
+import { Case } from './case';
 import { Api } from './api';
+import { TellScript, AcceptScript, ReceiveScript,NotifyScript } from './scripts';
 
 /**
  * Reference to an actor address.
@@ -34,26 +31,35 @@ export interface Resident<C extends Context, S extends System<C>>
 export abstract class AbstractResident<C extends Context, S extends System<C>>
     implements Resident<C, S> {
 
-    constructor(public system: System<C>) { }
+    constructor(public handle: Handle<C, S>) { }
 
     abstract init(c: C): C;
 
-    self() {
+    abstract select<T>(_: Case<T>[]): AbstractResident<C, S>;
 
-        return this.system.identify(this);
+    abstract run(): void;
+
+    notify() {
+
+this.handle.exec(new NotifyScript());
 
     }
 
-    accept({ to, from, message }: Envelope) {
+    self() {
 
-        this.system.exec(new Discard(to, from, message));
-        return this;
+        return this.handle.self;
+
+    }
+
+    accept(m: Message) {
+
+        this.handle.exec(new AcceptScript(m));
 
     }
 
     spawn(t: Template<C, S>): Address {
 
-        this.system.exec(new Spawn(this, t));
+        this.handle.exec(new SpawnScript(t));
 
         return isRestricted(t.id) ?
             ADDRESS_DISCARD :
@@ -63,33 +69,30 @@ export abstract class AbstractResident<C extends Context, S extends System<C>>
 
     tell<M>(ref: Address, m: M): AbstractResident<C, S> {
 
-        this.system.exec(new Tell(ref, this.self(), m));
+        this.handle.exec(new TellScript(ref, m));
         return this;
 
     }
 
-    abstract select<T>(_: Case<T>[]): AbstractResident<C, S>;
 
     kill(addr: Address): AbstractResident<C, S> {
 
-        this.system.exec(new Kill(this, addr));
+        this.handle.exec(new StopScript(addr));
         return this;
 
     }
 
     exit(): void {
 
-        this.kill(this.self());
+        this.handle.exec(new StopScript(this.self()));
 
     }
 
     stop(): void {
 
-        this.system = new DetachedSystem();
+        this.handle = new Void('?', this.handle.system);
 
     }
-
-    abstract run(): void;
 
 }
 
@@ -128,7 +131,7 @@ export abstract class Immutable<T, C extends Context, S extends System<C>>
 
     }
 
-      run() {}
+    run() { }
 
 }
 
@@ -155,7 +158,7 @@ export abstract class Mutable<C extends Context, S extends System<C>>
      */
     select<M>(cases: Case<M>[]): Mutable<C, S> {
 
-        this.system.exec(new Receive(this.self(), false, mbehaviour(cases)));
+        this.handle.exec(new ReceiveScript(mbehaviour(cases)));
         return this;
 
     }
