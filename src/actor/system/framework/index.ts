@@ -1,24 +1,23 @@
 import * as config from '../configuration';
 import { Err } from '@quenk/noni/lib/control/error';
 import { nothing } from '@quenk/noni/lib/data/maybe';
-import { ADDRESS_DISCARD, ADDRESS_SYSTEM, Address } from '../../address';
+import { ADDRESS_SYSTEM } from '../../address';
 import { Template as ActorTemplate } from '../../template';
 import { Actor, Instance } from '../../';
-import { Discard } from '../op/discard';
-import { Op, log } from '../op';
-import { Envelope } from '../../mailbox';
 import { Context } from '../../context';
-import { State, getAddress } from '../state';
-import { Spawn } from '../op/spawn';
-import { Executor } from '../op';
+import { Template } from '../../template';
+import { State } from '../state';
+import { Runtime } from '../vm/runtime';
 import { System } from '../';
+import { SpawnScript } from './scripts';
+import { This } from '../vm/runtime/this';
 
 /**
- * Template is provided here as a convenience when creating new systems.
+ * STemplate is provided here as a convenience when creating new systems.
  *
  * It provides the expected defaults.
  */
-export class Template {
+export class STemplate {
 
     public id = ADDRESS_SYSTEM;
 
@@ -47,45 +46,28 @@ export class Template {
 /**
  * AbstractSystem
  *
- * Implemnation of a System and Executor that spawns
+ * Implemnation of a System and Runtime that spawns
  * various general purpose actors.
  */
-export abstract class AbstractSystem<C extends Context>
-    implements System<C>, Executor<C, System<C>> {
+export abstract class AbstractSystem<C extends Context> implements System<C> {
 
     constructor(public configuration: config.Configuration = {}) { }
 
-    stack: Op<C, System<C>>[] = [];
-
-    running: boolean = false;
-
     abstract state: State<C>;
 
-    abstract allocate(t: ActorTemplate<C, AbstractSystem<C>>): C;
-
-    exec(code: Op<C, AbstractSystem<C>>): AbstractSystem<C> {
-
-        this.stack.push(code);
-        this.run();
-        return this;
-
-    }
+    abstract allocate(
+        a: Actor<C>,
+        h: Runtime<C, AbstractSystem<C>>,
+        t: Template<C, AbstractSystem<C>>): C
 
     /**
      * spawn a new actor from a template.
      */
     spawn(t: ActorTemplate<C, AbstractSystem<C>>): AbstractSystem<C> {
 
-        this.exec(new Spawn(this, t));
+        (new This('$', this)).exec(new SpawnScript(t));
+
         return this;
-
-    }
-
-    identify(actor: Actor<Context>): Address {
-
-        return getAddress(this.state, actor)
-            .orJust(() => ADDRESS_DISCARD)
-            .get();
 
     }
 
@@ -95,29 +77,17 @@ export abstract class AbstractSystem<C extends Context>
 
     }
 
-    accept({ to, from, message }: Envelope): AbstractSystem<C> {
+    notify() { }
 
-        return this.exec(new Discard(to, from, message));
+    accept() {
+
+        return this;
 
     }
 
     stop(): void { }
 
-    run(): void {
-
-        let policy = <config.LogPolicy>(this.configuration.log || {});
-
-        if (this.running) return;
-
-        this.running = true;
-
-        while (this.stack.length > 0)
-            log(policy.level || 0, policy.logger || console,
-                <Op<C, System<C>>>this.stack.shift()).exec(this);
-
-        this.running = false;
-
-    }
+    run(): void { }
 
 }
 
@@ -127,7 +97,8 @@ export abstract class AbstractSystem<C extends Context>
  * The value can be merged to satsify user defined Context types.
  */
 export const newContext = <C extends Context, S extends System<C>>
-    (actor: Instance, template: ActorTemplate<C, S>): Context => ({
+    (actor: Instance, handler: Runtime<C, S>, template: ActorTemplate<C, S>)
+    : Context => ({
 
         mailbox: nothing(),
 
@@ -136,6 +107,8 @@ export const newContext = <C extends Context, S extends System<C>>
         behaviour: [],
 
         flags: { immutable: false, buffered: false },
+
+        handler,
 
         template
 
@@ -150,10 +123,10 @@ export const newState = <C extends Context>(sys: System<C>): State<Context> => (
 
     contexts: {
 
-        $: newContext(sys, new Template())
+        $: newContext(sys, new This('$', sys), new STemplate())
 
     },
 
-    routes: {}
+    routers: {}
 
 });
