@@ -8,32 +8,31 @@ import {
 import {
     Constants,
     Template,
-    ExecutorImpl,
     SystemImpl,
     InstanceImpl,
     newContext
 } from '../../../../fixtures/mocks';
 import { TempCC } from '../../../../../src/actor/system/vm/op/tempcc';
+import { This } from '../../../../../src/actor/system/vm/runtime/this';
 
 const withChilds: Template = {
 
     id: 'parent',
 
-    create: (_: SystemImpl) => new InstanceImpl(),
+    create: () => new InstanceImpl(),
 
     children: [{
 
         id: 'child0',
 
-        create: (_: SystemImpl) => new InstanceImpl()
-
+        create: () => new InstanceImpl()
 
     },
     {
 
         id: 'child1',
 
-        create: (_: SystemImpl) => new InstanceImpl()
+        create: () => new InstanceImpl()
 
     },
 
@@ -41,7 +40,7 @@ const withChilds: Template = {
 
         id: 'child2',
 
-        create: (_: SystemImpl) => new InstanceImpl()
+        create: () => new InstanceImpl()
 
     }
 
@@ -58,16 +57,16 @@ describe('tempcc', () => {
             it('should push the child count of a template', () => {
 
                 let c: Constants = [[], [], [], [withChilds], [], []];
-                let e = new ExecutorImpl(
-                    new Frame('self', newContext(), new Script(c), [],
 
-                        [Location.Constants, Type.Template,0]
+                let f = new Frame('/', newContext(), new Script(c), [],
+                    [Location.Constants, Type.Template, 0]);
 
-                    ));
+                let e = new This('/', new SystemImpl(), [f]);
 
                 new TempCC().exec(e);
 
-                assert(e.current().get().data).equate([3, Type.Number, Location.Literal]);
+                assert(e.current().get().data)
+                    .equate([Location.Literal, Type.Number, 3]);
 
             });
 

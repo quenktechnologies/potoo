@@ -8,24 +8,25 @@ import {
 import {
     Constants,
     Template,
-    ExecutorImpl,
+    RuntimeImpl,
     SystemImpl,
     InstanceImpl,
     newContext
 } from '../../../../fixtures/mocks';
 import { TempChild } from '../../../../../src/actor/system/vm/op/tempchild';
+import { This } from '../../../../../src/actor/system/vm/runtime/this';
 
 const withChilds: Template = {
 
     id: 'parent',
 
-    create: (_: SystemImpl) => new InstanceImpl(),
+    create: () => new InstanceImpl(),
 
     children: [{
 
         id: 'child0',
 
-        create: (_: SystemImpl) => new InstanceImpl()
+        create: () => new InstanceImpl()
 
 
     },
@@ -33,7 +34,7 @@ const withChilds: Template = {
 
         id: 'child1',
 
-        create: (_: SystemImpl) => new InstanceImpl()
+        create: () => new InstanceImpl()
 
     },
 
@@ -41,7 +42,7 @@ const withChilds: Template = {
 
         id: 'child2',
 
-        create: (_: SystemImpl) => new InstanceImpl()
+        create: () => new InstanceImpl()
 
     }
 
@@ -59,17 +60,16 @@ describe('tempchild', () => {
 
                 let c: Constants = [[], [], [], [withChilds], [], []];
 
-                let e = new ExecutorImpl(
-                    new Frame('self', newContext(), new Script(c), [], [
+                let f = new Frame('/', newContext(), new Script(c), [], [
+                    Location.Literal,
+                    Type.Number,
+                    1,
+                    Location.Constants,
+                    Type.Template,
+                    0
+                ]);
 
-                        Location.Literal,
-                        Type.Number,
-                        1,
-                        Location.Constants,
-                        Type.Template,
-                        0
-
-                    ]));
+                let e = new This('/', new SystemImpl(), [f]);
 
                 new TempChild().exec(e);
 
@@ -83,21 +83,39 @@ describe('tempchild', () => {
 
                 let c: Constants = [[], [], [], [withChilds], [], []];
 
-                let e = new ExecutorImpl(
-                    new Frame('self', newContext(), new Script(c), [], [
+                let thrown = false;
 
-                        Location.Literal,
-                        Type.Number,
-                        122222222222,
-                        Location.Constants,
-                        Type.Template,
-                        0
+                let ctx = newContext();
 
-                    ]));
+                let f = new Frame('/', ctx, new Script(c), [], [
 
-                new TempChild().exec(e);
+                    Location.Literal,
+                    Type.Number,
+                    122222222222,
+                    Location.Constants,
+                    Type.Template,
+                    0
 
-                assert(e.MOCK.called()).equate(['current', 'raise']);
+                ]);
+
+                let e = new This('/', new SystemImpl(), [f]);
+
+                e.system.state.contexts['/'] = ctx;
+
+                try {
+
+                    new TempChild().exec(e);
+
+                } catch (e) {
+
+                    if (e.message === 'The index ' +
+                        '"122222222222" does not exist ' +
+                        'in the Template table!')
+                        thrown = true;
+
+                }
+
+                assert(thrown).true();
 
             });
 

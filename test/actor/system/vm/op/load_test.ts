@@ -5,8 +5,9 @@ import {
     Location,
     Frame
 } from '../../../../../src/actor/system/vm/frame';
-import { ExecutorImpl, newContext } from '../../../../fixtures/mocks';
+import { SystemImpl, newContext } from '../../../../fixtures/mocks';
 import { Load } from '../../../../../src/actor/system/vm/op/load';
+import { This } from '../../../../../src/actor/system/vm/runtime/this';
 
 describe('load', () => {
 
@@ -16,19 +17,20 @@ describe('load', () => {
 
             it('', () => {
 
-                let e = new ExecutorImpl(
-                    new Frame('self', newContext(), new Script(), [], [], [
+                let f = new Frame('/', newContext(), new Script(), [], [], [
 
-                        [Location.Constants, Type.Template, 12]
+                    [Location.Constants, Type.Template, 12]
 
-                    ]));
+                ]);
+
+                let e = new This('/', new SystemImpl(), [f]);
 
                 new Load(0).exec(e);
 
                 assert([
                     e.current().get().data[0],
                     e.current().get().data[1],
-                  e.current().get().data[2]
+                    e.current().get().data[2]
                 ]).
                     equate([12, Type.Template, Location.Constants]);
 

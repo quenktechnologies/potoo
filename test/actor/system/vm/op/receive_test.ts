@@ -7,19 +7,19 @@ import {
     Frame
 } from '../../../../../src/actor/system/vm/frame';
 import {
-    ExecutorImpl,
     SystemImpl,
     Context,
     newContext
 } from '../../../../fixtures/mocks';
 import { Receive } from '../../../../../src/actor/system/vm/op/receive';
+import { This } from '../../../../../src/actor/system/vm/runtime/this';
 
-                const b = (m: string) => {
+const b = (m: string) => {
 
-                    return m === 'u' ?
-                        right(undefined) : left(m);
+    return m === 'u' ?
+        right(undefined) : left(m);
 
-                }
+}
 
 describe('receive', () => {
 
@@ -27,16 +27,17 @@ describe('receive', () => {
 
         describe('exec', () => {
 
-            it('should scheduled receives ', () => {
+            it('should schedule receives ', () => {
 
-               let c: Constants<Context, SystemImpl> = [[], [], [], [], [], [b]];
+                let c: Constants<Context, SystemImpl> = [[], [], [], [], [], [b]];
 
-                let e = new ExecutorImpl(
-                    new Frame('self', newContext(), new Script(c), [], [
+                let f = new Frame('/', newContext(), new Script(c), [], [
 
-                        Location.Constants, Type.Foreign, 0
+                    Location.Constants, Type.Foreign, 0
 
-                    ]));
+                ])
+
+                let e = new This('/', new SystemImpl(), [f]);
 
                 e.current().get().context.mailbox.get().push('u', 'are', 'special');
 
@@ -48,22 +49,22 @@ describe('receive', () => {
 
             it('should notify actors ', () => {
 
-
                 let c: Constants<Context, SystemImpl> = [[], [], [], [], [], [b]];
 
-                let e = new ExecutorImpl(
-                    new Frame('self', newContext(), new Script(c), [], [
+                let f = new Frame('self', newContext(), new Script(c), [], [
 
-                        Location.Constants, Type.Foreign, 0
+                    Location.Constants, Type.Foreign, 0
 
-                    ]));
+                ]);
 
-              e.current().get().context.mailbox.get().push('u');
+                let e = new This('/', new SystemImpl(), [f]);
+
+                e.current().get().context.mailbox.get().push('u');
 
                 new Receive().exec(e);
 
-              assert((<any>e.current().get().context.actor).MOCK.called())
-                .be.equate(['notify']);
+                assert((<any>e.current().get().context.actor).MOCK.called())
+                    .be.equate(['notify']);
 
             });
 

@@ -1,9 +1,11 @@
 import { assert } from '@quenk/test/lib/assert';
+import { Err } from '@quenk/noni/lib/control/error';
 import { Script } from '../../../../../src/actor/system/vm/script';
 import { Log } from '../../../../../src/actor/system/vm/op';
 import { Frame, Type, Location } from '../../../../../src/actor/system/vm/frame';
-import { ExecutorImpl, newContext } from '../../../../fixtures/mocks';
-import { Jump,JumpIfOne } from '../../../../../src/actor/system/vm/op/jump';
+import { SystemImpl, newContext } from '../../../../fixtures/mocks';
+import { Jump, JumpIfOne } from '../../../../../src/actor/system/vm/op/jump';
+import { This } from '../../../../../src/actor/system/vm/runtime/this';
 
 class Hit {
 
@@ -39,27 +41,58 @@ describe('jump', () => {
                 let two = new Hit();
                 let three = new Hit();
 
-                let e = new ExecutorImpl(new Frame('self', newContext(),
+                let f = new Frame('self', newContext(),
                     new Script(), [
                         one,
                         two,
                         three
-                    ], []));
+                    ], []);
+
+                let e = new This('/', new SystemImpl(), [f]);
 
                 new Jump(1).exec(e);
 
-                assert(e.current().get().ip).equal(1);
+                assert(e.current().get().ip).equal(0);
 
             });
 
             it('should raise if jump is out of bounds', () => {
 
-                let e = new ExecutorImpl(new Frame('self', newContext(),
-                    new Script(), [                    ], []));
+                let thrown = false;
 
-                new Jump(1).exec(e);
+                let c = newContext({
 
-                assert(e.MOCK.called()).equate(['current', 'raise']);
+                    handler: {
+
+                        raise(e: Err) {
+
+                            throw new Error(e.message);
+
+                        }
+
+                    }
+
+                });
+
+                let f = new Frame('/', c, new Script(), [], []);
+
+                let e = new This('/', new SystemImpl(), [f]);
+
+                e.system.state.contexts['/'] = c;
+
+                try {
+
+                    new Jump(1).exec(e);
+
+                } catch (e) {
+
+                    if (e.message =
+                        'Error: Cannot jump to location "1"! Max location: 0!')
+                        thrown = true;
+
+                }
+
+                assert(thrown).true();
 
             })
 
@@ -77,20 +110,21 @@ describe('jump', () => {
                 let two = new Hit();
                 let three = new Hit();
 
-                let e = new ExecutorImpl(new Frame('self', newContext(),
-                    new Script(), [
-                        one,
-                        two,
-                        three
-                    ], [
+                let f = new Frame('self', newContext(), new Script(), [
+                    one,
+                    two,
+                    three
+                ], [
                         Location.Literal,
                         Type.Number,
                         1
-                    ]));
+                    ]);
+
+                let e = new This('/', new SystemImpl(), [f]);
 
                 new JumpIfOne(1).exec(e);
 
-                assert(e.current().get().ip).equal(1);
+                assert(e.current().get().ip).equal(0);
 
             });
 
@@ -100,16 +134,17 @@ describe('jump', () => {
                 let two = new Hit();
                 let three = new Hit();
 
-                let e = new ExecutorImpl(new Frame('self', newContext(),
-                    new Script(), [
-                        one,
-                        two,
-                        three
-                    ], [
+                let f = new Frame('/', newContext(), new Script(), [
+                    one,
+                    two,
+                    three
+                ], [
                         Location.Literal,
                         Type.Number,
                         10
-                    ]));
+                    ]);
+
+                let e = new This('/', new SystemImpl(), [f]);
 
                 new JumpIfOne(1).exec(e);
 
@@ -119,17 +154,47 @@ describe('jump', () => {
 
             it('should raise if jump is out of bounds', () => {
 
-                let e = new ExecutorImpl(new Frame('self', newContext(),
-                    new Script(), [
-                    ], [
+                let thrown = false;
+
+                let c = newContext({
+
+                    handler: {
+
+                        raise(e: Err) {
+
+                            throw new Error(e.message);
+
+                        }
+
+                    }
+
+                });
+
+                let f = new Frame('self', c, new Script(), [
+                ], [
                         Location.Literal,
                         Type.Number,
                         1
-                    ]));
+                    ]);
 
-                new JumpIfOne(1).exec(e);
+                let e = new This('/', new SystemImpl(), [f]);
 
-                assert(e.MOCK.called()).equate(['current', 'raise']);
+                e.system.state.contexts['/'] = c;
+
+                try {
+
+                    new JumpIfOne(1).exec(e);
+
+                } catch (e) {
+
+
+                    if (e.message =
+                        'Error: Cannot jump to location "1"! Max location: 0!')
+                        thrown = true;
+
+                }
+
+                assert(thrown).true();
 
             })
 

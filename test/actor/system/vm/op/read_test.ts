@@ -7,10 +7,11 @@ import {
     Frame
 } from '../../../../../src/actor/system/vm/frame';
 import {
-    ExecutorImpl,
+    SystemImpl,
     newContext
 } from '../../../../fixtures/mocks';
 import { Read } from '../../../../../src/actor/system/vm/op/read';
+import {This} from '../../../../../src/actor/system/vm/runtime/this';
 
 describe('read', () => {
 
@@ -31,12 +32,13 @@ describe('read', () => {
 
                 }
 
-                let e = new ExecutorImpl(
-                    new Frame('self', newContext(), new Script(), [], [
+              let f =                     new Frame('/', newContext(), new Script(), [], [
 
                         Location.Constants, Type.Foreign, 0
 
-                    ]));
+                    ]);
+
+              let e = new This('/', new SystemImpl(), [f]);
 
                 e.current().get().context.mailbox.get().push('u', 'are', 'special');
 

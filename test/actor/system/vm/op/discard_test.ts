@@ -2,10 +2,11 @@ import { assert } from '@quenk/test/lib/assert';
 import { Script } from '../../../../../src/actor/system/vm/script';
 import {    Frame} from '../../../../../src/actor/system/vm/frame';
 import {
-    ExecutorImpl,
+    SystemImpl,
     newContext
 } from '../../../../fixtures/mocks';
 import { Discard } from '../../../../../src/actor/system/vm/op/discard';
+import {This} from '../../../../../src/actor/system/vm/runtime/this';
 
 describe('discard', () => {
 
@@ -15,8 +16,9 @@ describe('discard', () => {
 
             it('should remove the next message', () => {
 
-                let e = new ExecutorImpl(
-                    new Frame('self', newContext(), new Script()));
+              let f =                     new Frame('self', newContext(), new Script());
+
+              let e = new This('/', new SystemImpl(), [f]);
 
                 e.current().get().context.mailbox.get().push(12, 24, 48);
 

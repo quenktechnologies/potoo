@@ -1,7 +1,8 @@
 import { assert } from '@quenk/test/lib/assert';
 import { Script } from '../../../../../src/actor/system/vm/script';
 import { Frame, Type, Location } from '../../../../../src/actor/system/vm/frame';
-import { Constants, ExecutorImpl, newContext } from '../../../../fixtures/mocks';
+import { Context, Constants, SystemImpl, newContext } from '../../../../fixtures/mocks';
+import { This } from '../../../../../src/actor/system/vm/runtime/this';
 import { Log } from '../../../../../src/actor/system/vm/op';
 import { Call } from '../../../../../src/actor/system/vm/op/call';
 
@@ -32,23 +33,43 @@ describe('call', () => {
 
             it('should push a new frame', () => {
 
-                let c: Constants = [[], [], [() => [new Int()]], [], [], []];
+                let called = false;
 
-                let e = new ExecutorImpl(new Frame('self', newContext(),
-                    new Script(c), [],
-                    [Location.Constants, Type.Function, 0]));
+                let func = () => { called = true; return [new Int()]; }
+
+                let c: Constants = [[], [], [func], [], [], []];
+
+                let f = new Frame('/', newContext(), new Script(c), [],
+                    [Location.Constants, Type.Function, 0]);
+
+                let e = new This('/', new SystemImpl(), [f]);
 
                 new Call(0).exec(e);
 
-                assert(e.stack.length).equal(2);
+                assert(called).true();
 
             });
 
             it('should work with arguments', () => {
 
-                let c: Constants = [[], [], [() => [new Int()]], [], [], []];
+                let called = false;
 
-                let f = new Frame('self', newContext(),
+                let func = () => {
+
+                    assert(e.stack[0].data).equate([
+                        Location.Literal, Type.Number, 3,
+                        Location.Literal, Type.Number, 2,
+                        Location.Literal, Type.Number, 1
+                    ]);
+
+                    called = true;
+                    return [new Int()];
+
+                }
+
+                let c: Constants = [[], [], [func], [], [], []];
+
+                let f = new Frame('/', newContext(),
                     new Script(c), [],
                     [
                         Location.Literal,
@@ -64,20 +85,12 @@ describe('call', () => {
                         Type.Function,
                         0
                     ])
-                let e = new ExecutorImpl(f);
+
+                let e = new This('/', new SystemImpl(), [f]);
 
                 new Call(3).exec(e);
 
-                assert(e.stack.length).equal(2);
-
-                assert(e.stack[0].data).equate([
-                    Location.Literal, Type.Number, 3,
-                ]);
-
-                assert(e.stack[1].data).equate([
-                    Location.Literal, Type.Number, 1,
-                    Location.Literal, Type.Number, 2
-                ]);
+                assert(called).true();
 
             })
 
