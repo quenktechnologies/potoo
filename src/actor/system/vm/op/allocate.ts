@@ -47,7 +47,12 @@ export class Allocate<C extends Context, S extends System<C>> implements Op<C, S
         if (e.getContext(addr).isJust())
             return e.raise(new error.DuplicateAddressErr(addr));
 
-        e.putContext(addr, e.allocate(addr, t));
+      let ctx = e.allocate(addr, t);
+
+      e.putContext(addr, ctx);
+
+      if(ctx.flags.router === true)
+      e.putRoute(addr, addr);
 
         curr.pushAddress(addr);
 

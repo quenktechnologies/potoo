@@ -109,19 +109,9 @@ export class Frame<C extends Context, S extends System<C>> {
         if ((location < 0) || (location >= this.code.length))
             return left(new error.JumpOutOfBoundsErr(location, this.code.length));
 
-        this.ip = location;
+        this.ip = location - 1;
 
         return right(this);
-
-    }
-
-    /**
-     * end advances the Frame's ip beyond the last instruction to terminate
-     * execution.
-     */
-    end(): void {
-
-        this.ip = this.code.length;
 
     }
 
@@ -161,7 +151,9 @@ export class Frame<C extends Context, S extends System<C>> {
      */
     pushNumber(n: number): Frame<C, S> {
 
-        this.data.push(n, Type.Number, Location.Literal);
+      this.data.push( Location.Literal);
+      this.data.push( Type.Number);
+      this.data.push(n);
         return this;
 
     }
@@ -192,15 +184,15 @@ export class Frame<C extends Context, S extends System<C>> {
 
     }
 
-    peek(n=0): Data {
+    peek(n = 0): Data {
 
         let len = this.data.length;
-      let offset = n * 3;
+        let offset = n * 3;
 
         return [
             <number>this.data[len - (1 + offset)],
-            <Type>this.data[len - (2+offset)],
-            <Location>this.data[len - (3+offset)]
+            <Type>this.data[len - (2 + offset)],
+            <Location>this.data[len - (3 + offset)]
         ];
 
     }

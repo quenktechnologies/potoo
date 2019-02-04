@@ -2,7 +2,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
 import { Runtime } from '../runtime';
-import {OP_CODE_CALL, Log, Op, Level } from './';
+import { OP_CODE_CALL, Log, Op, Level } from './';
 
 /**
  * Call a function.
@@ -24,15 +24,14 @@ export class Call<C extends Context, S extends System<C>> implements Op<C, S> {
         let curr = e.current().get();
         let { actor, context, script, heap } = curr;
 
-        let work =
-            curr
-                .resolveFunction(curr.pop())
-                .map(f => new Frame(actor, context, script, f(), [], heap));
+        let eitherFunc = curr.resolveFunction(curr.pop());
 
-        if (work.isLeft())
-            return e.raise(work.takeLeft());
+        if (eitherFunc.isLeft())
+            return e.raise(eitherFunc.takeLeft());
 
-        let frm = work.takeRight();
+      let f = eitherFunc.takeRight();
+
+        let frm = new Frame(actor, context, script, f(), [], heap);
 
         for (let i = 0; i < this.args; i++) {
 

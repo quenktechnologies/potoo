@@ -25,13 +25,17 @@ export class Add<C extends Context, S extends System<C>> implements Op<C, S> {
 
         let curr = e.current().get();
 
-        curr
-            .resolveNumber(curr.pop())
-            .chain(a =>
-                curr
-                    .resolveNumber(curr.pop())
-                    .map(b => curr.pushNumber(a + b)))
-            .lmap(err => e.raise(err));
+      let eitherA = curr.resolveNumber(curr.pop());
+
+      let eitherB = curr.resolveNumber(curr.pop());
+
+      if(eitherA.isLeft()) 
+        return e.raise(eitherA.takeLeft());
+
+      if(eitherB.isLeft())
+        return e.raise(eitherB.takeLeft());
+
+      curr.pushNumber(eitherA.takeRight() + eitherB.takeRight());
 
     }
 

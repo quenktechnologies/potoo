@@ -4,7 +4,7 @@ import { Contexts, Context, ErrorHandler } from '../../../context';
 import { Address } from '../../../address';
 import { System } from '../../';
 import { Frame } from '../frame';
-import {Handle} from '../handle';
+import { Handle } from '../handle';
 
 /**
  * Runtime interface.
@@ -51,9 +51,26 @@ export interface Runtime<C extends Context, S extends System<C>>
     removeContext(addr: Address): Runtime<C, S>
 
     /**
-     * push a new Frame onto the Frame stack, triggering
+     * putRoute configures a router for all actors that are under the
+     * target address.
+     */
+    putRoute(target: Address, router: Address): Runtime<C, S>
+
+    /**
+     * removeRoute configuration.
+     */
+    removeRoute(target: Address): Runtime<C, S>
+
+    /**
+     * push a new Frame onto the stack, triggering
      * its execution.
      */
     push(f: Frame<C, S>): Runtime<C, S>
+
+    /**
+     * clear all Frames from the stack, thus ending
+     * current execution.
+     */
+      clear(): Runtime<C,S>
 
 }

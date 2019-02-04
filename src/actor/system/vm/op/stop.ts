@@ -1,7 +1,5 @@
 import * as error from '../error';
 import { map } from '@quenk/noni/lib/data/record';
-import { left, right } from '@quenk/noni/lib/data/either';
-import { Err } from '@quenk/noni/lib/control/error';
 import { isChild } from '../../../address';
 import { Context } from '../../../context';
 import { System } from '../../';
@@ -25,39 +23,31 @@ export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
 
         let curr = e.current().get();
 
-        curr
-            .resolveAddress(curr.pop())
-            .chain(addr => {
+        let eitherAddress = curr.resolveAddress(curr.pop());
 
-                if ((!isChild(curr.actor, addr)) &&
-                    (addr !== curr.actor))
-                    return left<Err, string>(new error.IllegalStopErr(
-                        curr.actor, addr));
+        if (eitherAddress.isLeft())
+            return e.raise(eitherAddress.takeLeft());
 
-                return right<Err, string>(addr);
+        let addr = eitherAddress.takeRight();
 
-            })
-            .map(addr =>
-                e
-                    .getChildren(addr)
-                    .map(ctxs =>
-                        map(ctxs, (ctx, k) => {
+        if ((!isChild(curr.actor, addr)) && (addr !== curr.actor))
+            return e.raise(new error.IllegalStopErr(curr.actor, addr));
 
-                            ctx.actor.stop();
-                            e.removeContext(k);
+        let maybeChilds = e.getChildren(addr);
 
-                        }))
-                    .orJust(() => { })
-                    .map(() =>
-                        e
-                            .getContext(addr)
-                            .map(ctx => {
+        if (maybeChilds.isJust()) {
 
-                                ctx.actor.stop();
-                                e.removeContext(addr);
+            let ctxs = maybeChilds.get();
 
-                            })))
-            .lmap(err => e.raise(err));
+            map(ctxs, (c, k) => { c.actor.stop(); e.removeContext(k); });
+
+        }
+
+        curr.context.actor.stop();
+
+        e.removeContext(addr);
+
+        e.clear();
 
     }
 

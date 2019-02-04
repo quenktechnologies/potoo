@@ -11,13 +11,15 @@ import {
     getChildren,
     getRouter,
     put,
+    putRoute,
+    removeRoute,
     remove
 } from '../../state';
 import { System } from '../../';
 import { Log, Op } from '../op';
 import { Data, Frame } from '../frame';
 import { Script } from '../script';
-import {StopScript,RestartScript} from './scripts';
+import { StopScript, RestartScript } from './scripts';
 import { Runtime } from './';
 
 /**
@@ -29,9 +31,12 @@ import { Runtime } from './';
 export class This<C extends Context, S extends System<C>>
     implements Runtime<C, S> {
 
-    constructor(public self: Address, public system: System<C>) { }
+    constructor(
+        public self: Address,
+        public system: System<C>,
+        public stack: Frame<C, S>[] = []) { }
 
-    stack: Frame<C, S>[] = [];
+    running = false;
 
     current(): Maybe<Frame<C, S>> {
 
@@ -82,20 +87,41 @@ export class This<C extends Context, S extends System<C>>
 
     }
 
+    putRoute(target: Address, router: Address): This<C, S> {
+
+        putRoute(this.system.state, target, router);
+        return this;
+
+
+    }
+
+    removeRoute(target: Address): This<C, S> {
+
+        removeRoute(this.system.state, target);
+        return this;
+
+    }
+
     push(f: Frame<C, S>): This<C, S> {
 
         this.stack.push(f);
-        this.run();
+        return this;
+
+    }
+
+    clear(): This<C, S> {
+
+        this.stack = [];
         return this;
 
     }
 
     raise(err: Err): void {
 
-        let target = this.self;
+        let { self } = this;
 
         this
-            .getContext(target)
+            .getContext(self)
             .chain(ctx =>
                 fromNullable<template.TrapFunc>(ctx.template.trap)
                     .map(trap => {
@@ -106,36 +132,32 @@ export class This<C extends Context, S extends System<C>>
                                 break;
 
                             case template.ACTION_RESTART:
-                                this.current().get().end();
                                 this.exec(new RestartScript());
                                 break;
 
                             case template.ACTION_STOP:
-                                this.current().get().end();
-                                this.exec(new StopScript(target));
+                                this.exec(new StopScript(self));
                                 break;
 
                             default:
-                                this.current().get().end();
-                                this.exec(new StopScript(target));
-                                escalate(this.system, target, err);
+                                this.exec(new StopScript(self));
+                                escalate(this.system, self, err);
                                 break;
 
                         }
 
-                    })
-                    .orJust(() => {
+                    }))
+            .orJust(() => {
 
-                        this.current().get().end();
-                        this.exec(new StopScript(target));
-                        escalate(this.system, target, err);
+                this.exec(new StopScript(self));
+                escalate(this.system, self, err);
 
-                    }));
+            });
 
     }
 
     exec(s: Script<C, S>): void {
-
+      
         let ctx = this.getContext(this.self).get();
 
         this.push(new Frame(this.self, ctx, s, s.code));
@@ -146,14 +168,19 @@ export class This<C extends Context, S extends System<C>>
 
         let policy = <config.LogPolicy>(this.system.configuration.log || {});
 
-        if (this.stack.length > 0) {
+        while (this.stack.length > 0) {
 
             let cur = tail(this.stack);
 
-            while (cur.ip < cur.code.length)
-                log(policy, cur, cur.code[cur.ip]).exec(this);
+            while ((cur.ip < cur.code.length) && (tail(this.stack) === cur)) {
 
-            this.stack.pop();
+                log(policy, cur, cur.code[cur.ip]).exec(this);
+                cur.ip++;
+
+            }
+
+            if (cur.ip === cur.code.length)
+                this.stack.pop();
 
         }
 

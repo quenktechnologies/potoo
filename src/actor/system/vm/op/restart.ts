@@ -16,20 +16,21 @@ export class Restart<C extends Context, S extends System<C>> implements Op<C, S>
 
         let curr = e.current().get();
 
-                e
-                    .getContext(curr.actor)
-                    .map(ctx => {
+        e
+            .getContext(curr.actor)
+            .map(ctx => {
 
-                        ctx.actor.stop();
+              e.clear();
 
-                        let nctx = e.allocate(curr.actor, ctx.template);
+                ctx.actor.stop();
 
-                        nctx.mailbox = ctx.mailbox;
+                let nctx = e.allocate(curr.actor, ctx.template);
 
-                        e.putContext(curr.actor, nctx);
+                nctx.mailbox = ctx.mailbox;
 
-                    });
+                e.putContext(curr.actor, nctx);
 
+            });
 
     }
 
