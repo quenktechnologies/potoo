@@ -52,7 +52,7 @@ describe('jump', () => {
 
                 new Jump(1).exec(e);
 
-                assert(e.current().get().ip).equal(0);
+                assert(e.current().get().ip).equal(1);
 
             });
 
@@ -124,7 +124,7 @@ describe('jump', () => {
 
                 new JumpIfOne(1).exec(e);
 
-                assert(e.current().get().ip).equal(0);
+                assert(e.current().get().ip).equal(1);
 
             });
 

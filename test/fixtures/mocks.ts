@@ -96,7 +96,7 @@ export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
     }
 
     raise(e: Err): void {
-
+console.error(e);
         return this.MOCK.record('raise', [e], undefined);
 
     }
@@ -166,13 +166,18 @@ export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
 
     }
 
-  clear() : RuntimeImpl {
+    clear(): RuntimeImpl {
 
-    this.stack = [];
-    return this;
+        this.stack = [];
+        return this;
 
+    }
 
-  }
+    drop(): RuntimeImpl {
+
+        return this;
+
+    }
 
     exec(s: Script<Context, SystemImpl>) {
 

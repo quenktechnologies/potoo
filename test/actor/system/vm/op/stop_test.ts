@@ -48,11 +48,14 @@ describe('stop', () => {
                 e.putContext('/foo', foo);
                 e.putContext('/bar', bar);
 
+                assert(Object.keys(e.system.state.contexts).length).equal(3);
+
                 new Stop().exec(e);
 
-                assert((<any>bar.actor).MOCK.called()).equate([]);
+              assert((<any>bar.actor).MOCK.called()).equate([]);
 
-                assert(Object.keys(e.system.state.contexts).length).equal(3);
+              // Actor /foo will die because of the error.
+                assert(Object.keys(e.system.state.contexts).length).equal(2);
 
             })
 
