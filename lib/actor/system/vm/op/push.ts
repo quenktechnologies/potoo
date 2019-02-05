@@ -1,34 +1,38 @@
-import { show } from '@quenk/noni/lib/data/type';
 import { Context } from '../../../context';
 import { System } from '../../';
-import { Executor } from '../';
-import {Type, Location, Frame } from '../frame';
-import { Level } from './';
-
-export const OP_CODE_PUSH_NUM = 0x1;
-export const OP_CODE_PUSH_STR = 0x2;
-export const OP_CODE_PUSH_TEMP = 0x3;
+import { Runtime } from '../runtime';
+import { Type, Location } from '../frame';
+import {
+    OP_CODE_PUSH_NUM,
+    OP_CODE_PUSH_STR,
+    OP_CODE_PUSH_FUNC,
+    OP_CODE_PUSH_TEMP,
+    OP_CODE_PUSH_MSG,
+    OP_CODE_PUSH_FOREIGN,
+  Log,
+    Level
+} from './';
 
 /**
  * PushNum pushes a literal number onto the stack.
  */
 export class PushNum<C extends Context, S extends System<C>> {
 
-    constructor(public value: number) { }
+    constructor(public index: number) { }
 
     code = OP_CODE_PUSH_NUM;
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
-        e.current.push(this.value, Type.Number, Location.Literal);
+        e.current().get().push(this.index, Type.Number, Location.Literal);
 
     }
 
-    toLog() {
+    toLog(): Log {
 
-        return `pushnum ${this.value}`;
+        return ['pushnum', [this.index, Type.Number, Location.Literal], []];
 
     }
 
@@ -39,22 +43,46 @@ export class PushNum<C extends Context, S extends System<C>> {
  */
 export class PushStr<C extends Context, S extends System<C>> {
 
-    constructor(public value: number) { }
+    constructor(public index: number) { }
 
     code = OP_CODE_PUSH_STR;
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
-        e.current.push(this.value, Type.String, Location.Constants);
+        e.current().get().push(this.index, Type.String, Location.Constants);
 
     }
 
-    toLog(f: Frame<C, S>): string {
+    toLog(): Log {
 
-        return `pushstr ${this.value} ` +
-            `// ${f.script.constants[Type.String][this.value]}`;
+        return ['pushstr', [this.index, Type.String, Location.Constants], []];
+
+    }
+
+}
+
+/**
+ * PushFunc pushes a function constant onto the stack.
+ */
+export class PushFunc<C extends Context, S extends System<C>> {
+
+    constructor(public index: number) { }
+
+    code = OP_CODE_PUSH_FUNC;
+
+    level = Level.Base;
+
+    exec(e: Runtime<C, S>): void {
+
+        e.current().get().push(this.index, Type.Function, Location.Constants);
+
+    }
+
+    toLog(): Log {
+
+        return ['pushfunc', [this.index, Type.Function, Location.Constants], []];
 
     }
 
@@ -65,22 +93,71 @@ export class PushStr<C extends Context, S extends System<C>> {
  */
 export class PushTemp<C extends Context, S extends System<C>> {
 
-    constructor(public value: number) { }
+    constructor(public index: number) { }
 
     code = OP_CODE_PUSH_TEMP;
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
-        e.current.push(this.value, Type.Template,Location.Constants);
+        e.current().get().push(this.index, Type.Template, Location.Constants);
 
     }
 
-    toLog(f: Frame<C, S>): string {
+    toLog(): Log {
 
-        return `pushtemp ${this.value} ` +
-            `// ${show(f.script.constants[Type.Template][this.value])}`;
+        return ['pushtemp', [this.index, Type.Template, Location.Constants], []];
+
+    }
+
+}
+
+/**
+ * PushMsg pushes a message constant onto the stack.
+ */
+export class PushMsg<C extends Context, S extends System<C>> {
+
+    constructor(public index: number) { }
+
+    code = OP_CODE_PUSH_MSG;
+
+    level = Level.Base;
+
+    exec(e: Runtime<C, S>): void {
+
+        e.current().get().push(this.index, Type.Message, Location.Constants);
+
+    }
+
+    toLog(): Log {
+
+        return ['pushmsg', [this.index, Type.Message, Location.Constants], []];
+
+    }
+
+}
+
+/**
+ * PushForeign pushes a foreign function onto the stack.
+ */
+export class PushForeign<C extends Context, S extends System<C>> {
+
+    constructor(public index: number) { }
+
+    code = OP_CODE_PUSH_FOREIGN;
+
+    level = Level.Base;
+
+    exec(e: Runtime<C, S>): void {
+
+        e.current().get().push(this.index, Type.Foreign, Location.Constants);
+
+    }
+
+    toLog(): Log {
+
+        return ['pushmsg', [this.index, Type.Foreign, Location.Constants], []];
 
     }
 

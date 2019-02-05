@@ -1,9 +1,8 @@
 import { Context } from '../../../context';
 import { System } from '../../';
 import { Frame } from '../frame';
-import { Executor } from '../';
-import { Level } from './';
-export declare const OP_CODE_LOAD = 18;
+import { Runtime } from '../runtime';
+import { Log, Level } from './';
 /**
  * Load the local stored at index onto the stack.
  *
@@ -15,6 +14,6 @@ export declare class Load<C extends Context, S extends System<C>> {
     constructor(index: number);
     code: number;
     level: Level;
-    exec(e: Executor<C, S>): void;
-    toLog(_: Frame<C, S>): string;
+    exec(e: Runtime<C, S>): void;
+    toLog(_: Frame<C, S>): Log;
 }

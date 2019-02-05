@@ -46,7 +46,8 @@ export declare class NullFunctionPointerErr extends Error {
  */
 export declare class JumpOutOfBoundsErr extends Error {
     location: number;
-    constructor(location: number);
+    size: number;
+    constructor(location: number, size: number);
 }
 export declare class NullPointerErr extends Error {
     data: number[];
@@ -56,4 +57,33 @@ export declare class TypeErr extends Error {
     expected: number;
     got: number;
     constructor(expected: number, got: number);
+}
+/**
+ * IllegalStopErr
+ */
+export declare class IllegalStopErr extends Error {
+    parent: string;
+    child: string;
+    constructor(parent: string, child: string);
+}
+/**
+ * NoReceiveErr
+ */
+export declare class NoReceiveErr extends Error {
+    actor: string;
+    constructor(actor: string);
+}
+/**
+ * NoMailboxErr
+ */
+export declare class NoMailboxErr extends Error {
+    actor: string;
+    constructor(actor: string);
+}
+/**
+ * EmptyMailboxErr
+ */
+export declare class EmptyMailboxErr extends Error {
+    actor: string;
+    constructor(actor: string);
 }

@@ -26,3 +26,7 @@ export declare const getParent: (addr: string) => string;
  * getId provides the id part of an actor address.
  */
 export declare const getId: (addr: string) => string;
+/**
+ * isChild tests whether an address is a child of the parent address.
+ */
+export declare const isChild: (parent: string, child: string) => boolean;

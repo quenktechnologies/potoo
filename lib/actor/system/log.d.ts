@@ -21,17 +21,17 @@ export interface Logger {
     /**
      * info log.
      */
-    info(e: any): void;
+    info(...e: any[]): void;
     /**
      * warn log.
      */
-    warn(e: any): void;
+    warn(...e: any[]): void;
     /**
      * error log.
      */
-    error(e: any): void;
+    error(...e: any[]): void;
     /**
      * log
      */
-    log(e: any): void;
+    log(...e: any[]): void;
 }

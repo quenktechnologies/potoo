@@ -1,7 +1,19 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Mailbox } from './mailbox';
-import { Behaviour, Instance } from './';
+import { Err } from '@quenk/noni/lib/control/error';
 import { Template } from './template';
+import { Message } from './message';
+import { Behaviour, Instance } from './';
+/**
+ * ErrorHandler processes errors that come up during an actor execution
+ * or raised by a child.
+ */
+export interface ErrorHandler {
+    /**
+     * raise an error within an actor's context triggering
+     * the error handling machinery.
+     */
+    raise(e: Err): void;
+}
 /**
  * Flags used to indicate a Frame's state.
  */
@@ -32,7 +44,7 @@ export interface Context {
      *
      * Some actors may not use mailboxes and instead accept messages directly.
      */
-    mailbox: Maybe<Mailbox>;
+    mailbox: Maybe<Message[]>;
     /**
      * actor instance.
      */
@@ -45,6 +57,10 @@ export interface Context {
      * flags currently enabled for the actor.
      */
     flags: Flags;
+    /**
+     * handler for errors.
+     */
+    handler: ErrorHandler;
     /**
      * template used to create new instances of the actor.
      *

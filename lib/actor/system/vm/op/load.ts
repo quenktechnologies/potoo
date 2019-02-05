@@ -1,10 +1,8 @@
 import { Context } from '../../../context';
 import { System } from '../../';
-import { Frame } from '../frame';
-import { Executor } from '../';
-import { Level } from './';
-
-export const OP_CODE_LOAD = 0x12;
+import { Type, Location, Frame } from '../frame';
+import { Runtime } from '../runtime';
+import {OP_CODE_LOAD, Log, Level } from './';
 
 /**
  * Load the local stored at index onto the stack.
@@ -20,16 +18,17 @@ export class Load<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Executor<C, S>): void {
+    exec(e: Runtime<C, S>): void {
 
-        let [value, type, location] = e.current.locals[this.index];
-        e.current.push(value, type, location);
+        let curr = e.current().get();
+        let [value, type, location] = curr.locals[this.index];
+        curr.push(value, type, location);
 
     }
 
-    toLog(_: Frame<C, S>) {
+    toLog(_: Frame<C, S>): Log {
 
-        return `load ${this.index}`;
+        return ['load', [this.index, Type.Number, Location.Literal], []];
 
     }
 

@@ -1,6 +1,7 @@
 import { Constructor } from '@quenk/noni/lib/data/type/constructor';
 import { Pattern } from '@quenk/noni/lib/data/type';
 import { Message } from '../message';
+export { Pattern };
 /**
  * Handler function type for Cases.
  */
