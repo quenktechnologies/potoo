@@ -1,5 +1,6 @@
 import { match } from '@quenk/noni/lib/control/match';
 import { Any } from '@quenk/noni/lib/data/type';
+import {OP_CODE_TELL,OP_CODE_RAISE} from '../system/vm/op';
 import { system } from '../system/default';
 import { Handle } from '../system/vm/handle';
 import { System } from '../system';
@@ -26,7 +27,14 @@ const sys = system({
 
     hooks: {
 
-        drop: (e: Envelope) => (<any>process).send(e)
+      drop: ({to,from,message}: Envelope) => (<any>process).send({
+
+        code: OP_CODE_TELL,
+        to,
+        from,
+        message
+      
+      })
 
     }
 
@@ -46,7 +54,14 @@ const fitlerDrop = <C extends Context>(s: Handle<C, System<C>>) => (m: Message) 
     s.exec(new DropScript(m));
 
 process.on('uncaughtException', e =>
-  (<any>process.send)({ error: e.stack, src: address, dest: address}));
+  (<any>process.send)({ 
+
+    code:OP_CODE_RAISE,
+    error: e.stack, 
+    src: address, 
+    dest: address 
+  
+  }));
 
 sys.spawn({
 
@@ -55,6 +70,7 @@ sys.spawn({
     create: s => {
 
         process.on('message', filter(s));
+
         return require(<string>process.env.POTOO_ACTOR_MODULE).create(s);
 
     }

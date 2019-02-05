@@ -5,6 +5,7 @@ import { Err, convert } from '@quenk/noni/lib/control/error';
 import { tail } from '@quenk/noni/lib/data/array';
 import { Maybe, just, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
 import { Contexts, Context } from '../../../context';
+import { Message } from '../../../message';
 import { Address, getParent } from '../../../address';
 import {
     get,
@@ -34,7 +35,8 @@ export class This<C extends Context, S extends System<C>>
     constructor(
         public self: Address,
         public system: System<C>,
-        public stack: Frame<C, S>[] = []) { }
+        public stack: Frame<C, S>[] = [],
+        public queue: Frame<C, S>[] = []) { }
 
     running = false;
 
@@ -92,7 +94,6 @@ export class This<C extends Context, S extends System<C>>
         putRoute(this.system.state, target, router);
         return this;
 
-
     }
 
     removeRoute(target: Address): This<C, S> {
@@ -112,6 +113,22 @@ export class This<C extends Context, S extends System<C>>
     clear(): This<C, S> {
 
         this.stack = [];
+        return this;
+
+    }
+
+    drop(m: Message): This<C, S> {
+
+        let policy = <config.LogPolicy>(this.system.configuration.log || {});
+        let level = policy.level || 0;
+        let logger = policy.logger || console;
+
+        if (level > logging.WARN) {
+
+            logger.warn(`[${this.self}]: Dropped `, m);
+
+        }
+
         return this;
 
     }
@@ -160,7 +177,15 @@ export class This<C extends Context, S extends System<C>>
 
         let ctx = this.getContext(this.self).get();
 
-        this.push(new Frame(this.self, ctx, s, s.code));
+        if (this.running) {
+
+            this.queue.push(new Frame(this.self, ctx, s, s.code));
+
+        } else {
+
+            this.push(new Frame(this.self, ctx, s, s.code));
+
+        }
 
         this.run();
 
@@ -174,7 +199,7 @@ export class This<C extends Context, S extends System<C>>
 
         this.running = true;
 
-        while (this.stack.length > 0) {
+        while (true) {
 
             let cur = tail(this.stack);
 
@@ -183,8 +208,8 @@ export class This<C extends Context, S extends System<C>>
                 if (tail(this.stack) !== cur) break;
 
                 if (cur.ip === cur.code.length) {
-
-                  if ((this.stack.length > 1) && (cur.data.length > 0)) {
+                    //XXX: We should really always push the top most to the next
+                    if ((this.stack.length > 1) && (cur.data.length > 0)) {
 
                         let [value, type, loc] = cur.pop();
 
@@ -201,6 +226,20 @@ export class This<C extends Context, S extends System<C>>
                 log(policy, cur, cur.code[cur.ip]).exec(this);
 
                 cur.ip++;
+
+            }
+
+            if (this.stack.length === 0) {
+
+                if (this.queue.length > 0) {
+
+                    this.stack.push(<Frame<C, S>>this.queue.shift());
+
+                } else {
+
+                    break;
+
+                }
 
             }
 

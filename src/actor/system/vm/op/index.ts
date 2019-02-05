@@ -30,6 +30,7 @@ export const OP_CODE_RUN = 0x26;
 export const OP_CODE_RECEIVE = 0x27;
 export const OP_CODE_READ = 0x28;
 export const OP_CODE_RESTART = 0x29;
+export const OP_CODE_DROP = 0x30;
 export const OP_CODE_STOP = 0x2a;
 export const OP_CODE_RAISE = 0xb;
 

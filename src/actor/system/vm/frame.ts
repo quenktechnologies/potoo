@@ -106,9 +106,9 @@ export class Frame<C extends Context, S extends System<C>> {
      */
     seek(location: number): Either<Err, Frame<C, S>> {
 
-        if ((location < 0) || (location >= this.code.length))
+        if ((location < 0) || (location >= (this.code.length )))
             return left(new error.JumpOutOfBoundsErr(location,
-                this.code.length));
+                this.code.length - 1));
 
         this.ip = location;
 

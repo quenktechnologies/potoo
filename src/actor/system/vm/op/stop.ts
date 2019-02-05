@@ -22,7 +22,6 @@ export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
     exec(e: Runtime<C, S>): void {
 
         let curr = e.current().get();
-
         let eitherAddress = curr.resolveAddress(curr.pop());
 
         if (eitherAddress.isLeft())

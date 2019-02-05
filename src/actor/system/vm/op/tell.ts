@@ -59,6 +59,14 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
                 deliver(maybeCtx.get(), msg);
                 curr.pushNumber(1);
 
+            } else if (e.system.configuration.hooks &&
+                e.system.configuration.hooks.drop) {
+
+                e.system.configuration.hooks.drop(new Envelope(
+                    addr, e.self, msg));
+
+                curr.pushNumber(1);
+
             } else {
 
                 curr.pushNumber(0);

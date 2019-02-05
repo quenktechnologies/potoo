@@ -2,6 +2,7 @@ import * as template from '../../../template';
 import { Maybe } from '@quenk/noni/lib/data/maybe'
 import { Contexts, Context, ErrorHandler } from '../../../context';
 import { Address } from '../../../address';
+import {Message} from '../../../message';
 import { System } from '../../';
 import { Frame } from '../frame';
 import { Handle } from '../handle';
@@ -72,5 +73,10 @@ export interface Runtime<C extends Context, S extends System<C>>
      * current execution.
      */
       clear(): Runtime<C,S>
+
+      /**
+       * drop a Message
+       */
+      drop(m:Message): Runtime<C,S>
 
 }
