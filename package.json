@@ -11,14 +11,13 @@
     "test": "./node_modules/.bin/mocha --opts mocha.opts test"
   },
   "devDependencies": {
-    "@quenk/must": "^1.0.4",
+    "@quenk/test": "^2.1.0",
     "@types/mocha": "^2.2.48",
-    "@quenk/test": "^2.0.0",
-    "@types/node": "^10.12.12",
-    "mocha": "^3.5.3",
-    "ts-node": "^7.0.1",
-    "typedoc": "^0.11.1",
-    "typescript": "^3.2.2"
+    "@types/node": "^10.12.21",
+    "mocha": "^5.2.0",
+    "ts-node": "^8.0.2",
+    "typedoc": "^0.14.2",
+    "typescript": "^3.3.1"
   },
   "author": "Quenk Technologies Limited",
   "license": "Apache-2.0",

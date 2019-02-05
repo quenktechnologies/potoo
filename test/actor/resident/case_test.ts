@@ -1,4 +1,4 @@
-import { must } from '@quenk/must';
+import { assert } from '@quenk/test/lib/assert';
 import {  Case, Default } from '../../../src/actor/resident/case';
 
 class Flag { constructor(public value: boolean) { } }
@@ -13,9 +13,9 @@ describe('case', () => {
 
     describe('Case', function() {
 
-        it('must be extendable', () => {
+        it('assert be extendable', () => {
 
-            must(new ChildCase().match(new Flag(true))).be.true();
+            assert(new ChildCase().match(new Flag(true))).be.true();
 
         });
 
@@ -23,14 +23,14 @@ describe('case', () => {
 
     describe('Case', () => {
 
-        it('must match', () => {
+        it('assert match', () => {
 
             let x = 0;
             let f = (n: number) => { x = n }
             let c = new Case(12, f);
 
-            must(c.match(12)).equal(true);
-            must(x).equal(12);
+            assert(c.match(12)).equal(true);
+            assert(x).equal(12);
 
         });
 
@@ -38,16 +38,16 @@ describe('case', () => {
 
     describe('Default', () => {
 
-        it('must match', () => {
+        it('assert match', () => {
 
             let x = 0;
             let f = (_: any) => { x++ }
             let c = new Default(f);
 
-            must(c.match(1)).equal(true);
-            must(c.match('12')).equal(true);
-            must(c.match({})).equal(true);
-            must(x).equal(3);
+            assert(c.match(1)).equal(true);
+            assert(c.match('12')).equal(true);
+            assert(c.match({})).equal(true);
+            assert(x).equal(3);
 
         });
 

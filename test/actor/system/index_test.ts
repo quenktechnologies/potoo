@@ -1,4 +1,4 @@
-import { must } from '@quenk/must';
+import { assert } from '@quenk/test/lib/assert';
 import { Case } from '../../../src/actor/resident/case';
 import { Immutable, Mutable } from '../../../src/actor/resident';
 import { Context } from '../../../src/actor/context';
@@ -24,7 +24,7 @@ class A3 extends Immutable<String, Context, ActorSystem> {
 
     receive = [
 
-        new Case(String, (m: string) => { must(m).equal('You said : \'Hello!\'') })
+        new Case(String, (m: string) => { assert(m).equal('You said : \'Hello!\'') })
 
     ]
 
@@ -62,12 +62,12 @@ describe('system', function() {
                     .spawn({ id: 'a2', create: s => new A2(s) })
                     .spawn({ id: 'a3', create: s => new A3(s) });
 
-                must(s.state.contexts['a1'].actor).be.instance.of(Mutable);
-                must(s.state.contexts['a2'].actor).be.instance.of(Mutable);
-                must(s.state.contexts['a3'].actor).be.instance.of(Immutable);
+                assert(s.state.contexts['a1'].actor).be.instance.of(Mutable);
+                assert(s.state.contexts['a2'].actor).be.instance.of(Mutable);
+                assert(s.state.contexts['a3'].actor).be.instance.of(Immutable);
 
                 setTimeout(() => {
-                    must(s.state.contexts['a3/a3a'].actor).be.instance.of(Immutable);
+                    assert(s.state.contexts['a3/a3a'].actor).be.instance.of(Immutable);
                     done();
                 }, 200);
 

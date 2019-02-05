@@ -1,4 +1,4 @@
-import {must} from '@quenk/must';
+import {assert} from '@quenk/test/lib/assert';
 import {
     isRestricted,
     make,
@@ -12,13 +12,13 @@ describe('address', function() {
 
         it('should not allow path seperators', () => {
 
-            must(isRestricted('/path/to/actor')).equal(true);
+            assert(isRestricted('/path/to/actor')).equal(true);
 
         })
 
         it('should allow a single /', () => {
 
-            must(isRestricted('/')).equal(false);
+            assert(isRestricted('/')).equal(false);
 
         })
 
@@ -28,13 +28,13 @@ describe('address', function() {
 
         it('should be $ aware', () => {
 
-            must(make('$', 'foobar')).equal('foobar');
+            assert(make('$', 'foobar')).equal('foobar');
 
         });
 
         it('should be / aware', () => {
 
-            must(make('/', 'foobar')).equal('/foobar');
+            assert(make('/', 'foobar')).equal('/foobar');
 
         })
 
@@ -44,16 +44,16 @@ describe('address', function() {
 
         it('should return $ in some cases', () => {
 
-            must(getParent('')).equal('$');
-            must(getParent('/')).equal('$');
-            must(getParent('?')).equal('$');
-            must(getParent('selector')).equal('$');
+            assert(getParent('')).equal('$');
+            assert(getParent('/')).equal('$');
+            assert(getParent('?')).equal('$');
+            assert(getParent('selector')).equal('$');
 
         })
 
         it('should not mess up paths with one seperator', () => {
 
-            must(getParent('/path')).equal('/');
+            assert(getParent('/path')).equal('/');
 
         });
 
@@ -63,16 +63,16 @@ describe('address', function() {
 
         it('should recognize special addresses', () => {
 
-            must(getId('')).equal('');
-            must(getId('/')).equal('/');
-            must(getId('?')).equal('?');
-            must(getId('$')).equal('$')
+            assert(getId('')).equal('');
+            assert(getId('/')).equal('/');
+            assert(getId('?')).equal('?');
+            assert(getId('$')).equal('$')
 
         })
 
         it('should return the id part', () => {
 
-            must(getId('path/to/id')).equal('id');
+            assert(getId('path/to/id')).equal('id');
 
         })
 

@@ -1,4 +1,4 @@
-import { must } from '@quenk/must';
+import { assert } from '@quenk/test/lib/assert';
 import { Context } from '../../../src/actor/context';
 import { System } from '../../../src/actor/system';
 import {
@@ -122,7 +122,7 @@ class ShouldWork extends Mutable<Context, ActorSystem> {
             new Case('two', () => (bucket.push(2), this.select(cases))),
             new Case('three', () => (bucket.push(3), this.select(cases))),
             new Case('done', () => {
-                must(bucket.join(',')).equate('1,2,3'); this.done();
+                assert(bucket.join(',')).equate('1,2,3'); this.done();
             })
 
         ];
@@ -172,7 +172,7 @@ class MutableSelfTalk extends Mutable<Context, ActorSystem> {
 
         }),
 
-        new Case('end', () => { must(this.count).equate(3); this.done(); })
+        new Case('end', () => { assert(this.count).equate(3); this.done(); })
 
     ]
 
@@ -212,7 +212,7 @@ class ImmutableSelfTalk extends Immutable<string, Context, ActorSystem> {
 
         }),
 
-        new Case('end', () => { must(this.count).equal(3); this.done(); })
+        new Case('end', () => { assert(this.count).equal(3); this.done(); })
 
     ]
 
@@ -238,7 +238,7 @@ describe('resident', () => {
                         id: 'a',
                         create: sys => new Killer(sys, k => {
 
-                            must(s.state.contexts['a/targets']).not.equal(undefined);
+                            assert(s.state.contexts['a/targets']).not.equal(undefined);
                             setTimeout(() => k.kill('a/targets'), 100);
 
                         })
@@ -246,7 +246,7 @@ describe('resident', () => {
 
                 setTimeout(() => {
 
-                    must(s.state.contexts['a/targets']).equal(undefined);
+                    assert(s.state.contexts['a/targets']).equal(undefined);
                     done();
 
                 }, 200);
@@ -262,7 +262,7 @@ describe('resident', () => {
 
 
                             setTimeout(() =>
-                                must(s.state.contexts['a/targets/a'])
+                                assert(s.state.contexts['a/targets/a'])
                                     .not.equal(undefined), 200);
 
                             setTimeout(() => k.kill('a/targets/a'), 300);
@@ -272,7 +272,7 @@ describe('resident', () => {
 
                 setTimeout(() => {
 
-                    must(s.state.contexts['a/targets/a']).equal(undefined);
+                    assert(s.state.contexts['a/targets/a']).equal(undefined);
                     done();
 
                 }, 400);
@@ -292,11 +292,11 @@ describe('resident', () => {
 
 
                             setTimeout(() =>
-                                must(s.state.contexts['a']).not.equal(undefined), 100);
+                                assert(s.state.contexts['a']).not.equal(undefined), 100);
 
                             setTimeout(() => {
 
-                                must(s.state.contexts['a']).equal(undefined);
+                                assert(s.state.contexts['a']).equal(undefined);
                                 done();
 
                             }, 300);

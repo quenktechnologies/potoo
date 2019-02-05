@@ -1,4 +1,4 @@
-import { must } from '@quenk/must';
+import { assert } from '@quenk/test/lib/assert';
 import { ActorSystem, system } from '../../../src/actor/system/default';
 import { Case } from '../../../src/actor/resident/case';
 import { Handle } from '../../../src/actor/system/vm/handle';
@@ -21,7 +21,7 @@ class Sender extends Mutable<Context, ActorSystem> {
 
             new Case(String, (m: string) => {
 
-                must(m).equal('hi');
+                assert(m).equal('hi');
 
                 this.done();
 

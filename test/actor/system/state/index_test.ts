@@ -1,5 +1,4 @@
-import {must} from '@quenk/must';
-import { nothing } from '@quenk/noni/lib/data/maybe';
+import { assert } from '@quenk/test/lib/assert';
 import {
     State,
     getParent,
@@ -8,15 +7,15 @@ import {
 } from '../../../../src/actor/system/state';
 import { Context } from '../../../../src/actor/context';
 import { Envelope } from '../../../../src/actor/mailbox';
-import {newContext} from '../../../fixtures/mocks';
+import { newContext } from '../../../fixtures/mocks';
 
 class Act {
 
-  init(c:Context): Context { return c; }
+    init(c: Context): Context { return c; }
 
     accept(_: Envelope) { return this; }
 
-  notify() { return this; }
+    notify() { return this; }
 
     run() { }
 
@@ -24,7 +23,7 @@ class Act {
 
 }
 
-const context = (id: string)=> newContext({
+const context = (id: string) => newContext({
 
     actor: new Act(),
 
@@ -64,7 +63,7 @@ describe('state', () => {
         it('should return the correct parent', () => {
 
             getParent(state, '/path/to/context')
-                .map(p => must(p.template.id).equal('3'))
+                .map(p => assert(p.template.id).equal('3'))
                 .orJust(() => { throw new Error('404!'); })
 
         });
@@ -77,8 +76,8 @@ describe('state', () => {
 
             let childs = getChildren(state, '/path/to')
 
-            must(childs['/path/to/actor'].template.id).equal('4');
-            must(childs['/path/to/context'].template.id).equal('5');
+            assert(childs['/path/to/actor'].template.id).equal('4');
+            assert(childs['/path/to/context'].template.id).equal('5');
 
         });
 
@@ -86,12 +85,12 @@ describe('state', () => {
 
             let childs = getChildren(state, '/');
 
-            must(childs['/path'].template.id).equal('2');
-            must(childs['/path/to'].template.id).equal('3');
-            must(childs['/path/to/actor'].template.id).equal('4');
-            must(childs['/path/to/context'].template.id).equal('5');
-            must(childs['/pizza'].template.id).equal('6');
-            must(childs['nil']).equal(undefined);
+            assert(childs['/path'].template.id).equal('2');
+            assert(childs['/path/to'].template.id).equal('3');
+            assert(childs['/path/to/actor'].template.id).equal('4');
+            assert(childs['/path/to/context'].template.id).equal('5');
+            assert(childs['/pizza'].template.id).equal('6');
+            assert(childs['nil']).equal(undefined);
 
         });
 
@@ -102,7 +101,7 @@ describe('state', () => {
         it('should return the correct address', () => {
 
             getAddress(state, state.contexts['/path/to'].actor)
-                .map(addr => must(addr).equal('/path/to'))
+                .map(addr => assert(addr).equal('/path/to'))
                 .orJust(() => { throw new Error('failed'); });
 
         });
