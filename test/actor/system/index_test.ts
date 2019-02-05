@@ -1,10 +1,10 @@
-import {must} from '@quenk/must';
+import { must } from '@quenk/must';
 import { Case } from '../../../src/actor/resident/case';
-import { Immutable, Mutable  } from '../../../src/actor/resident';
-import {Context} from '../../../src/actor/context';
-import {ActorSystem, system } from '../../../src/actor/system/default';
+import { Immutable, Mutable } from '../../../src/actor/resident';
+import { Context } from '../../../src/actor/context';
+import { ActorSystem, system } from '../../../src/actor/system/default';
 
-class A1 extends Mutable<Context,ActorSystem> {
+class A1 extends Mutable<Context, ActorSystem> {
 
     receive = [];
 
@@ -20,7 +20,7 @@ class A2 extends Mutable<Context, ActorSystem> {
 
 }
 
-class A3 extends Immutable<String,Context,ActorSystem> {
+class A3 extends Immutable<String, Context, ActorSystem> {
 
     receive = [
 
@@ -37,7 +37,7 @@ class A3 extends Immutable<String,Context,ActorSystem> {
 
 }
 
-class A3A extends Immutable<any,Context,ActorSystem> {
+class A3A extends Immutable<any, Context, ActorSystem> {
 
     receive = [
 
@@ -62,7 +62,7 @@ describe('system', function() {
                     .spawn({ id: 'a2', create: s => new A2(s) })
                     .spawn({ id: 'a3', create: s => new A3(s) });
 
-              must(s.state.contexts['a1'].actor).be.instance.of(Mutable);
+                must(s.state.contexts['a1'].actor).be.instance.of(Mutable);
                 must(s.state.contexts['a2'].actor).be.instance.of(Mutable);
                 must(s.state.contexts['a3'].actor).be.instance.of(Immutable);
 

@@ -1,5 +1,5 @@
 import { Either } from '@quenk/noni/lib/data/either';
-import { Envelope } from './mailbox';
+import { Message } from './message';
 import { Context } from './context';
 /**
  * Behaviour of an actor.
@@ -8,7 +8,7 @@ import { Context } from './context';
  * functions that return an Either that indicates whether
  * the message is rejected or will/was processed.
  */
-export declare type Behaviour = <M>(m: M) => Either<M, void>;
+export declare type Behaviour = (m: Message) => Either<Message, void>;
 /**
  * Contexts map.
  */
@@ -25,11 +25,16 @@ export interface Instance {
      * For some actors, this message allows bypassing the mailbox
      * system and handling messages directly.
      */
-    accept(e: Envelope): Instance;
+    accept(m: Message): void;
     /**
      * run this actor instance.
      */
     run(): void;
+    /**
+     * notify is called by the system to indicate new messages
+     * in the actor's mailbox.
+     */
+    notify(): void;
     /**
      * stop is called by the system to stop the actor.
      */

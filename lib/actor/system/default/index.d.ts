@@ -6,18 +6,19 @@
 import * as config from '../configuration';
 import { State } from '../state';
 import { Context } from '../../context';
-import { Template as ActorTemplate } from '../../template';
-import { AbstractSystem } from '../abstract';
+import { Template } from '../../template';
+import { Runtime } from '../vm/runtime';
+import { Actor } from '../../';
+import { AbstractSystem } from '../framework';
 /**
  * ActorSystem
  *
- * Implemenation of a System and Executor that spawns
+ * Implemenation of a System and Runtime that spawns
  * various general purpose actors.
  */
 export declare class ActorSystem extends AbstractSystem<Context> {
-    running: boolean;
     state: State<Context>;
-    allocate(t: ActorTemplate<Context, ActorSystem>): Context;
+    allocate(a: Actor<Context>, h: Runtime<Context, ActorSystem>, t: Template<Context, ActorSystem>): Context;
 }
 /**
  * system creates a new actor system using the optionally passed

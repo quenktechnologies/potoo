@@ -8,6 +8,7 @@ import {
 } from '../../../../src/actor/system/state';
 import { Context } from '../../../../src/actor/context';
 import { Envelope } from '../../../../src/actor/mailbox';
+import {newContext} from '../../../fixtures/mocks';
 
 class Act {
 
@@ -15,21 +16,19 @@ class Act {
 
     accept(_: Envelope) { return this; }
 
+  notify() { return this; }
+
     run() { }
 
     stop() { }
 
 }
 
-const context = (id: string): Context => ({
-
-    mailbox: nothing(),
+const context = (id: string)=> newContext({
 
     actor: new Act(),
 
     behaviour: [],
-
-    flags: { immutable: true, buffered: false },
 
     template: { id, create: () => new Act() }
 
@@ -55,7 +54,7 @@ let state: State<Context> = {
 
     },
 
-    routes: {}
+    routers: {}
 }
 
 describe('state', () => {

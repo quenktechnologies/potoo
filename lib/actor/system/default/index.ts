@@ -8,25 +8,27 @@ import * as config from '../configuration';
 import { rmerge } from '@quenk/noni/lib/data/record';
 import { State } from '../state';
 import { Context } from '../../context';
-import { Template as ActorTemplate } from '../../template';
-import { AbstractSystem, newContext, newState } from '../abstract';
+import { Template } from '../../template';
+import { Runtime } from '../vm/runtime';
+import { Actor } from '../../';
+import { AbstractSystem, newContext, newState } from '../framework';
 
 /**
  * ActorSystem
  *
- * Implemenation of a System and Executor that spawns
+ * Implemenation of a System and Runtime that spawns
  * various general purpose actors.
  */
 export class ActorSystem extends AbstractSystem<Context> {
 
-    running: boolean = false;
-
     state: State<Context> = newState(this);
 
-    allocate(t: ActorTemplate<Context, ActorSystem>): Context {
+    allocate(
+        a: Actor<Context>,
+        h: Runtime<Context, ActorSystem>,
+        t: Template<Context, ActorSystem>): Context {
 
-        let act = t.create(this);
-        return act.init(newContext(act, t));
+        return a.init(newContext(a, h, t));
 
     }
 

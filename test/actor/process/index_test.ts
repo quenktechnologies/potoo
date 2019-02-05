@@ -1,15 +1,16 @@
 import { must } from '@quenk/must';
 import { ActorSystem, system } from '../../../src/actor/system/default';
 import { Case } from '../../../src/actor/resident/case';
-import { Mutable  } from '../../../src/actor/resident';
+import { Handle } from '../../../src/actor/system/vm/handle';
+import { Mutable } from '../../../src/actor/resident';
 import { Context } from '../../../src/actor/context';
 import { Process } from '../../../src/actor/process';
 import { System } from '../../../src/actor/system';
 
-class Sender extends Mutable< Context, ActorSystem> {
+class Sender extends Mutable<Context, ActorSystem> {
 
     constructor(
-        public system: System<Context>,
+        public system: Handle<Context, System<Context>>,
         public done: () => void) { super(system); }
 
     run() {
@@ -50,7 +51,6 @@ describe('process', () => {
                     create: s => new Sender(s, done)
 
                 })
-
         })
 
     })

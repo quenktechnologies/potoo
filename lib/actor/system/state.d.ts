@@ -1,14 +1,11 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Instance, Behaviour } from '../';
-import { Template } from '../template';
-import { Envelope } from '../mailbox';
+import { Instance } from '../';
 import { Address } from '../address';
 import { Context, Contexts } from '../context';
-import { System } from './';
 /**
- * Routes map.
+ * Routers map.
  */
-export interface Routes {
+export interface Routers {
     [key: string]: Address;
 }
 /**
@@ -20,9 +17,9 @@ export interface State<C extends Context> {
      */
     contexts: Contexts<C>;
     /**
-     * routes configured for transfers.
+     * routers configured for transfers.
      */
-    routes: Routes;
+    routers: Routers;
 }
 /**
  * exists tests whether an address exists in the State.
@@ -33,30 +30,17 @@ export declare const exists: <C extends Context>(s: State<C>, addr: string) => b
  */
 export declare const get: <C extends Context>(s: State<C>, addr: string) => Maybe<C>;
 /**
+ * put a new Context in the State.
+ */
+export declare const put: <C extends Context>(s: State<C>, addr: string, context: C) => State<C>;
+/**
+ * remove an actor entry.
+ */
+export declare const remove: <C extends Context>(s: State<C>, addr: string) => State<C>;
+/**
  * getAddress attempts to retrieve the address of an Actor instance.
  */
 export declare const getAddress: <C extends Context>(s: State<C>, actor: Instance) => Maybe<string>;
-/**
- * getInstance attempts to retrieve an actor given its address.
- */
-export declare const getInstance: <C extends Context>(s: State<C>, addr: string) => Maybe<Instance>;
-/**
- * getTemplate attempts to retrieve the template for an
- * actor given an address.
- */
-export declare const getTemplate: <C extends Context, S extends System<C>>(s: State<C>, addr: string) => Maybe<Template<C, S>>;
-/**
- * getMessage attempts to retrieve the next message
- * from an actors mailbox.
- *
- * If sucessfull, the message will be removed.
- */
-export declare const getMessage: <C extends Context>(s: State<C>, addr: string) => Maybe<Envelope>;
-/**
- * getBehaviour attempts to retrieve the behaviour for an
- * actor given an address.
- */
-export declare const getBehaviour: <C extends Context>(s: State<C>, addr: string) => Maybe<Behaviour>;
 /**
  * getChildren returns the child contexts for an address.
  */
@@ -72,20 +56,12 @@ export declare const getParent: <C extends Context>(s: State<C>, addr: string) =
  * The value returned depends on whether the given
  * address begins with any of the installed router's address.
  */
-export declare const getRouter: <C extends Context>(s: State<C>, addr: string) => Maybe<string>;
-/**
- * put a new Context in the State.
- */
-export declare const put: <C extends Context>(s: State<C>, addr: string, context: C) => State<C>;
+export declare const getRouter: <C extends Context>(s: State<C>, addr: string) => Maybe<C>;
 /**
  * putRoute adds a route to the routing table.
  */
-export declare const putRoute: <C extends Context>(s: State<C>, from: string, to: string) => State<C>;
+export declare const putRoute: <C extends Context>(s: State<C>, target: string, router: string) => State<C>;
 /**
- * remove an actor entry.
+ * removeRoute from the routing table.
  */
-export declare const remove: <C extends Context>(s: State<C>, addr: string) => State<C>;
-/**
- * runInstance attempts to invoke the run code of an actor instance.
- */
-export declare const runInstance: <C extends Context>(s: State<C>, addr: string) => void;
+export declare const removeRoute: <C extends Context>(s: State<C>, target: string) => State<C>;

@@ -1,11 +1,11 @@
+import { Handle } from '../system/vm/handle';
+import { System } from '../system';
 import { Address } from '../address';
 import { Message } from '../message';
-import { Envelope } from '../mailbox';
-import { System } from '../system';
 import { Template } from '../template';
 import { Context } from '../context';
-import { Case } from './case';
 import { Actor } from '../';
+import { Case } from './case';
 import { Api } from './api';
 /**
  * Reference to an actor address.
@@ -20,18 +20,19 @@ export interface Resident<C extends Context, S extends System<C>> extends Api<C,
  * AbstractResident implementation.
  */
 export declare abstract class AbstractResident<C extends Context, S extends System<C>> implements Resident<C, S> {
-    system: System<C>;
-    constructor(system: System<C>);
+    handle: Handle<C, S>;
+    constructor(handle: Handle<C, S>);
     abstract init(c: C): C;
+    abstract select<T>(_: Case<T>[]): AbstractResident<C, S>;
+    abstract run(): void;
+    notify(): void;
     self(): string;
-    accept({ to, from, message }: Envelope): this;
+    accept(m: Message): void;
     spawn(t: Template<C, S>): Address;
     tell<M>(ref: Address, m: M): AbstractResident<C, S>;
-    abstract select<T>(_: Case<T>[]): AbstractResident<C, S>;
     kill(addr: Address): AbstractResident<C, S>;
     exit(): void;
     stop(): void;
-    abstract run(): void;
 }
 /**
  * Immutable actors do not change their behaviour after receiving

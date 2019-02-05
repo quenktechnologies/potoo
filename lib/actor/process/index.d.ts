@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import { ChildProcess } from 'child_process';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
+import { Handle } from '../system/vm/handle';
 import { System } from '../system';
 import { Context } from '../context';
 import { Envelope } from '../mailbox';
@@ -28,12 +29,14 @@ export declare type Path = string;
  */
 export declare class Process<C extends Context> implements Actor<C> {
     module: Path;
-    system: System<C>;
-    constructor(module: Path, system: System<C>);
-    handle: Maybe<ChildProcess>;
+    handle: Handle<C, System<C>>;
+    script: string;
+    constructor(module: Path, handle: Handle<C, System<C>>, script?: string);
+    process: Maybe<ChildProcess>;
     self: () => string;
     init(c: C): C;
     accept(e: Envelope): Process<C>;
+    notify(): void;
     stop(): void;
     run(): void;
 }

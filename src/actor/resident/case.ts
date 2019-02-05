@@ -3,6 +3,8 @@ import { Constructor } from '@quenk/noni/lib/data/type/constructor';
 import { Pattern } from '@quenk/noni/lib/data/type';
 import { Message } from '../message';
 
+export { Pattern }
+
 /**
  * Handler function type for Cases.
  */
@@ -22,7 +24,7 @@ export class Case<T> {
     constructor(pattern: number, f: (value: number) => void)
     constructor(pattern: boolean, f: (value: boolean) => void)
     constructor(pattern: Constructor<T>, f: (value: T) => void)
-  constructor(public pattern: Pattern<T>, public handler: Handler<T>) {}
+    constructor(public pattern: Pattern<T>, public handler: Handler<T>) { }
 
     /**
      * match a message against a pattern.
