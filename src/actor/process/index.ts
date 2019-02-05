@@ -79,10 +79,10 @@ interface RaiseMsg {
  */
 export class Process<C extends Context> implements Actor<C> {
 
-  constructor(
-    public module: Path,
-    public handle: Handle<C, System<C>>,
-   public script = SCRIPT_PATH) { }
+    constructor(
+        public module: Path,
+        public handle: Handle<C, System<C>>,
+        public script = SCRIPT_PATH) { }
 
     process: Maybe<ChildProcess> = nothing();
 
@@ -101,7 +101,9 @@ export class Process<C extends Context> implements Actor<C> {
 
         if (this.process.isJust()) {
 
-            this.process.get().send(e);
+            let p = this.process.get();
+
+            p.send(e);
 
         } else {
 

@@ -16,13 +16,13 @@ const acceptCode = [new PushMsg(0), new Discard()];
 
 const tellcode: Op<Context, System<Context>>[] = [
 
-    new PushMsg(0),    //1: Push the message onto the stack. 
-    new PushStr(0),    //2: Push the address onto the stack.
-    new Tell(),        //3: Tell the message to the address.
-    new JumpIfOne(7),  //4: Jump to the end if sending was successful
-    new PushMsg(0),    //5: Put the message back on the stack.
-    new Discard(),     //6: Discard it
-    new Noop()         //7: Do nothing
+    new PushMsg(0),    //0: Push the message onto the stack. 
+    new PushStr(0),    //1: Push the address onto the stack.
+    new Tell(),        //2: Tell the message to the address.
+    new JumpIfOne(6),  //3: Jump to the end if sending was successful
+    new PushMsg(0),    //4: Put the message back on the stack.
+    new Discard(),     //5: Discard it
+    new Noop()         //6: Do nothing
 
 ];
 
@@ -36,7 +36,7 @@ const receivecode: Op<Context, System<Context>>[] = [
 const notifyCode: Op<Context, System<Context>>[] = [
 
     new Read(),
-    new JumpIfOne(4),
+    new JumpIfOne(3),
     new Discard(),
     new Noop()
 
@@ -57,7 +57,7 @@ export class AcceptScript<C extends Context, S extends System<C>>
 
 }
 
-export {AcceptScript as DropScript}
+export { AcceptScript as DropScript }
 
 /**
  * TellScript for sending messages.
@@ -83,8 +83,7 @@ export class ReceiveScript<C extends Context, S extends System<C>>
 
     constructor(public func: Foreign<C, S>) {
 
-        super(<Constants<C, S>>[[], [], [], [], [], []],
-            receivecode);
+        super(<Constants<C, S>>[[], [], [], [], [], [func]],            receivecode);
 
     }
 

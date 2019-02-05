@@ -29,7 +29,7 @@ export class Call<C extends Context, S extends System<C>> implements Op<C, S> {
         if (eitherFunc.isLeft())
             return e.raise(eitherFunc.takeLeft());
 
-      let f = eitherFunc.takeRight();
+        let f = eitherFunc.takeRight();
 
         let frm = new Frame(actor, context, script, f(), [], heap);
 
@@ -41,10 +41,6 @@ export class Call<C extends Context, S extends System<C>> implements Op<C, S> {
         }
 
         e.push(frm);
-
-        let [value, type, location] = frm.pop();
-
-        curr.push(value, type, location); //return
 
     }
 

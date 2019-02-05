@@ -49,6 +49,29 @@ export const get = <C extends Context>
     (s: State<C>, addr: Address): Maybe<C> => fromNullable(s.contexts[addr]);
 
 /**
+ * put a new Context in the State.
+ */
+export const put = <C extends Context>
+    (s: State<C>, addr: Address, context: C): State<C> => {
+
+    s.contexts[addr] = context;
+    return s;
+
+}
+
+/**
+ * remove an actor entry.
+ */
+export const remove = <C extends Context>
+    (s: State<C>, addr: Address): State<C> => {
+
+    delete s.contexts[addr];
+
+    return s;
+
+    }
+
+/**
  * getAddress attempts to retrieve the address of an Actor instance.
  */
 export const getAddress = <C extends Context>
@@ -86,35 +109,23 @@ export const getRouter = <C extends Context>
         startsWith(addr, k) ? fromNullable(s.contexts[k]) : p);
 
 /**
- * put a new Context in the State.
- */
-export const put = <C extends Context>
-    (s: State<C>, addr: Address, context: C): State<C> => {
-
-    s.contexts[addr] = context;
-    return s;
-
-}
-
-/**
  * putRoute adds a route to the routing table.
  */
 export const putRoute = <C extends Context>
-    (s: State<C>, from: Address, to: Address): State<C> => {
+    (s: State<C>, target: Address, router: Address): State<C> => {
 
-    s.routers[from] = to;
+    s.routers[target] = router;
     return s;
 
 }
 
 /**
- * remove an actor entry.
+ * removeRoute from the routing table.
  */
-export const remove = <C extends Context>
-    (s: State<C>, addr: Address): State<C> => {
+export const removeRoute = <C extends Context>(s: State<C>, target: Address)
+    : State<C> => {
 
-    delete s.contexts[addr];
-
+    delete s.routers[target];
     return s;
 
 }

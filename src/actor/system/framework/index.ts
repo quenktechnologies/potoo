@@ -65,7 +65,7 @@ export abstract class AbstractSystem<C extends Context> implements System<C> {
      */
     spawn(t: ActorTemplate<C, AbstractSystem<C>>): AbstractSystem<C> {
 
-        (new This('$', this)).exec(new SpawnScript(t));
+        (new This('$', this)).exec(new SpawnScript('',t));
 
         return this;
 

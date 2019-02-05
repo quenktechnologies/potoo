@@ -59,7 +59,7 @@ this.handle.exec(new NotifyScript());
 
     spawn(t: Template<C, S>): Address {
 
-        this.handle.exec(new SpawnScript(t));
+        this.handle.exec(new SpawnScript(this.self(), t));
 
         return isRestricted(t.id) ?
             ADDRESS_DISCARD :

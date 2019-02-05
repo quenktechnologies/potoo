@@ -1,15 +1,28 @@
 import { Mock } from '@quenk/test/lib/mock';
-import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe';
+import { Maybe, just, fromNullable } from '@quenk/noni/lib/data/maybe';
+import { tail } from '@quenk/noni/lib/data/array';
+import { reduce, merge, rmerge } from '@quenk/noni/lib/data/record';
+import { startsWith } from '@quenk/noni/lib/data/string';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Address } from '../../src/actor/address';
-import { System } from '../..//src/actor/system';
-import { Op } from '../..//src/actor/system/op';
+import { System } from '../../src/actor/system';
+import { Handle } from '../../src/actor/system/vm/handle';
 import { Instance, Actor } from '../../src/actor';
-import { Template } from '../../src/actor/template';
-import { Executor } from '../../src/actor/system/vm';
+import { Template as T } from '../../src/actor/template';
+import { State } from '../../src/actor/system/state';
+import { Runtime } from '../../src/actor/system/vm/runtime';
+import { Constants as C, Script } from '../../src/actor/system/vm/script';
 import { Frame } from '../../src/actor/system/vm/frame';
-import { Context } from '../../src/actor/context';
-import { Envelope } from '../../src/actor/mailbox';
+import { Contexts as Ctxs, Context as Ctx } from '../../src/actor/context';
+import { Envelope } from '../../src/actor/message';
+
+export type Constants = C<Ctx, SystemImpl>;
+
+export interface Contexts extends Ctxs<Context> { }
+
+export interface Context extends Ctx { }
+
+export interface Template extends T<Context, SystemImpl> { }
 
 export class InstanceImpl extends Mock implements Instance {
 
@@ -22,6 +35,12 @@ export class InstanceImpl extends Mock implements Instance {
     accept(e: Envelope) {
 
         return this.MOCK.record('accept', [e], this);
+
+    }
+
+    notify() {
+
+        this.MOCK.record('notify', [], this);
 
     }
 
@@ -41,27 +60,40 @@ export class InstanceImpl extends Mock implements Instance {
 
 export class SystemImpl extends InstanceImpl implements System<Context> {
 
-    identify(a: Actor<Context>): Address {
+    state: State<Context> = { contexts: {}, routers: {} };
 
-        return this.MOCK.record('identify', [a], 'test');
+    configuration = {}
 
-    }
+    allocate(
+        a: Actor<Context>,
+        h: Handle<Context, SystemImpl>,
+        t: Template): Context {
 
-    exec(code: Op<Context, SystemImpl>): SystemImpl {
+        return this.MOCK.record('allocate', [a, h, t], a.init(newContext({
+            handler: { raise() { console.error('TURKET') } }
 
-        return this.MOCK.record('exec', [code], this);
+        })));
 
     }
 
 }
 
-export class ExecutorImpl extends Mock implements Executor<Context, SystemImpl> {
+export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
 
     constructor(
-        public current: Frame<Context, SystemImpl>,
-        public stack: Frame<Context, SystemImpl>[]=[]) { super(); }
+        public self = '?',
+        public system = new SystemImpl(),
+        public stack: Frame<Context, SystemImpl>[] = []) { super(); }
 
     contexts: { [key: string]: Context } = {};
+
+    routers: { [key: string]: Address } = {};
+
+    current(): Maybe<Frame<Context, SystemImpl>> {
+
+        return this.MOCK.record('current', [], fromNullable(tail(this.stack)));
+
+    }
 
     raise(e: Err): void {
 
@@ -69,9 +101,9 @@ export class ExecutorImpl extends Mock implements Executor<Context, SystemImpl> 
 
     }
 
-    allocate(t: Template<Context, SystemImpl>): Context {
+    allocate(addr: Address, t: T<Context, SystemImpl>): Context {
 
-        return this.MOCK.record('allocate', [t], newContext());
+        return this.MOCK.record('allocate', [addr, t], newContext());
 
     }
 
@@ -82,40 +114,86 @@ export class ExecutorImpl extends Mock implements Executor<Context, SystemImpl> 
 
     }
 
-    putContext(addr: Address, ctx: Context): ExecutorImpl {
+    getRouter(addr: Address): Maybe<Context> {
+
+        return this.MOCK.record('getRouter', [addr],
+            fromNullable<Context>(
+                reduce(this.routers, <Context | undefined>undefined, (p, c, k) =>
+                    startsWith(addr, k) ? this.contexts[c] : p)));
+
+    }
+
+    getChildren(addr: Address): Maybe<Contexts> {
+
+        return this.MOCK.record('getContexts', [addr],
+            fromNullable(reduce(this.contexts, <Contexts>{}, (p, c, k) =>
+                startsWith(k, addr) ? merge(p, { [k]: c }) : p)));
+
+    }
+
+    putContext(addr: Address, ctx: Context): RuntimeImpl {
 
         this.contexts[addr] = ctx;
         return this.MOCK.record('putContext', [addr, ctx], this);
 
     }
 
-    removeContext(addr: Address): ExecutorImpl {
+    removeContext(addr: Address): RuntimeImpl {
 
         delete this.contexts[addr];
         return this.MOCK.record('removeContext', [addr], this);
 
     }
 
-    push(f: Frame<Context, SystemImpl>): ExecutorImpl {
+    putRoute(target: Address, router: Address): RuntimeImpl {
+
+        this.routers[target] = router;
+        return this.MOCK.record('putRoute', [target], this);
+
+    }
+
+    removeRoute(target: Address): RuntimeImpl {
+
+        delete this.routers[target];
+        return this.MOCK.record('removeRoute', [target], this);
+
+    }
+
+    push(f: Frame<Context, SystemImpl>): RuntimeImpl {
 
         this.stack.push(f);
         return this.MOCK.record('push', [f], this);
 
     }
 
+  clear() : RuntimeImpl {
+
+    this.stack = [];
+    return this;
+
+
+  }
+
+    exec(s: Script<Context, SystemImpl>) {
+
+        this.MOCK.record('exec', [s], undefined);
+
+    }
+
 }
 
+export const newContext = (o: Partial<Context> = {}): Context => rmerge({
 
-export const newContext = (): Context => ({
-
-    mailbox: nothing(),
+    mailbox: just([]),
 
     actor: new InstanceImpl(),
 
     behaviour: [],
 
-    flags: { immutable: true, buffered: false },
+    flags: { immutable: true, buffered: true },
+
+    handler: { raise() { } },
 
     template: { id: 'test', create: () => new InstanceImpl() }
 
-});
+}, <any>o);

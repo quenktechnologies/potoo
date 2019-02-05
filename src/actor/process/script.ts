@@ -42,12 +42,11 @@ const filterTell = <C extends Context>(s: Handle<C, System<C>>) =>
     ({ to, message }: { to: string, from: string, message: Message }) =>
         s.exec(new TellScript(to, message));
 
-
 const fitlerDrop = <C extends Context>(s: Handle<C, System<C>>) => (m: Message) =>
     s.exec(new DropScript(m));
 
 process.on('uncaughtException', e =>
-    (<any>process.send)(<string>e.stack, address));
+  (<any>process.send)({ error: e.stack, src: address, dest: address}));
 
 sys.spawn({
 

@@ -2,9 +2,9 @@ import { assert } from '@quenk/test/lib/assert';
 import { Script } from '../../../../src/actor/system/vm/script';
 import { NullPointerErr, TypeErr } from '../../../../src/actor/system/vm/error';
 import { Type, Location, Frame } from '../../../../src/actor/system/vm/frame';
+import {Log} from '../../../../src/actor/system/vm/op';
 import {
     Constants,
-    SystemImpl,
     InstanceImpl,
     newContext
 } from '../../../fixtures/mocks';
@@ -20,9 +20,9 @@ class Int {
 
     }
 
-    toLog() {
+    toLog() : Log{
 
-        return 'int';
+        return ['int', [], []];
 
     }
 
@@ -208,7 +208,7 @@ describe('frame', () => {
 
         describe('resolveTemplate', function() {
 
-            const temp = { id: 'foo', create: (_: SystemImpl) => new InstanceImpl() };
+            const temp = { id: 'foo', create: () => new InstanceImpl() };
             const c: Constants = [[], [], [], [temp], [], []];
 
             it('should resolve templates', () => {

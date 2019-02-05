@@ -2,7 +2,7 @@ import { Context } from '../../../context';
 import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
 import { Runtime } from '../runtime';
-import {OP_CODE_STORE, Log, Level, Op } from './';
+import { OP_CODE_STORE, Log, Level, Op } from './';
 
 /**
  * Store the top most value on the stack in the locals array at the 

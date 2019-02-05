@@ -1,4 +1,5 @@
 import { Err } from '@quenk/noni/lib/control/error';
+import {Handle} from './system/vm/handle';
 import { System } from './system';
 import { Context } from './context';
 import { Actor } from './';
@@ -24,7 +25,8 @@ export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * CreateFunc is applied to produce an instance of an actor.
  */
-export type CreateFunc<C extends Context, S extends System<C>> = (s: S) => Actor<C>;
+export type CreateFunc<C extends Context, S extends System<C>> 
+  = (h:Handle<C,S>) => Actor<C>;
 
 /**
  * DelayMilliseconds type.

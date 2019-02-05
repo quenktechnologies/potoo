@@ -157,10 +157,12 @@ export class This<C extends Context, S extends System<C>>
     }
 
     exec(s: Script<C, S>): void {
-      
+
         let ctx = this.getContext(this.self).get();
 
         this.push(new Frame(this.self, ctx, s, s.code));
+
+        this.run();
 
     }
 
@@ -168,21 +170,43 @@ export class This<C extends Context, S extends System<C>>
 
         let policy = <config.LogPolicy>(this.system.configuration.log || {});
 
+        if (this.running) return;
+
+        this.running = true;
+
         while (this.stack.length > 0) {
 
             let cur = tail(this.stack);
 
-            while ((cur.ip < cur.code.length) && (tail(this.stack) === cur)) {
+            while (true) {
+
+                if (tail(this.stack) !== cur) break;
+
+                if (cur.ip === cur.code.length) {
+
+                  if ((this.stack.length > 1) && (cur.data.length > 0)) {
+
+                        let [value, type, loc] = cur.pop();
+
+                        this.stack[this.stack.length - 2].push(value, type, loc);
+
+                    }
+
+                    this.stack.pop();
+
+                    break;
+
+                }
 
                 log(policy, cur, cur.code[cur.ip]).exec(this);
+
                 cur.ip++;
 
             }
 
-            if (cur.ip === cur.code.length)
-                this.stack.pop();
-
         }
+
+        this.running = false;
 
     }
 
@@ -200,28 +224,28 @@ const log = <C extends Context, S extends System<C>>
     let level = policy.level || 0;
     let logger = policy.logger || console;
 
-    if (o.level <= <number>level) {
+    if (o.level <= <number>level) { }
 
-        let ctx = `[${f.actor}]`;
-        let msg = resolveLog(f, o.toLog(f));
+    let ctx = `[${f.actor}]`;
+    let msg = resolveLog(f, o.toLog(f));
 
-        switch (o.level) {
-            case logging.INFO:
-                (<logging.Logger>logger).info(ctx, msg);
-                break;
-            case logging.WARN:
-                (<logging.Logger>logger).warn(ctx, msg);
-                break;
-            case logging.ERROR:
-                (<logging.Logger>logger).error(ctx, msg);
-                break;
-            default:
-                (<logging.Logger>logger).log(ctx, msg)
-                break;
-
-        }
+    switch (o.level) {
+        case logging.INFO:
+            (<logging.Logger>logger).info(ctx, msg);
+            break;
+        case logging.WARN:
+            (<logging.Logger>logger).warn(ctx, msg);
+            break;
+        case logging.ERROR:
+            (<logging.Logger>logger).error(ctx, msg);
+            break;
+        default:
+            (<logging.Logger>logger).log(ctx, msg)
+            break;
 
     }
+
+    //   }
 
     return o;
 

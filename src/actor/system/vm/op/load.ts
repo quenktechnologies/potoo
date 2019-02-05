@@ -26,9 +26,9 @@ export class Load<C extends Context, S extends System<C>> {
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(_: Frame<C, S>): Log {
 
-        return ['load', [this.index, Type.Number, Location.Literal], [f.peek()]];
+        return ['load', [this.index, Type.Number, Location.Literal], []];
 
     }
 

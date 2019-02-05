@@ -1,4 +1,5 @@
 import { tail } from '@quenk/noni/lib/data/array';
+import { startsWith } from '@quenk/noni/lib/data/string';
 
 export const SEPERATOR = '/';
 
@@ -82,3 +83,8 @@ export const getId = (addr: Address): string =>
         addr :
         tail(addr.split(SEPERATOR));
 
+/**
+ * isChild tests whether an address is a child of the parent address.
+ */
+export const isChild = (parent: Address, child: Address): boolean =>
+ (parent !== child) &&   startsWith(child, parent);

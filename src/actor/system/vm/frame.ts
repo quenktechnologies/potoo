@@ -107,9 +107,10 @@ export class Frame<C extends Context, S extends System<C>> {
     seek(location: number): Either<Err, Frame<C, S>> {
 
         if ((location < 0) || (location >= this.code.length))
-            return left(new error.JumpOutOfBoundsErr(location, this.code.length));
+            return left(new error.JumpOutOfBoundsErr(location,
+                this.code.length));
 
-        this.ip = location - 1;
+        this.ip = location;
 
         return right(this);
 
@@ -151,9 +152,7 @@ export class Frame<C extends Context, S extends System<C>> {
      */
     pushNumber(n: number): Frame<C, S> {
 
-      this.data.push( Location.Literal);
-      this.data.push( Type.Number);
-      this.data.push(n);
+        this.push(n, Type.Number, Location.Literal);
         return this;
 
     }
@@ -166,7 +165,7 @@ export class Frame<C extends Context, S extends System<C>> {
     pushAddress(addr: Address): Frame<C, S> {
 
         this.heap.push(addr);
-        this.data.push(this.heap.length - 1, Type.String, Location.Heap);
+        this.push(this.heap.length - 1, Type.String, Location.Heap);
         return this;
 
     }

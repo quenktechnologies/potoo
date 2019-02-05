@@ -1,3 +1,4 @@
+import * as errors from '../error';
 import { fromArray } from '@quenk/noni/lib/data/maybe';
 import { Context } from '../../../context';
 import { Message } from '../../../message';
@@ -11,7 +12,7 @@ import { OP_CODE_READ, Log, Op, Level } from './';
  *
  * Pushes
  *
- * 1. The number 1 if successful or 0 if the message was not processed.
+ * The number 1 if successful or 0 if the message was not processed.
  */
 export class Read<C extends Context, S extends System<C>> implements Op<C, S> {
 
@@ -23,29 +24,45 @@ export class Read<C extends Context, S extends System<C>> implements Op<C, S> {
 
         let curr = e.current().get();
 
-        fromArray<Behaviour>(curr.context.behaviour)
-            .chain((b: Behaviour[]) =>
-                curr
-                    .context
-                    .mailbox
-                    .chain(fromArray)
-                    .map(mbox =>
-                        (b[0](mbox.shift()))
-                            .lmap(m => {
+        let maybBehave = fromArray<Behaviour>(curr.context.behaviour);
 
-                                mbox.unshift(<Message>m);
-                                curr.pushNumber(0);
+        if (maybBehave.isNothing())
+            return e.raise(new errors.NoReceiveErr(e.self));
 
-                            })
-                            .map(() => {
+        let stack = maybBehave.get();
 
-                                if (!curr.context.flags.immutable)
-                                    curr.context.behaviour.shift();
+        let maybMbox = curr.context.mailbox;
 
-                                curr.pushNumber(1);
+        if (maybMbox.isNothing())
+            return e.raise(new errors.NoMailboxErr(e.self));
 
-                            })));
+        let maybHasMail = maybMbox.chain(fromArray);
 
+        if (maybHasMail.isNothing()) {
+
+            return e.raise(new errors.EmptyMailboxErr(e.self));
+
+        } else {
+
+            let mbox = maybHasMail.get();
+
+            let eitherRead = stack[0](mbox.shift());
+
+            if (eitherRead.isLeft()) {
+
+                mbox.unshift(<Message>eitherRead.takeLeft());
+                curr.pushNumber(0);
+
+            } else {
+
+                if (!curr.context.flags.immutable)
+                    curr.context.behaviour.shift();
+
+                curr.pushNumber(1);
+
+            }
+
+        }
 
     }
 
