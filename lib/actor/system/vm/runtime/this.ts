@@ -223,11 +223,11 @@ export class This<C extends Context, S extends System<C>>
 
                 }
 
-              let next = log(policy, cur, cur.code[cur.ip]);
-              
-              cur.ip++; // increment here so jumps do not skip
-              
-              next.exec(this);
+                let next = log(policy, cur, cur.code[cur.ip]);
+
+                cur.ip++; // increment here so jumps do not skip
+
+                next.exec(this);
 
 
             }
@@ -266,7 +266,7 @@ const log = <C extends Context, S extends System<C>>
     let level = policy.level || 0;
     let logger = policy.logger || console;
 
-    if (o.level <= <number>level) { }
+    if (o.level <= <number>level) { 
 
     let ctx = `[${f.actor}]`;
     let msg = resolveLog(f, o.toLog(f));
@@ -287,7 +287,7 @@ const log = <C extends Context, S extends System<C>>
 
     }
 
-    //   }
+       }
 
     return o;
 
@@ -300,7 +300,7 @@ const resolveLog = <C extends Context, S extends System<C>>
         f
             .resolve(<Data>rand)
             .orRight(() => undefined)
-            .takeRight() : undefined;
+            .takeRight() : [];
 
     let stack = data.length > 0 ?
         data.map(d =>
