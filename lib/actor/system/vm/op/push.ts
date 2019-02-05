@@ -157,7 +157,7 @@ export class PushForeign<C extends Context, S extends System<C>> {
 
     toLog(): Log {
 
-        return ['pushmsg', [this.index, Type.Foreign, Location.Constants], []];
+        return ['pushforeign', [this.index, Type.Foreign, Location.Constants], []];
 
     }
 

@@ -3,12 +3,12 @@ import { Script } from '../../../../../src/actor/system/vm/script';
 import { Frame, Type, Location } from '../../../../../src/actor/system/vm/frame';
 import {
     Constants,
-  SystemImpl,
-  newContext
+    SystemImpl,
+    newContext
 }
     from '../../../../fixtures/mocks';
 import { Tell } from '../../../../../src/actor/system/vm/op/tell';
-import {This} from '../../../../../src/actor/system/vm/runtime/this';
+import { This } from '../../../../../src/actor/system/vm/runtime/this';
 
 class Msg { stroke = 1 }
 
@@ -18,43 +18,47 @@ describe('tell', () => {
 
         describe('exec', () => {
 
-            it('should deliver a message', () => {
+            it('should deliver a message', done => {
 
                 let c: Constants = [[], ['foo'], [], [], [new Msg()], []];
 
-              let f = new Frame('/', newContext(),
+                let f = new Frame('/', newContext(),
                     new Script(c),
                     [], [
                         Location.Constants, Type.Message, 0,
                         Location.Constants, Type.String, 0
                     ]);
 
-              let e = new This('/', new SystemImpl(), [f]);
+                let e = new This('/', new SystemImpl(), [f]);
 
                 e.putContext('foo', newContext());
 
                 new Tell().exec(e);
 
-                assert(
-                    e.getContext('foo')
-                        .get()
-                        .mailbox
-                        .get()[0]).equal(c[4][0]);
+                setTimeout(() => {
+                    assert(
+                        e.getContext('foo')
+                            .get()
+                            .mailbox
+                            .get()[0]).equal(c[4][0]);
+                    done();
+
+                }, 100);
 
             });
 
-            it('should use routers', () => {
+            it('should use routers', done => {
 
                 let c: Constants = [[], ['/bar/foo/two'], [], [], [new Msg()], []];
 
-              let f=  new Frame('/', newContext(),
+                let f = new Frame('/', newContext(),
                     new Script(c),
                     [], [
                         Location.Constants, Type.Message, 0,
                         Location.Constants, Type.String, 0
                     ]);
 
-              let e = new This('/', new SystemImpl(), [f]);
+                let e = new This('/', new SystemImpl(), [f]);
 
                 e.putContext('/bar/foo', newContext());
 
@@ -62,11 +66,17 @@ describe('tell', () => {
 
                 new Tell().exec(e);
 
+              setTimeout(()=> {
+
                 assert(
                     e.getContext('/bar/foo')
                         .get()
                         .mailbox
-                        .get()[0].message).equal(c[4][0]);
+                  .get()[0].message).equal(c[4][0]);
+
+                done();
+
+              }, 100);
 
             });
 

@@ -110,8 +110,6 @@ class ShouldWork extends Mutable<Context, ActorSystem> {
 
     }
 
-    receive = [];
-
     run() {
 
         let bucket: any = [];
@@ -315,7 +313,7 @@ describe('resident', () => {
 
             it('should work', done => {
 
-                system({ log: { level: 1 } })
+                system({ log: { level: 100 } })
                     .spawn({
                         id: 'selector',
                         create: s => new ShouldWork(s, done)
@@ -323,7 +321,7 @@ describe('resident', () => {
 
             })
 
-            it('should be able to talk to itself', done => {
+           it('should be able to talk to itself', done => {
 
                 system({ log: { level: 1 } })
                     .spawn({

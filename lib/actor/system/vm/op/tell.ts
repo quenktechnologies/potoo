@@ -85,9 +85,17 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
 
 }
 
-const deliver = <C extends Context>(ctx: C, msg: Message) =>
-    ctx
-        .mailbox
-        .map(mbox => mbox.push(msg))
-        .map(() => tick(() => ctx.actor.notify()))
-        .orJust(() => ctx.actor.accept(msg));
+const deliver = <C extends Context>(ctx: C, msg: Message) => {
+
+  if(ctx.mailbox.isJust()) {
+
+    tick(()=> { ctx.mailbox.get().push(msg); ctx.actor.notify(); });
+
+  } else {
+
+    ctx.actor.accept(msg);
+
+  }
+
+}
+

@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { ChildProcess } from 'child_process';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Handle } from '../system/vm/handle';

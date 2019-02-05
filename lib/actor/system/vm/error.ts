@@ -128,7 +128,7 @@ export class NoReceiveErr extends Error {
 
     constructor(public actor: string) {
 
-        super(`Actor ${actor} tried to receive without a handler!`);
+        super(`Actor ${actor} tried to read without a handler!`);
 
     }
 
