@@ -2,15 +2,39 @@ import { assert } from '@quenk/test/lib/assert';
 import { Err } from '@quenk/noni/lib/control/error';
 import { just } from '@quenk/noni/lib/data/maybe';
 import { This } from '../../../../../src/actor/system/vm/runtime/this';
+import { Jump } from '../../../../../src/actor/system/vm/op/jump';
+import { Op, Log } from '../../../../../src/actor/system/vm/op';
 import { Script } from '../../../../../src/actor/system/vm/script';
 import { Frame } from '../../../../../src/actor/system/vm/frame';
 import { ACTION_RAISE, ACTION_IGNORE } from '../../../../../src/actor/template';
-import { 
-  Context,
-  SystemImpl,
-  InstanceImpl,
-  newContext } from '../../../../fixtures/mocks';
+import {
+    Context,
+    SystemImpl,
+    InstanceImpl,
+    newContext
+} from '../../../../fixtures/mocks';
 
+class Int implements Op<Context, SystemImpl> {
+
+    constructor(public n: number[]) { }
+
+    code = 0;
+
+    level = 1;
+
+    exec(): void {
+
+        this.n.push(1);
+
+    }
+
+    toLog(): Log {
+
+        return ['int', [], []];
+
+    }
+
+}
 describe('runtime', () => {
 
     describe('This', () => {
@@ -142,6 +166,56 @@ describe('runtime', () => {
                 r.raise(new Error('an error'));
 
                 assert(escalated).true();
+
+            });
+
+        });
+
+        describe('exec', () => {
+
+            it('should not skip instructions after jumps', () => {
+
+                let s = new SystemImpl();
+
+                let list: number[] = [];
+
+                let ctx: Context = {
+
+                    mailbox: just([]),
+
+                    actor: new InstanceImpl(),
+
+                    behaviour: [],
+
+                    flags: { immutable: true, buffered: true },
+
+                    handler: new This('/', s),
+
+                    template: {
+
+                        id: '/',
+
+                        create: () => new InstanceImpl()
+
+                    }
+                };
+
+                let ops: Op<Context, SystemImpl>[] = [
+
+                    new Int(list),
+                    new Int(list),
+                    new Jump(4),
+                    new Int(list),
+                    new Int(list)
+                ];
+
+              let r = new This('/', s);
+
+                r.system.state.contexts['/'] = ctx;
+
+              r.exec(new Script([[], [], [], [], [], []], ops));
+
+                assert(list).equate([1, 1, 1]);
 
             });
 

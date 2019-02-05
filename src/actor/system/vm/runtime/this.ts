@@ -223,9 +223,12 @@ export class This<C extends Context, S extends System<C>>
 
                 }
 
-                log(policy, cur, cur.code[cur.ip]).exec(this);
+              let next = log(policy, cur, cur.code[cur.ip]);
+              
+              cur.ip++; // increment here so jumps do not skip
+              
+              next.exec(this);
 
-                cur.ip++;
 
             }
 
