@@ -917,6 +917,9 @@ img { max-width: 100%; }
 					<a href="_index_.actor.html#init" class="tsd-kind-icon">init</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a href="_index_.actor.html#notify" class="tsd-kind-icon">notify</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 					<a href="_index_.actor.html#run" class="tsd-kind-icon">run</a>
 				</li>
 				<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
@@ -990,6 +993,7 @@ img { max-width: 100%; }
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_index_.actor.html#accept" class="tsd-kind-icon">accept</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_index_.actor.html#init" class="tsd-kind-icon">init</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_index_.actor.html#notify" class="tsd-kind-icon">notify</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_index_.actor.html#run" class="tsd-kind-icon">run</a></li>
 							<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_index_.actor.html#stop" class="tsd-kind-icon">stop</a></li>
 						</ul>
@@ -1003,14 +1007,14 @@ img { max-width: 100%; }
 				<a name="accept" class="tsd-anchor"></a>
 				<h3>accept</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
-					<li class="tsd-signature tsd-kind-icon">accept<span class="tsd-signature-symbol">(</span>e<span class="tsd-signature-symbol">: </span><a href="../classes/_mailbox_.envelope.html" class="tsd-signature-type">Envelope</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_index_.instance.html" class="tsd-signature-type">Instance</a></li>
+					<li class="tsd-signature tsd-kind-icon">accept<span class="tsd-signature-symbol">(</span>m<span class="tsd-signature-symbol">: </span><a href="../modules/_message_.html#message" class="tsd-signature-type">Message</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Inherited from <a href="_index_.instance.html">Instance</a>.<a href="_index_.instance.html#accept">accept</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/index.ts#L34">index.ts:34</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/index.ts#L34">index.ts:34</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1023,10 +1027,10 @@ img { max-width: 100%; }
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>e: <a href="../classes/_mailbox_.envelope.html" class="tsd-signature-type">Envelope</a></h5>
+								<h5>m: <a href="../modules/_message_.html#message" class="tsd-signature-type">Message</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_index_.instance.html" class="tsd-signature-type">Instance</a></h4>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -1040,7 +1044,7 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/index.ts#L62">index.ts:62</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/index.ts#L68">index.ts:68</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1061,6 +1065,30 @@ img { max-width: 100%; }
 				</ul>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+				<a name="notify" class="tsd-anchor"></a>
+				<h3>notify</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">notify<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Inherited from <a href="_index_.instance.html">Instance</a>.<a href="_index_.instance.html#notify">notify</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/index.ts#L45">index.ts:45</a></li>
+							</ul>
+						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>notify is called by the system to indicate new messages
+								in the actor&#39;s mailbox.</p>
+							</div>
+						</div>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 				<a name="run" class="tsd-anchor"></a>
 				<h3>run</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
@@ -1071,7 +1099,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from <a href="_index_.instance.html">Instance</a>.<a href="_index_.instance.html#run">run</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/index.ts#L39">index.ts:39</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/index.ts#L39">index.ts:39</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -1094,7 +1122,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from <a href="_index_.instance.html">Instance</a>.<a href="_index_.instance.html#stop">stop</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/index.ts#L44">index.ts:44</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/index.ts#L50">index.ts:50</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">

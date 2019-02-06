@@ -920,6 +920,9 @@ img { max-width: 100%; }
 					<a href="_context_.context.html#flags" class="tsd-kind-icon">flags</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="_context_.context.html#handler" class="tsd-kind-icon">handler</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
 					<a href="_context_.context.html#mailbox" class="tsd-kind-icon">mailbox</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
@@ -929,6 +932,9 @@ img { max-width: 100%; }
 		</li>
 		<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
 			<a href="_context_.contexts.html" class="tsd-kind-icon">Contexts</a>
+		</li>
+		<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+			<a href="_context_.errorhandler.html" class="tsd-kind-icon">Error<wbr>Handler</a>
 		</li>
 		<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 			<a href="_context_.flags.html" class="tsd-kind-icon">Flags</a>
@@ -962,6 +968,7 @@ img { max-width: 100%; }
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_context_.context.html#actor" class="tsd-kind-icon">actor</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_context_.context.html#behaviour" class="tsd-kind-icon">behaviour</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_context_.context.html#flags" class="tsd-kind-icon">flags</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_context_.context.html#handler" class="tsd-kind-icon">handler</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_context_.context.html#mailbox" class="tsd-kind-icon">mailbox</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_context_.context.html#template" class="tsd-kind-icon">template</a></li>
 						</ul>
@@ -977,7 +984,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">actor<span class="tsd-signature-symbol">:</span> <a href="_index_.instance.html" class="tsd-signature-type">Instance</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/context.ts#L50">context.ts:50</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/context.ts#L65">context.ts:65</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -992,7 +999,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">behaviour<span class="tsd-signature-symbol">:</span> <a href="../modules/_index_.html#behaviour" class="tsd-signature-type">Behaviour</a><span class="tsd-signature-symbol">[]</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/context.ts#L55">context.ts:55</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/context.ts#L70">context.ts:70</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1007,7 +1014,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">flags<span class="tsd-signature-symbol">:</span> <a href="_context_.flags.html" class="tsd-signature-type">Flags</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/context.ts#L60">context.ts:60</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/context.ts#L75">context.ts:75</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1017,12 +1024,27 @@ img { max-width: 100%; }
 				</div>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="mailbox" class="tsd-anchor"></a>
-				<h3>mailbox</h3>
-				<div class="tsd-signature tsd-kind-icon">mailbox<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_mailbox_.html#mailbox" class="tsd-signature-type">Mailbox</a><span class="tsd-signature-symbol">&gt;</span></div>
+				<a name="handler" class="tsd-anchor"></a>
+				<h3>handler</h3>
+				<div class="tsd-signature tsd-kind-icon">handler<span class="tsd-signature-symbol">:</span> <a href="_context_.errorhandler.html" class="tsd-signature-type">ErrorHandler</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/context.ts#L45">context.ts:45</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/context.ts#L80">context.ts:80</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>handler for errors.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="mailbox" class="tsd-anchor"></a>
+				<h3>mailbox</h3>
+				<div class="tsd-signature tsd-kind-icon">mailbox<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_message_.html#message" class="tsd-signature-type">Message</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/context.ts#L60">context.ts:60</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1038,7 +1060,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">template<span class="tsd-signature-symbol">:</span> <a href="_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/3558ba3/lib/actor/context.ts#L69">context.ts:69</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/context.ts#L89">context.ts:89</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
