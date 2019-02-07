@@ -16,11 +16,11 @@ import {
     removeRoute,
     remove
 } from '../../state';
-import { System } from '../../';
 import { Log, Op } from '../op';
 import { Data, Frame } from '../frame';
 import { Script } from '../script';
 import { StopScript, RestartScript } from './scripts';
+import { Platform } from '../';
 import { Runtime } from './';
 
 /**
@@ -29,12 +29,12 @@ import { Runtime } from './';
  *
  * It has all the methods and properties expected for Op code execution.
  */
-export class This<C extends Context, S extends System<C>>
+export class This<C extends Context, S extends Platform<C>>
     implements Runtime<C, S> {
 
     constructor(
         public self: Address,
-        public system: System<C>,
+        public system: Platform<C>,
         public stack: Frame<C, S>[] = [],
         public queue: Frame<C, S>[] = []) { }
 
@@ -255,12 +255,12 @@ export class This<C extends Context, S extends System<C>>
 }
 
 const escalate = <C extends Context>
-    (env: System<C>, target: Address, err: Err) =>
+    (env: Platform<C>, target: Address, err: Err) =>
     get(env.state, getParent(target))
         .map(ctx => ctx.handler.raise(err))
         .orJust(() => { throw convert(err); });
 
-const log = <C extends Context, S extends System<C>>
+const log = <C extends Context, S extends Platform<C>>
     (policy: config.LogPolicy, f: Frame<C, S>, o: Op<C, S>): Op<C, S> => {
 
     let level = policy.level || 0;
@@ -293,7 +293,7 @@ const log = <C extends Context, S extends System<C>>
 
 }
 
-const resolveLog = <C extends Context, S extends System<C>>
+const resolveLog = <C extends Context, S extends Platform<C>>
     (f: Frame<C, S>, [op, rand, data]: Log) => {
 
     let operand = rand.length > 0 ?

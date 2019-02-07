@@ -2,9 +2,9 @@ import { tick } from '@quenk/noni/lib/control/timer';
 import { Message } from '../../../message';
 import { Envelope } from '../../../mailbox';
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { OP_CODE_TELL, Log, Op, Level } from './';
 
 /**
@@ -19,7 +19,7 @@ import { OP_CODE_TELL, Log, Op, Level } from './';
  *
  * 1 if delivery is successful, 0 otherwise.
  */
-export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Tell<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     public code = OP_CODE_TELL;
 

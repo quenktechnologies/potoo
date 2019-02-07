@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { OP_CODE_RAISE,Log, Op, Level } from './';
 
 /**
@@ -23,7 +23,7 @@ import { OP_CODE_RAISE,Log, Op, Level } from './';
  * Pops:
  * 1. Message indicating an error.
  */
-export class Raise<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Raise<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     public code = OP_CODE_RAISE;
 

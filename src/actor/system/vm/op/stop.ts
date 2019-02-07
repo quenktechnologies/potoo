@@ -2,9 +2,9 @@ import * as error from '../error';
 import { map } from '@quenk/noni/lib/data/record';
 import { isChild } from '../../../address';
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { OP_CODE_STOP, Log, Op, Level } from './';
 
 /**
@@ -13,7 +13,7 @@ import { OP_CODE_STOP, Log, Op, Level } from './';
  * Pops:
  * 1. Address of actor to stop.
  */
-export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Stop<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     public code = OP_CODE_STOP;
 

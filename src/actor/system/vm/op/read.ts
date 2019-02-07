@@ -3,8 +3,8 @@ import { fromArray } from '@quenk/noni/lib/data/maybe';
 import { Context } from '../../../context';
 import { Message } from '../../../message';
 import { Behaviour } from '../../../';
-import { System } from '../../';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { OP_CODE_READ, Log, Op, Level } from './';
 
 /**
@@ -14,7 +14,7 @@ import { OP_CODE_READ, Log, Op, Level } from './';
  *
  * The number 1 if successful or 0 if the message was not processed.
  */
-export class Read<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Read<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     public code = OP_CODE_READ;
 

@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import {OP_CODE_LOAD, Log, Level } from './';
 
 /**
@@ -10,7 +10,7 @@ import {OP_CODE_LOAD, Log, Level } from './';
  * Pushes:
  * 1. Value of index in locals table.
  */
-export class Load<C extends Context, S extends System<C>> {
+export class Load<C extends Context, S extends Platform<C>> {
 
     constructor(public index: number) { }
 

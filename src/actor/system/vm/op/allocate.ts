@@ -1,9 +1,9 @@
 import * as error from '../error';
 import { Context } from '../../../context';
 import { isRestricted, make } from '../../../address';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { OP_CODE_ALLOCATE, Log, Op, Level } from './';
 
 /**
@@ -18,7 +18,7 @@ import { OP_CODE_ALLOCATE, Log, Op, Level } from './';
  * UnknownParentAddressErr
  * DuplicateAddressErr
  */
-export class Allocate<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Allocate<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     public code = OP_CODE_ALLOCATE;
 
