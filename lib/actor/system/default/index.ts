@@ -12,6 +12,7 @@ import { Template } from '../../template';
 import { Runtime } from '../vm/runtime';
 import { Actor } from '../../';
 import { AbstractSystem, newContext, newState } from '../framework';
+import { System } from '../';
 
 /**
  * ActorSystem
@@ -28,7 +29,7 @@ export class ActorSystem extends AbstractSystem<Context> {
         h: Runtime<Context, ActorSystem>,
         t: Template<Context, ActorSystem>): Context {
 
-        return a.init(newContext(a, h, t));
+        return a.init(newContext(a, <Runtime<Context, System<Context>>>h, t));
 
     }
 

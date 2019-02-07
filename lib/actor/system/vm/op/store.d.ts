@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { Platform } from '../';
+import { System } from '../../';
 import { Log, Level, Op } from './';
 /**
  * Store the top most value on the stack in the locals array at the
@@ -10,7 +10,7 @@ import { Log, Level, Op } from './';
  * Pops:
  * 1. Operand to store.
  */
-export declare class Store<C extends Context, S extends Platform<C>> implements Op<C, S> {
+export declare class Store<C extends Context, S extends System<C>> implements Op<C, S> {
     index: number;
     constructor(index: number);
     code: number;

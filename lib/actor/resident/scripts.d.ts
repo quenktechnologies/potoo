@@ -1,6 +1,6 @@
 import { Foreign, Script } from '../system/vm/script';
-import { Context } from '../context';
 import { System } from '../system';
+import { Context } from '../context';
 import { Address } from '../address';
 import { Message } from '../message';
 /**

@@ -4,7 +4,7 @@ import { Envelope } from '../../../mailbox';
 import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { Platform } from '../';
+import { System } from '../../';
 import { OP_CODE_TELL, Log, Op, Level } from './';
 
 /**
@@ -19,7 +19,7 @@ import { OP_CODE_TELL, Log, Op, Level } from './';
  *
  * 1 if delivery is successful, 0 otherwise.
  */
-export class Tell<C extends Context, S extends Platform<C>> implements Op<C, S> {
+export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
 
     public code = OP_CODE_TELL;
 
@@ -53,17 +53,17 @@ export class Tell<C extends Context, S extends Platform<C>> implements Op<C, S> 
         } else {
 
             let maybeCtx = e.getContext(addr);
+          let conf  = e.config();
 
             if (maybeCtx.isJust()) {
 
                 deliver(maybeCtx.get(), msg);
                 curr.pushNumber(1);
 
-            } else if (e.system.configuration.hooks &&
-                e.system.configuration.hooks.drop) {
+            } else if (conf.hooks &&
+                conf.hooks.drop) {
 
-                e.system.configuration.hooks.drop(new Envelope(
-                    addr, e.self, msg));
+              conf.hooks.drop(new Envelope(                    addr, e.self, msg));
 
                 curr.pushNumber(1);
 

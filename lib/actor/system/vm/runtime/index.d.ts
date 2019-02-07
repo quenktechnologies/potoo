@@ -3,16 +3,29 @@ import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Contexts, Context, ErrorHandler } from '../../../context';
 import { Address } from '../../../address';
 import { Message } from '../../../message';
+import { Configuration } from '../../configuration';
 import { Frame } from '../frame';
-import { Handle } from '../handle';
-import { Platform } from '../';
+import { Value, Script } from '../script';
+import { System } from '../../';
 /**
  * Runtime interface.
  *
  * An Runtime is responsible for executing the Op codes that allow
  * actors to interact with the rest of the system.
  */
-export interface Runtime<C extends Context, S extends Platform<C>> extends ErrorHandler, Handle<C, S> {
+export interface Runtime<C extends Context, S extends System<C>> extends ErrorHandler {
+    /**
+     * self is the address of the actor.
+     */
+    self: Address;
+    /**
+     * config provides the system configuration.
+     */
+    config(): Configuration;
+    /**
+     * exec a Script on behalf of the actor.
+     */
+    exec(s: Script<C, S>): Maybe<Value<C, S>>;
     /**
      * current provides the Frame being executed (if any).
      */

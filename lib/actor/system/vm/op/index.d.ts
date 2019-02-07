@@ -2,7 +2,7 @@ import { Type } from '@quenk/noni/lib/data/type';
 import { Context } from '../../../context';
 import { Data, Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { Platform } from '../';
+import { System } from '../../';
 export declare const OP_CODE_NOOP = 0;
 export declare const OP_CODE_PUSH_NUM = 1;
 export declare const OP_CODE_PUSH_STR = 2;
@@ -18,6 +18,7 @@ export declare const OP_CODE_STORE = 11;
 export declare const OP_CODE_LOAD = 12;
 export declare const OP_CODE_JUMP = 13;
 export declare const OP_CODE_JUMP_IF_ONE = 14;
+export declare const OP_CODE_IDENT = 19;
 export declare const OP_CODE_QUERY = 32;
 export declare const OP_CODE_ALLOCATE = 33;
 export declare const OP_CODE_TEMP_CC = 34;
@@ -55,7 +56,7 @@ export declare type Operand = number;
  * Implementations of this class carry out a single task
  * in the Runtime's context.
  */
-export interface Op<C extends Context, S extends Platform<C>> {
+export interface Op<C extends Context, S extends System<C>> {
     /**
      * code for the Op.
      */

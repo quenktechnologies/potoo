@@ -3,7 +3,7 @@ import { right, left } from '@quenk/noni/lib/data/either';
 import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { Platform } from '../';
+import { System } from '../../';
 import { OP_CODE_TEMP_CHILD, Log, Op, Level } from './';
 
 /**
@@ -13,7 +13,7 @@ import { OP_CODE_TEMP_CHILD, Log, Op, Level } from './';
  * 1: Pointer to the template.
  * 2: Index of the child template.
  */
-export class TempChild<C extends Context, S extends Platform<C>> 
+export class TempChild<C extends Context, S extends System<C>> 
   implements Op<C, S> {
 
     public code = OP_CODE_TEMP_CHILD;

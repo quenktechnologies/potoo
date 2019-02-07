@@ -2,13 +2,13 @@ import { right } from '@quenk/noni/lib/data/either';
 import { Context } from '../../../context';
 import { Type, Location, Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { Platform } from '../';
+import { System } from '../../';
 import { OP_CODE_JUMP, OP_CODE_JUMP_IF_ONE, Log, Level, Op } from './';
 
 /**
  * Jump to a new location.
  */
-export class Jump<C extends Context, S extends Platform<C>> implements Op<C, S> {
+export class Jump<C extends Context, S extends System<C>> implements Op<C, S> {
 
     constructor(public location: number) { }
 
@@ -40,7 +40,7 @@ export class Jump<C extends Context, S extends Platform<C>> implements Op<C, S> 
  * Pops
  * 1. value to test.
  */
-export class JumpIfOne<C extends Context, S extends Platform<C>>
+export class JumpIfOne<C extends Context, S extends System<C>>
     implements Op<C, S>{
 
     constructor(public location: number) { }

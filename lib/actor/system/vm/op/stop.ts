@@ -4,7 +4,7 @@ import { isChild } from '../../../address';
 import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { Platform } from '../';
+import { System } from '../../';
 import { OP_CODE_STOP, Log, Op, Level } from './';
 
 /**
@@ -13,7 +13,7 @@ import { OP_CODE_STOP, Log, Op, Level } from './';
  * Pops:
  * 1. Address of actor to stop.
  */
-export class Stop<C extends Context, S extends Platform<C>> implements Op<C, S> {
+export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
 
     public code = OP_CODE_STOP;
 

@@ -4,9 +4,9 @@ import { Context } from '../../context';
 import { Message } from '../../message';
 import { Template } from '../../template';
 import { Address } from '../../address';
+import { System } from '../';
 import { Operand, Op } from './op';
 import { Value, Function, Foreign, Script } from './script';
-import { Platform } from './';
 export declare const TYPE_NUMBER = 0;
 export declare const TYPE_STRING = 1;
 export declare const TYPE_FUNCTION = 2;
@@ -60,7 +60,7 @@ export declare type Data = [number, Type, Location];
 /**
  * Frame of execution.
  */
-export declare class Frame<C extends Context, S extends Platform<C>> {
+export declare class Frame<C extends Context, S extends System<C>> {
     actor: Address;
     context: Context;
     script: Script<C, S>;

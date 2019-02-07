@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
 import { Runtime } from '../runtime';
 import { Frame } from '../frame';
-import { Platform } from '../';
+import { System } from '../../';
 import { OP_CODE_RECEIVE, Log, Op, Level } from './';
 
 /**
@@ -12,7 +12,7 @@ import { OP_CODE_RECEIVE, Log, Op, Level } from './';
  *  1. Reference to a foreign function that will be installed as the message 
  *     handler.
  */
-export class Receive<C extends Context, S extends Platform<C>> implements Op<C, S> {
+export class Receive<C extends Context, S extends System<C>> implements Op<C, S> {
 
     public code = OP_CODE_RECEIVE;
 

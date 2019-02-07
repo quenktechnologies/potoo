@@ -4,8 +4,9 @@ import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Contexts, Context } from '../../../context';
 import { Message } from '../../../message';
 import { Address } from '../../../address';
+import { Configuration } from '../../configuration';
 import { Frame } from '../frame';
-import { Script } from '../script';
+import { Value, Script } from '../script';
 import { Platform } from '../';
 import { Runtime } from './';
 /**
@@ -16,11 +17,12 @@ import { Runtime } from './';
  */
 export declare class This<C extends Context, S extends Platform<C>> implements Runtime<C, S> {
     self: Address;
-    system: Platform<C>;
+    system: S;
     stack: Frame<C, S>[];
     queue: Frame<C, S>[];
-    constructor(self: Address, system: Platform<C>, stack?: Frame<C, S>[], queue?: Frame<C, S>[]);
+    constructor(self: Address, system: S, stack?: Frame<C, S>[], queue?: Frame<C, S>[]);
     running: boolean;
+    config(): Configuration;
     current(): Maybe<Frame<C, S>>;
     allocate(addr: Address, t: template.Template<C, S>): C;
     getContext(addr: Address): Maybe<C>;
@@ -34,6 +36,6 @@ export declare class This<C extends Context, S extends Platform<C>> implements R
     clear(): This<C, S>;
     drop(m: Message): This<C, S>;
     raise(err: Err): void;
-    exec(s: Script<C, S>): void;
-    run(): void;
+    exec(s: Script<C, S>): Maybe<Value<C, S>>;
+    run(): Maybe<Value<C, S>>;
 }

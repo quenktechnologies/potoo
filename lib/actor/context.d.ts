@@ -1,5 +1,7 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Runtime } from './system/vm/runtime';
+import { System } from './system';
 import { Template } from './template';
 import { Message } from './message';
 import { Behaviour, Instance } from './';
@@ -58,15 +60,13 @@ export interface Context {
      */
     flags: Flags;
     /**
-     * handler for errors.
+     * runtime for the Context.
      */
-    handler: ErrorHandler;
+    runtime: Runtime<Context, System<Context>>;
     /**
      * template used to create new instances of the actor.
      *
-     * XXX: We use the any type here because this is
-     * a cyclical constraint. In the future we may refactor to find a
-     * way around this but for now it keeps things going.
+     * XXX: We use the any type here because there is a cyclical constraint.
      */
     template: Template<any, any>;
 }

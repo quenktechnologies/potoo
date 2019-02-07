@@ -6,9 +6,9 @@ import { Context } from '../../context';
 import { Message } from '../../message';
 import { Template } from '../../template';
 import { Address } from '../../address';
+import { System } from '../';
 import { Operand, Op } from './op';
 import { Value, Function, Foreign, Script } from './script';
-import {Platform} from './';
 
 //Type indicators.
 export const TYPE_NUMBER = 0x0;
@@ -87,7 +87,7 @@ export type Data = [number, Type, Location];
 /**
  * Frame of execution.
  */
-export class Frame<C extends Context, S extends Platform<C>> {
+export class Frame<C extends Context, S extends System<C>> {
 
     constructor(
         public actor: Address,
@@ -106,7 +106,7 @@ export class Frame<C extends Context, S extends Platform<C>> {
      */
     seek(location: number): Either<Err, Frame<C, S>> {
 
-        if ((location < 0) || (location >= (this.code.length )))
+        if ((location < 0) || (location >= (this.code.length)))
             return left(new error.JumpOutOfBoundsErr(location,
                 this.code.length - 1));
 

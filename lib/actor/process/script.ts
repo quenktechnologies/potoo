@@ -1,8 +1,7 @@
 import { match } from '@quenk/noni/lib/control/match';
 import { Any } from '@quenk/noni/lib/data/type';
-import {OP_CODE_TELL,OP_CODE_RAISE} from '../system/vm/op';
+import { OP_CODE_TELL, OP_CODE_RAISE } from '../system/vm/op';
 import { system } from '../system/default';
-import { Handle } from '../system/vm/handle';
 import { System } from '../system';
 import { DropScript, TellScript } from '../resident/scripts';
 import { Message } from '../message';
@@ -27,41 +26,41 @@ const sys = system({
 
     hooks: {
 
-      drop: ({to,from,message}: Envelope) => (<any>process).send({
+        drop: ({ to, from, message }: Envelope) => (<Function>process.send)({
 
-        code: OP_CODE_TELL,
-        to,
-        from,
-        message
-      
-      })
+            code: OP_CODE_TELL,
+            to,
+            from,
+            message
+
+        })
 
     }
 
 });
 
-const filter = <C extends Context>(s: Handle<C, System<C>>) => (m: Message) =>
+const filter = <C extends Context>(s: System<C>) => (m: Message) =>
     match(m)
         .caseOf(tellShape, filterTell(s))
         .orElse(fitlerDrop(s))
         .end();
 
-const filterTell = <C extends Context>(s: Handle<C, System<C>>) =>
+const filterTell = <C extends Context>(s: System<C>) =>
     ({ to, message }: { to: string, from: string, message: Message }) =>
-        s.exec(new TellScript(to, message));
+        s.exec(s, new TellScript(to, message));
 
-const fitlerDrop = <C extends Context>(s: Handle<C, System<C>>) => (m: Message) =>
-    s.exec(new DropScript(m));
+const fitlerDrop = <C extends Context>(s: System<C>) => (m: Message) =>
+    s.exec(s, new DropScript(m));
 
 process.on('uncaughtException', e =>
-  (<any>process.send)({ 
+    (<Function>process.send)({
 
-    code:OP_CODE_RAISE,
-    error: e.stack, 
-    src: address, 
-    dest: address 
-  
-  }));
+        code: OP_CODE_RAISE,
+        error: e.stack,
+        src: address,
+        dest: address
+
+    }));
 
 sys.spawn({
 

@@ -6,14 +6,14 @@ import { Restart } from '../op/restart';
 import { Run } from '../op/run';
 import { Op } from '../op';
 import { Constants, Script } from '../script';
-import { Platform } from '../';
+import { System } from '../../';
 
-const restartCode: Op<Context, Platform<Context>>[] = [
+const restartCode: Op<Context, System<Context>>[] = [
     new Restart(),
     new Run()
 ];
 
-const stopCode: Op<Context, Platform<Context>>[] = [
+const stopCode: Op<Context, System<Context>>[] = [
 
     new PushStr(0),
     new Stop()
@@ -23,7 +23,7 @@ const stopCode: Op<Context, Platform<Context>>[] = [
 /**
  * StopScript for stopping actors.
  */
-export class StopScript<C extends Context, S extends Platform<C>>
+export class StopScript<C extends Context, S extends System<C>>
     extends Script<C, S> {
 
     constructor(public addr: Address) {
@@ -38,7 +38,7 @@ export class StopScript<C extends Context, S extends Platform<C>>
 /**
  * RestartScript for restarting actors.
  */
-export class RestartScript<C extends Context, S extends Platform<C>>
+export class RestartScript<C extends Context, S extends System<C>>
     extends Script<C, S> {
 
     constructor() {
