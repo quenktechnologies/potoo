@@ -1,13 +1,13 @@
 import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { Platform } from '../';
+import { System } from '../../';
 import { OP_CODE_DUP, Log, Op, Level } from './';
 
 /**
  * Dup duplicates the current value at the top of the stack.
  */
-export class Dup<C extends Context, S extends Platform<C>> implements Op<C, S> {
+export class Dup<C extends Context, S extends System<C>> implements Op<C, S> {
 
     code = OP_CODE_DUP;
 

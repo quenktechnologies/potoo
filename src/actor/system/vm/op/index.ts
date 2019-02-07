@@ -3,7 +3,7 @@ import { Type } from '@quenk/noni/lib/data/type';
 import { Context } from '../../../context';
 import { Data, Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { Platform } from '../';
+import { System } from '../../';
 
 export const OP_CODE_NOOP = 0x0;
 export const OP_CODE_PUSH_NUM = 0x1;
@@ -63,7 +63,7 @@ export type Operand = number;
  * Implementations of this class carry out a single task
  * in the Runtime's context.
  */
-export interface Op<C extends Context, S extends Platform<C>> {
+export interface Op<C extends Context, S extends System<C>> {
 
     /**
      * code for the Op.

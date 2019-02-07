@@ -2,7 +2,7 @@ import { tick } from '@quenk/noni/lib/control/timer';
 import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { Platform } from '../';
+import { System } from '../../';
 import {OP_CODE_RUN, Log, Op, Level } from './';
 
 /**
@@ -11,7 +11,7 @@ import {OP_CODE_RUN, Log, Op, Level } from './';
  * Pops
  * 1. The address of the current actor or child to be run.
  */
-export class Run<C extends Context, S extends Platform<C>> implements Op<C, S> {
+export class Run<C extends Context, S extends System<C>> implements Op<C, S> {
 
     public code = OP_CODE_RUN;
 

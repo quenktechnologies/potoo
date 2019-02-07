@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { Platform } from '../';
+import { System } from '../../';
 import { OP_CODE_CMP, Log, Level, Op } from './';
 
 /**
@@ -16,7 +16,7 @@ import { OP_CODE_CMP, Log, Level, Op } from './';
  *
  * 1 if true, 0 if false
  */
-export class Cmp<C extends Context, S extends Platform<C>> implements Op<C, S>{
+export class Cmp<C extends Context, S extends System<C>> implements Op<C, S>{
 
     public code = OP_CODE_CMP;
 
