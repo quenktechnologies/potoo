@@ -1,13 +1,13 @@
 import { Context } from '../../../context';
-import { System } from '../../../system';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import {OP_CODE_NOOP, Log, Level, Op } from './';
+import { Platform } from '../';
+import { OP_CODE_NOOP, Log, Level, Op } from './';
 
 /**
  * Noop does nothing.
  */
-export class Noop<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Noop<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     public code = OP_CODE_NOOP;
 

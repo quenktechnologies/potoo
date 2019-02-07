@@ -4,9 +4,9 @@ import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Contexts, Context } from '../../../context';
 import { Message } from '../../../message';
 import { Address } from '../../../address';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Script } from '../script';
+import { Platform } from '../';
 import { Runtime } from './';
 /**
  * This is an implementation of Runtime for exactly one
@@ -14,12 +14,12 @@ import { Runtime } from './';
  *
  * It has all the methods and properties expected for Op code execution.
  */
-export declare class This<C extends Context, S extends System<C>> implements Runtime<C, S> {
+export declare class This<C extends Context, S extends Platform<C>> implements Runtime<C, S> {
     self: Address;
-    system: System<C>;
+    system: Platform<C>;
     stack: Frame<C, S>[];
     queue: Frame<C, S>[];
-    constructor(self: Address, system: System<C>, stack?: Frame<C, S>[], queue?: Frame<C, S>[]);
+    constructor(self: Address, system: Platform<C>, stack?: Frame<C, S>[], queue?: Frame<C, S>[]);
     running: boolean;
     current(): Maybe<Frame<C, S>>;
     allocate(addr: Address, t: template.Template<C, S>): C;

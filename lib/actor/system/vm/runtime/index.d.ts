@@ -3,16 +3,16 @@ import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Contexts, Context, ErrorHandler } from '../../../context';
 import { Address } from '../../../address';
 import { Message } from '../../../message';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Handle } from '../handle';
+import { Platform } from '../';
 /**
  * Runtime interface.
  *
  * An Runtime is responsible for executing the Op codes that allow
- * actors to interact witht the system.
+ * actors to interact with the rest of the system.
  */
-export interface Runtime<C extends Context, S extends System<C>> extends ErrorHandler, Handle<C, S> {
+export interface Runtime<C extends Context, S extends Platform<C>> extends ErrorHandler, Handle<C, S> {
     /**
      * current provides the Frame being executed (if any).
      */

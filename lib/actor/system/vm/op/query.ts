@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { OP_CODE_QUERY,Log, Op, Level } from './';
 
 /**
@@ -13,7 +13,7 @@ import { OP_CODE_QUERY,Log, Op, Level } from './';
  * Pushes:
  * 1 on true, 0 otherwise.
  */
-export class Query<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Query<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     public code = OP_CODE_QUERY;
 

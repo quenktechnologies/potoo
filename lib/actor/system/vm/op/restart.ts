@@ -1,12 +1,12 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { OP_CODE_RESTART, Log, Op, Level } from './';
 
 /**
  * Restart the current actor.
  */
-export class Restart<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Restart<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     public code = OP_CODE_RESTART;
 

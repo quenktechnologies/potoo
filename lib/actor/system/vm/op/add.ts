@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../../system';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { OP_CODE_ADD, Log, Level, Op } from './';
 
 /**
@@ -15,7 +15,7 @@ import { OP_CODE_ADD, Log, Level, Op } from './';
  *
  * The result of adding the two numbers.
  */
-export class Add<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Add<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     public code = OP_CODE_ADD;
 

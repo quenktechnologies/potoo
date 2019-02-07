@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { Log, Level } from './';
 /**
  * Load the local stored at index onto the stack.
@@ -9,7 +9,7 @@ import { Log, Level } from './';
  * Pushes:
  * 1. Value of index in locals table.
  */
-export declare class Load<C extends Context, S extends System<C>> {
+export declare class Load<C extends Context, S extends Platform<C>> {
     index: number;
     constructor(index: number);
     code: number;

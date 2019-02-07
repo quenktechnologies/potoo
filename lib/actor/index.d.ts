@@ -4,9 +4,9 @@ import { Context } from './context';
 /**
  * Behaviour of an actor.
  *
- * Behaviours are represented by imperative side-effectfull
- * functions that return an Either that indicates whether
- * the message is rejected or will/was processed.
+ * Behaviours are procedures that return an
+ * Either type indicating whether a message
+ * was processed or rejected.
  */
 export declare type Behaviour = (m: Message) => Either<Message, void>;
 /**
@@ -16,27 +16,32 @@ export interface Contexts<C extends Context> {
     [key: string]: C;
 }
 /**
- * Instance is a running actor that has already initialized its context.
+ * Instance of an actor already running in its context.
  */
 export interface Instance {
     /**
-     * accept an enveloped message.
+     * accept a message directly.
      *
-     * For some actors, this message allows bypassing the mailbox
-     * system and handling messages directly.
+     * Some actors may have a mailbox disabling usage
+     * of this method.
      */
     accept(m: Message): void;
     /**
-     * run this actor instance.
+     * run the actor instance.
+     *
+     * Once instantiated this method is called to allow the actor to begin
+     * execution.
      */
     run(): void;
     /**
      * notify is called by the system to indicate new messages
-     * in the actor's mailbox.
+     * have been placed in the actor's mailbox.
+     *
+     * (Buffered actors only!)
      */
     notify(): void;
     /**
-     * stop is called by the system to stop the actor.
+     * stop the actor instance.
      */
     stop(): void;
 }
@@ -44,11 +49,11 @@ export interface Instance {
  * Actor common interface.
  *
  * The system expects all actors to satisfy this interface so they
- * can be managed.
+ * can be managed properly.
  */
 export interface Actor<C extends Context> extends Instance {
     /**
-     * init method.
+     * init the Actor.
      *
      * This method allows an actor to configure its Context just
      * before it is added to the system.

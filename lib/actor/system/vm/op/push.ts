@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Runtime } from '../runtime';
 import { Type, Location } from '../frame';
+import { Platform } from '../';
 import {
     OP_CODE_PUSH_NUM,
     OP_CODE_PUSH_STR,
@@ -16,7 +16,7 @@ import {
 /**
  * PushNum pushes a literal number onto the stack.
  */
-export class PushNum<C extends Context, S extends System<C>> {
+export class PushNum<C extends Context, S extends Platform<C>> {
 
     constructor(public index: number) { }
 
@@ -41,7 +41,7 @@ export class PushNum<C extends Context, S extends System<C>> {
 /**
  * PushStr pushes a string from the constants table onto the stack.
  */
-export class PushStr<C extends Context, S extends System<C>> {
+export class PushStr<C extends Context, S extends Platform<C>> {
 
     constructor(public index: number) { }
 
@@ -66,7 +66,7 @@ export class PushStr<C extends Context, S extends System<C>> {
 /**
  * PushFunc pushes a function constant onto the stack.
  */
-export class PushFunc<C extends Context, S extends System<C>> {
+export class PushFunc<C extends Context, S extends Platform<C>> {
 
     constructor(public index: number) { }
 
@@ -91,7 +91,7 @@ export class PushFunc<C extends Context, S extends System<C>> {
 /**
  * PushTemp pushes a template from the constants table onto the stack.
  */
-export class PushTemp<C extends Context, S extends System<C>> {
+export class PushTemp<C extends Context, S extends Platform<C>> {
 
     constructor(public index: number) { }
 
@@ -116,7 +116,7 @@ export class PushTemp<C extends Context, S extends System<C>> {
 /**
  * PushMsg pushes a message constant onto the stack.
  */
-export class PushMsg<C extends Context, S extends System<C>> {
+export class PushMsg<C extends Context, S extends Platform<C>> {
 
     constructor(public index: number) { }
 
@@ -141,7 +141,7 @@ export class PushMsg<C extends Context, S extends System<C>> {
 /**
  * PushForeign pushes a foreign function onto the stack.
  */
-export class PushForeign<C extends Context, S extends System<C>> {
+export class PushForeign<C extends Context, S extends Platform<C>> {
 
     constructor(public index: number) { }
 

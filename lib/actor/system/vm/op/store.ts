@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { OP_CODE_STORE, Log, Level, Op } from './';
 
 /**
@@ -11,7 +11,7 @@ import { OP_CODE_STORE, Log, Level, Op } from './';
  * Pops:
  * 1. Operand to store.
  */
-export class Store<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Store<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     constructor(public index: number) { }
 

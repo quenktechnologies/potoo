@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Runtime } from '../runtime';
 import {Frame} from '../frame';
+import { Platform } from '../';
 import { OP_CODE_DROP, Log, Op, Level } from './';
 
 /**
@@ -11,7 +11,7 @@ import { OP_CODE_DROP, Log, Op, Level } from './';
  *
  * 1. The message to be dropped.
  */
-export class Drop<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Drop<C extends Context, S extends Platform<C>> implements Op<C, S> {
 
     public code = OP_CODE_DROP
 

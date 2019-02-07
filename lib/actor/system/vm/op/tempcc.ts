@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { OP_CODE_TEMP_CC, Log, Level } from './';
 
 /**
@@ -11,7 +11,7 @@ import { OP_CODE_TEMP_CC, Log, Level } from './';
  *
  * 1: Reference to the template to count.
  */
-export class TempCC<C extends Context, S extends System<C>>  {
+export class TempCC<C extends Context, S extends Platform<C>>  {
 
     public code = OP_CODE_TEMP_CC;
 

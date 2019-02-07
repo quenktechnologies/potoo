@@ -1,12 +1,12 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { Platform } from '../';
 import { Log, Level, Op } from './';
 /**
  * Jump to a new location.
  */
-export declare class Jump<C extends Context, S extends System<C>> implements Op<C, S> {
+export declare class Jump<C extends Context, S extends Platform<C>> implements Op<C, S> {
     location: number;
     constructor(location: number);
     code: number;
@@ -20,7 +20,7 @@ export declare class Jump<C extends Context, S extends System<C>> implements Op<
  * Pops
  * 1. value to test.
  */
-export declare class JumpIfOne<C extends Context, S extends System<C>> implements Op<C, S> {
+export declare class JumpIfOne<C extends Context, S extends Platform<C>> implements Op<C, S> {
     location: number;
     constructor(location: number);
     code: number;
