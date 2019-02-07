@@ -1,33 +1,56 @@
+import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Context } from '../context';
-import { Template } from '../template';
-import { Actor } from '../';
-import { Configuration } from './configuration';
-import { State } from './state';
-import { Runtime } from './vm/runtime';
+import { Address } from '../address';
+import {  Instance } from '../';
+import { Value, Script } from './vm/script';
 
 /**
  * System represents a dynamic collection of actors that 
- * share the JS event loop.
- *
- * A System has a configuration that is used to make decisions
- * during actor execution, a state containing a context for each
- * actor and a method for creating new contexts.
+ * can communicate with each other via message passing.
  */
-export interface System<C extends Context> extends Actor<C> {
+export interface System<C extends Context> extends Instance {
 
-    /**
-     * configuration of the System.
-     */
-    configuration: Configuration
+    ident(i: Instance): Address
 
-    /**
-     * state table.
-     */
-    state: State<C>;
+    exec(i: Instance, s: Script<C, any>): Maybe<Value<C, any>>
 
-    /**
-     * allocate a new Context for an actor.
-     */
-    allocate(a: Actor<C>, h: Runtime<C, System<C>>, t: Template<C, System<C>>): C;
+}
+
+/**
+ * Void system.
+ *
+ * This can be used to prevent a stopped actor from executing further commands.
+ */
+export class Void<C extends Context> implements System<C> {
+
+    ident(): Address {
+
+        return '?';
+
+    }
+
+  accept(): void {
+  
+  }
+
+  run(): void {
+  
+  }
+
+  notify(): void {
+
+
+  }
+
+  stop(): void {
+
+
+  }
+
+    exec(_: Instance, __: Script<C, any>): Maybe<Value<C, any>> {
+
+        return nothing();
+
+    }
 
 }

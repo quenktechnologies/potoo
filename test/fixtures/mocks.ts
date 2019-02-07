@@ -1,20 +1,21 @@
 import { Mock } from '@quenk/test/lib/mock';
-import { Maybe, just, fromNullable } from '@quenk/noni/lib/data/maybe';
-import { tail } from '@quenk/noni/lib/data/array';
-import { reduce, merge, rmerge } from '@quenk/noni/lib/data/record';
-import { startsWith } from '@quenk/noni/lib/data/string';
+import { Maybe, just, nothing } from '@quenk/noni/lib/data/maybe';
+import { rmerge } from '@quenk/noni/lib/data/record';
 import { Err } from '@quenk/noni/lib/control/error';
-import { Address } from '../../src/actor/address';
 import { System } from '../../src/actor/system';
-import { Handle } from '../../src/actor/system/vm/handle';
 import { Instance, Actor } from '../../src/actor';
 import { Template as T } from '../../src/actor/template';
 import { State } from '../../src/actor/system/state';
 import { Runtime } from '../../src/actor/system/vm/runtime';
-import { Constants as C, Script } from '../../src/actor/system/vm/script';
+import { This } from '../../src/actor/system/vm/runtime/this';
 import { Frame } from '../../src/actor/system/vm/frame';
+import { Address } from '../../src/actor/address';
+import { Message } from '../../src/actor/message';
+import { Constants as C, Value, Script } from '../../src/actor/system/vm/script';
+import { Configuration } from '../../src/actor/system/configuration';
 import { Contexts as Ctxs, Context as Ctx } from '../../src/actor/context';
 import { Envelope } from '../../src/actor/message';
+import { Platform } from '../../src/actor/system/vm';
 
 export type Constants = C<Ctx, SystemImpl>;
 
@@ -58,50 +59,23 @@ export class InstanceImpl extends Mock implements Instance {
 
 }
 
-export class SystemImpl extends InstanceImpl implements System<Context> {
-
-    state: State<Context> = { contexts: {}, routers: {} };
-
-    configuration = {}
-
-    allocate(
-        a: Actor<Context>,
-        h: Handle<Context, SystemImpl>,
-        t: Template): Context {
-
-        return this.MOCK.record('allocate', [a, h, t], a.init(newContext({
-            handler: { raise() { console.error('TURKET') } }
-
-        })));
-
-    }
-
-}
-
 export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
 
-    constructor(
-        public self = '?',
-        public system = new SystemImpl(),
-        public stack: Frame<Context, SystemImpl>[] = []) { super(); }
+    constructor(public self = '/', public system = new SystemImpl()) { super();  }
 
-    contexts: { [key: string]: Context } = {};
+    config(): Configuration {
 
-    routers: { [key: string]: Address } = {};
+        return this.MOCK.record('config', [], this.system.configuration);
+
+    }
 
     current(): Maybe<Frame<Context, SystemImpl>> {
 
-        return this.MOCK.record('current', [], fromNullable(tail(this.stack)));
+        return this.MOCK.record('current', [], nothing());
 
     }
 
-    raise(e: Err): void {
-console.error(e);
-        return this.MOCK.record('raise', [e], undefined);
-
-    }
-
-    allocate(addr: Address, t: T<Context, SystemImpl>): Context {
+    allocate(addr: Address, t: Template): Context {
 
         return this.MOCK.record('allocate', [addr, t], newContext());
 
@@ -109,79 +83,111 @@ console.error(e);
 
     getContext(addr: Address): Maybe<Context> {
 
-        return this.MOCK.record('getContext', [addr],
-            fromNullable<Context>(this.contexts[addr]));
+        return this.MOCK.record('getContext', [addr], nothing());
 
     }
 
     getRouter(addr: Address): Maybe<Context> {
 
-        return this.MOCK.record('getRouter', [addr],
-            fromNullable<Context>(
-                reduce(this.routers, <Context | undefined>undefined, (p, c, k) =>
-                    startsWith(addr, k) ? this.contexts[c] : p)));
+        return this.MOCK.record('getRouter', [addr], nothing());
 
     }
 
     getChildren(addr: Address): Maybe<Contexts> {
 
-        return this.MOCK.record('getContexts', [addr],
-            fromNullable(reduce(this.contexts, <Contexts>{}, (p, c, k) =>
-                startsWith(k, addr) ? merge(p, { [k]: c }) : p)));
+        return this.MOCK.record('getChildren', [addr], nothing());
 
     }
 
     putContext(addr: Address, ctx: Context): RuntimeImpl {
 
-        this.contexts[addr] = ctx;
         return this.MOCK.record('putContext', [addr, ctx], this);
 
     }
 
     removeContext(addr: Address): RuntimeImpl {
 
-        delete this.contexts[addr];
         return this.MOCK.record('removeContext', [addr], this);
 
     }
 
     putRoute(target: Address, router: Address): RuntimeImpl {
 
-        this.routers[target] = router;
-        return this.MOCK.record('putRoute', [target], this);
+        return this.MOCK.record('putRoute', [target, router], this);
 
     }
 
     removeRoute(target: Address): RuntimeImpl {
 
-        delete this.routers[target];
         return this.MOCK.record('removeRoute', [target], this);
 
     }
 
     push(f: Frame<Context, SystemImpl>): RuntimeImpl {
 
-        this.stack.push(f);
         return this.MOCK.record('push', [f], this);
 
     }
 
     clear(): RuntimeImpl {
 
-        this.stack = [];
-        return this;
+        return this.MOCK.record('clear', [], this);
 
     }
 
-    drop(): RuntimeImpl {
+    drop(m: Message): RuntimeImpl {
 
-        return this;
+        return this.MOCK.record('drop', [m], this);
 
     }
 
-    exec(s: Script<Context, SystemImpl>) {
+    raise(err: Err): void {
 
-        this.MOCK.record('exec', [s], undefined);
+        return this.MOCK.record('raise', [err], <void>undefined);
+
+    }
+
+    exec(s: Script<Context, SystemImpl>): Maybe<Value<Context, SystemImpl>> {
+
+        return this.MOCK.record('exec', [s], nothing());
+
+
+    }
+
+    run(): Maybe<Value<Context, SystemImpl>> {
+
+        return this.MOCK.record('run', [], nothing());
+
+    }
+
+}
+
+export class SystemImpl extends InstanceImpl
+    implements System<Context>, Platform<Context> {
+
+    state: State<Context> = { contexts: {}, routers: {} };
+
+    configuration = {}
+
+    ident(): string {
+
+        return '?';
+
+    }
+
+    allocate(
+        a: Actor<Context>,
+        h: Runtime<Context, SystemImpl>,
+        t: Template): Context {
+
+        return this.MOCK.record('allocate', [a, h, t], a.init(newContext()));
+
+    }
+
+    exec(i: Instance, s: Script<Context, SystemImpl>)
+        : Maybe<Value<Context, System<Context>>> {
+
+        return this.MOCK.record('exec', [i, s], nothing());
 
     }
 
@@ -197,8 +203,8 @@ export const newContext = (o: Partial<Context> = {}): Context => rmerge({
 
     flags: { immutable: true, buffered: true },
 
-    handler: { raise() { } },
+  runtime: new RuntimeImpl(),
 
-    template: { id: 'test', create: () => new InstanceImpl() }
+    template: { id: '/', create: () => new InstanceImpl() }
 
 }, <any>o);

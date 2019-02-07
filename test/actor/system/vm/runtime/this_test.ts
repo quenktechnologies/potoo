@@ -88,7 +88,7 @@ describe('runtime', () => {
 
                     flags: { immutable: true, buffered: true },
 
-                    handler: new This('/', s),
+                    runtime: new This('/', s),
 
                     template: {
 
@@ -117,7 +117,7 @@ describe('runtime', () => {
 
                     flags: { immutable: true, buffered: true },
 
-                    handler: new This('/foo', s),
+                    runtime: new This('/foo', s),
 
                     template: {
 
@@ -141,7 +141,7 @@ describe('runtime', () => {
 
                     flags: { immutable: true, buffered: true },
 
-                    handler: new This('/foo/bar', s),
+                    runtime: new This('/foo/bar', s),
 
                     template: {
 
@@ -189,7 +189,7 @@ describe('runtime', () => {
 
                     flags: { immutable: true, buffered: true },
 
-                    handler: new This('/', s),
+                    runtime: new This('/', s),
 
                     template: {
 

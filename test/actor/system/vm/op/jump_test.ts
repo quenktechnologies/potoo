@@ -60,19 +60,7 @@ describe('jump', () => {
 
                 let thrown = false;
 
-                let c = newContext({
-
-                    handler: {
-
-                        raise(e: Err) {
-
-                            throw new Error(e.message);
-
-                        }
-
-                    }
-
-                });
+                let c = newContext();
 
                 let f = new Frame('/', c, new Script(), [], []);
 
@@ -156,19 +144,7 @@ describe('jump', () => {
 
                 let thrown = false;
 
-                let c = newContext({
-
-                    handler: {
-
-                        raise(e: Err) {
-
-                            throw new Error(e.message);
-
-                        }
-
-                    }
-
-                });
+                let c = newContext();
 
                 let f = new Frame('self', c, new Script(), [
                 ], [
