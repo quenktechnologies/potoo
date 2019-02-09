@@ -280,20 +280,21 @@ const log = <C extends Context, S extends Platform<C>>
     if (o.level <= <number>level) {
 
         let ctx = `[${f.actor}]`;
-        let msg = resolveLog(f, o.toLog(f));
+        let msg = [ctx, ...resolveLog(f, o.toLog(f))];
 
-        switch (o.level) {
+      switch (o.level) {
+
             case logging.INFO:
-                (<logging.Logger>logger).info(ctx, msg);
+                (<logging.Logger>logger).info.apply(logger, msg);
                 break;
             case logging.WARN:
-                (<logging.Logger>logger).warn(ctx, msg);
+                (<logging.Logger>logger).warn.apply(logger, msg);
                 break;
             case logging.ERROR:
-                (<logging.Logger>logger).error(ctx, msg);
+                (<logging.Logger>logger).error.apply(logger, msg);
                 break;
             default:
-                (<logging.Logger>logger).log(ctx, msg)
+                (<logging.Logger>logger).log.apply(logger, msg);
                 break;
 
         }
@@ -319,6 +320,6 @@ const resolveLog = <C extends Context, S extends Platform<C>>
                 .orRight(() => undefined)
                 .takeRight()) : [];
 
-    return [op, operand, stack];
+    return [op, operand].concat(stack);
 
 }

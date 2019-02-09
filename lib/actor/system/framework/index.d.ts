@@ -8,6 +8,7 @@ import { Address } from '../../address';
 import { Template as ActorTemplate } from '../../template';
 import { Context } from '../../context';
 import { Template } from '../../template';
+import { Message } from '../../message';
 import { State } from '../state';
 import { Actor, Instance } from '../../';
 import { System } from '../';
@@ -36,7 +37,7 @@ export declare abstract class AbstractSystem<C extends Context> implements Syste
     spawn(t: ActorTemplate<C, AbstractSystem<C>>): AbstractSystem<C>;
     init(c: C): C;
     notify(): void;
-    accept(): this;
+    accept(_: Message): void;
     stop(): void;
     run(): void;
     exec(i: Instance, s: Script<C, AbstractSystem<C>>): Maybe<Value<C, System<C>>>;
