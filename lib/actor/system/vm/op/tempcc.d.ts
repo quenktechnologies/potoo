@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import { Log, Level } from './';
 /**
  * TempCC counts the number of child templates a template has.

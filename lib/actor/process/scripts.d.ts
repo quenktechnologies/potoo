@@ -1,6 +1,6 @@
 import { Script } from '../system/vm/script';
-import { System } from '../system';
 import { Context } from '../context';
+import { System } from '../system';
 /**
  * RaiseScript
  */

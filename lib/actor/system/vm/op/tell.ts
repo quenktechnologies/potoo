@@ -2,9 +2,9 @@ import { tick } from '@quenk/noni/lib/control/timer';
 import { Message } from '../../../message';
 import { Envelope } from '../../../mailbox';
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import { OP_CODE_TELL, Log, Op, Level } from './';
 
 /**
@@ -53,17 +53,17 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
         } else {
 
             let maybeCtx = e.getContext(addr);
+          let conf  = e.config();
 
             if (maybeCtx.isJust()) {
 
                 deliver(maybeCtx.get(), msg);
                 curr.pushNumber(1);
 
-            } else if (e.system.configuration.hooks &&
-                e.system.configuration.hooks.drop) {
+            } else if (conf.hooks &&
+                conf.hooks.drop) {
 
-                e.system.configuration.hooks.drop(new Envelope(
-                    addr, e.self, msg));
+              conf.hooks.drop(new Envelope(                    addr, e.self, msg));
 
                 curr.pushNumber(1);
 

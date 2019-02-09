@@ -3,8 +3,7 @@ import { just } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
 import { StopScript } from '../system/vm/runtime/scripts';
 import { SpawnScript } from '../system/framework/scripts';
-import { Handle, Void } from '../system/vm/handle';
-import { System } from '../system';
+import { System, Void } from '../system';
 import { ADDRESS_DISCARD, Address, isRestricted, make } from '../address';
 import { Message } from '../message';
 import { Template } from '../template';
@@ -12,7 +11,7 @@ import { Context } from '../context';
 import { Actor } from '../';
 import { Case } from './case';
 import { Api } from './api';
-import { TellScript, AcceptScript, ReceiveScript,NotifyScript } from './scripts';
+import { TellScript, AcceptScript, ReceiveScript, NotifyScript } from './scripts';
 
 /**
  * Reference to an actor address.
@@ -31,7 +30,7 @@ export interface Resident<C extends Context, S extends System<C>>
 export abstract class AbstractResident<C extends Context, S extends System<C>>
     implements Resident<C, S> {
 
-    constructor(public handle: Handle<C, S>) { }
+    constructor(public system: System<C>) { }
 
     abstract init(c: C): C;
 
@@ -41,25 +40,25 @@ export abstract class AbstractResident<C extends Context, S extends System<C>>
 
     notify() {
 
-this.handle.exec(new NotifyScript());
+        this.system.exec(this, new NotifyScript());
 
     }
 
     self() {
 
-        return this.handle.self;
+        return this.system.ident(this);
 
     }
 
     accept(m: Message) {
 
-        this.handle.exec(new AcceptScript(m));
+        this.system.exec(this,new AcceptScript(m));
 
     }
 
     spawn(t: Template<C, S>): Address {
 
-        this.handle.exec(new SpawnScript(this.self(), t));
+        this.system.exec(this,new SpawnScript(this.self(), t));
 
         return isRestricted(t.id) ?
             ADDRESS_DISCARD :
@@ -69,7 +68,7 @@ this.handle.exec(new NotifyScript());
 
     tell<M>(ref: Address, m: M): AbstractResident<C, S> {
 
-        this.handle.exec(new TellScript(ref, m));
+        this.system.exec(this,new TellScript(ref, m));
         return this;
 
     }
@@ -77,20 +76,20 @@ this.handle.exec(new NotifyScript());
 
     kill(addr: Address): AbstractResident<C, S> {
 
-        this.handle.exec(new StopScript(addr));
+        this.system.exec(this,new StopScript(addr));
         return this;
 
     }
 
     exit(): void {
 
-        this.handle.exec(new StopScript(this.self()));
+        this.system.exec(this,new StopScript(this.self()));
 
     }
 
     stop(): void {
 
-        this.handle = new Void('?', this.handle.system);
+        this.system = new Void();
 
     }
 
@@ -158,7 +157,7 @@ export abstract class Mutable<C extends Context, S extends System<C>>
      */
     select<M>(cases: Case<M>[]): Mutable<C, S> {
 
-        this.handle.exec(new ReceiveScript(mbehaviour(cases)));
+        this.system.exec(this,new ReceiveScript(mbehaviour(cases)));
         return this;
 
     }

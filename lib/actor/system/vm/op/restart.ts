@@ -1,6 +1,6 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import { OP_CODE_RESTART, Log, Op, Level } from './';
 
 /**

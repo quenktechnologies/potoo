@@ -1,0 +1,26 @@
+import * as config from '../configuration';
+import { Data } from '@quenk/test/lib/mock';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
+import { Address } from '../../address';
+import { Instance } from '../../';
+import { Value, Script } from '../vm/script';
+import { Message } from '../../message';
+import { Context } from '../../context';
+import { AbstractSystem } from './';
+/**
+ * TestAbstractSystem
+ *
+ * This system is provided for testing purposes. It provdies all the features
+ * of the AbstractSystem.
+ */
+export declare abstract class TestAbstractSystem<C extends Context> extends AbstractSystem<C> {
+    configuration: config.Configuration;
+    constructor(configuration?: config.Configuration);
+    MOCK: Data;
+    exec(i: Instance, s: Script<C, TestAbstractSystem<C>>): Maybe<Value<C, TestAbstractSystem<C>>>;
+    ident(i: Instance): Address;
+    init(c: C): C;
+    accept(m: Message): void;
+    stop(): void;
+    run(): void;
+}

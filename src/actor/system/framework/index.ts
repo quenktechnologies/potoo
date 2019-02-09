@@ -1,16 +1,19 @@
 import * as config from '../configuration';
 import { Err } from '@quenk/noni/lib/control/error';
-import { nothing } from '@quenk/noni/lib/data/maybe';
-import { ADDRESS_SYSTEM } from '../../address';
+import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
+import { This } from '../vm/runtime/this';
+import { Value, Script } from '../vm/script';
+import { Runtime } from '../vm/runtime';
+import { Platform } from '../vm';
+import { ADDRESS_SYSTEM, ADDRESS_DISCARD, Address } from '../../address';
 import { Template as ActorTemplate } from '../../template';
-import { Actor, Instance } from '../../';
 import { Context } from '../../context';
 import { Template } from '../../template';
-import { State } from '../state';
-import { Runtime } from '../vm/runtime';
+import { Message } from '../../message';
+import { State, getAddress, getRuntime } from '../state';
+import { Actor, Instance } from '../../';
 import { System } from '../';
 import { SpawnScript } from './scripts';
-import { This } from '../vm/runtime/this';
 
 /**
  * STemplate is provided here as a convenience when creating new systems.
@@ -44,12 +47,10 @@ export class STemplate {
 }
 
 /**
- * AbstractSystem
- *
- * Implemnation of a System and Runtime that spawns
- * various general purpose actors.
+ * AbstractSystem can be extended to create a customized actor system.
  */
-export abstract class AbstractSystem<C extends Context> implements System<C> {
+export abstract class AbstractSystem<C extends Context>
+    implements System<C>, Platform<C> {
 
     constructor(public configuration: config.Configuration = {}) { }
 
@@ -60,12 +61,18 @@ export abstract class AbstractSystem<C extends Context> implements System<C> {
         h: Runtime<C, AbstractSystem<C>>,
         t: Template<C, AbstractSystem<C>>): C
 
+    ident(i: Instance): Address {
+
+        return getAddress(this.state, i).orJust(() => ADDRESS_DISCARD).get();
+
+    }
+
     /**
      * spawn a new actor from a template.
      */
     spawn(t: ActorTemplate<C, AbstractSystem<C>>): AbstractSystem<C> {
 
-        (new This('$', this)).exec(new SpawnScript('',t));
+        (new This('$', this)).exec(new SpawnScript('', t));
 
         return this;
 
@@ -77,17 +84,29 @@ export abstract class AbstractSystem<C extends Context> implements System<C> {
 
     }
 
-    notify() { }
-
-    accept() {
-
-        return this;
+    notify(): void {
 
     }
 
-    stop(): void { }
+    accept(_: Message): void {
 
-    run(): void { }
+
+    }
+
+    stop(): void {
+
+    }
+
+    run(): void {
+
+    }
+
+    exec(i: Instance, s: Script<C, AbstractSystem<C>>): Maybe<Value<C, System<C>>> {
+
+        return getRuntime(this.state, i)
+            .chain(r => r.exec(<Script<C, System<C>>>s));
+
+    }
 
 }
 
@@ -97,33 +116,34 @@ export abstract class AbstractSystem<C extends Context> implements System<C> {
  * The value can be merged to satsify user defined Context types.
  */
 export const newContext = <C extends Context, S extends System<C>>
-    (actor: Instance, handler: Runtime<C, S>, template: ActorTemplate<C, S>)
-    : Context => ({
+    (actor: Instance,
+        runtime: Runtime<Context, System<C>>,
+        template: ActorTemplate<C, S>): Context => ({
 
-        mailbox: nothing(),
+            mailbox: nothing(),
 
-        actor,
+            actor,
 
-        behaviour: [],
+            behaviour: [],
 
-        flags: { immutable: false, buffered: false },
+            flags: { immutable: false, buffered: false },
 
-        handler,
+            runtime,
 
-        template
+            template
 
-    });
+        });
 
 /**
  * newState produces the bare minimum needed for creating a State.
  *
  * The value can be merged to statisfy user defined State.
  */
-export const newState = <C extends Context>(sys: System<C>): State<Context> => ({
+export const newState = <C extends Context>(sys: Platform<C>): State<C> => ({
 
     contexts: {
 
-        $: newContext(sys, new This('$', sys), new STemplate())
+        $: sys.allocate(sys, new This('$', sys), new STemplate())
 
     },
 

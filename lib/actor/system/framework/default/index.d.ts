@@ -3,18 +3,15 @@
  * along with submodules for creating resident actors.
  */
 /** imports */
-import * as config from '../configuration';
-import { State } from '../state';
-import { Context } from '../../context';
-import { Template } from '../../template';
-import { Runtime } from '../vm/runtime';
-import { Actor } from '../../';
-import { AbstractSystem } from '../framework';
+import * as config from '../../configuration';
+import { State } from '../../state';
+import { Context } from '../../../context';
+import { Template } from '../../../template';
+import { Runtime } from '../../vm/runtime';
+import { Actor } from '../../../';
+import { AbstractSystem } from '../../framework';
 /**
- * ActorSystem
- *
- * Implemenation of a System and Runtime that spawns
- * various general purpose actors.
+ * ActorSystem default implementation for general purpose work.
  */
 export declare class ActorSystem extends AbstractSystem<Context> {
     state: State<Context>;

@@ -3,8 +3,9 @@ import { fromArray } from '@quenk/noni/lib/data/maybe';
 import { Context } from '../../../context';
 import { Message } from '../../../message';
 import { Behaviour } from '../../../';
-import { System } from '../../';
 import { Runtime } from '../runtime';
+import {Type,Location} from '../frame';
+import { System } from '../../';
 import { OP_CODE_READ, Log, Op, Level } from './';
 
 /**
@@ -68,7 +69,7 @@ export class Read<C extends Context, S extends System<C>> implements Op<C, S> {
 
     toLog(): Log {
 
-        return ['read', [], []];
+        return ['read', [], [[0, Type.Message, Location.Mailbox]]];
 
     }
 

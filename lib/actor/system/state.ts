@@ -6,9 +6,11 @@ import {
 } from '@quenk/noni/lib/data/maybe';
 import { reduce, contains, partition } from '@quenk/noni/lib/data/record';
 import { startsWith } from '@quenk/noni/lib/data/string';
+import { Runtime } from './vm/runtime';
 import { Instance } from '../';
 import { ADDRESS_SYSTEM, Address, getParent as getParentAddress } from '../address';
 import { Context, Contexts } from '../context';
+import { System } from './';
 
 /**
  * Routers map.
@@ -69,7 +71,7 @@ export const remove = <C extends Context>
 
     return s;
 
-    }
+}
 
 /**
  * getAddress attempts to retrieve the address of an Actor instance.
@@ -78,6 +80,14 @@ export const getAddress = <C extends Context>
     (s: State<C>, actor: Instance): Maybe<Address> =>
     reduce(s.contexts, nothing(), (p: Maybe<Address>, c, k) =>
         c.actor === actor ? fromString(k) : p);
+
+/**
+ * getRuntime attempts to retrieve the runtime for an Actor instance.
+ */
+export const getRuntime = <C extends Context>
+    (s: State<C>, actor: Instance): Maybe<Runtime<Context, System<Context>>> =>
+    reduce(s.contexts, nothing(), (p, c) =>
+        c.actor === actor ? fromNullable(c.runtime) : p);
 
 /**
  * getChildren returns the child contexts for an address.

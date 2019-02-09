@@ -23,6 +23,7 @@ export const LOCATION_LITERAL = 0x0;
 export const LOCATION_CONSTANTS = 0x1;
 export const LOCATION_HEAP = 0x2;
 export const LOCATION_LOCAL = 0x3;
+export const LOCATION_MAILBOX = 0x4;
 
 /**
  * Type indicates the type of an Operand.
@@ -56,7 +57,9 @@ export enum Location {
 
     Heap = LOCATION_HEAP,
 
-    Local = LOCATION_LOCAL
+    Local = LOCATION_LOCAL,
+
+    Mailbox = LOCATION_MAILBOX
 
 }
 
@@ -106,7 +109,7 @@ export class Frame<C extends Context, S extends System<C>> {
      */
     seek(location: number): Either<Err, Frame<C, S>> {
 
-        if ((location < 0) || (location >= (this.code.length )))
+        if ((location < 0) || (location >= (this.code.length)))
             return left(new error.JumpOutOfBoundsErr(location,
                 this.code.length - 1));
 
@@ -219,6 +222,7 @@ export class Frame<C extends Context, S extends System<C>> {
             case Location.Local:
                 return fromNullable(this.locals[data[Field.Value]])
                     .map(d => this.resolve(d))
+                    .orJust(nullErr)
                     .get();
 
             case Location.Heap:
@@ -226,6 +230,14 @@ export class Frame<C extends Context, S extends System<C>> {
                     .map(v => right<Err, Value<C, S>>(v))
                     .orJust(nullErr)
                     .get();
+
+            case Location.Mailbox:
+               return this
+                    .context
+                    .mailbox
+                    .chain(m => fromNullable(m[data[Field.Value]]))
+                    .map(v => right<Err, Value<C, S>>(v))
+                    .get()
 
             default:
                 return nullErr();

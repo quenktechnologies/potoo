@@ -1,5 +1,5 @@
-import * as base from '../../../resident';
-import {Context} from '../../../context';
+import * as base from '../../../../resident';
+import {Context} from '../../../../context';
 import {ActorSystem} from '../';
 
 /**

@@ -1,6 +1,6 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import { Log, Op, Level } from './';
 /**
  * Restart the current actor.

@@ -1,4 +1,3 @@
-import { Handle } from '../system/vm/handle';
 import { System } from '../system';
 import { Address } from '../address';
 import { Message } from '../message';
@@ -20,8 +19,8 @@ export interface Resident<C extends Context, S extends System<C>> extends Api<C,
  * AbstractResident implementation.
  */
 export declare abstract class AbstractResident<C extends Context, S extends System<C>> implements Resident<C, S> {
-    handle: Handle<C, S>;
-    constructor(handle: Handle<C, S>);
+    system: System<C>;
+    constructor(system: System<C>);
     abstract init(c: C): C;
     abstract select<T>(_: Case<T>[]): AbstractResident<C, S>;
     abstract run(): void;

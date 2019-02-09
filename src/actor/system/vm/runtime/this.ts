@@ -16,11 +16,12 @@ import {
     removeRoute,
     remove
 } from '../../state';
-import { System } from '../../';
+import { Configuration } from '../../configuration';
 import { Log, Op } from '../op';
 import { Data, Frame } from '../frame';
-import { Script } from '../script';
+import { Value, Script } from '../script';
 import { StopScript, RestartScript } from './scripts';
+import { Platform } from '../';
 import { Runtime } from './';
 
 /**
@@ -29,16 +30,21 @@ import { Runtime } from './';
  *
  * It has all the methods and properties expected for Op code execution.
  */
-export class This<C extends Context, S extends System<C>>
-    implements Runtime<C, S> {
+export class This<C extends Context, S extends Platform<C>> implements Runtime<C, S> {
 
     constructor(
         public self: Address,
-        public system: System<C>,
+        public system: S,
         public stack: Frame<C, S>[] = [],
         public queue: Frame<C, S>[] = []) { }
 
     running = false;
+
+    config(): Configuration {
+
+        return this.system.configuration;
+
+    }
 
     current(): Maybe<Frame<C, S>> {
 
@@ -50,8 +56,8 @@ export class This<C extends Context, S extends System<C>>
 
     allocate(addr: Address, t: template.Template<C, S>): C {
 
-        let h = new This(addr, this.system);
-        let act = t.create(h);
+        let h = new This<C, S>(addr, this.system);
+        let act = t.create(this.system);
 
         return act.init(this.system.allocate(act, h, t));
 
@@ -173,7 +179,7 @@ export class This<C extends Context, S extends System<C>>
 
     }
 
-    exec(s: Script<C, S>): void {
+    exec(s: Script<C, S>): Maybe<Value<C, S>> {
 
         let ctx = this.getContext(this.self).get();
 
@@ -187,15 +193,17 @@ export class This<C extends Context, S extends System<C>>
 
         }
 
-        this.run();
+        return this.run();
 
     }
 
-    run(): void {
+    run(): Maybe<Value<C, S>> {
 
         let policy = <config.LogPolicy>(this.system.configuration.log || {});
 
-        if (this.running) return;
+        let ret: Maybe<Value<C, S>> = nothing();
+
+        if (this.running) return ret;
 
         this.running = true;
 
@@ -217,6 +225,8 @@ export class This<C extends Context, S extends System<C>>
 
                     }
 
+                    ret = cur.resolve(cur.pop()).toMaybe();
+
                     this.stack.pop();
 
                     break;
@@ -228,7 +238,6 @@ export class This<C extends Context, S extends System<C>>
                 cur.ip++; // increment here so jumps do not skip
 
                 next.exec(this);
-
 
             }
 
@@ -250,50 +259,53 @@ export class This<C extends Context, S extends System<C>>
 
         this.running = false;
 
+        return ret;
+
     }
 
 }
 
 const escalate = <C extends Context>
-    (env: System<C>, target: Address, err: Err) =>
+    (env: Platform<C>, target: Address, err: Err) =>
     get(env.state, getParent(target))
-        .map(ctx => ctx.handler.raise(err))
+        .map(ctx => ctx.runtime.raise(err))
         .orJust(() => { throw convert(err); });
 
-const log = <C extends Context, S extends System<C>>
+const log = <C extends Context, S extends Platform<C>>
     (policy: config.LogPolicy, f: Frame<C, S>, o: Op<C, S>): Op<C, S> => {
 
     let level = policy.level || 0;
     let logger = policy.logger || console;
 
-    if (o.level <= <number>level) { 
+    if (o.level <= <number>level) {
 
-    let ctx = `[${f.actor}]`;
-    let msg = resolveLog(f, o.toLog(f));
+        let ctx = `[${f.actor}]`;
+        let msg = [ctx, ...resolveLog(f, o.toLog(f))];
 
-    switch (o.level) {
-        case logging.INFO:
-            (<logging.Logger>logger).info(ctx, msg);
-            break;
-        case logging.WARN:
-            (<logging.Logger>logger).warn(ctx, msg);
-            break;
-        case logging.ERROR:
-            (<logging.Logger>logger).error(ctx, msg);
-            break;
-        default:
-            (<logging.Logger>logger).log(ctx, msg)
-            break;
+      switch (o.level) {
+
+            case logging.INFO:
+                (<logging.Logger>logger).info.apply(logger, msg);
+                break;
+            case logging.WARN:
+                (<logging.Logger>logger).warn.apply(logger, msg);
+                break;
+            case logging.ERROR:
+                (<logging.Logger>logger).error.apply(logger, msg);
+                break;
+            default:
+                (<logging.Logger>logger).log.apply(logger, msg);
+                break;
+
+        }
 
     }
-
-       }
 
     return o;
 
 }
 
-const resolveLog = <C extends Context, S extends System<C>>
+const resolveLog = <C extends Context, S extends Platform<C>>
     (f: Frame<C, S>, [op, rand, data]: Log) => {
 
     let operand = rand.length > 0 ?
@@ -308,6 +320,6 @@ const resolveLog = <C extends Context, S extends System<C>>
                 .orRight(() => undefined)
                 .takeRight()) : [];
 
-    return [op, operand, stack];
+    return [op, operand].concat(stack);
 
 }

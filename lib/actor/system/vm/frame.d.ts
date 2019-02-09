@@ -17,6 +17,7 @@ export declare const LOCATION_LITERAL = 0;
 export declare const LOCATION_CONSTANTS = 1;
 export declare const LOCATION_HEAP = 2;
 export declare const LOCATION_LOCAL = 3;
+export declare const LOCATION_MAILBOX = 4;
 /**
  * Type indicates the type of an Operand.
  *
@@ -37,7 +38,8 @@ export declare enum Location {
     Literal,
     Constants,
     Heap,
-    Local
+    Local,
+    Mailbox
 }
 /**
  * Field

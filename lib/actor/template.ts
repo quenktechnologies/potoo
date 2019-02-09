@@ -1,5 +1,4 @@
 import { Err } from '@quenk/noni/lib/control/error';
-import {Handle} from './system/vm/handle';
 import { System } from './system';
 import { Context } from './context';
 import { Actor } from './';
@@ -23,10 +22,9 @@ export const ACTION_STOP = 0x2;
 export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 
 /**
- * CreateFunc is applied to produce an instance of an actor.
+ * Cons is applied to produce an instance of an actor.
  */
-export type CreateFunc<C extends Context, S extends System<C>> 
-  = (h:Handle<C,S>) => Actor<C>;
+export type Cons<C extends Context, S extends System<C>> = (s: S) => Actor<C>;
 
 /**
  * DelayMilliseconds type.
@@ -58,7 +56,7 @@ export interface Template<C extends Context, S extends System<C>> {
     /**
      * create function.
      */
-    create: CreateFunc<C, S>;
+    create: Cons<C, S>;
 
     /**
      * trap is used to take action when the spanwed
@@ -80,6 +78,6 @@ export interface Template<C extends Context, S extends System<C>> {
     /**
      * children is list of child actors that will automatically be spawned.
      */
-    children?: Template<C,S>[]
+    children?: Template<C, S>[]
 
 }

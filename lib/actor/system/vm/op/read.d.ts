@@ -1,6 +1,6 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import { Log, Op, Level } from './';
 /**
  * Read consumes the next message in the current actor's mailbox.

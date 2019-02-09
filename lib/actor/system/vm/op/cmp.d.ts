@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import { Log, Level, Op } from './';
 /**
  * Cmp compares the top two values for equality.

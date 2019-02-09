@@ -7,13 +7,12 @@ import {
     Immutable,
 } from '../../../src/actor/resident';
 import { Case } from '../../../src/actor/resident/case';
-import { Handle } from '../../../src/actor/system/vm/handle';
-import { ActorSystem, system } from '../../../src/actor/system/default';
+import { ActorSystem, system } from '../../../src/actor/system/framework/default';
 
 class Killer extends AbstractResident<Context, ActorSystem> {
 
     constructor(
-        public s: Handle<Context, System<Context>>,
+        public s: System<Context>,
         public done: (k: Killer) => void) { super(s); }
 
     init(c: Context): Context {
@@ -68,7 +67,7 @@ class Victim extends Immutable<void, Context, ActorSystem> {
 class Exiter extends AbstractResident<Context, ActorSystem> {
 
     constructor(
-        public s: Handle<Context, System<Context>>,
+        public s: System<Context>,
         public done: () => void) { super(s); }
 
     init(c: Context): Context {
@@ -103,7 +102,7 @@ class Exiter extends AbstractResident<Context, ActorSystem> {
 class ShouldWork extends Mutable<Context, ActorSystem> {
 
     constructor(
-        public s: Handle<Context, System<Context>>,
+        public s: System<Context>,
         public done: () => void) {
 
         super(s);
@@ -139,7 +138,7 @@ class ShouldWork extends Mutable<Context, ActorSystem> {
 class MutableSelfTalk extends Mutable<Context, ActorSystem> {
 
     constructor(
-        public s: Handle<Context, System<Context>>,
+        public s: System<Context>,
         public done: () => void) { super(s); }
 
     count = 0;
@@ -186,7 +185,7 @@ class MutableSelfTalk extends Mutable<Context, ActorSystem> {
 class ImmutableSelfTalk extends Immutable<string, Context, ActorSystem> {
 
     constructor(
-        public s: Handle<Context, System<Context>>,
+        public s: System<Context>,
         public done: () => void) { super(s); }
 
     count = 0;

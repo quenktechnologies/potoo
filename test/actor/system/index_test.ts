@@ -2,7 +2,7 @@ import { assert } from '@quenk/test/lib/assert';
 import { Case } from '../../../src/actor/resident/case';
 import { Immutable, Mutable } from '../../../src/actor/resident';
 import { Context } from '../../../src/actor/context';
-import { ActorSystem, system } from '../../../src/actor/system/default';
+import { ActorSystem, system } from '../../../src/actor/system/framework/default';
 
 class A1 extends Mutable<Context, ActorSystem> {
 

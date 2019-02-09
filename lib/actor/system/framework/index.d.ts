@@ -1,11 +1,16 @@
 import * as config from '../configuration';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
+import { Value, Script } from '../vm/script';
+import { Runtime } from '../vm/runtime';
+import { Platform } from '../vm';
+import { Address } from '../../address';
 import { Template as ActorTemplate } from '../../template';
-import { Actor, Instance } from '../../';
 import { Context } from '../../context';
 import { Template } from '../../template';
+import { Message } from '../../message';
 import { State } from '../state';
-import { Runtime } from '../vm/runtime';
+import { Actor, Instance } from '../../';
 import { System } from '../';
 /**
  * STemplate is provided here as a convenience when creating new systems.
@@ -18,35 +23,34 @@ export declare class STemplate {
     trap: (e: Err) => never;
 }
 /**
- * AbstractSystem
- *
- * Implemnation of a System and Runtime that spawns
- * various general purpose actors.
+ * AbstractSystem can be extended to create a customized actor system.
  */
-export declare abstract class AbstractSystem<C extends Context> implements System<C> {
+export declare abstract class AbstractSystem<C extends Context> implements System<C>, Platform<C> {
     configuration: config.Configuration;
     constructor(configuration?: config.Configuration);
     abstract state: State<C>;
     abstract allocate(a: Actor<C>, h: Runtime<C, AbstractSystem<C>>, t: Template<C, AbstractSystem<C>>): C;
+    ident(i: Instance): Address;
     /**
      * spawn a new actor from a template.
      */
     spawn(t: ActorTemplate<C, AbstractSystem<C>>): AbstractSystem<C>;
     init(c: C): C;
     notify(): void;
-    accept(): this;
+    accept(_: Message): void;
     stop(): void;
     run(): void;
+    exec(i: Instance, s: Script<C, AbstractSystem<C>>): Maybe<Value<C, System<C>>>;
 }
 /**
  * newContext produces the bare minimum needed for creating a Context type.
  *
  * The value can be merged to satsify user defined Context types.
  */
-export declare const newContext: <C extends Context, S extends System<C>>(actor: Instance, handler: Runtime<C, S>, template: ActorTemplate<C, S>) => Context;
+export declare const newContext: <C extends Context, S extends System<C>>(actor: Instance, runtime: Runtime<Context, System<C>>, template: ActorTemplate<C, S>) => Context;
 /**
  * newState produces the bare minimum needed for creating a State.
  *
  * The value can be merged to statisfy user defined State.
  */
-export declare const newState: <C extends Context>(sys: System<C>) => State<Context>;
+export declare const newState: <C extends Context>(sys: Platform<C>) => State<C>;

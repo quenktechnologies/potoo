@@ -1,5 +1,4 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Address } from '../../../address';
 import { PushStr } from '../op/push';
 import { Stop } from '../op/stop';
@@ -7,6 +6,7 @@ import { Restart } from '../op/restart';
 import { Run } from '../op/run';
 import { Op } from '../op';
 import { Constants, Script } from '../script';
+import { System } from '../../';
 
 const restartCode: Op<Context, System<Context>>[] = [
     new Restart(),

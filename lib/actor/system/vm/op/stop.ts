@@ -2,9 +2,9 @@ import * as error from '../error';
 import { map } from '@quenk/noni/lib/data/record';
 import { isChild } from '../../../address';
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import { OP_CODE_STOP, Log, Op, Level } from './';
 
 /**

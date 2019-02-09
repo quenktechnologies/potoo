@@ -1,9 +1,9 @@
 import { right } from '@quenk/noni/lib/data/either';
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { OP_CODE_JUMP, OP_CODE_JUMP_IF_ONE,Log, Level, Op } from './';
+import { System } from '../../';
+import { OP_CODE_JUMP, OP_CODE_JUMP_IF_ONE, Log, Level, Op } from './';
 
 /**
  * Jump to a new location.

@@ -45,7 +45,7 @@ describe('runtime', () => {
 
                 let thrown = false;
                 let r = new This('/', new SystemImpl(), [
-                    new Frame('/', newContext(), new Script())
+                    new Frame<Context, SystemImpl>('/', newContext(), new Script())
                 ]);
 
                 r.system.state.contexts['/'] = newContext();
@@ -88,7 +88,7 @@ describe('runtime', () => {
 
                     flags: { immutable: true, buffered: true },
 
-                    handler: new This('/', s),
+                    runtime: new This('/', s),
 
                     template: {
 
@@ -117,7 +117,7 @@ describe('runtime', () => {
 
                     flags: { immutable: true, buffered: true },
 
-                    handler: new This('/foo', s),
+                    runtime: new This('/foo', s),
 
                     template: {
 
@@ -141,7 +141,7 @@ describe('runtime', () => {
 
                     flags: { immutable: true, buffered: true },
 
-                    handler: new This('/foo/bar', s),
+                    runtime: new This('/foo/bar', s),
 
                     template: {
 
@@ -156,7 +156,7 @@ describe('runtime', () => {
                 }
 
                 let r = new This('/foo/bar', s, [
-                    new Frame('/foo/bar', parent, new Script())
+                    new Frame<Context, SystemImpl>('/foo/bar', parent, new Script())
                 ]);
 
                 r.system.state.contexts['/'] = parent;
@@ -189,7 +189,7 @@ describe('runtime', () => {
 
                     flags: { immutable: true, buffered: true },
 
-                    handler: new This('/', s),
+                    runtime: new This('/', s),
 
                     template: {
 
@@ -209,11 +209,11 @@ describe('runtime', () => {
                     new Int(list)
                 ];
 
-              let r = new This('/', s);
+                let r = new This('/', s);
 
                 r.system.state.contexts['/'] = ctx;
 
-              r.exec(new Script([[], [], [], [], [], []], ops));
+                r.exec(new Script([[], [], [], [], [], []], ops));
 
                 assert(list).equate([1, 1, 1]);
 

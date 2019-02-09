@@ -1,6 +1,6 @@
 import { PushMsg, PushStr, PushForeign } from '../system/vm/op/push';
 import { Tell } from '../system/vm/op/tell';
-import {Drop} from '../system/vm/op/drop';
+import { Drop } from '../system/vm/op/drop';
 import { Discard } from '../system/vm/op/discard';
 import { JumpIfOne } from '../system/vm/op/jump';
 import { Noop } from '../system/vm/op/noop';
@@ -8,14 +8,14 @@ import { Receive } from '../system/vm/op/receive';
 import { Read } from '../system/vm/op/read';
 import { Op } from '../system/vm/op';
 import { Constants, Foreign, Script } from '../system/vm/script';
+import {System} from '../system';
 import { Context } from '../context';
-import { System } from '../system';
 import { Address } from '../address';
 import { Message } from '../message';
 
 const acceptCode: Op<Context, System<Context>>[] = [
-  new PushMsg(0),
-  new Drop()
+    new PushMsg(0),
+    new Drop()
 ];
 
 const tellcode: Op<Context, System<Context>>[] = [

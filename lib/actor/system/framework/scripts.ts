@@ -1,10 +1,11 @@
 import { Context } from '../../context';
 import { Address } from '../../address';
+import { Template } from '../../template';
 import { PushNum, PushStr, PushTemp, PushFunc } from '../vm/op/push';
 import { Store } from '../vm/op/store';
 import { Load } from '../vm/op/load';
 import { Allocate } from '../vm/op/allocate';
-import {Run} from '../vm/op/run';
+import { Run } from '../vm/op/run';
 import { Call } from '../vm/op/call';
 import { TempCC } from '../vm/op/tempcc';
 import { TempChild } from '../vm/op/tempchild';
@@ -13,7 +14,6 @@ import { Jump, JumpIfOne } from '../vm/op/jump';
 import { Add } from '../vm/op/add';
 import { Noop } from '../vm/op/noop';
 import { Op } from '../vm/op';
-import { Template } from '../../template';
 import { Constants, Script } from '../vm/script';
 import { System } from '../';
 

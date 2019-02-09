@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Type, Location, Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import {OP_CODE_LOAD, Log, Level } from './';
 
 /**

@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import { Log, Op, Level } from './';
 /**
  * Query verifies whether an address has a valid Context within the system.

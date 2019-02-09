@@ -1,9 +1,9 @@
 import * as error from '../error';
 import { Context } from '../../../context';
 import { isRestricted, make } from '../../../address';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import { OP_CODE_ALLOCATE, Log, Op, Level } from './';
 
 /**

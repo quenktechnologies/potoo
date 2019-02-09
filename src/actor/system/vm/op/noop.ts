@@ -1,8 +1,8 @@
 import { Context } from '../../../context';
-import { System } from '../../../system';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import {OP_CODE_NOOP, Log, Level, Op } from './';
+import { System } from '../../';
+import { OP_CODE_NOOP, Log, Level, Op } from './';
 
 /**
  * Noop does nothing.

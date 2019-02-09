@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Address } from '../../../address';
 import { Script } from '../script';
+import { System } from '../../';
 /**
  * StopScript for stopping actors.
  */

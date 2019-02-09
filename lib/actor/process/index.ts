@@ -3,7 +3,6 @@ import { ChildProcess, fork } from 'child_process';
 import { Maybe, nothing, just } from '@quenk/noni/lib/data/maybe';
 import { match } from '@quenk/noni/lib/control/match';
 import { Any } from '@quenk/noni/lib/data/type';
-import { Handle } from '../system/vm/handle';
 import { System } from '../system';
 import { AcceptScript as DropScript, TellScript } from '../resident/scripts';
 import { StopScript } from '../system/vm/runtime/scripts';
@@ -81,12 +80,12 @@ export class Process<C extends Context> implements Actor<C> {
 
     constructor(
         public module: Path,
-        public handle: Handle<C, System<C>>,
+        public system: System<C>,
         public script = SCRIPT_PATH) { }
 
     process: Maybe<ChildProcess> = nothing();
 
-    self = () => this.handle.self;
+    self = () => this.system.ident(this);
 
     init(c: C): C {
 
@@ -107,7 +106,7 @@ export class Process<C extends Context> implements Actor<C> {
 
         } else {
 
-            this.handle.exec(new DropScript(e));
+            this.system.exec(this, new DropScript(e));
 
         }
 
@@ -166,20 +165,20 @@ const filterMessage = <C extends Context>(p: Process<C>) => (m: Message) =>
         .end();
 
 const handleUnknown = <C extends Context>(p: Process<C>) => (m: Message) =>
-    p.handle.exec(new DropScript(m));
+    p.system.exec(p, new DropScript(m));
 
 const handleTell = <C extends Context>(p: Process<C>) => (m: TellMsg) =>
-    p.handle.exec(new TellScript(m.to, m.message));
+    p.system.exec(p, new TellScript(m.to, m.message));
 
 const handleRaise = <C extends Context>
     (p: Process<C>) => ({ error: { message }, src }: RaiseMsg) =>
-        p.handle.exec(new RaiseScript(`Error message from ${src}: ${message}`));
+        p.system.exec(p, new RaiseScript(`Error message from ${src}: ${message}`));
 
 const handleErrors = <C extends Context>(p: Process<C>) => (c: ChildProcess) =>
     c.on('error', raise(p))
 
 const raise = <C extends Context>(p: Process<C>) => (e: Error) =>
-    p.handle.exec(new RaiseScript(e.message));
+    p.system.exec(p, new RaiseScript(e.message));
 
 const handleExit = <C extends Context>(p: Process<C>) => (c: ChildProcess) =>
-    c.on('exit', () => p.handle.exec(new StopScript(p.self())));
+    c.on('exit', () => p.system.exec(p, new StopScript(p.self())));

@@ -4,20 +4,18 @@
  */
 
 /** imports */
-import * as config from '../configuration';
+import * as config from '../../configuration';
 import { rmerge } from '@quenk/noni/lib/data/record';
-import { State } from '../state';
-import { Context } from '../../context';
-import { Template } from '../../template';
-import { Runtime } from '../vm/runtime';
-import { Actor } from '../../';
-import { AbstractSystem, newContext, newState } from '../framework';
+import { State } from '../../state';
+import { Context } from '../../../context';
+import { Template } from '../../../template';
+import { Runtime } from '../../vm/runtime';
+import { Actor } from '../../../';
+import { AbstractSystem, newContext, newState } from '../../framework';
+import { System } from '../../';
 
 /**
- * ActorSystem
- *
- * Implemenation of a System and Runtime that spawns
- * various general purpose actors.
+ * ActorSystem default implementation for general purpose work.
  */
 export class ActorSystem extends AbstractSystem<Context> {
 
@@ -28,7 +26,7 @@ export class ActorSystem extends AbstractSystem<Context> {
         h: Runtime<Context, ActorSystem>,
         t: Template<Context, ActorSystem>): Context {
 
-        return a.init(newContext(a, h, t));
+        return a.init(newContext(a, <Runtime<Context, System<Context>>>h, t));
 
     }
 

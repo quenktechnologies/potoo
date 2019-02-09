@@ -1,8 +1,8 @@
 import { tick } from '@quenk/noni/lib/control/timer';
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import {OP_CODE_RUN, Log, Op, Level } from './';
 
 /**

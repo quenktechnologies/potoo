@@ -1,6 +1,6 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Runtime } from '../runtime';
+import { System } from '../../';
 import { Log, Level } from './';
 /**
  * PushNum pushes a literal number onto the stack.

@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Runtime } from '../runtime';
 import { Frame } from '../frame';
+import { System } from '../../';
 import { Log, Op, Level } from './';
 /**
  * Drop an unwanted message.

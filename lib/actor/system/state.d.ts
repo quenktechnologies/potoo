@@ -1,7 +1,9 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
+import { Runtime } from './vm/runtime';
 import { Instance } from '../';
 import { Address } from '../address';
 import { Context, Contexts } from '../context';
+import { System } from './';
 /**
  * Routers map.
  */
@@ -41,6 +43,10 @@ export declare const remove: <C extends Context>(s: State<C>, addr: string) => S
  * getAddress attempts to retrieve the address of an Actor instance.
  */
 export declare const getAddress: <C extends Context>(s: State<C>, actor: Instance) => Maybe<string>;
+/**
+ * getRuntime attempts to retrieve the runtime for an Actor instance.
+ */
+export declare const getRuntime: <C extends Context>(s: State<C>, actor: Instance) => Maybe<Runtime<Context, System<Context>>>;
 /**
  * getChildren returns the child contexts for an address.
  */

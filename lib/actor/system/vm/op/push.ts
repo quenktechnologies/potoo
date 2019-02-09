@@ -1,7 +1,7 @@
 import { Context } from '../../../context';
-import { System } from '../../';
 import { Runtime } from '../runtime';
 import { Type, Location } from '../frame';
+import { System } from '../../';
 import {
     OP_CODE_PUSH_NUM,
     OP_CODE_PUSH_STR,
