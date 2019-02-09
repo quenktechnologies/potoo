@@ -1,7 +1,7 @@
 import { match } from '@quenk/noni/lib/control/match';
 import { Any } from '@quenk/noni/lib/data/type';
 import { OP_CODE_TELL, OP_CODE_RAISE } from '../system/vm/op';
-import { system } from '../system/default';
+import { system } from '../system/framework/default';
 import { System } from '../system';
 import { DropScript, TellScript } from '../resident/scripts';
 import { Message } from '../message';

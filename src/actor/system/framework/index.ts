@@ -9,6 +9,7 @@ import { ADDRESS_SYSTEM, ADDRESS_DISCARD, Address } from '../../address';
 import { Template as ActorTemplate } from '../../template';
 import { Context } from '../../context';
 import { Template } from '../../template';
+import { Message } from '../../message';
 import { State, getAddress, getRuntime } from '../state';
 import { Actor, Instance } from '../../';
 import { System } from '../';
@@ -83,23 +84,22 @@ export abstract class AbstractSystem<C extends Context>
 
     }
 
-      notify() : void {
-      
-      }
-
-    accept() {
-
-        return this;
+    notify(): void {
 
     }
 
-      stop(): void {
-      
-      }
+    accept(_: Message): void {
 
-      run(): void {
-      
-      }
+
+    }
+
+    stop(): void {
+
+    }
+
+    run(): void {
+
+    }
 
     exec(i: Instance, s: Script<C, AbstractSystem<C>>): Maybe<Value<C, System<C>>> {
 

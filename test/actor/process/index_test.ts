@@ -1,5 +1,5 @@
 import { assert } from '@quenk/test/lib/assert';
-import { ActorSystem, system } from '../../../src/actor/system/default';
+import { ActorSystem, system } from '../../../src/actor/system/framework/default';
 import { Case } from '../../../src/actor/resident/case';
 import { Mutable } from '../../../src/actor/resident';
 import { Context } from '../../../src/actor/context';

@@ -7,7 +7,7 @@ import {
     Immutable,
 } from '../../../src/actor/resident';
 import { Case } from '../../../src/actor/resident/case';
-import { ActorSystem, system } from '../../../src/actor/system/default';
+import { ActorSystem, system } from '../../../src/actor/system/framework/default';
 
 class Killer extends AbstractResident<Context, ActorSystem> {
 
