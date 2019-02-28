@@ -1,6 +1,8 @@
 import {assert} from '@quenk/test/lib/assert';
 import {
+  ADDRESS_SYSTEM,
     isRestricted,
+  isChild,
     make,
     getParent,
     getId
@@ -77,5 +79,15 @@ describe('address', function() {
         })
 
     })
+
+  describe('isChild', () => {
+
+    it('it must see the system as parent of all actors', () => {
+
+      assert(isChild(ADDRESS_SYSTEM, 'foor bar')).true();
+        
+      });
+      
+    });
 
 });
