@@ -96,7 +96,7 @@ export const getChildren = <C extends Context>
     (s: State<C>, addr: Address): Contexts<C> =>
     (addr === ADDRESS_SYSTEM) ?
         s.contexts :
-        <Contexts<C>>partition(s.contexts)((_, key) =>
+        <Contexts<C>>partition(s.contexts, (_, key) =>
             (startsWith(key, addr) && key !== addr))[0];
 
 /**
