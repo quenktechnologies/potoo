@@ -26,7 +26,7 @@ export class ActorSystem extends AbstractSystem<Context> {
         h: Runtime<Context, ActorSystem>,
         t: Template<Context, ActorSystem>): Context {
 
-        return a.init(newContext(a, <Runtime<Context, System<Context>>>h, t));
+        return newContext(a, <Runtime<Context, System<Context>>>h, t);
 
     }
 
