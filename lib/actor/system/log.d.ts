@@ -1,19 +1,8 @@
-/**
- * DEBUG log level.
- */
 export declare const DEBUG = 7;
-/**
- * INFO log level.
- */
 export declare const INFO = 6;
-/**
- * WARN log level.
- */
-export declare const WARN = 5;
-/**
- * ERROR log level.
- */
-export declare const ERROR = 1;
+export declare const NOTICE = 5;
+export declare const WARN = 4;
+export declare const ERROR = 3;
 /**
  * Logger facility.
  */

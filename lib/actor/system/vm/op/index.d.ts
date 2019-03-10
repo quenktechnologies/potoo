@@ -18,20 +18,20 @@ export declare const OP_CODE_STORE = 11;
 export declare const OP_CODE_LOAD = 12;
 export declare const OP_CODE_JUMP = 13;
 export declare const OP_CODE_JUMP_IF_ONE = 14;
-export declare const OP_CODE_IDENT = 19;
-export declare const OP_CODE_QUERY = 32;
-export declare const OP_CODE_ALLOCATE = 33;
-export declare const OP_CODE_TEMP_CC = 34;
-export declare const OP_CODE_TEMP_CHILD = 35;
-export declare const OP_CODE_TELL = 36;
-export declare const OP_CODE_DISCARD = 37;
-export declare const OP_CODE_RUN = 38;
-export declare const OP_CODE_RECEIVE = 39;
-export declare const OP_CODE_READ = 40;
-export declare const OP_CODE_RESTART = 41;
-export declare const OP_CODE_DROP = 48;
-export declare const OP_CODE_STOP = 42;
-export declare const OP_CODE_RAISE = 11;
+export declare const OP_CODE_IDENT = 51;
+export declare const OP_CODE_QUERY = 52;
+export declare const OP_CODE_TEMP_CC = 53;
+export declare const OP_CODE_TEMP_CHILD = 54;
+export declare const OP_CODE_RUN = 55;
+export declare const OP_CODE_RESTART = 56;
+export declare const OP_CODE_ALLOCATE = 100;
+export declare const OP_CODE_TELL = 101;
+export declare const OP_CODE_DISCARD = 102;
+export declare const OP_CODE_RECEIVE = 103;
+export declare const OP_CODE_READ = 104;
+export declare const OP_CODE_DROP = 105;
+export declare const OP_CODE_STOP = 112;
+export declare const OP_CODE_RAISE = 113;
 /**
  * Log describes an Op code's execution in a format that can
  * be logged.

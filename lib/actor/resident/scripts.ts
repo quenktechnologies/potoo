@@ -23,8 +23,10 @@ const tellcode: Op<Context, System<Context>>[] = [
     new PushMsg(0),    //0: Push the message onto the stack. 
     new PushStr(0),    //1: Push the address onto the stack.
     new Tell(),        //2: Tell the message to the address.
-    new JumpIfOne(4),  //3: Jump to the end if sending was successful.
-    new Noop()         //4: Do nothing.
+    new JumpIfOne(6),  //3: Jump to the end if sending was successful.
+  new PushMsg(0),    //4: Put the message back on the stack.
+  new Drop(),        //5: Drop the script.
+    new Noop()         //6: Do nothing.
 
 ];
 
