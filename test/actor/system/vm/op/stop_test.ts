@@ -52,9 +52,9 @@ describe('stop', () => {
 
                 new Stop().exec(e);
 
-              assert((<any>bar.actor).MOCK.called()).equate([]);
+                assert((<any>bar.actor).MOCK.called()).equate([]);
 
-              // Actor /foo will die because of the error.
+                // Actor /foo will die because of the error.
                 assert(Object.keys(e.system.state.contexts).length).equal(2);
 
             })
@@ -84,6 +84,34 @@ describe('stop', () => {
                 assert(Object.keys(e.system.state.contexts).length).equal(0);
 
             });
+
+            it('should not stop the executing actor if not the target', () => {
+
+                let c: Constants = [[], ['/bar'], [], [], [], []];
+                let slash = newContext();
+                let foo = newContext();
+                let bar = newContext();
+
+                let f = new Frame('/', slash,
+                    new Script(c), [], [Location.Constants, Type.String, 0]);
+
+                let e = new This('/', new SystemImpl(), [f]);
+
+                e.putContext('/', slash);
+                e.putContext('/foo', foo);
+                e.putContext('/bar', bar);
+
+                assert(Object.keys(e.system.state.contexts).length).equal(3);
+
+                new Stop().exec(e);
+
+                assert((<any>slash.actor).MOCK.called()).equate([]);
+
+                assert(Object.keys(e.system.state.contexts)).equate([
+                    '/', '/foo'
+                ]);
+
+            })
 
         });
 

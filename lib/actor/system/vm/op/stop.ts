@@ -42,9 +42,14 @@ export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
 
         }
 
-        curr.context.actor.stop();
+      let maybeTarget = e.getContext(addr);
 
+      if(maybeTarget.isJust()) {
+
+        maybeTarget.get().actor.stop();
         e.removeContext(addr);
+
+      }
 
         e.clear();
 
