@@ -30,7 +30,7 @@ export interface Resident<C extends Context, S extends System<C>>
 export abstract class AbstractResident<C extends Context, S extends System<C>>
     implements Resident<C, S> {
 
-    constructor(public system: System<C>) { }
+    constructor(public system: S) { }
 
     abstract init(c: C): C;
 
@@ -52,13 +52,13 @@ export abstract class AbstractResident<C extends Context, S extends System<C>>
 
     accept(m: Message) {
 
-        this.system.exec(this,new AcceptScript(m));
+        this.system.exec(this, new AcceptScript(m));
 
     }
 
     spawn(t: Template<C, S>): Address {
 
-        this.system.exec(this,new SpawnScript(this.self(), t));
+        this.system.exec(this, new SpawnScript(this.self(), t));
 
         return isRestricted(t.id) ?
             ADDRESS_DISCARD :
@@ -68,7 +68,7 @@ export abstract class AbstractResident<C extends Context, S extends System<C>>
 
     tell<M>(ref: Address, m: M): AbstractResident<C, S> {
 
-        this.system.exec(this,new TellScript(ref, m));
+        this.system.exec(this, new TellScript(ref, m));
         return this;
 
     }
@@ -76,20 +76,27 @@ export abstract class AbstractResident<C extends Context, S extends System<C>>
 
     kill(addr: Address): AbstractResident<C, S> {
 
-        this.system.exec(this,new StopScript(addr));
+        this.system.exec(this, new StopScript(addr));
         return this;
 
     }
 
     exit(): void {
 
-        this.system.exec(this,new StopScript(this.self()));
+        this.system.exec(this, new StopScript(this.self()));
 
     }
 
     stop(): void {
 
-        this.system = new Void();
+      //XXX: this is a temp hack to avoid the system parameter being of type
+      //System<C>. As much as possibl we want to keep the system type to
+      //make implementing an actor system simple.
+      //
+      //In future revisions we may wrap the system in a Maybe or have
+      //the runtime check if the actor is the valid instance but for now,
+      //we force void. This may result in some crashes if not careful.
+      this.system = <any>new Void();
 
     }
 
@@ -157,7 +164,7 @@ export abstract class Mutable<C extends Context, S extends System<C>>
      */
     select<M>(cases: Case<M>[]): Mutable<C, S> {
 
-        this.system.exec(this,new ReceiveScript(mbehaviour(cases)));
+        this.system.exec(this, new ReceiveScript(mbehaviour(cases)));
         return this;
 
     }
@@ -182,4 +189,3 @@ export const ref = <C extends Context, S extends System<C>>
     (res: Resident<C, S>, addr: Address): Reference =>
     (m: Message) =>
         res.tell(addr, m);
-
