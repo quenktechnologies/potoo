@@ -27,11 +27,14 @@ export declare class This<C extends Context, S extends Platform<C>> implements R
     allocate(addr: Address, t: template.Template<C, S>): C;
     getContext(addr: Address): Maybe<C>;
     getRouter(addr: Address): Maybe<C>;
+    getGroup(name: string): Maybe<Address[]>;
     getChildren(addr: Address): Maybe<Contexts<C>>;
     putContext(addr: Address, ctx: C): This<C, S>;
     removeContext(addr: Address): This<C, S>;
     putRoute(target: Address, router: Address): This<C, S>;
     removeRoute(target: Address): This<C, S>;
+    putMember(group: string, addr: Address): This<C, S>;
+    removeMember(group: string, addr: Address): This<C, S>;
     push(f: Frame<C, S>): This<C, S>;
     clear(): This<C, S>;
     drop(m: Message): This<C, S>;

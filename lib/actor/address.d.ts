@@ -30,3 +30,7 @@ export declare const getId: (addr: string) => string;
  * isChild tests whether an address is a child of the parent address.
  */
 export declare const isChild: (parent: string, child: string) => boolean;
+/**
+ * isGroup determines if an address is a group reference.
+ */
+export declare const isGroup: (addr: string) => boolean;

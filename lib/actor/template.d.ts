@@ -46,6 +46,10 @@ export interface Template<C extends Context, S extends System<C>> {
      */
     id: string;
     /**
+     * group assignment for the actor.
+     */
+    group?: string | string[];
+    /**
      * create function.
      */
     create: Cons<C, S>;

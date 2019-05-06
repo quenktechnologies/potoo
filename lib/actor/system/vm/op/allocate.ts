@@ -54,6 +54,14 @@ export class Allocate<C extends Context, S extends System<C>> implements Op<C, S
       if(ctx.flags.router === true)
       e.putRoute(addr, addr);
 
+      if(t.group) {
+
+       let groups = (typeof t.group === 'string') ? [t.group] : t.group ;
+
+        groups.forEach(g => e.putMember(g, addr));
+
+      }
+
         curr.pushAddress(addr);
 
     }

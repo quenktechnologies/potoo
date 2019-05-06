@@ -52,6 +52,11 @@ export interface Runtime<C extends Context, S extends System<C>>
      */
     getRouter(addr: Address): Maybe<C>
 
+        /**
+         * getGroup attemps to retreive all the members of a group.
+         */
+        getGroup(name:string): Maybe<Address[]>
+
     /**
      * getChildren provides the children context's for an address.
      */
@@ -77,6 +82,16 @@ export interface Runtime<C extends Context, S extends System<C>>
      * removeRoute configuration.
      */
     removeRoute(target: Address): Runtime<C, S>
+
+        /**
+         * putMember puts an address into a group.
+         */
+        putMember(group: string, addr: Address): Runtime<C,S>
+
+        /**
+         * removeMember from a group.
+         */
+    removeMember(group:string, addr: Address): Runtime<C, S>;
 
     /**
      * push a new Frame onto the stack, triggering

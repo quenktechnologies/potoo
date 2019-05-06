@@ -11,6 +11,12 @@ export interface Routers {
     [key: string]: Address;
 }
 /**
+ * Groups map.
+ */
+export interface Groups {
+    [key: string]: Address[];
+}
+/**
  * State contains Context entries for all actors in the system.
  */
 export interface State<C extends Context> {
@@ -22,6 +28,10 @@ export interface State<C extends Context> {
      * routers configured for transfers.
      */
     routers: Routers;
+    /**
+     * group assignments.
+     */
+    groups: Groups;
 }
 /**
  * exists tests whether an address exists in the State.
@@ -57,7 +67,7 @@ export declare const getChildren: <C extends Context>(s: State<C>, addr: string)
 export declare const getParent: <C extends Context>(s: State<C>, addr: string) => Maybe<C>;
 /**
  * getRouter will attempt to provide the
- * routing actor for an Address.
+ * router context for an Address.
  *
  * The value returned depends on whether the given
  * address begins with any of the installed router's address.
@@ -71,3 +81,20 @@ export declare const putRoute: <C extends Context>(s: State<C>, target: string, 
  * removeRoute from the routing table.
  */
 export declare const removeRoute: <C extends Context>(s: State<C>, target: string) => State<C>;
+/**
+ * getGroup attempts to provide the addresses of actors that have
+ * been assigned to a group.
+ *
+ * Note that groups must be prefixed with a '$' to be resolved.
+ */
+export declare const getGroup: <C extends Context>(s: State<C>, name: string) => Maybe<string[]>;
+/**
+ * putMember adds an address to a group.
+ *
+ * If the group does not exist, it will be created.
+ */
+export declare const putMember: <C extends Context>(s: State<C>, group: string, member: string) => State<C>;
+/**
+ * removeMember from a group.
+ */
+export declare const removeMember: <C extends Context>(s: State<C>, group: string, member: string) => State<C>;
