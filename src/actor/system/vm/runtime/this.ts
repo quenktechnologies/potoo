@@ -14,6 +14,9 @@ import {
     put,
     putRoute,
     removeRoute,
+    getGroup,
+    putMember,
+    removeMember,
     remove
 } from '../../state';
 import { Configuration } from '../../configuration';
@@ -75,6 +78,12 @@ export class This<C extends Context, S extends Platform<C>> implements Runtime<C
 
     }
 
+    getGroup(name: string): Maybe<Address[]> {
+
+        return getGroup(this.system.state, name.split('$').join(''));
+
+    }
+
     getChildren(addr: Address): Maybe<Contexts<C>> {
 
         return fromNullable(getChildren(this.system.state, addr));
@@ -105,6 +114,20 @@ export class This<C extends Context, S extends Platform<C>> implements Runtime<C
     removeRoute(target: Address): This<C, S> {
 
         removeRoute(this.system.state, target);
+        return this;
+
+    }
+
+    putMember(group: string, addr: Address): This<C, S> {
+
+        putMember(this.system.state, group, addr);
+        return this;
+
+    }
+
+    removeMember(group: string, addr: Address): This<C, S> {
+
+        removeMember(this.system.state, group, addr);
         return this;
 
     }
@@ -282,7 +305,7 @@ const log = <C extends Context, S extends Platform<C>>
         let ctx = `[${f.actor}]`;
         let msg = [ctx, ...resolveLog(f, o.toLog(f))];
 
-      switch (o.level) {
+        switch (o.level) {
 
             case logging.INFO:
                 (<logging.Logger>logger).info.apply(logger, msg);

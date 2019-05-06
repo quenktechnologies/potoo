@@ -1,6 +1,6 @@
 import * as error from '../error';
 import { map } from '@quenk/noni/lib/data/record';
-import { isChild } from '../../../address';
+import { isChild,isGroup } from '../../../address';
 import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
@@ -29,10 +29,19 @@ export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
 
         let addr = eitherAddress.takeRight();
 
-        if ((!isChild(curr.actor, addr)) && (addr !== curr.actor))
-            return e.raise(new error.IllegalStopErr(curr.actor, addr));
+        let addrs = isGroup(addr) ? 
+      e.getGroup(addr).orJust(()=>[]).get() : [addr];
 
-        let maybeChilds = e.getChildren(addr);
+      addrs.every(a => {
+
+        if ((!isChild(curr.actor, a)) && (a !== curr.actor)) {
+      
+          e.raise(new error.IllegalStopErr(curr.actor, a));
+          return false;
+
+        }
+
+   let maybeChilds = e.getChildren(a);
 
         if (maybeChilds.isJust()) {
 
@@ -42,16 +51,20 @@ export class Stop<C extends Context, S extends System<C>> implements Op<C, S> {
 
         }
 
-      let maybeTarget = e.getContext(addr);
+      let maybeTarget = e.getContext(a);
 
       if(maybeTarget.isJust()) {
 
         maybeTarget.get().actor.stop();
-        e.removeContext(addr);
+        e.removeContext(a);
 
       }
 
         e.clear();
+
+        return true;
+
+      })
 
     }
 

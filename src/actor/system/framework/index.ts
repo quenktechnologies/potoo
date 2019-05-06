@@ -147,6 +147,8 @@ export const newState = <C extends Context>(sys: Platform<C>): State<C> => ({
 
     },
 
-    routers: {}
+  routers: {},
+
+  groups: {}
 
 });

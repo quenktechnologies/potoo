@@ -2,6 +2,7 @@ import {
     Maybe,
     fromString,
     fromNullable,
+    fromArray,
     nothing
 } from '@quenk/noni/lib/data/maybe';
 import { reduce, contains, partition } from '@quenk/noni/lib/data/record';
@@ -22,6 +23,15 @@ export interface Routers {
 }
 
 /**
+ * Groups map.
+ */
+export interface Groups {
+
+    [key: string]: Address[]
+
+}
+
+/**
  * State contains Context entries for all actors in the system.
  */
 export interface State<C extends Context> {
@@ -34,7 +44,12 @@ export interface State<C extends Context> {
     /**
      * routers configured for transfers.
      */
-    routers: Routers
+    routers: Routers,
+
+    /**
+     * group assignments.
+     */
+    groups: Groups
 
 }
 
@@ -108,7 +123,7 @@ export const getParent = <C extends Context>
 
 /**
  * getRouter will attempt to provide the 
- * routing actor for an Address.
+ * router context for an Address.
  *
  * The value returned depends on whether the given 
  * address begins with any of the installed router's address.
@@ -136,6 +151,47 @@ export const removeRoute = <C extends Context>(s: State<C>, target: Address)
     : State<C> => {
 
     delete s.routers[target];
+    return s;
+
+}
+
+/**
+ * getGroup attempts to provide the addresses of actors that have
+ * been assigned to a group.
+ *
+ * Note that groups must be prefixed with a '$' to be resolved.
+ */
+export const getGroup = <C extends Context>
+    (s: State<C>, name: string): Maybe<Address[]> =>
+    s.groups.hasOwnProperty(name) ?
+        fromArray(<string[]>s.groups[name]) : nothing();
+
+/**
+ * putMember adds an address to a group.
+ *
+ * If the group does not exist, it will be created.
+ */
+export const putMember = <C extends Context>
+    (s: State<C>, group: string, member: Address): State<C> => {
+
+      if(s.groups[group] == null )
+        s.groups[group] = [];
+
+      s.groups[group].push(member);
+
+    return s;
+
+}
+
+/**
+ * removeMember from a group.
+ */
+export const removeMember = <C extends Context>
+  (s: State<C>, group:string, member: Address)    : State<C> => {
+
+    if(s.groups[group] != null) 
+    s.groups[group] =   s.groups[group].filter(m => m != member);
+
     return s;
 
 }

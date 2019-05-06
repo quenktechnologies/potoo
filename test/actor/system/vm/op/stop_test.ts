@@ -1,4 +1,5 @@
 import { assert } from '@quenk/test/lib/assert';
+import { merge } from '@quenk/noni/lib/data/record';
 import { Script } from '../../../../../src/actor/system/vm/script';
 import { Frame, Type, Location } from '../../../../../src/actor/system/vm/frame';
 import { Constants, SystemImpl, newContext } from '../../../../fixtures/mocks';
@@ -109,6 +110,39 @@ describe('stop', () => {
 
                 assert(Object.keys(e.system.state.contexts)).equate([
                     '/', '/foo'
+                ]);
+
+            })
+
+            it('should stop groups', () => {
+
+                let c: Constants = [[], ['$group'], [], [], [], []];
+                let one = newContext();
+                let two = newContext();
+                let three = newContext();
+                let four = newContext();
+                let five = newContext();
+
+                let f = new Frame('/', one,
+                    new Script(c), [], [Location.Constants, Type.String, 0]);
+
+                let e = new This('/', new SystemImpl(), [f]);
+
+                e.system.state.groups = { group: ['/two', '/three'] };
+
+                e.putContext('/', one);
+                e.putContext('/two', two);
+                e.putContext('/three', three);
+                e.putContext('/four', four);
+                e.putContext('/five', five);
+
+                assert(Object.keys(e.system.state.contexts)).equate([
+                    '/', '/two', '/three', '/four', '/five'
+                ]);
+                new Stop().exec(e);
+
+                assert(Object.keys(e.system.state.contexts)).equate([
+                    '/', '/four', '/five'
                 ]);
 
             })

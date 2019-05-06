@@ -7,7 +7,6 @@ import { Instance, Actor } from '../../src/actor';
 import { Template as T } from '../../src/actor/template';
 import { State } from '../../src/actor/system/state';
 import { Runtime } from '../../src/actor/system/vm/runtime';
-import { This } from '../../src/actor/system/vm/runtime/this';
 import { Frame } from '../../src/actor/system/vm/frame';
 import { Address } from '../../src/actor/address';
 import { Message } from '../../src/actor/message';
@@ -61,7 +60,7 @@ export class InstanceImpl extends Mock implements Instance {
 
 export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
 
-    constructor(public self = '/', public system = new SystemImpl()) { super();  }
+    constructor(public self = '/', public system = new SystemImpl()) { super(); }
 
     config(): Configuration {
 
@@ -93,6 +92,12 @@ export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
 
     }
 
+    getGroup(name: string): Maybe<Address[]> {
+
+        return this.MOCK.record('getGroup', [name], nothing());
+
+    }
+
     getChildren(addr: Address): Maybe<Contexts> {
 
         return this.MOCK.record('getChildren', [addr], nothing());
@@ -120,6 +125,18 @@ export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
     removeRoute(target: Address): RuntimeImpl {
 
         return this.MOCK.record('removeRoute', [target], this);
+
+    }
+
+    putMember(group: string, addr: Address): RuntimeImpl {
+
+        return this.MOCK.record('putRoute', [group, addr], this);
+
+    }
+
+    removeMember(group: string, addr: Address): RuntimeImpl {
+
+        return this.MOCK.record('removeGroup', [group, addr], this);
 
     }
 
@@ -165,7 +182,7 @@ export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
 export class SystemImpl extends InstanceImpl
     implements System<Context>, Platform<Context> {
 
-    state: State<Context> = { contexts: {}, routers: {} };
+    state: State<Context> = { contexts: {}, routers: {}, groups: {} };
 
     configuration = {}
 
@@ -203,7 +220,7 @@ export const newContext = (o: Partial<Context> = {}): Context => rmerge({
 
     flags: { immutable: true, buffered: true },
 
-  runtime: new RuntimeImpl(),
+    runtime: new RuntimeImpl(),
 
     template: { id: '/', create: () => new InstanceImpl() }
 

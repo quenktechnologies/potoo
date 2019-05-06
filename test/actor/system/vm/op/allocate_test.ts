@@ -38,6 +38,16 @@ const router = {
 
 }
 
+const group = {
+
+    id: 'group',
+
+    group: 'mygroup',
+
+    create: () => new InstanceImpl()
+
+}
+
 class RouterImpl extends InstanceImpl {
 
     init(ctx: Context): Context {
@@ -95,8 +105,8 @@ describe('allocate', () => {
 
                 } catch (e) {
 
-                  if(e.message === 'Duplicate address "/act1" detected!')
-                    thrown = true;
+                    if (e.message === 'Duplicate address "/act1" detected!')
+                        thrown = true;
 
                 }
 
@@ -145,6 +155,26 @@ describe('allocate', () => {
                 assert(e.system.state.routers).equate({ '/router': '/router' });
 
             });
+
+            it('should configure groups', () => {
+
+                let c: Constants = [[], ['/'], [], [group], [], []];
+
+                let f = new Frame('self', newContext(), new Script(c), [],
+                    [Location.Constants, Type.Template, 0,
+                    Location.Constants, Type.String, 0]);
+
+                let e = new This('self', new SystemImpl(), [f]);
+
+                new Allocate().exec(e);
+
+                assert(e.system.state.groups['mygroup']).be.array();
+
+                assert(e.system.state.groups).equate({
+                    'mygroup': ['/group']
+                });
+
+            })
 
         });
 
