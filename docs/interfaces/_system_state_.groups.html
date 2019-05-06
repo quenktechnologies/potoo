@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Void | @quenk/potoo</title>
+	<title>Groups | @quenk/potoo</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -907,25 +907,56 @@ img { max-width: 100%; }
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
-		<li class="current tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="_system_vm_handle_.void.html" class="tsd-kind-icon">Void</a>
-			<ul>
-				<li class=" tsd-kind-constructor tsd-parent-kind-class">
-					<a href="_system_vm_handle_.void.html#constructor" class="tsd-kind-icon">constructor</a>
-				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-class">
-					<a href="_system_vm_handle_.void.html#self" class="tsd-kind-icon">self</a>
-				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-class">
-					<a href="_system_vm_handle_.void.html#system" class="tsd-kind-icon">system</a>
-				</li>
-				<li class=" tsd-kind-method tsd-parent-kind-class">
-					<a href="_system_vm_handle_.void.html#exec" class="tsd-kind-icon">exec</a>
-				</li>
-			</ul>
+		<li class="current tsd-kind-interface tsd-parent-kind-external-module">
+			<a href="_system_state_.groups.html" class="tsd-kind-icon">Groups</a>
+		</li>
+		<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+			<a href="_system_state_.routers.html" class="tsd-kind-icon">Routers</a>
 		</li>
 		<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../interfaces/_system_vm_handle_.handle.html" class="tsd-kind-icon">Handle</a>
+			<a href="_system_state_.state.html" class="tsd-kind-icon">State</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#exists" class="tsd-kind-icon">exists</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#get" class="tsd-kind-icon">get</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#getaddress" class="tsd-kind-icon">get<wbr>Address</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#getchildren" class="tsd-kind-icon">get<wbr>Children</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#getgroup" class="tsd-kind-icon">get<wbr>Group</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#getparent" class="tsd-kind-icon">get<wbr>Parent</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#getrouter" class="tsd-kind-icon">get<wbr>Router</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#getruntime" class="tsd-kind-icon">get<wbr>Runtime</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#put" class="tsd-kind-icon">put</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#putmember" class="tsd-kind-icon">put<wbr>Member</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#putroute" class="tsd-kind-icon">put<wbr>Route</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#remove" class="tsd-kind-icon">remove</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#removemember" class="tsd-kind-icon">remove<wbr>Member</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#removeroute" class="tsd-kind-icon">remove<wbr>Route</a>
 		</li>
 	</ul>
 </nav>
@@ -934,141 +965,26 @@ img { max-width: 100%; }
 		<section class="tsd-panel tsd-comment">
 			<div class="tsd-comment tsd-typography">
 				<div class="lead">
-					<p>Void Handle.</p>
+					<p>Groups map.</p>
 				</div>
 			</div>
-		</section>
-		<section class="tsd-panel tsd-type-parameters">
-			<h3>Type parameters</h3>
-			<ul class="tsd-type-parameters">
-				<li>
-					<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
-				</li>
-				<li>
-					<h4>S<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
-				</li>
-			</ul>
 		</section>
 		<section class="tsd-panel tsd-hierarchy">
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<span class="target">Void</span>
+					<span class="target">Groups</span>
 				</li>
 			</ul>
 		</section>
-		<section class="tsd-panel">
-			<h3>Implements</h3>
-			<ul class="tsd-hierarchy">
-				<li><a href="../interfaces/_system_vm_handle_.handle.html" class="tsd-signature-type">Handle</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
-			</ul>
-		</section>
-		<section class="tsd-panel-group tsd-index-group">
-			<h2>Index</h2>
-			<section class="tsd-panel tsd-index-panel">
-				<div class="tsd-index-content">
-					<section class="tsd-index-section ">
-						<h3>Constructors</h3>
-						<ul class="tsd-index-list">
-							<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_system_vm_handle_.void.html#constructor" class="tsd-kind-icon">constructor</a></li>
-						</ul>
-					</section>
-					<section class="tsd-index-section ">
-						<h3>Properties</h3>
-						<ul class="tsd-index-list">
-							<li class="tsd-kind-property tsd-parent-kind-class"><a href="_system_vm_handle_.void.html#self" class="tsd-kind-icon">self</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-class"><a href="_system_vm_handle_.void.html#system" class="tsd-kind-icon">system</a></li>
-						</ul>
-					</section>
-					<section class="tsd-index-section ">
-						<h3>Methods</h3>
-						<ul class="tsd-index-list">
-							<li class="tsd-kind-method tsd-parent-kind-class"><a href="_system_vm_handle_.void.html#exec" class="tsd-kind-icon">exec</a></li>
-						</ul>
-					</section>
+		<section class="tsd-panel tsd-kind-interface tsd-parent-kind-external-module">
+			<h3 class="tsd-before-signature">Indexable</h3>
+			<div class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">[</span>key: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">[]</span></div>
+			<div class="tsd-comment tsd-typography">
+				<div class="lead">
+					<p>Groups map.</p>
 				</div>
-			</section>
-		</section>
-		<section class="tsd-panel-group tsd-member-group ">
-			<h2>Constructors</h2>
-			<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
-				<a name="constructor" class="tsd-anchor"></a>
-				<h3>constructor</h3>
-				<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">new <wbr>Void<span class="tsd-signature-symbol">(</span>self<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a>, system<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_handle_.void.html" class="tsd-signature-type">Void</a></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/vm/handle.ts#L32">system/vm/handle.ts:32</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>self: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
-							</li>
-							<li>
-								<h5>system: <a href="../interfaces/_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_system_vm_handle_.void.html" class="tsd-signature-type">Void</a></h4>
-					</li>
-				</ul>
-			</section>
-		</section>
-		<section class="tsd-panel-group tsd-member-group ">
-			<h2>Properties</h2>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-				<a name="self" class="tsd-anchor"></a>
-				<h3>self</h3>
-				<div class="tsd-signature tsd-kind-icon">self<span class="tsd-signature-symbol">:</span> <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></div>
-				<aside class="tsd-sources">
-					<p>Implementation of <a href="../interfaces/_system_vm_handle_.handle.html">Handle</a>.<a href="../interfaces/_system_vm_handle_.handle.html#self">self</a></p>
-					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/vm/handle.ts#L34">system/vm/handle.ts:34</a></li>
-					</ul>
-				</aside>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-				<a name="system" class="tsd-anchor"></a>
-				<h3>system</h3>
-				<div class="tsd-signature tsd-kind-icon">system<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></div>
-				<aside class="tsd-sources">
-					<p>Implementation of <a href="../interfaces/_system_vm_handle_.handle.html">Handle</a>.<a href="../interfaces/_system_vm_handle_.handle.html#system">system</a></p>
-					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/vm/handle.ts#L34">system/vm/handle.ts:34</a></li>
-					</ul>
-				</aside>
-			</section>
-		</section>
-		<section class="tsd-panel-group tsd-member-group ">
-			<h2>Methods</h2>
-			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-				<a name="exec" class="tsd-anchor"></a>
-				<h3>exec</h3>
-				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>_<span class="tsd-signature-symbol">: </span><a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<p>Implementation of <a href="../interfaces/_system_vm_handle_.handle.html">Handle</a>.<a href="../interfaces/_system_vm_handle_.handle.html#exec">exec</a></p>
-							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/vm/handle.ts#L36">system/vm/handle.ts:36</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>_: <a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-					</li>
-				</ul>
-			</section>
+			</div>
 		</section>
 		<footer class="with-border-bottom">
 			<div class="container">

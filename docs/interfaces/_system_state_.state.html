@@ -908,6 +908,9 @@ img { max-width: 100%; }
 <nav class="tsd-navigation secondary">
 	<ul>
 		<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+			<a href="_system_state_.groups.html" class="tsd-kind-icon">Groups</a>
+		</li>
+		<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 			<a href="_system_state_.routers.html" class="tsd-kind-icon">Routers</a>
 		</li>
 		<li class="current tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
@@ -915,6 +918,9 @@ img { max-width: 100%; }
 			<ul>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
 					<a href="_system_state_.state.html#contexts" class="tsd-kind-icon">contexts</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="_system_state_.state.html#groups" class="tsd-kind-icon">groups</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
 					<a href="_system_state_.state.html#routers" class="tsd-kind-icon">routers</a>
@@ -934,19 +940,31 @@ img { max-width: 100%; }
 			<a href="../modules/_system_state_.html#getchildren" class="tsd-kind-icon">get<wbr>Children</a>
 		</li>
 		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#getgroup" class="tsd-kind-icon">get<wbr>Group</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 			<a href="../modules/_system_state_.html#getparent" class="tsd-kind-icon">get<wbr>Parent</a>
 		</li>
 		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 			<a href="../modules/_system_state_.html#getrouter" class="tsd-kind-icon">get<wbr>Router</a>
 		</li>
 		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#getruntime" class="tsd-kind-icon">get<wbr>Runtime</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 			<a href="../modules/_system_state_.html#put" class="tsd-kind-icon">put</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#putmember" class="tsd-kind-icon">put<wbr>Member</a>
 		</li>
 		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 			<a href="../modules/_system_state_.html#putroute" class="tsd-kind-icon">put<wbr>Route</a>
 		</li>
 		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 			<a href="../modules/_system_state_.html#remove" class="tsd-kind-icon">remove</a>
+		</li>
+		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="../modules/_system_state_.html#removemember" class="tsd-kind-icon">remove<wbr>Member</a>
 		</li>
 		<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-has-type-parameter">
 			<a href="../modules/_system_state_.html#removeroute" class="tsd-kind-icon">remove<wbr>Route</a>
@@ -986,6 +1004,7 @@ img { max-width: 100%; }
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_system_state_.state.html#contexts" class="tsd-kind-icon">contexts</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_system_state_.state.html#groups" class="tsd-kind-icon">groups</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_system_state_.state.html#routers" class="tsd-kind-icon">routers</a></li>
 						</ul>
 					</section>
@@ -1000,7 +1019,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">contexts<span class="tsd-signature-symbol">:</span> <a href="_context_.contexts.html" class="tsd-signature-type">Contexts</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/state.ts#L30">system/state.ts:30</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/state.ts#L42">system/state.ts:42</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1010,12 +1029,27 @@ img { max-width: 100%; }
 				</div>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="groups" class="tsd-anchor"></a>
+				<h3>groups</h3>
+				<div class="tsd-signature tsd-kind-icon">groups<span class="tsd-signature-symbol">:</span> <a href="_system_state_.groups.html" class="tsd-signature-type">Groups</a></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/state.ts#L52">system/state.ts:52</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>group assignments.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 				<a name="routers" class="tsd-anchor"></a>
 				<h3>routers</h3>
 				<div class="tsd-signature tsd-kind-icon">routers<span class="tsd-signature-symbol">:</span> <a href="_system_state_.routers.html" class="tsd-signature-type">Routers</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/state.ts#L35">system/state.ts:35</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/state.ts#L47">system/state.ts:47</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">

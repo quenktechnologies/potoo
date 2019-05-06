@@ -911,7 +911,7 @@ img { max-width: 100%; }
 			<a href="../interfaces/_template_.template.html" class="tsd-kind-icon">Template</a>
 		</li>
 		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="_template_.html#createfunc" class="tsd-kind-icon">Create<wbr>Func</a>
+			<a href="_template_.html#cons" class="tsd-kind-icon">Cons</a>
 		</li>
 		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 			<a href="_template_.html#delaymilliseconds" class="tsd-kind-icon">Delay<wbr>Milliseconds</a>
@@ -951,7 +951,7 @@ img { max-width: 100%; }
 					<section class="tsd-index-section ">
 						<h3>Type aliases</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_template_.html#createfunc" class="tsd-kind-icon">Create<wbr>Func</a></li>
+							<li class="tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter"><a href="_template_.html#cons" class="tsd-kind-icon">Cons</a></li>
 							<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_template_.html#delaymilliseconds" class="tsd-kind-icon">Delay<wbr>Milliseconds</a></li>
 							<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_template_.html#trapaction" class="tsd-kind-icon">Trap<wbr>Action</a></li>
 							<li class="tsd-kind-type-alias tsd-parent-kind-external-module"><a href="_template_.html#trapfunc" class="tsd-kind-icon">Trap<wbr>Func</a></li>
@@ -972,17 +972,17 @@ img { max-width: 100%; }
 		<section class="tsd-panel-group tsd-member-group ">
 			<h2>Type aliases</h2>
 			<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
-				<a name="createfunc" class="tsd-anchor"></a>
-				<h3>Create<wbr>Func</h3>
-				<div class="tsd-signature tsd-kind-icon">Create<wbr>Func<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+				<a name="cons" class="tsd-anchor"></a>
+				<h3>Cons</h3>
+				<div class="tsd-signature tsd-kind-icon">Cons<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/template.ts#L28">template.ts:28</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/template.ts#L27">template.ts:27</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>CreateFunc is applied to produce an instance of an actor.</p>
+						<p>Cons is applied to produce an instance of an actor.</p>
 					</div>
 				</div>
 				<div class="tsd-type-declaration">
@@ -990,14 +990,14 @@ img { max-width: 100%; }
 					<ul class="tsd-parameters">
 						<li class="tsd-parameter-siganture">
 							<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias tsd-is-not-exported">
-								<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>h<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_vm_handle_.handle.html" class="tsd-signature-type">Handle</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_index_.actor.html" class="tsd-signature-type">Actor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+								<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_index_.actor.html" class="tsd-signature-type">Actor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
 							</ul>
 							<ul class="tsd-descriptions">
 								<li class="tsd-description">
 									<h4 class="tsd-parameters-title">Parameters</h4>
 									<ul class="tsd-parameters">
 										<li>
-											<h5>h: <a href="../interfaces/_system_vm_handle_.handle.html" class="tsd-signature-type">Handle</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
+											<h5>s: <span class="tsd-signature-type">S</span></h5>
 										</li>
 									</ul>
 									<h4 class="tsd-returns-title">Returns <a href="../interfaces/_index_.actor.html" class="tsd-signature-type">Actor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -1013,7 +1013,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">Delay<wbr>Milliseconds<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/template.ts#L34">template.ts:34</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/template.ts#L32">template.ts:32</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1028,7 +1028,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">Trap<wbr>Action<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">-1</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">0</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">1</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">2</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/template.ts#L23">template.ts:23</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/template.ts#L22">template.ts:22</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1051,7 +1051,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">Trap<wbr>Func<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/template.ts#L40">template.ts:40</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/template.ts#L38">template.ts:38</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -1091,7 +1091,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">ACTION_<wbr>IGNORE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">0</span><span class="tsd-signature-symbol"> =&nbsp;0</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/template.ts#L8">template.ts:8</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/template.ts#L7">template.ts:7</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1101,7 +1101,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">ACTION_<wbr>RAISE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">-1</span><span class="tsd-signature-symbol"> =&nbsp;-0x1</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/template.ts#L7">template.ts:7</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/template.ts#L6">template.ts:6</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1111,7 +1111,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">ACTION_<wbr>RESTART<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">1</span><span class="tsd-signature-symbol"> =&nbsp;1</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/template.ts#L9">template.ts:9</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/template.ts#L8">template.ts:8</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1121,7 +1121,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">ACTION_<wbr>STOP<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">2</span><span class="tsd-signature-symbol"> =&nbsp;2</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/template.ts#L10">template.ts:10</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/template.ts#L9">template.ts:9</a></li>
 					</ul>
 				</aside>
 			</section>
