@@ -16,7 +16,7 @@ export type Function
  */
 export type Foreign
     = (...arg: Value) => Value
-  ;
+    ;
 
 /**
  * Value corresponds to the VM's supported types.
@@ -25,7 +25,7 @@ export type Value
     = number
     | string
     | Function
-  | Template<Context, System<Context>>
+    | Template<Context, System>
     | Message
     ;
 
@@ -41,11 +41,11 @@ export type Constants
         number[],
         string[],
         Function[],
-      Template<Context, System<Context>>[],
+        Template<Context, System>[],
         Message[],
         Foreign[]
     ]
-;
+    ;
 
 /**
  * Script is a "program" an actor submits to the Runtime run execute.
@@ -54,7 +54,7 @@ export type Constants
  * 1. constants - Static values referenced in the code section.
  * 2. code - A list of one or more Op codes to execute in sequence.
  */
-export class Script  {
+export class Script {
 
     constructor(
         public constants: Constants = [[], [], [], [], [], []],

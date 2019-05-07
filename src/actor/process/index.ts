@@ -80,7 +80,7 @@ export class Process<C extends Context> implements Actor<C> {
 
     constructor(
         public module: Path,
-        public system: System<C>,
+        public system: System,
         public script = SCRIPT_PATH) { }
 
     process: Maybe<ChildProcess> = nothing();

@@ -8,7 +8,6 @@ import {
 } from '../../../../../src/actor/system/vm/frame';
 import {
     SystemImpl,
-    Context,
     newContext
 } from '../../../../fixtures/mocks';
 import { Receive } from '../../../../../src/actor/system/vm/op/receive';
@@ -29,7 +28,7 @@ describe('receive', () => {
 
             it('should schedule receives ', () => {
 
-                let c: Constants<Context, SystemImpl> = [[], [], [], [], [], [b]];
+                let c: Constants = [[], [], [], [], [], [b]];
 
                 let f = new Frame('/', newContext(), new Script(c), [], [
 
@@ -49,7 +48,7 @@ describe('receive', () => {
 
             it('should notify actors ', () => {
 
-                let c: Constants<Context, SystemImpl> = [[], [], [], [], [], [b]];
+                let c: Constants = [[], [], [], [], [], [b]];
 
                 let f = new Frame('self', newContext(), new Script(c), [], [
 

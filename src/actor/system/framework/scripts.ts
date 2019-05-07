@@ -62,7 +62,7 @@ export class SpawnScript extends Script {
 
     constructor(
         public parent: Address,
-        public tmp: Template<Context, System<Context>>) {
+        public tmp: Template<Context, System>) {
 
         super(
             <Constants>[[], [parent], [() => spawnFuncCode], [tmp], [], []],

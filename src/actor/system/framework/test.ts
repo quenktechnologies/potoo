@@ -6,7 +6,6 @@ import { Instance } from '../../';
 import { Value, Script } from '../vm/script';
 import { Message } from '../../message';
 import { Context } from '../../context';
-import { System } from '../';
 import { AbstractSystem } from './';
 
 /**

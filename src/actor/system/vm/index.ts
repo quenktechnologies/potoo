@@ -13,7 +13,7 @@ import { Runtime } from './runtime';
  * A Platform implementor is used by other APIs in this module 
  * to execute scripts on behalf of actors.
  */
-export interface Platform extends System<Context>, Actor<Context> {
+export interface Platform extends System, Actor<Context> {
 
     /**
      * configuration of the Platform.

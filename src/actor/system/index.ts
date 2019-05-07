@@ -1,5 +1,4 @@
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
-import { Context } from '../context';
 import { Address } from '../address';
 import { Instance } from '../';
 import { Value, Script } from './vm/script';
@@ -8,7 +7,7 @@ import { Value, Script } from './vm/script';
  * System represents a dynamic collection of actors that 
  * can communicate with each other via message passing.
  */
-export interface System<C extends Context> extends Instance {
+export interface System extends Instance {
 
     ident(i: Instance): Address
 
@@ -21,7 +20,7 @@ export interface System<C extends Context> extends Instance {
  *
  * This can be used to prevent a stopped actor from executing further commands.
  */
-export class Void<C extends Context> implements System<C> {
+export class Void implements System {
 
     ident(): Address {
 

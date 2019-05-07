@@ -53,7 +53,10 @@ let state: State<Context> = {
 
     },
 
-    routers: {}
+    routers: {},
+
+    groups: {}
+
 }
 
 describe('state', () => {

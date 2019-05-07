@@ -132,7 +132,7 @@ export class Frame {
     /**
      * allocateTemplate
      */
-  allocateTemplate(t: Template<Context, System<Context>>): Data {
+    allocateTemplate(t: Template<Context, System>): Data {
 
         return this.allocate(t, Type.Template);
 
@@ -232,7 +232,7 @@ export class Frame {
                     .get();
 
             case Location.Mailbox:
-               return this
+                return this
                     .context
                     .mailbox
                     .chain(m => fromNullable(m[data[Field.Value]]))
@@ -285,7 +285,7 @@ export class Frame {
     /**
      * resolveTemplate
      */
-  resolveTemplate(data: Data): Either<Err, Template<Context, System<Context>>> {
+    resolveTemplate(data: Data): Either<Err, Template<Context, System>> {
 
         if (data[Field.Type] !== Type.Template)
             return left(new error.TypeErr(Type.Template, data[Field.Type]));
