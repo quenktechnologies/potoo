@@ -1,7 +1,7 @@
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Context } from '../context';
 import { Address } from '../address';
-import {  Instance } from '../';
+import { Instance } from '../';
 import { Value, Script } from './vm/script';
 
 /**
@@ -12,7 +12,7 @@ export interface System<C extends Context> extends Instance {
 
     ident(i: Instance): Address
 
-    exec(i: Instance, s: Script<C, any>): Maybe<Value<C, any>>
+    exec(i: Instance, s: Script): Maybe<Value>
 
 }
 
@@ -29,25 +29,25 @@ export class Void<C extends Context> implements System<C> {
 
     }
 
-  accept(): void {
-  
-  }
+    accept(): void {
 
-  run(): void {
-  
-  }
+    }
 
-  notify(): void {
+    run(): void {
 
+    }
 
-  }
-
-  stop(): void {
+    notify(): void {
 
 
-  }
+    }
 
-    exec(_: Instance, __: Script<C, any>): Maybe<Value<C, any>> {
+    stop(): void {
+
+
+    }
+
+    exec(_: Instance, __: Script): Maybe<Value> {
 
         return nothing();
 

@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Runtime } from '../runtime';
 import { Frame } from '../frame';
-import { System } from '../../';
 import { OP_CODE_RECEIVE, Log, Op, Level } from './';
 
 /**
@@ -12,13 +10,13 @@ import { OP_CODE_RECEIVE, Log, Op, Level } from './';
  *  1. Reference to a foreign function that will be installed as the message 
  *     handler.
  */
-export class Receive<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Receive implements Op {
 
     public code = OP_CODE_RECEIVE;
 
     public level = Level.Actor;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
 
@@ -42,7 +40,7 @@ export class Receive<C extends Context, S extends System<C>> implements Op<C, S>
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(f: Frame): Log {
 
         return ['receive', [], [f.peek()]];
 

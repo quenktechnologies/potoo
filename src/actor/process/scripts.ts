@@ -1,11 +1,9 @@
-import { Constants, Script } from '../system/vm/script';
-import { Context } from '../context';
+import { Script } from '../system/vm/script';
 import { PushStr } from '../system/vm/op/push';
 import { Raise } from '../system/vm/op/raise';
 import { Op } from '../system/vm/op';
-import { System } from '../system';
 
-const raiseCode: Op<Context, System<Context>>[] = [
+const raiseCode: Op[] = [
 
     new PushStr(0),
     new Raise()
@@ -15,13 +13,11 @@ const raiseCode: Op<Context, System<Context>>[] = [
 /**
  * RaiseScript
  */
-export class RaiseScript<C extends Context, S extends System<C>>
-    extends Script<C, S> {
+export class RaiseScript extends Script {
 
     constructor(public emsg: string) {
 
-        super(<Constants<C, S>>[[], [emsg], [], [], [], []],
-            raiseCode);
+        super([[], [emsg], [], [], [], []], raiseCode);
 
     }
 

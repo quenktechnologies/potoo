@@ -1,9 +1,7 @@
 import * as error from '../error';
 import { right, left } from '@quenk/noni/lib/data/either';
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { OP_CODE_TEMP_CHILD, Log, Op, Level } from './';
 
 /**
@@ -13,14 +11,13 @@ import { OP_CODE_TEMP_CHILD, Log, Op, Level } from './';
  * 1: Pointer to the template.
  * 2: Index of the child template.
  */
-export class TempChild<C extends Context, S extends System<C>> 
-  implements Op<C, S> {
+export class TempChild implements Op {
 
     public code = OP_CODE_TEMP_CHILD;
 
     public level = Level.Control;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
 
@@ -49,7 +46,7 @@ export class TempChild<C extends Context, S extends System<C>>
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(f: Frame): Log {
 
         return ['tempchild', [], [f.peek(), f.peek(1)]];
 

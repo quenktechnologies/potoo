@@ -1,4 +1,3 @@
-import { Context } from '../../../context';
 import { Address } from '../../../address';
 import { PushStr } from '../op/push';
 import { Stop } from '../op/stop';
@@ -6,14 +5,13 @@ import { Restart } from '../op/restart';
 import { Run } from '../op/run';
 import { Op } from '../op';
 import { Constants, Script } from '../script';
-import { System } from '../../';
 
-const restartCode: Op<Context, System<Context>>[] = [
+const restartCode: Op[] = [
     new Restart(),
     new Run()
 ];
 
-const stopCode: Op<Context, System<Context>>[] = [
+const stopCode: Op[] = [
 
     new PushStr(0),
     new Stop()
@@ -23,13 +21,13 @@ const stopCode: Op<Context, System<Context>>[] = [
 /**
  * StopScript for stopping actors.
  */
-export class StopScript<C extends Context, S extends System<C>>
-    extends Script<C, S> {
+export class StopScript
+    extends Script {
 
     constructor(public addr: Address) {
 
-        super(<Constants<C, S>>[[], [addr], [], [], [], []],
-            <Op<C, S>[]>stopCode);
+        super(<Constants>[[], [addr], [], [], [], []],
+            <Op[]>stopCode);
 
     }
 
@@ -38,14 +36,13 @@ export class StopScript<C extends Context, S extends System<C>>
 /**
  * RestartScript for restarting actors.
  */
-export class RestartScript<C extends Context, S extends System<C>>
-    extends Script<C, S> {
+export class RestartScript extends Script {
 
     constructor() {
 
         super(
-            <Constants<C, S>>[[], [], [], [], [], []],
-            <Op<C, S>[]>restartCode);
+            <Constants>[[], [], [], [], [], []],
+            <Op[]>restartCode);
 
     }
 

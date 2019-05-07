@@ -90,16 +90,16 @@ export type Data = [number, Type, Location];
 /**
  * Frame of execution.
  */
-export class Frame<C extends Context, S extends System<C>> {
+export class Frame {
 
     constructor(
         public actor: Address,
         public context: Context,
-        public script: Script<C, S>,
-        public code: Op<C, S>[] = [],
+        public script: Script,
+        public code: Op[] = [],
         public data: Operand[] = [],
         public locals: Data[] = [],
-        public heap: Value<C, S>[] = [],
+        public heap: Value[] = [],
         public ip = 0) { }
 
     /**
@@ -107,7 +107,7 @@ export class Frame<C extends Context, S extends System<C>> {
      *
      * Generates an error if the seek is out of the code block's bounds.
      */
-    seek(location: number): Either<Err, Frame<C, S>> {
+    seek(location: number): Either<Err, Frame> {
 
         if ((location < 0) || (location >= (this.code.length)))
             return left(new error.JumpOutOfBoundsErr(location,
@@ -122,7 +122,7 @@ export class Frame<C extends Context, S extends System<C>> {
     /**
      * allocate space on the heap for a value.
      */
-    allocate(value: Value<C, S>, typ: Type): Data {
+    allocate(value: Value, typ: Type): Data {
 
         this.heap.push(value);
         return [this.heap.length - 1, typ, Location.Heap];
@@ -132,7 +132,7 @@ export class Frame<C extends Context, S extends System<C>> {
     /**
      * allocateTemplate
      */
-    allocateTemplate(t: Template<C, S>): Data {
+  allocateTemplate(t: Template<Context, System<Context>>): Data {
 
         return this.allocate(t, Type.Template);
 
@@ -141,7 +141,7 @@ export class Frame<C extends Context, S extends System<C>> {
     /**
      * push onto the stack an Operand, indicating its type and storage location.
      */
-    push(value: Operand, type: Type, location: Location): Frame<C, S> {
+    push(value: Operand, type: Type, location: Location): Frame {
 
         this.data.push(location);
         this.data.push(type);
@@ -153,7 +153,7 @@ export class Frame<C extends Context, S extends System<C>> {
     /**
      * pushNumber onto the stack.
      */
-    pushNumber(n: number): Frame<C, S> {
+    pushNumber(n: number): Frame {
 
         this.push(n, Type.Number, Location.Literal);
         return this;
@@ -165,7 +165,7 @@ export class Frame<C extends Context, S extends System<C>> {
      *
      * (Value is stored on the heap)
      */
-    pushAddress(addr: Address): Frame<C, S> {
+    pushAddress(addr: Address): Frame {
 
         this.heap.push(addr);
         this.push(this.heap.length - 1, Type.String, Location.Heap);
@@ -203,7 +203,7 @@ export class Frame<C extends Context, S extends System<C>> {
      * resolve a value from it's location, producing 
      * an error if it can not be found.
      */
-    resolve(data: Data): Either<Err, Value<C, S>> {
+    resolve(data: Data): Either<Err, Value> {
 
         let nullErr = () => left(new error.NullPointerErr(data));
 
@@ -215,7 +215,7 @@ export class Frame<C extends Context, S extends System<C>> {
             case Location.Constants:
                 return fromNullable(this.script.constants[data[Field.Type]])
                     .chain(typ => fromNullable(typ[data[Field.Value]]))
-                    .map(v => right<Err, Value<C, S>>(v))
+                    .map(v => right<Err, Value>(v))
                     .orJust(nullErr)
                     .get();
 
@@ -227,7 +227,7 @@ export class Frame<C extends Context, S extends System<C>> {
 
             case Location.Heap:
                 return fromNullable(this.heap[data[Field.Value]])
-                    .map(v => right<Err, Value<C, S>>(v))
+                    .map(v => right<Err, Value>(v))
                     .orJust(nullErr)
                     .get();
 
@@ -236,7 +236,7 @@ export class Frame<C extends Context, S extends System<C>> {
                     .context
                     .mailbox
                     .chain(m => fromNullable(m[data[Field.Value]]))
-                    .map(v => right<Err, Value<C, S>>(v))
+                    .map(v => right<Err, Value>(v))
                     .get()
 
             default:
@@ -273,7 +273,7 @@ export class Frame<C extends Context, S extends System<C>> {
     /**
      * resolveFunction
      */
-    resolveFunction(data: Data): Either<Err, Function<C, S>> {
+    resolveFunction(data: Data): Either<Err, Function> {
 
         if (data[Field.Type] !== Type.Function)
             return left(new error.TypeErr(Type.Function, data[Field.Type]));
@@ -285,7 +285,7 @@ export class Frame<C extends Context, S extends System<C>> {
     /**
      * resolveTemplate
      */
-    resolveTemplate(data: Data): Either<Err, Template<C, S>> {
+  resolveTemplate(data: Data): Either<Err, Template<Context, System<Context>>> {
 
         if (data[Field.Type] !== Type.Template)
             return left(new error.TypeErr(Type.Template, data[Field.Type]));
@@ -309,7 +309,7 @@ export class Frame<C extends Context, S extends System<C>> {
     /**
      * resolveForeign
      */
-    resolveForeign(data: Data): Either<Err, Foreign<C, S>> {
+    resolveForeign(data: Data): Either<Err, Foreign> {
 
         if (data[Field.Type] !== Type.Foreign)
             return left(new error.TypeErr(Type.Foreign, data[Field.Type]));

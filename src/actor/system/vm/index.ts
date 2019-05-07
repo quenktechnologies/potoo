@@ -13,7 +13,7 @@ import { Runtime } from './runtime';
  * A Platform implementor is used by other APIs in this module 
  * to execute scripts on behalf of actors.
  */
-export interface Platform<C extends Context> extends System<C>, Actor<C> {
+export interface Platform extends System<Context>, Actor<Context> {
 
     /**
      * configuration of the Platform.
@@ -23,11 +23,11 @@ export interface Platform<C extends Context> extends System<C>, Actor<C> {
     /**
      * state table.
      */
-    state: State<C>;
+    state: State<Context>;
 
     /**
      * allocate a new Context for an actor.
      */
-    allocate(a: Actor<C>, h: Runtime<C, this>, t: Template<C, this>): C;
+    allocate(a: Actor<Context>, h: Runtime, t: Template<Context, this>): Context;
 
 }

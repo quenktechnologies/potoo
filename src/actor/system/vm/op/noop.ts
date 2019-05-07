@@ -1,23 +1,19 @@
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { OP_CODE_NOOP, Log, Level, Op } from './';
 
 /**
  * Noop does nothing.
  */
-export class Noop<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Noop implements Op {
 
     public code = OP_CODE_NOOP;
 
     public level = Level.Base;
 
-    exec(_: Runtime<C, S>) {
+    exec(_: Runtime) {}
 
-    }
-
-    toLog(_: Frame<C, S>): Log {
+    toLog(_: Frame): Log {
 
         return ['noop', [], []];
 

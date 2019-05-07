@@ -26,11 +26,10 @@ export abstract class TestAbstractSystem<C extends Context>
 
     MOCK = new Data();
 
-    exec(i: Instance, s: Script<C, TestAbstractSystem<C>>)
-        : Maybe<Value<C, TestAbstractSystem<C>>> {
+    exec(i: Instance, s: Script): Maybe<Value> {
 
         this.MOCK.record('exec', [i, s], this);
-        return super.exec(i, <Script<C, System<C>>>s);
+        return super.exec(i, <Script>s);
 
     }
 
