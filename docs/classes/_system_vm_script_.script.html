@@ -907,7 +907,7 @@ img { max-width: 100%; }
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
-		<li class="current tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
+		<li class="current tsd-kind-class tsd-parent-kind-external-module">
 			<a href="_system_vm_script_.script.html" class="tsd-kind-icon">Script</a>
 			<ul>
 				<li class=" tsd-kind-constructor tsd-parent-kind-class">
@@ -921,16 +921,16 @@ img { max-width: 100%; }
 				</li>
 			</ul>
 		</li>
-		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
+		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 			<a href="../modules/_system_vm_script_.html#constants" class="tsd-kind-icon">Constants</a>
 		</li>
-		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
+		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 			<a href="../modules/_system_vm_script_.html#foreign" class="tsd-kind-icon">Foreign</a>
 		</li>
-		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
+		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 			<a href="../modules/_system_vm_script_.html#function" class="tsd-kind-icon">Function</a>
 		</li>
-		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
+		<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 			<a href="../modules/_system_vm_script_.html#value" class="tsd-kind-icon">Value</a>
 		</li>
 	</ul>
@@ -948,17 +948,6 @@ img { max-width: 100%; }
 					<li>code - A list of one or more Op codes to execute in sequence.</li>
 				</ol>
 			</div>
-		</section>
-		<section class="tsd-panel tsd-type-parameters">
-			<h3>Type parameters</h3>
-			<ul class="tsd-type-parameters">
-				<li>
-					<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
-				</li>
-				<li>
-					<h4>S<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
-				</li>
-			</ul>
 		</section>
 		<section class="tsd-panel tsd-hierarchy">
 			<h3>Hierarchy</h3>
@@ -1020,22 +1009,22 @@ img { max-width: 100%; }
 				<a name="constructor" class="tsd-anchor"></a>
 				<h3>constructor</h3>
 				<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">new <wbr>Script<span class="tsd-signature-symbol">(</span>constants<span class="tsd-signature-symbol">?: </span><a href="../modules/_system_vm_script_.html#constants" class="tsd-signature-type">Constants</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span>, code<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_system_vm_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a></li>
+					<li class="tsd-signature tsd-kind-icon">new <wbr>Script<span class="tsd-signature-symbol">(</span>constants<span class="tsd-signature-symbol">?: </span><a href="../modules/_system_vm_script_.html#constants" class="tsd-signature-type">Constants</a>, code<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_system_vm_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/vm/script.ts#L57">system/vm/script.ts:57</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/script.ts#L57">system/vm/script.ts:57</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> constants: <a href="../modules/_system_vm_script_.html#constants" class="tsd-signature-type">Constants</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;[[], [], [], [], [],[]]</span></h5>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> constants: <a href="../modules/_system_vm_script_.html#constants" class="tsd-signature-type">Constants</a><span class="tsd-signature-symbol"> =&nbsp;[[], [], [], [], [], []]</span></h5>
 							</li>
 							<li>
-								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> code: <a href="../interfaces/_system_vm_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></h5>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> code: <a href="../interfaces/_system_vm_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a></h4>
@@ -1048,20 +1037,20 @@ img { max-width: 100%; }
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 				<a name="code" class="tsd-anchor"></a>
 				<h3>code</h3>
-				<div class="tsd-signature tsd-kind-icon">code<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_system_vm_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
+				<div class="tsd-signature tsd-kind-icon">code<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_system_vm_op_index_.op.html" class="tsd-signature-type">Op</a><span class="tsd-signature-symbol">[]</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/vm/script.ts#L61">system/vm/script.ts:61</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/script.ts#L61">system/vm/script.ts:61</a></li>
 					</ul>
 				</aside>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 				<a name="constants" class="tsd-anchor"></a>
 				<h3>constants</h3>
-				<div class="tsd-signature tsd-kind-icon">constants<span class="tsd-signature-symbol">:</span> <a href="../modules/_system_vm_script_.html#constants" class="tsd-signature-type">Constants</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<div class="tsd-signature tsd-kind-icon">constants<span class="tsd-signature-symbol">:</span> <a href="../modules/_system_vm_script_.html#constants" class="tsd-signature-type">Constants</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/vm/script.ts#L60">system/vm/script.ts:60</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/script.ts#L60">system/vm/script.ts:60</a></li>
 					</ul>
 				</aside>
 			</section>

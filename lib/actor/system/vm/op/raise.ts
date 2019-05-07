@@ -1,8 +1,6 @@
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
-import { OP_CODE_RAISE,Log, Op, Level } from './';
+import { OP_CODE_RAISE, Log, Op, Level } from './';
 
 /**
  * Raise instruction.
@@ -23,13 +21,13 @@ import { OP_CODE_RAISE,Log, Op, Level } from './';
  * Pops:
  * 1. Message indicating an error.
  */
-export class Raise<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Raise implements Op {
 
     public code = OP_CODE_RAISE;
 
     public level = Level.System;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
 
@@ -40,7 +38,7 @@ export class Raise<C extends Context, S extends System<C>> implements Op<C, S> {
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(f: Frame): Log {
 
         return ['raise', [], [f.peek()]];
 

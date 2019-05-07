@@ -2,7 +2,7 @@ import { assert } from '@quenk/test/lib/assert';
 import { Script } from '../../../../src/actor/system/vm/script';
 import { NullPointerErr, TypeErr } from '../../../../src/actor/system/vm/error';
 import { Type, Location, Frame } from '../../../../src/actor/system/vm/frame';
-import {Log} from '../../../../src/actor/system/vm/op';
+import { Log } from '../../../../src/actor/system/vm/op';
 import {
     Constants,
     InstanceImpl,
@@ -20,7 +20,7 @@ class Int {
 
     }
 
-    toLog() : Log{
+    toLog(): Log {
 
         return ['int', [], []];
 

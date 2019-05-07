@@ -946,7 +946,7 @@ img { max-width: 100%; }
 					<p>Actor common interface.</p>
 				</div>
 				<p>The system expects all actors to satisfy this interface so they
-				can be managed.</p>
+				can be managed properly.</p>
 			</div>
 		</section>
 		<section class="tsd-panel tsd-type-parameters">
@@ -967,7 +967,7 @@ img { max-width: 100%; }
 							<span class="target">Actor</span>
 							<ul class="tsd-hierarchy">
 								<li>
-									<a href="_system_index_.system.html" class="tsd-signature-type">System</a>
+									<a href="_system_vm_index_.platform.html" class="tsd-signature-type">Platform</a>
 								</li>
 								<li>
 									<a href="_resident_index_.resident.html" class="tsd-signature-type">Resident</a>
@@ -1014,15 +1014,15 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from <a href="_index_.instance.html">Instance</a>.<a href="_index_.instance.html#accept">accept</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/index.ts#L34">index.ts:34</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/index.ts#L34">index.ts:34</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
-								<p>accept an enveloped message.</p>
+								<p>accept a message directly.</p>
 							</div>
-							<p>For some actors, this message allows bypassing the mailbox
-							system and handling messages directly.</p>
+							<p>Some actors may have a mailbox disabling usage
+							of this method.</p>
 						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
@@ -1044,12 +1044,12 @@ img { max-width: 100%; }
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/index.ts#L68">index.ts:68</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/index.ts#L73">index.ts:73</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
-								<p>init method.</p>
+								<p>init the Actor.</p>
 							</div>
 							<p>This method allows an actor to configure its Context just
 							before it is added to the system.</p>
@@ -1075,14 +1075,15 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from <a href="_index_.instance.html">Instance</a>.<a href="_index_.instance.html#notify">notify</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/index.ts#L45">index.ts:45</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/index.ts#L50">index.ts:50</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
 								<p>notify is called by the system to indicate new messages
-								in the actor&#39;s mailbox.</p>
+								have been placed in the actor&#39;s mailbox.</p>
 							</div>
+							<p>(Buffered actors only!)</p>
 						</div>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 					</li>
@@ -1099,13 +1100,15 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from <a href="_index_.instance.html">Instance</a>.<a href="_index_.instance.html#run">run</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/index.ts#L39">index.ts:39</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/index.ts#L42">index.ts:42</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
-								<p>run this actor instance.</p>
+								<p>run the actor instance.</p>
 							</div>
+							<p>Once instantiated this method is called to allow the actor to begin
+							execution.</p>
 						</div>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 					</li>
@@ -1122,12 +1125,12 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Inherited from <a href="_index_.instance.html">Instance</a>.<a href="_index_.instance.html#stop">stop</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/index.ts#L50">index.ts:50</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/index.ts#L55">index.ts:55</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
-								<p>stop is called by the system to stop the actor.</p>
+								<p>stop the actor instance.</p>
 							</div>
 						</div>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>

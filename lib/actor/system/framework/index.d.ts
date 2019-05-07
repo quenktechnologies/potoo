@@ -25,32 +25,32 @@ export declare class STemplate {
 /**
  * AbstractSystem can be extended to create a customized actor system.
  */
-export declare abstract class AbstractSystem<C extends Context> implements System<C>, Platform<C> {
+export declare abstract class AbstractSystem implements System, Platform {
     configuration: config.Configuration;
     constructor(configuration?: config.Configuration);
-    abstract state: State<C>;
-    abstract allocate(a: Actor<C>, h: Runtime<C, AbstractSystem<C>>, t: Template<C, AbstractSystem<C>>): C;
+    abstract state: State<Context>;
+    abstract allocate(a: Actor<Context>, h: Runtime, t: Template<AbstractSystem>): Context;
     ident(i: Instance): Address;
     /**
      * spawn a new actor from a template.
      */
-    spawn(t: ActorTemplate<C, AbstractSystem<C>>): AbstractSystem<C>;
-    init(c: C): C;
+    spawn(t: ActorTemplate<AbstractSystem>): AbstractSystem;
+    init(c: Context): Context;
     notify(): void;
     accept(_: Message): void;
     stop(): void;
     run(): void;
-    exec(i: Instance, s: Script<C, AbstractSystem<C>>): Maybe<Value<C, System<C>>>;
+    exec(i: Instance, s: Script): Maybe<Value>;
 }
 /**
  * newContext produces the bare minimum needed for creating a Context type.
  *
  * The value can be merged to satsify user defined Context types.
  */
-export declare const newContext: <C extends Context, S extends System<C>>(actor: Instance, runtime: Runtime<Context, System<C>>, template: ActorTemplate<C, S>) => Context;
+export declare const newContext: <S extends System>(actor: Instance, runtime: Runtime, template: ActorTemplate<S>) => Context;
 /**
  * newState produces the bare minimum needed for creating a State.
  *
  * The value can be merged to statisfy user defined State.
  */
-export declare const newState: <C extends Context>(sys: Platform<C>) => State<C>;
+export declare const newState: (sys: Platform) => State<Context>;

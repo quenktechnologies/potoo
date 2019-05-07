@@ -62,44 +62,44 @@ export declare type Data = [number, Type, Location];
 /**
  * Frame of execution.
  */
-export declare class Frame<C extends Context, S extends System<C>> {
+export declare class Frame {
     actor: Address;
     context: Context;
-    script: Script<C, S>;
-    code: Op<C, S>[];
+    script: Script;
+    code: Op[];
     data: Operand[];
     locals: Data[];
-    heap: Value<C, S>[];
+    heap: Value[];
     ip: number;
-    constructor(actor: Address, context: Context, script: Script<C, S>, code?: Op<C, S>[], data?: Operand[], locals?: Data[], heap?: Value<C, S>[], ip?: number);
+    constructor(actor: Address, context: Context, script: Script, code?: Op[], data?: Operand[], locals?: Data[], heap?: Value[], ip?: number);
     /**
      * seek advances the Frame's ip to the location specified.
      *
      * Generates an error if the seek is out of the code block's bounds.
      */
-    seek(location: number): Either<Err, Frame<C, S>>;
+    seek(location: number): Either<Err, Frame>;
     /**
      * allocate space on the heap for a value.
      */
-    allocate(value: Value<C, S>, typ: Type): Data;
+    allocate(value: Value, typ: Type): Data;
     /**
      * allocateTemplate
      */
-    allocateTemplate(t: Template<C, S>): Data;
+    allocateTemplate(t: Template<System>): Data;
     /**
      * push onto the stack an Operand, indicating its type and storage location.
      */
-    push(value: Operand, type: Type, location: Location): Frame<C, S>;
+    push(value: Operand, type: Type, location: Location): Frame;
     /**
      * pushNumber onto the stack.
      */
-    pushNumber(n: number): Frame<C, S>;
+    pushNumber(n: number): Frame;
     /**
      * pushAddress onto the stack.
      *
      * (Value is stored on the heap)
      */
-    pushAddress(addr: Address): Frame<C, S>;
+    pushAddress(addr: Address): Frame;
     /**
      * pop an operand off the stack.
      */
@@ -109,7 +109,7 @@ export declare class Frame<C extends Context, S extends System<C>> {
      * resolve a value from it's location, producing
      * an error if it can not be found.
      */
-    resolve(data: Data): Either<Err, Value<C, S>>;
+    resolve(data: Data): Either<Err, Value>;
     /**
      * resolveNumber
      */
@@ -121,11 +121,11 @@ export declare class Frame<C extends Context, S extends System<C>> {
     /**
      * resolveFunction
      */
-    resolveFunction(data: Data): Either<Err, Function<C, S>>;
+    resolveFunction(data: Data): Either<Err, Function>;
     /**
      * resolveTemplate
      */
-    resolveTemplate(data: Data): Either<Err, Template<C, S>>;
+    resolveTemplate(data: Data): Either<Err, Template<System>>;
     /**
      * resolveMessage
      */
@@ -133,5 +133,5 @@ export declare class Frame<C extends Context, S extends System<C>> {
     /**
      * resolveForeign
      */
-    resolveForeign(data: Data): Either<Err, Foreign<C, S>>;
+    resolveForeign(data: Data): Either<Err, Foreign>;
 }

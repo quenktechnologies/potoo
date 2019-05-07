@@ -16,13 +16,13 @@ import { Contexts as Ctxs, Context as Ctx } from '../../src/actor/context';
 import { Envelope } from '../../src/actor/message';
 import { Platform } from '../../src/actor/system/vm';
 
-export type Constants = C<Ctx, SystemImpl>;
+export type Constants = C;
 
 export interface Contexts extends Ctxs<Context> { }
 
 export interface Context extends Ctx { }
 
-export interface Template extends T<Context, SystemImpl> { }
+export interface Template extends T<SystemImpl> { }
 
 export class InstanceImpl extends Mock implements Instance {
 
@@ -58,7 +58,7 @@ export class InstanceImpl extends Mock implements Instance {
 
 }
 
-export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
+export class RuntimeImpl extends Mock implements Runtime {
 
     constructor(public self = '/', public system = new SystemImpl()) { super(); }
 
@@ -68,7 +68,7 @@ export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
 
     }
 
-    current(): Maybe<Frame<Context, SystemImpl>> {
+    current(): Maybe<Frame> {
 
         return this.MOCK.record('current', [], nothing());
 
@@ -140,7 +140,7 @@ export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
 
     }
 
-    push(f: Frame<Context, SystemImpl>): RuntimeImpl {
+    push(f: Frame): RuntimeImpl {
 
         return this.MOCK.record('push', [f], this);
 
@@ -164,14 +164,14 @@ export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
 
     }
 
-    exec(s: Script<Context, SystemImpl>): Maybe<Value<Context, SystemImpl>> {
+    exec(s: Script): Maybe<Value> {
 
         return this.MOCK.record('exec', [s], nothing());
 
 
     }
 
-    run(): Maybe<Value<Context, SystemImpl>> {
+    run(): Maybe<Value> {
 
         return this.MOCK.record('run', [], nothing());
 
@@ -180,7 +180,7 @@ export class RuntimeImpl extends Mock implements Runtime<Context, SystemImpl> {
 }
 
 export class SystemImpl extends InstanceImpl
-    implements System<Context>, Platform<Context> {
+    implements System, Platform {
 
     state: State<Context> = { contexts: {}, routers: {}, groups: {} };
 
@@ -194,15 +194,15 @@ export class SystemImpl extends InstanceImpl
 
     allocate(
         a: Actor<Context>,
-        h: Runtime<Context, SystemImpl>,
+        h: Runtime,
         t: Template): Context {
 
         return this.MOCK.record('allocate', [a, h, t], a.init(newContext()));
 
     }
 
-    exec(i: Instance, s: Script<Context, SystemImpl>)
-        : Maybe<Value<Context, System<Context>>> {
+    exec(i: Instance, s: Script)
+        : Maybe<Value> {
 
         return this.MOCK.record('exec', [i, s], nothing());
 

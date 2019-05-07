@@ -1,9 +1,9 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
-import {Runtime} from './system/vm/runtime';
-import {System} from './system';
+import { Runtime } from './system/vm/runtime';
 import { Template } from './template';
 import { Message } from './message';
+import { System } from './system';
 import { Behaviour, Instance } from './';
 
 /**
@@ -79,13 +79,11 @@ export interface Context {
     /**
      * runtime for the Context.
      */
-    runtime: Runtime<Context, System<Context>>
+    runtime: Runtime,
 
     /**
      * template used to create new instances of the actor.
-     *
-     * XXX: We use the any type here because there is a cyclical constraint.
      */
-    template: Template<any, any>
+    template: Template<System>
 
 }

@@ -49,17 +49,17 @@ export class STemplate {
 /**
  * AbstractSystem can be extended to create a customized actor system.
  */
-export abstract class AbstractSystem<C extends Context>
-    implements System<C>, Platform<C> {
+export abstract class AbstractSystem
+    implements System, Platform {
 
     constructor(public configuration: config.Configuration = {}) { }
 
-    abstract state: State<C>;
+    abstract state: State<Context>;
 
     abstract allocate(
-        a: Actor<C>,
-        h: Runtime<C, AbstractSystem<C>>,
-        t: Template<C, AbstractSystem<C>>): C
+        a: Actor<Context>,
+        h: Runtime,
+        t: Template<AbstractSystem>): Context
 
     ident(i: Instance): Address {
 
@@ -70,15 +70,16 @@ export abstract class AbstractSystem<C extends Context>
     /**
      * spawn a new actor from a template.
      */
-    spawn(t: ActorTemplate<C, AbstractSystem<C>>): AbstractSystem<C> {
+    spawn(t: ActorTemplate<AbstractSystem>): AbstractSystem {
 
-        (new This('$', this)).exec(new SpawnScript('', t));
+        (new This('$', <Platform>this))
+            .exec(new SpawnScript('', <Template<System>>t));
 
         return this;
 
     }
 
-    init(c: C): C {
+    init(c: Context): Context {
 
         return c;
 
@@ -101,10 +102,10 @@ export abstract class AbstractSystem<C extends Context>
 
     }
 
-    exec(i: Instance, s: Script<C, AbstractSystem<C>>): Maybe<Value<C, System<C>>> {
+    exec(i: Instance, s: Script): Maybe<Value> {
 
         return getRuntime(this.state, i)
-            .chain(r => r.exec(<Script<C, System<C>>>s));
+            .chain(r => r.exec(<Script>s));
 
     }
 
@@ -115,10 +116,10 @@ export abstract class AbstractSystem<C extends Context>
  *
  * The value can be merged to satsify user defined Context types.
  */
-export const newContext = <C extends Context, S extends System<C>>
+export const newContext = <S extends System>
     (actor: Instance,
-        runtime: Runtime<Context, System<C>>,
-        template: ActorTemplate<C, S>): Context => ({
+        runtime: Runtime,
+        template: ActorTemplate<S>): Context => ({
 
             mailbox: nothing(),
 
@@ -130,7 +131,7 @@ export const newContext = <C extends Context, S extends System<C>>
 
             runtime,
 
-            template
+            template: <Template<System>>template
 
         });
 
@@ -139,7 +140,7 @@ export const newContext = <C extends Context, S extends System<C>>
  *
  * The value can be merged to statisfy user defined State.
  */
-export const newState = <C extends Context>(sys: Platform<C>): State<C> => ({
+export const newState = (sys: Platform): State<Context> => ({
 
     contexts: {
 
@@ -147,8 +148,8 @@ export const newState = <C extends Context>(sys: Platform<C>): State<C> => ({
 
     },
 
-  routers: {},
+    routers: {},
 
-  groups: {}
+    groups: {}
 
 });

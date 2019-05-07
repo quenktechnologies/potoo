@@ -14,7 +14,7 @@ import {
     newContext
 } from '../../../../fixtures/mocks';
 
-class Int implements Op<Context, SystemImpl> {
+class Int implements Op {
 
     constructor(public n: number[]) { }
 
@@ -45,7 +45,7 @@ describe('runtime', () => {
 
                 let thrown = false;
                 let r = new This('/', new SystemImpl(), [
-                    new Frame<Context, SystemImpl>('/', newContext(), new Script())
+                    new Frame('/', newContext(), new Script())
                 ]);
 
                 r.system.state.contexts['/'] = newContext();
@@ -156,7 +156,7 @@ describe('runtime', () => {
                 }
 
                 let r = new This('/foo/bar', s, [
-                    new Frame<Context, SystemImpl>('/foo/bar', parent, new Script())
+                    new Frame('/foo/bar', parent, new Script())
                 ]);
 
                 r.system.state.contexts['/'] = parent;
@@ -200,7 +200,7 @@ describe('runtime', () => {
                     }
                 };
 
-                let ops: Op<Context, SystemImpl>[] = [
+                let ops: Op[] = [
 
                     new Int(list),
                     new Int(list),

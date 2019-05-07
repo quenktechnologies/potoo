@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Type, Location, Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import {OP_CODE_LOAD, Log, Level } from './';
 
 /**
@@ -10,7 +8,7 @@ import {OP_CODE_LOAD, Log, Level } from './';
  * Pushes:
  * 1. Value of index in locals table.
  */
-export class Load<C extends Context, S extends System<C>> {
+export class Load {
 
     constructor(public index: number) { }
 
@@ -18,7 +16,7 @@ export class Load<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
         let [value, type, location] = curr.locals[this.index];
@@ -26,7 +24,7 @@ export class Load<C extends Context, S extends System<C>> {
 
     }
 
-    toLog(_: Frame<C, S>): Log {
+    toLog(_: Frame): Log {
 
         return ['load', [this.index, Type.Number, Location.Literal], []];
 

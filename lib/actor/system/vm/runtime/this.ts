@@ -25,6 +25,7 @@ import { Data, Frame } from '../frame';
 import { Value, Script } from '../script';
 import { StopScript, RestartScript } from './scripts';
 import { Platform } from '../';
+import { System } from '../../';
 import { Runtime } from './';
 
 /**
@@ -33,13 +34,13 @@ import { Runtime } from './';
  *
  * It has all the methods and properties expected for Op code execution.
  */
-export class This<C extends Context, S extends Platform<C>> implements Runtime<C, S> {
+export class This implements Runtime {
 
     constructor(
         public self: Address,
-        public system: S,
-        public stack: Frame<C, S>[] = [],
-        public queue: Frame<C, S>[] = []) { }
+        public system: Platform,
+        public stack: Frame[] = [],
+        public queue: Frame[] = []) { }
 
     running = false;
 
@@ -49,7 +50,7 @@ export class This<C extends Context, S extends Platform<C>> implements Runtime<C
 
     }
 
-    current(): Maybe<Frame<C, S>> {
+    current(): Maybe<Frame> {
 
         return (this.stack.length > 0) ?
             just(tail(this.stack)) :
@@ -57,22 +58,22 @@ export class This<C extends Context, S extends Platform<C>> implements Runtime<C
 
     }
 
-    allocate(addr: Address, t: template.Template<C, S>): C {
+    allocate(addr: Address, t: template.Template<System>): Context {
 
-        let h = new This<C, S>(addr, this.system);
+        let h = new This(addr, this.system);
         let act = t.create(this.system);
 
         return act.init(this.system.allocate(act, h, t));
 
     }
 
-    getContext(addr: Address): Maybe<C> {
+    getContext(addr: Address): Maybe<Context> {
 
         return get(this.system.state, addr);
 
     }
 
-    getRouter(addr: Address): Maybe<C> {
+    getRouter(addr: Address): Maybe<Context> {
 
         return getRouter(this.system.state, addr);
 
@@ -84,69 +85,69 @@ export class This<C extends Context, S extends Platform<C>> implements Runtime<C
 
     }
 
-    getChildren(addr: Address): Maybe<Contexts<C>> {
+    getChildren(addr: Address): Maybe<Contexts<Context>> {
 
         return fromNullable(getChildren(this.system.state, addr));
 
     }
 
-    putContext(addr: Address, ctx: C): This<C, S> {
+    putContext(addr: Address, ctx: Context): This {
 
         this.system.state = put(this.system.state, addr, ctx);
         return this;
 
     }
 
-    removeContext(addr: Address): This<C, S> {
+    removeContext(addr: Address): This {
 
         this.system.state = remove(this.system.state, addr);
         return this;
 
     }
 
-    putRoute(target: Address, router: Address): This<C, S> {
+    putRoute(target: Address, router: Address): This {
 
         putRoute(this.system.state, target, router);
         return this;
 
     }
 
-    removeRoute(target: Address): This<C, S> {
+    removeRoute(target: Address): This {
 
         removeRoute(this.system.state, target);
         return this;
 
     }
 
-    putMember(group: string, addr: Address): This<C, S> {
+    putMember(group: string, addr: Address): This {
 
         putMember(this.system.state, group, addr);
         return this;
 
     }
 
-    removeMember(group: string, addr: Address): This<C, S> {
+    removeMember(group: string, addr: Address): This {
 
         removeMember(this.system.state, group, addr);
         return this;
 
     }
 
-    push(f: Frame<C, S>): This<C, S> {
+    push(f: Frame): This {
 
         this.stack.push(f);
         return this;
 
     }
 
-    clear(): This<C, S> {
+    clear(): This {
 
         this.stack = [];
         return this;
 
     }
 
-    drop(m: Message): This<C, S> {
+    drop(m: Message): This {
 
         let policy = <config.LogPolicy>(this.system.configuration.log || {});
         let level = policy.level || 0;
@@ -202,7 +203,7 @@ export class This<C extends Context, S extends Platform<C>> implements Runtime<C
 
     }
 
-    exec(s: Script<C, S>): Maybe<Value<C, S>> {
+    exec(s: Script): Maybe<Value> {
 
         let ctx = this.getContext(this.self).get();
 
@@ -220,11 +221,11 @@ export class This<C extends Context, S extends Platform<C>> implements Runtime<C
 
     }
 
-    run(): Maybe<Value<C, S>> {
+    run(): Maybe<Value> {
 
         let policy = <config.LogPolicy>(this.system.configuration.log || {});
 
-        let ret: Maybe<Value<C, S>> = nothing();
+        let ret: Maybe<Value> = nothing();
 
         if (this.running) return ret;
 
@@ -268,7 +269,7 @@ export class This<C extends Context, S extends Platform<C>> implements Runtime<C
 
                 if (this.queue.length > 0) {
 
-                    this.stack.push(<Frame<C, S>>this.queue.shift());
+                    this.stack.push(<Frame>this.queue.shift());
 
                 } else {
 
@@ -288,61 +289,61 @@ export class This<C extends Context, S extends Platform<C>> implements Runtime<C
 
 }
 
-const escalate = <C extends Context>
-    (env: Platform<C>, target: Address, err: Err) =>
-    get(env.state, getParent(target))
-        .map(ctx => ctx.runtime.raise(err))
-        .orJust(() => { throw convert(err); });
+const escalate =
+    (env: Platform, target: Address, err: Err) =>
+        get(env.state, getParent(target))
+            .map(ctx => ctx.runtime.raise(err))
+            .orJust(() => { throw convert(err); });
 
-const log = <C extends Context, S extends Platform<C>>
-    (policy: config.LogPolicy, f: Frame<C, S>, o: Op<C, S>): Op<C, S> => {
+const log =
+    (policy: config.LogPolicy, f: Frame, o: Op): Op => {
 
-    let level = policy.level || 0;
-    let logger = policy.logger || console;
+        let level = policy.level || 0;
+        let logger = policy.logger || console;
 
-    if (o.level <= <number>level) {
+        if (o.level <= <number>level) {
 
-        let ctx = `[${f.actor}]`;
-        let msg = [ctx, ...resolveLog(f, o.toLog(f))];
+            let ctx = `[${f.actor}]`;
+            let msg = [ctx, ...resolveLog(f, o.toLog(f))];
 
-        switch (o.level) {
+            switch (o.level) {
 
-            case logging.INFO:
-                (<logging.Logger>logger).info.apply(logger, msg);
-                break;
-            case logging.WARN:
-                (<logging.Logger>logger).warn.apply(logger, msg);
-                break;
-            case logging.ERROR:
-                (<logging.Logger>logger).error.apply(logger, msg);
-                break;
-            default:
-                (<logging.Logger>logger).log.apply(logger, msg);
-                break;
+                case logging.INFO:
+                    (<logging.Logger>logger).info.apply(logger, msg);
+                    break;
+                case logging.WARN:
+                    (<logging.Logger>logger).warn.apply(logger, msg);
+                    break;
+                case logging.ERROR:
+                    (<logging.Logger>logger).error.apply(logger, msg);
+                    break;
+                default:
+                    (<logging.Logger>logger).log.apply(logger, msg);
+                    break;
+
+            }
 
         }
 
+        return o;
+
     }
 
-    return o;
+const resolveLog =
+    (f: Frame, [op, rand, data]: Log) => {
 
-}
-
-const resolveLog = <C extends Context, S extends Platform<C>>
-    (f: Frame<C, S>, [op, rand, data]: Log) => {
-
-    let operand = rand.length > 0 ?
-        f
-            .resolve(<Data>rand)
-            .orRight(() => undefined)
-            .takeRight() : [];
-
-    let stack = data.length > 0 ?
-        data.map(d =>
-            f.resolve(d)
+        let operand = rand.length > 0 ?
+            f
+                .resolve(<Data>rand)
                 .orRight(() => undefined)
-                .takeRight()) : [];
+                .takeRight() : [];
 
-    return [op, operand].concat(stack);
+        let stack = data.length > 0 ?
+            data.map(d =>
+                f.resolve(d)
+                    .orRight(() => undefined)
+                    .takeRight()) : [];
 
-}
+        return [op, operand].concat(stack);
+
+    }

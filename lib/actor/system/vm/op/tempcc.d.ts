@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { Log, Level } from './';
 /**
  * TempCC counts the number of child templates a template has.
@@ -10,9 +8,9 @@ import { Log, Level } from './';
  *
  * 1: Reference to the template to count.
  */
-export declare class TempCC<C extends Context, S extends System<C>> {
+export declare class TempCC {
     code: number;
     level: Level;
-    exec(e: Runtime<C, S>): void;
-    toLog(f: Frame<C, S>): Log;
+    exec(e: Runtime): void;
+    toLog(f: Frame): Log;
 }

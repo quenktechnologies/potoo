@@ -13,12 +13,12 @@ export declare type Reference = (m: Message) => void;
 /**
  * Resident is an actor that exists in the current runtime.
  */
-export interface Resident<C extends Context, S extends System<C>> extends Api<C, S>, Actor<C> {
+export interface Resident<C extends Context, S extends System> extends Api<C, S>, Actor<C> {
 }
 /**
  * AbstractResident implementation.
  */
-export declare abstract class AbstractResident<C extends Context, S extends System<C>> implements Resident<C, S> {
+export declare abstract class AbstractResident<C extends Context, S extends System> implements Resident<C, S> {
     system: S;
     constructor(system: S);
     abstract init(c: C): C;
@@ -27,7 +27,7 @@ export declare abstract class AbstractResident<C extends Context, S extends Syst
     notify(): void;
     self(): string;
     accept(m: Message): void;
-    spawn(t: Template<C, S>): Address;
+    spawn(t: Template<S>): Address;
     tell<M>(ref: Address, m: M): AbstractResident<C, S>;
     kill(addr: Address): AbstractResident<C, S>;
     exit(): void;
@@ -40,7 +40,7 @@ export declare abstract class AbstractResident<C extends Context, S extends Syst
  * Once the receive property is provided, all messages will be
  * filtered by it.
  */
-export declare abstract class Immutable<T, C extends Context, S extends System<C>> extends AbstractResident<C, S> {
+export declare abstract class Immutable<T, C extends Context, S extends System> extends AbstractResident<C, S> {
     /**
      * receive is a static list of Case classes
      * that the actor will always use to process messages.
@@ -56,7 +56,7 @@ export declare abstract class Immutable<T, C extends Context, S extends System<C
 /**
  * Mutable actors can change their behaviour after message processing.
  */
-export declare abstract class Mutable<C extends Context, S extends System<C>> extends AbstractResident<C, S> {
+export declare abstract class Mutable<C extends Context, S extends System> extends AbstractResident<C, S> {
     receive: Case<void>[];
     init(c: C): C;
     /**
@@ -67,4 +67,4 @@ export declare abstract class Mutable<C extends Context, S extends System<C>> ex
 /**
  * ref produces a function for sending messages to an actor address.
  */
-export declare const ref: <C extends Context, S extends System<C>>(res: Resident<C, S>, addr: string) => Reference;
+export declare const ref: <C extends Context, S extends System>(res: Resident<C, S>, addr: string) => Reference;

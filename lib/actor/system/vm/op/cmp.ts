@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { OP_CODE_CMP, Log, Level, Op } from './';
 
 /**
@@ -16,13 +14,13 @@ import { OP_CODE_CMP, Log, Level, Op } from './';
  *
  * 1 if true, 0 if false
  */
-export class Cmp<C extends Context, S extends System<C>> implements Op<C, S>{
+export class Cmp implements Op {
 
     public code = OP_CODE_CMP;
 
     public level = Level.Base;
 
-    exec(e: Runtime<C, S>) {
+    exec(e: Runtime) {
 
         let curr = e.current().get();
 
@@ -43,7 +41,7 @@ export class Cmp<C extends Context, S extends System<C>> implements Op<C, S>{
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(f: Frame): Log {
 
         return ['cmp', [], [f.peek(), f.peek(1)]];
 

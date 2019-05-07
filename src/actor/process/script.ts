@@ -6,7 +6,6 @@ import { System } from '../system';
 import { DropScript, TellScript } from '../resident/scripts';
 import { Message } from '../message';
 import { Envelope } from '../mailbox';
-import { Context } from '../context';
 
 const id = <string>process.env.POTOO_ACTOR_ID;
 
@@ -39,17 +38,17 @@ const sys = system({
 
 });
 
-const filter = <C extends Context>(s: System<C>) => (m: Message) =>
+const filter = (s: System) => (m: Message) =>
     match(m)
         .caseOf(tellShape, filterTell(s))
         .orElse(fitlerDrop(s))
         .end();
 
-const filterTell = <C extends Context>(s: System<C>) =>
+const filterTell = (s: System) =>
     ({ to, message }: { to: string, from: string, message: Message }) =>
         s.exec(s, new TellScript(to, message));
 
-const fitlerDrop = <C extends Context>(s: System<C>) => (m: Message) =>
+const fitlerDrop = (s: System) => (m: Message) =>
     s.exec(s, new DropScript(m));
 
 process.on('uncaughtException', e =>

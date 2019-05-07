@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Handle | @quenk/potoo</title>
+	<title>TestAbstractSystem | @quenk/potoo</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -907,20 +907,47 @@ img { max-width: 100%; }
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
-		<li class=" tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="../classes/_system_vm_handle_.void.html" class="tsd-kind-icon">Void</a>
-		</li>
-		<li class="current tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-			<a href="_system_vm_handle_.handle.html" class="tsd-kind-icon">Handle</a>
+		<li class="current tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
+			<a href="_system_framework_test_.testabstractsystem.html" class="tsd-kind-icon">Test<wbr>Abstract<wbr>System</a>
 			<ul>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="_system_vm_handle_.handle.html#self" class="tsd-kind-icon">self</a>
+				<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_framework_test_.testabstractsystem.html#constructor" class="tsd-kind-icon">constructor</a>
 				</li>
-				<li class=" tsd-kind-property tsd-parent-kind-interface">
-					<a href="_system_vm_handle_.handle.html#system" class="tsd-kind-icon">system</a>
+				<li class=" tsd-kind-property tsd-parent-kind-class">
+					<a href="_system_framework_test_.testabstractsystem.html#mock" class="tsd-kind-icon">MOCK</a>
 				</li>
-				<li class=" tsd-kind-method tsd-parent-kind-interface">
-					<a href="_system_vm_handle_.handle.html#exec" class="tsd-kind-icon">exec</a>
+				<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_framework_test_.testabstractsystem.html#configuration" class="tsd-kind-icon">configuration</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a href="_system_framework_test_.testabstractsystem.html#state" class="tsd-kind-icon">state</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_framework_test_.testabstractsystem.html#accept" class="tsd-kind-icon">accept</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a href="_system_framework_test_.testabstractsystem.html#allocate" class="tsd-kind-icon">allocate</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_framework_test_.testabstractsystem.html#exec" class="tsd-kind-icon">exec</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_framework_test_.testabstractsystem.html#ident" class="tsd-kind-icon">ident</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_framework_test_.testabstractsystem.html#init" class="tsd-kind-icon">init</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a href="_system_framework_test_.testabstractsystem.html#notify" class="tsd-kind-icon">notify</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_framework_test_.testabstractsystem.html#run" class="tsd-kind-icon">run</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a href="_system_framework_test_.testabstractsystem.html#spawn" class="tsd-kind-icon">spawn</a>
+				</li>
+				<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a href="_system_framework_test_.testabstractsystem.html#stop" class="tsd-kind-icon">stop</a>
 				</li>
 			</ul>
 		</li>
@@ -931,18 +958,17 @@ img { max-width: 100%; }
 		<section class="tsd-panel tsd-comment">
 			<div class="tsd-comment tsd-typography">
 				<div class="lead">
-					<p>Handle used by actors to interact with the System.</p>
+					<p>TestAbstractSystem</p>
 				</div>
+				<p>This system is provided for testing purposes. It provdies all the features
+				of the AbstractSystem.</p>
 			</div>
 		</section>
 		<section class="tsd-panel tsd-type-parameters">
 			<h3>Type parameters</h3>
 			<ul class="tsd-type-parameters">
 				<li>
-					<h4>C<span class="tsd-signature-symbol">: </span><a href="_context_.context.html" class="tsd-signature-type">Context</a></h4>
-				</li>
-				<li>
-					<h4>S<span class="tsd-signature-symbol">: </span><a href="_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
 				</li>
 			</ul>
 		</section>
@@ -950,19 +976,20 @@ img { max-width: 100%; }
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
 				<li>
-					<span class="target">Handle</span>
+					<a href="_system_framework_index_.abstractsystem.html" class="tsd-signature-type">AbstractSystem</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>
 					<ul class="tsd-hierarchy">
 						<li>
-							<a href="_system_vm_runtime_index_.runtime.html" class="tsd-signature-type">Runtime</a>
+							<span class="target">TestAbstractSystem</span>
 						</li>
 					</ul>
 				</li>
 			</ul>
 		</section>
 		<section class="tsd-panel">
-			<h3>Implemented by</h3>
+			<h3>Implements</h3>
 			<ul class="tsd-hierarchy">
-				<li><a href="../classes/_system_vm_handle_.void.html" class="tsd-signature-type">Void</a></li>
+				<li><a href="../interfaces/_system_index_.system.html" class="tsd-signature-type">System</a></li>
+				<li><a href="../interfaces/_system_vm_index_.platform.html" class="tsd-signature-type">Platform</a></li>
 			</ul>
 		</section>
 		<section class="tsd-panel-group tsd-index-group">
@@ -970,80 +997,317 @@ img { max-width: 100%; }
 			<section class="tsd-panel tsd-index-panel">
 				<div class="tsd-index-content">
 					<section class="tsd-index-section ">
+						<h3>Constructors</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="_system_framework_test_.testabstractsystem.html#constructor" class="tsd-kind-icon">constructor</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
 						<h3>Properties</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_system_vm_handle_.handle.html#self" class="tsd-kind-icon">self</a></li>
-							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_system_vm_handle_.handle.html#system" class="tsd-kind-icon">system</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class"><a href="_system_framework_test_.testabstractsystem.html#mock" class="tsd-kind-icon">MOCK</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-overwrite"><a href="_system_framework_test_.testabstractsystem.html#configuration" class="tsd-kind-icon">configuration</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_system_framework_test_.testabstractsystem.html#state" class="tsd-kind-icon">state</a></li>
 						</ul>
 					</section>
 					<section class="tsd-index-section ">
 						<h3>Methods</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_system_vm_handle_.handle.html#exec" class="tsd-kind-icon">exec</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_system_framework_test_.testabstractsystem.html#accept" class="tsd-kind-icon">accept</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_system_framework_test_.testabstractsystem.html#allocate" class="tsd-kind-icon">allocate</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_system_framework_test_.testabstractsystem.html#exec" class="tsd-kind-icon">exec</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_system_framework_test_.testabstractsystem.html#ident" class="tsd-kind-icon">ident</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_system_framework_test_.testabstractsystem.html#init" class="tsd-kind-icon">init</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_system_framework_test_.testabstractsystem.html#notify" class="tsd-kind-icon">notify</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_system_framework_test_.testabstractsystem.html#run" class="tsd-kind-icon">run</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_system_framework_test_.testabstractsystem.html#spawn" class="tsd-kind-icon">spawn</a></li>
+							<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_system_framework_test_.testabstractsystem.html#stop" class="tsd-kind-icon">stop</a></li>
 						</ul>
 					</section>
 				</div>
 			</section>
 		</section>
 		<section class="tsd-panel-group tsd-member-group ">
-			<h2>Properties</h2>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="self" class="tsd-anchor"></a>
-				<h3>self</h3>
-				<div class="tsd-signature tsd-kind-icon">self<span class="tsd-signature-symbol">:</span> <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></div>
-				<aside class="tsd-sources">
-					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/vm/handle.ts#L14">system/vm/handle.ts:14</a></li>
-					</ul>
-				</aside>
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>self is the address of the actor.</p>
-					</div>
-				</div>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-				<a name="system" class="tsd-anchor"></a>
-				<h3>system</h3>
-				<div class="tsd-signature tsd-kind-icon">system<span class="tsd-signature-symbol">:</span> <a href="_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></div>
-				<aside class="tsd-sources">
-					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/vm/handle.ts#L19">system/vm/handle.ts:19</a></li>
-					</ul>
-				</aside>
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>system the actor is part of.</p>
-					</div>
-				</div>
-			</section>
-		</section>
-		<section class="tsd-panel-group tsd-member-group ">
-			<h2>Methods</h2>
-			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
-				<a name="exec" class="tsd-anchor"></a>
-				<h3>exec</h3>
-				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="../classes/_system_vm_script_.script.html" class="tsd-signature-type">Script</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+			<h2>Constructors</h2>
+			<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+				<a name="constructor" class="tsd-anchor"></a>
+				<h3>constructor</h3>
+				<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+					<li class="tsd-signature tsd-kind-icon">new <wbr>Test<wbr>Abstract<wbr>System<span class="tsd-signature-symbol">(</span>configuration<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_system_configuration_.configuration.html" class="tsd-signature-type">Configuration</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_framework_test_.testabstractsystem.html" class="tsd-signature-type">TestAbstractSystem</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
+							<p>Overrides <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#constructor">constructor</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/16a0f8d/lib/actor/system/vm/handle.ts#L24">system/vm/handle.ts:24</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/test.ts#L18">system/framework/test.ts:18</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> configuration: <a href="../interfaces/_system_configuration_.configuration.html" class="tsd-signature-type">Configuration</a><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="_system_framework_test_.testabstractsystem.html" class="tsd-signature-type">TestAbstractSystem</a></h4>
+					</li>
+				</ul>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Properties</h2>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+				<a name="mock" class="tsd-anchor"></a>
+				<h3>MOCK</h3>
+				<div class="tsd-signature tsd-kind-icon">MOCK<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Data</span><span class="tsd-signature-symbol"> =&nbsp;new Data()</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/test.ts#L26">system/framework/test.ts:26</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite">
+				<a name="configuration" class="tsd-anchor"></a>
+				<h3>configuration</h3>
+				<div class="tsd-signature tsd-kind-icon">configuration<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_system_configuration_.configuration.html" class="tsd-signature-type">Configuration</a></div>
+				<aside class="tsd-sources">
+					<p>Implementation of <a href="../interfaces/_system_vm_index_.platform.html">Platform</a>.<a href="../interfaces/_system_vm_index_.platform.html#configuration">configuration</a></p>
+					<p>Overrides <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#configuration">configuration</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/test.ts#L20">system/framework/test.ts:20</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+				<a name="state" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagAbstract">Abstract</span> state</h3>
+				<div class="tsd-signature tsd-kind-icon">state<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_system_state_.state.html" class="tsd-signature-type">State</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<aside class="tsd-sources">
+					<p>Implementation of <a href="../interfaces/_system_vm_index_.platform.html">Platform</a>.<a href="../interfaces/_system_vm_index_.platform.html#state">state</a></p>
+					<p>Inherited from <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#state">state</a></p>
+					<ul>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/index.ts#L57">system/framework/index.ts:57</a></li>
+					</ul>
+				</aside>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Methods</h2>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+				<a name="accept" class="tsd-anchor"></a>
+				<h3>accept</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<li class="tsd-signature tsd-kind-icon">accept<span class="tsd-signature-symbol">(</span>m<span class="tsd-signature-symbol">: </span><a href="../modules/_message_.html#message" class="tsd-signature-type">Message</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Implementation of <a href="../interfaces/_system_vm_index_.platform.html">Platform</a>.<a href="../interfaces/_system_vm_index_.platform.html#accept">accept</a></p>
+							<p>Overrides <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#accept">accept</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/test.ts#L47">system/framework/test.ts:47</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>m: <a href="../modules/_message_.html#message" class="tsd-signature-type">Message</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+				<a name="allocate" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagAbstract">Abstract</span> allocate</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">allocate<span class="tsd-signature-symbol">(</span>a<span class="tsd-signature-symbol">: </span><a href="../interfaces/_index_.actor.html" class="tsd-signature-type">Actor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span>, h<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_vm_runtime_index_.runtime.html" class="tsd-signature-type">Runtime</a>, t<span class="tsd-signature-symbol">: </span><a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><a href="_system_framework_index_.abstractsystem.html" class="tsd-signature-type">AbstractSystem</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Implementation of <a href="../interfaces/_system_vm_index_.platform.html">Platform</a>.<a href="../interfaces/_system_vm_index_.platform.html#allocate">allocate</a></p>
+							<p>Inherited from <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#allocate">allocate</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/index.ts#L59">system/framework/index.ts:59</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>a: <a href="../interfaces/_index_.actor.html" class="tsd-signature-type">Actor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+							<li>
+								<h5>h: <a href="../interfaces/_system_vm_runtime_index_.runtime.html" class="tsd-signature-type">Runtime</a></h5>
+							</li>
+							<li>
+								<h5>t: <a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><a href="_system_framework_index_.abstractsystem.html" class="tsd-signature-type">AbstractSystem</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+				<a name="exec" class="tsd-anchor"></a>
+				<h3>exec</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>i<span class="tsd-signature-symbol">: </span><a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a>, s<span class="tsd-signature-symbol">: </span><a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../enums/_system_vm_frame_.field.html#value" class="tsd-signature-type">Value</a><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Implementation of <a href="../interfaces/_system_vm_index_.platform.html">Platform</a>.<a href="../interfaces/_system_vm_index_.platform.html#exec">exec</a></p>
+							<p>Overrides <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#exec">exec</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/test.ts#L28">system/framework/test.ts:28</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>i: <a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a></h5>
+							</li>
+							<li>
+								<h5>s: <a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../enums/_system_vm_frame_.field.html#value" class="tsd-signature-type">Value</a><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+				<a name="ident" class="tsd-anchor"></a>
+				<h3>ident</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<li class="tsd-signature tsd-kind-icon">ident<span class="tsd-signature-symbol">(</span>i<span class="tsd-signature-symbol">: </span><a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Implementation of <a href="../interfaces/_system_vm_index_.platform.html">Platform</a>.<a href="../interfaces/_system_vm_index_.platform.html#ident">ident</a></p>
+							<p>Overrides <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#ident">ident</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/test.ts#L35">system/framework/test.ts:35</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>i: <a href="../interfaces/_index_.instance.html" class="tsd-signature-type">Instance</a></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+				<a name="init" class="tsd-anchor"></a>
+				<h3>init</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<li class="tsd-signature tsd-kind-icon">init<span class="tsd-signature-symbol">(</span>c<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">C</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Overrides <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#init">init</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/test.ts#L41">system/framework/test.ts:41</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-parameters-title">Parameters</h4>
+						<ul class="tsd-parameters">
+							<li>
+								<h5>c: <span class="tsd-signature-type">C</span></h5>
+							</li>
+						</ul>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">C</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+				<a name="notify" class="tsd-anchor"></a>
+				<h3>notify</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">notify<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Implementation of <a href="../interfaces/_system_vm_index_.platform.html">Platform</a>.<a href="../interfaces/_system_vm_index_.platform.html#notify">notify</a></p>
+							<p>Inherited from <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#notify">notify</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/index.ts#L87">system/framework/index.ts:87</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+				<a name="run" class="tsd-anchor"></a>
+				<h3>run</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<li class="tsd-signature tsd-kind-icon">run<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Implementation of <a href="../interfaces/_system_vm_index_.platform.html">Platform</a>.<a href="../interfaces/_system_vm_index_.platform.html#run">run</a></p>
+							<p>Overrides <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#run">run</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/test.ts#L59">system/framework/test.ts:59</a></li>
+							</ul>
+						</aside>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+				<a name="spawn" class="tsd-anchor"></a>
+				<h3>spawn</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<li class="tsd-signature tsd-kind-icon">spawn<span class="tsd-signature-symbol">(</span>t<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ActorTemplate</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><a href="_system_framework_index_.abstractsystem.html" class="tsd-signature-type">AbstractSystem</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_framework_index_.abstractsystem.html" class="tsd-signature-type">AbstractSystem</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Inherited from <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#spawn">spawn</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/index.ts#L73">system/framework/index.ts:73</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
-								<p>exec a Script on behalf of the actor.</p>
+								<p>spawn a new actor from a template.</p>
 							</div>
 						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>s: <a href="../classes/_system_vm_script_.script.html" class="tsd-signature-type">Script</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>t: <span class="tsd-signature-type">ActorTemplate</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><a href="_system_framework_index_.abstractsystem.html" class="tsd-signature-type">AbstractSystem</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h5>
 							</li>
 						</ul>
+						<h4 class="tsd-returns-title">Returns <a href="_system_framework_index_.abstractsystem.html" class="tsd-signature-type">AbstractSystem</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+				<a name="stop" class="tsd-anchor"></a>
+				<h3>stop</h3>
+				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<li class="tsd-signature tsd-kind-icon">stop<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				</ul>
+				<ul class="tsd-descriptions">
+					<li class="tsd-description">
+						<aside class="tsd-sources">
+							<p>Implementation of <a href="../interfaces/_system_vm_index_.platform.html">Platform</a>.<a href="../interfaces/_system_vm_index_.platform.html#stop">stop</a></p>
+							<p>Overrides <a href="_system_framework_index_.abstractsystem.html">AbstractSystem</a>.<a href="_system_framework_index_.abstractsystem.html#stop">stop</a></p>
+							<ul>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/framework/test.ts#L53">system/framework/test.ts:53</a></li>
+							</ul>
+						</aside>
 						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 					</li>
 				</ul>

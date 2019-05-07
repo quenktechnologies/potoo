@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Runtime } from '../runtime';
 import { Type, Location } from '../frame';
-import { System } from '../../';
 import {
     OP_CODE_PUSH_NUM,
     OP_CODE_PUSH_STR,
@@ -9,14 +7,15 @@ import {
     OP_CODE_PUSH_TEMP,
     OP_CODE_PUSH_MSG,
     OP_CODE_PUSH_FOREIGN,
-  Log,
-    Level
+    Log,
+    Level,
+    Op
 } from './';
 
 /**
  * PushNum pushes a literal number onto the stack.
  */
-export class PushNum<C extends Context, S extends System<C>> {
+export class PushNum implements Op {
 
     constructor(public index: number) { }
 
@@ -24,7 +23,7 @@ export class PushNum<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         e.current().get().push(this.index, Type.Number, Location.Literal);
 
@@ -41,7 +40,7 @@ export class PushNum<C extends Context, S extends System<C>> {
 /**
  * PushStr pushes a string from the constants table onto the stack.
  */
-export class PushStr<C extends Context, S extends System<C>> {
+export class PushStr implements Op {
 
     constructor(public index: number) { }
 
@@ -49,7 +48,7 @@ export class PushStr<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         e.current().get().push(this.index, Type.String, Location.Constants);
 
@@ -66,7 +65,7 @@ export class PushStr<C extends Context, S extends System<C>> {
 /**
  * PushFunc pushes a function constant onto the stack.
  */
-export class PushFunc<C extends Context, S extends System<C>> {
+export class PushFunc implements Op {
 
     constructor(public index: number) { }
 
@@ -74,7 +73,7 @@ export class PushFunc<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         e.current().get().push(this.index, Type.Function, Location.Constants);
 
@@ -91,7 +90,7 @@ export class PushFunc<C extends Context, S extends System<C>> {
 /**
  * PushTemp pushes a template from the constants table onto the stack.
  */
-export class PushTemp<C extends Context, S extends System<C>> {
+export class PushTemp implements Op {
 
     constructor(public index: number) { }
 
@@ -99,7 +98,7 @@ export class PushTemp<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         e.current().get().push(this.index, Type.Template, Location.Constants);
 
@@ -116,7 +115,7 @@ export class PushTemp<C extends Context, S extends System<C>> {
 /**
  * PushMsg pushes a message constant onto the stack.
  */
-export class PushMsg<C extends Context, S extends System<C>> {
+export class PushMsg implements Op {
 
     constructor(public index: number) { }
 
@@ -124,7 +123,7 @@ export class PushMsg<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         e.current().get().push(this.index, Type.Message, Location.Constants);
 
@@ -141,7 +140,7 @@ export class PushMsg<C extends Context, S extends System<C>> {
 /**
  * PushForeign pushes a foreign function onto the stack.
  */
-export class PushForeign<C extends Context, S extends System<C>> {
+export class PushForeign implements Op {
 
     constructor(public index: number) { }
 
@@ -149,7 +148,7 @@ export class PushForeign<C extends Context, S extends System<C>> {
 
     level = Level.Base;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         e.current().get().push(this.index, Type.Foreign, Location.Constants);
 

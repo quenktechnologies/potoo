@@ -1,4 +1,3 @@
-import { Context } from '../../context';
 import { Template } from '../../template';
 import { Message } from '../../message';
 import { System } from '../';
@@ -6,15 +5,15 @@ import { Op } from './op';
 /**
  * Function type.
  */
-export declare type Function<C extends Context, S extends System<C>> = () => Op<C, S>[];
+export declare type Function = () => Op[];
 /**
  * Foreign function type.
  */
-export declare type Foreign<C extends Context, S extends System<C>> = (...arg: Value<C, S>) => Value<C, S>;
+export declare type Foreign = (...arg: Value) => Value;
 /**
  * Value corresponds to the VM's supported types.
  */
-export declare type Value<C extends Context, S extends System<C>> = number | string | Function<C, S> | Template<C, S> | Message;
+export declare type Value = number | string | Function | Template<System> | Message;
 /**
  * Constants is a tuple of immutable values available to a
  * Script at runtime.
@@ -22,7 +21,7 @@ export declare type Value<C extends Context, S extends System<C>> = number | str
  * Access to these values happens by using first the index of its type
  * then the following index within the type's table.
  */
-export declare type Constants<C extends Context, S extends System<C>> = [number[], string[], Function<C, S>[], Template<C, S>[], Message[], Foreign<C, S>[]];
+export declare type Constants = [number[], string[], Function[], Template<System>[], Message[], Foreign[]];
 /**
  * Script is a "program" an actor submits to the Runtime run execute.
  *
@@ -30,8 +29,8 @@ export declare type Constants<C extends Context, S extends System<C>> = [number[
  * 1. constants - Static values referenced in the code section.
  * 2. code - A list of one or more Op codes to execute in sequence.
  */
-export declare class Script<C extends Context, S extends System<C>> {
-    constants: Constants<C, S>;
-    code: Op<C, S>[];
-    constructor(constants?: Constants<C, S>, code?: Op<C, S>[]);
+export declare class Script {
+    constants: Constants;
+    code: Op[];
+    constructor(constants?: Constants, code?: Op[]);
 }

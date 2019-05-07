@@ -8,36 +8,34 @@ import { Receive } from '../system/vm/op/receive';
 import { Read } from '../system/vm/op/read';
 import { Op } from '../system/vm/op';
 import { Constants, Foreign, Script } from '../system/vm/script';
-import {System} from '../system';
-import { Context } from '../context';
 import { Address } from '../address';
 import { Message } from '../message';
 
-const acceptCode: Op<Context, System<Context>>[] = [
+const acceptCode: Op[] = [
     new PushMsg(0),
     new Drop()
 ];
 
-const tellcode: Op<Context, System<Context>>[] = [
+const tellcode: Op[] = [
 
     new PushMsg(0),    //0: Push the message onto the stack. 
     new PushStr(0),    //1: Push the address onto the stack.
     new Tell(),        //2: Tell the message to the address.
     new JumpIfOne(6),  //3: Jump to the end if sending was successful.
-  new PushMsg(0),    //4: Put the message back on the stack.
-  new Drop(),        //5: Drop the script.
+    new PushMsg(0),    //4: Put the message back on the stack.
+    new Drop(),        //5: Drop the script.
     new Noop()         //6: Do nothing.
 
 ];
 
-const receivecode: Op<Context, System<Context>>[] = [
+const receivecode: Op[] = [
 
     new PushForeign(0),
     new Receive()
 
 ];
 
-const notifyCode: Op<Context, System<Context>>[] = [
+const notifyCode: Op[] = [
 
     new Read(),
     new JumpIfOne(3),
@@ -49,12 +47,11 @@ const notifyCode: Op<Context, System<Context>>[] = [
 /**
  * AcceptScript for discarding messages.
  */
-export class AcceptScript<C extends Context, S extends System<C>>
-    extends Script<C, S> {
+export class AcceptScript extends Script {
 
     constructor(public msg: Message) {
 
-        super(<Constants<C, S>>[[], [], [], [], [msg], []], acceptCode);
+        super(<Constants>[[], [], [], [], [msg], []], acceptCode);
 
     }
 
@@ -66,14 +63,13 @@ export { AcceptScript as DropScript }
 /**
  * TellScript for sending messages.
  */
-export class TellScript<C extends Context, S extends System<C>>
-    extends Script<C, S> {
+export class TellScript extends Script {
 
     constructor(public to: Address, public msg: Message) {
 
         super(
-            <Constants<C, S>>[[], [to], [], [], [msg], []],
-            <Op<C, S>[]>tellcode);
+            <Constants>[[], [to], [], [], [msg], []],
+            <Op[]>tellcode);
 
     }
 
@@ -82,12 +78,11 @@ export class TellScript<C extends Context, S extends System<C>>
 /**
  * ReceiveScript
  */
-export class ReceiveScript<C extends Context, S extends System<C>>
-    extends Script<C, S> {
+export class ReceiveScript extends Script {
 
-    constructor(public func: Foreign<C, S>) {
+    constructor(public func: Foreign) {
 
-        super(<Constants<C, S>>[[], [], [], [], [], [func]], receivecode);
+        super(<Constants>[[], [], [], [], [], [func]], receivecode);
 
     }
 
@@ -96,12 +91,11 @@ export class ReceiveScript<C extends Context, S extends System<C>>
 /**
  * NotifyScript
  */
-export class NotifyScript<C extends Context, S extends System<C>>
-    extends Script<C, S> {
+export class NotifyScript extends Script {
 
     constructor() {
 
-        super(<Constants<C, S>>[[], [], [], [], [], []], notifyCode);
+        super(<Constants>[[], [], [], [], [], []], notifyCode);
 
     }
 

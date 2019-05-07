@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Type, Location, Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { OP_CODE_CALL, Log, Op, Level } from './';
 
 /**
@@ -11,7 +9,7 @@ import { OP_CODE_CALL, Log, Op, Level } from './';
  * 1: The function reference from the top of the stack.
  * 2: N arguments to be pushed onto the new Frame's stack.
  */
-export class Call<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Call implements Op {
 
     constructor(public args: number) { }
 
@@ -19,7 +17,7 @@ export class Call<C extends Context, S extends System<C>> implements Op<C, S> {
 
     public level = Level.Control;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
         let { actor, context, script, heap } = curr;
@@ -44,7 +42,7 @@ export class Call<C extends Context, S extends System<C>> implements Op<C, S> {
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(f: Frame): Log {
 
         let data = [f.peek()];
 

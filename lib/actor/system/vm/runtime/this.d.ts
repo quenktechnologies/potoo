@@ -8,6 +8,7 @@ import { Configuration } from '../../configuration';
 import { Frame } from '../frame';
 import { Value, Script } from '../script';
 import { Platform } from '../';
+import { System } from '../../';
 import { Runtime } from './';
 /**
  * This is an implementation of Runtime for exactly one
@@ -15,30 +16,30 @@ import { Runtime } from './';
  *
  * It has all the methods and properties expected for Op code execution.
  */
-export declare class This<C extends Context, S extends Platform<C>> implements Runtime<C, S> {
+export declare class This implements Runtime {
     self: Address;
-    system: S;
-    stack: Frame<C, S>[];
-    queue: Frame<C, S>[];
-    constructor(self: Address, system: S, stack?: Frame<C, S>[], queue?: Frame<C, S>[]);
+    system: Platform;
+    stack: Frame[];
+    queue: Frame[];
+    constructor(self: Address, system: Platform, stack?: Frame[], queue?: Frame[]);
     running: boolean;
     config(): Configuration;
-    current(): Maybe<Frame<C, S>>;
-    allocate(addr: Address, t: template.Template<C, S>): C;
-    getContext(addr: Address): Maybe<C>;
-    getRouter(addr: Address): Maybe<C>;
+    current(): Maybe<Frame>;
+    allocate(addr: Address, t: template.Template<System>): Context;
+    getContext(addr: Address): Maybe<Context>;
+    getRouter(addr: Address): Maybe<Context>;
     getGroup(name: string): Maybe<Address[]>;
-    getChildren(addr: Address): Maybe<Contexts<C>>;
-    putContext(addr: Address, ctx: C): This<C, S>;
-    removeContext(addr: Address): This<C, S>;
-    putRoute(target: Address, router: Address): This<C, S>;
-    removeRoute(target: Address): This<C, S>;
-    putMember(group: string, addr: Address): This<C, S>;
-    removeMember(group: string, addr: Address): This<C, S>;
-    push(f: Frame<C, S>): This<C, S>;
-    clear(): This<C, S>;
-    drop(m: Message): This<C, S>;
+    getChildren(addr: Address): Maybe<Contexts<Context>>;
+    putContext(addr: Address, ctx: Context): This;
+    removeContext(addr: Address): This;
+    putRoute(target: Address, router: Address): This;
+    removeRoute(target: Address): This;
+    putMember(group: string, addr: Address): This;
+    removeMember(group: string, addr: Address): This;
+    push(f: Frame): This;
+    clear(): This;
+    drop(m: Message): This;
     raise(err: Err): void;
-    exec(s: Script<C, S>): Maybe<Value<C, S>>;
-    run(): Maybe<Value<C, S>>;
+    exec(s: Script): Maybe<Value>;
+    run(): Maybe<Value>;
 }

@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { Log, Level, Op } from './';
 /**
  * Add the top two operands of the stack.
@@ -14,9 +12,9 @@ import { Log, Level, Op } from './';
  *
  * The result of adding the two numbers.
  */
-export declare class Add<C extends Context, S extends System<C>> implements Op<C, S> {
+export declare class Add implements Op {
     code: number;
     level: Level;
-    exec(e: Runtime<C, S>): void;
-    toLog(f: Frame<C, S>): Log;
+    exec(e: Runtime): void;
+    toLog(f: Frame): Log;
 }

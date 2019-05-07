@@ -6,7 +6,6 @@ import { Instance } from '../../';
 import { Value, Script } from '../vm/script';
 import { Message } from '../../message';
 import { Context } from '../../context';
-import { System } from '../';
 import { AbstractSystem } from './';
 
 /**
@@ -15,8 +14,7 @@ import { AbstractSystem } from './';
  * This system is provided for testing purposes. It provdies all the features
  * of the AbstractSystem.
  */
-export abstract class TestAbstractSystem<C extends Context>
-    extends AbstractSystem<C> {
+export abstract class TestAbstractSystem extends AbstractSystem {
 
     constructor(public configuration: config.Configuration = {}) {
 
@@ -26,11 +24,10 @@ export abstract class TestAbstractSystem<C extends Context>
 
     MOCK = new Data();
 
-    exec(i: Instance, s: Script<C, TestAbstractSystem<C>>)
-        : Maybe<Value<C, TestAbstractSystem<C>>> {
+    exec(i: Instance, s: Script): Maybe<Value> {
 
         this.MOCK.record('exec', [i, s], this);
-        return super.exec(i, <Script<C, System<C>>>s);
+        return super.exec(i, <Script>s);
 
     }
 
@@ -40,7 +37,7 @@ export abstract class TestAbstractSystem<C extends Context>
 
     }
 
-    init(c: C): C {
+    init(c: Context): Context {
 
         return this.MOCK.record('init', [c], super.init(c));
 

@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Runtime } from '../runtime';
-import {Frame} from '../frame';
-import { System } from '../../';
+import { Frame } from '../frame';
 import { OP_CODE_DROP, Log, Op, Level } from './';
 
 /**
@@ -11,13 +9,13 @@ import { OP_CODE_DROP, Log, Op, Level } from './';
  *
  * 1. The message to be dropped.
  */
-export class Drop<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Drop implements Op {
 
     public code = OP_CODE_DROP
 
     public level = Level.Actor;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
 
@@ -32,7 +30,7 @@ export class Drop<C extends Context, S extends System<C>> implements Op<C, S> {
 
     }
 
-  toLog(f:Frame<C,S>): Log {
+    toLog(f: Frame): Log {
 
         return ['drop', [], [f.peek()]];
 

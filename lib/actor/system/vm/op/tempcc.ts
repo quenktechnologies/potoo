@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { OP_CODE_TEMP_CC, Log, Level } from './';
 
 /**
@@ -11,13 +9,13 @@ import { OP_CODE_TEMP_CC, Log, Level } from './';
  *
  * 1: Reference to the template to count.
  */
-export class TempCC<C extends Context, S extends System<C>>  {
+export class TempCC {
 
     public code = OP_CODE_TEMP_CC;
 
     public level = Level.Control;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
 
@@ -29,7 +27,7 @@ export class TempCC<C extends Context, S extends System<C>>  {
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(f: Frame): Log {
 
         return ['tempcc', [], [f.peek()]];
 

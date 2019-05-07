@@ -1,4 +1,3 @@
-import { Context } from '../../context';
 import { Address } from '../../address';
 import { Template } from '../../template';
 import { Script } from '../vm/script';
@@ -6,8 +5,8 @@ import { System } from '../';
 /**
  * SpawnScript for spawning new actors and children from templates.
  */
-export declare class SpawnScript<C extends Context, S extends System<C>> extends Script<C, S> {
+export declare class SpawnScript extends Script {
     parent: Address;
-    tmp: Template<C, S>;
-    constructor(parent: Address, tmp: Template<C, S>);
+    tmp: Template<System>;
+    constructor(parent: Address, tmp: Template<System>);
 }

@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { OP_CODE_ADD, Log, Level, Op } from './';
 
 /**
@@ -15,31 +13,31 @@ import { OP_CODE_ADD, Log, Level, Op } from './';
  *
  * The result of adding the two numbers.
  */
-export class Add<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Add implements Op {
 
     public code = OP_CODE_ADD;
 
     public level = Level.Base;
 
-    exec(e: Runtime<C, S>) {
+    exec(e: Runtime) {
 
         let curr = e.current().get();
 
-      let eitherA = curr.resolveNumber(curr.pop());
+        let eitherA = curr.resolveNumber(curr.pop());
 
-      let eitherB = curr.resolveNumber(curr.pop());
+        let eitherB = curr.resolveNumber(curr.pop());
 
-      if(eitherA.isLeft()) 
-        return e.raise(eitherA.takeLeft());
+        if (eitherA.isLeft())
+            return e.raise(eitherA.takeLeft());
 
-      if(eitherB.isLeft())
-        return e.raise(eitherB.takeLeft());
+        if (eitherB.isLeft())
+            return e.raise(eitherB.takeLeft());
 
-      curr.pushNumber(eitherA.takeRight() + eitherB.takeRight());
+        curr.pushNumber(eitherA.takeRight() + eitherB.takeRight());
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(f: Frame): Log {
 
         return ['add', [], [f.peek(), f.peek(1)]];
 

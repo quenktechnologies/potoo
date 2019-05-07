@@ -13,13 +13,13 @@ import { AbstractSystem } from './';
  * This system is provided for testing purposes. It provdies all the features
  * of the AbstractSystem.
  */
-export declare abstract class TestAbstractSystem<C extends Context> extends AbstractSystem<C> {
+export declare abstract class TestAbstractSystem extends AbstractSystem {
     configuration: config.Configuration;
     constructor(configuration?: config.Configuration);
     MOCK: Data;
-    exec(i: Instance, s: Script<C, TestAbstractSystem<C>>): Maybe<Value<C, TestAbstractSystem<C>>>;
+    exec(i: Instance, s: Script): Maybe<Value>;
     ident(i: Instance): Address;
-    init(c: C): C;
+    init(c: Context): Context;
     accept(m: Message): void;
     stop(): void;
     run(): void;

@@ -1,4 +1,3 @@
-import { Context } from '../../context';
 import { Address } from '../../address';
 import { Template } from '../../template';
 import { PushNum, PushStr, PushTemp, PushFunc } from '../vm/op/push';
@@ -17,14 +16,14 @@ import { Op } from '../vm/op';
 import { Constants, Script } from '../vm/script';
 import { System } from '../';
 
-const spawnCode: Op<Context, System<Context>>[] = [
+const spawnCode: Op[] = [
     new PushStr(0),
     new PushTemp(0),
     new PushFunc(0),
     new Call(2)
 ];
 
-const spawnFuncCode: Op<Context, System<Context>>[] = [
+const spawnFuncCode: Op[] = [
     new Store(0),     // 0:  set $0 to the parent address
     new Store(1),     // 1:  set $1 to the template
     new Load(1),      // 2:  put the template back on the stack.
@@ -58,13 +57,14 @@ const spawnFuncCode: Op<Context, System<Context>>[] = [
 /**
  * SpawnScript for spawning new actors and children from templates.
  */
-export class SpawnScript<C extends Context, S extends System<C>>
-    extends Script<C, S> {
+export class SpawnScript extends Script {
 
-    constructor(public parent: Address, public tmp: Template<C, S>) {
+    constructor(
+        public parent: Address,
+        public tmp: Template<System>) {
 
         super(
-            <Constants<C, S>>[[], [parent], [() => spawnFuncCode], [tmp], [], []],
+            <Constants>[[], [parent], [() => spawnFuncCode], [tmp], [], []],
             spawnCode);
 
     }

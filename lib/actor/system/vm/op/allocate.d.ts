@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { Log, Op, Level } from './';
 /**
  * Allocate a new Context frame for an actor from a template.
@@ -15,9 +13,9 @@ import { Log, Op, Level } from './';
  * UnknownParentAddressErr
  * DuplicateAddressErr
  */
-export declare class Allocate<C extends Context, S extends System<C>> implements Op<C, S> {
+export declare class Allocate implements Op {
     code: number;
     level: Level;
-    exec(e: Runtime<C, S>): void;
-    toLog(f: Frame<C, S>): Log;
+    exec(e: Runtime): void;
+    toLog(f: Frame): Log;
 }

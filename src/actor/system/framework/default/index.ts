@@ -12,21 +12,20 @@ import { Template } from '../../../template';
 import { Runtime } from '../../vm/runtime';
 import { Actor } from '../../../';
 import { AbstractSystem, newContext, newState } from '../../framework';
-import { System } from '../../';
 
 /**
  * ActorSystem default implementation for general purpose work.
  */
-export class ActorSystem extends AbstractSystem<Context> {
+export class ActorSystem extends AbstractSystem {
 
     state: State<Context> = newState(this);
 
     allocate(
         a: Actor<Context>,
-        h: Runtime<Context, ActorSystem>,
-        t: Template<Context, ActorSystem>): Context {
+        h: Runtime,
+        t: Template<ActorSystem>): Context {
 
-        return newContext(a, <Runtime<Context, System<Context>>>h, t);
+        return newContext(a, <Runtime>h, t);
 
     }
 

@@ -3,7 +3,6 @@ import { Runtime } from './vm/runtime';
 import { Instance } from '../';
 import { Address } from '../address';
 import { Context, Contexts } from '../context';
-import { System } from './';
 /**
  * Routers map.
  */
@@ -56,7 +55,7 @@ export declare const getAddress: <C extends Context>(s: State<C>, actor: Instanc
 /**
  * getRuntime attempts to retrieve the runtime for an Actor instance.
  */
-export declare const getRuntime: <C extends Context>(s: State<C>, actor: Instance) => Maybe<Runtime<Context, System<Context>>>;
+export declare const getRuntime: <C extends Context>(s: State<C>, actor: Instance) => Maybe<Runtime>;
 /**
  * getChildren returns the child contexts for an address.
  */
