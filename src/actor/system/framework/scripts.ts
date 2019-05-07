@@ -1,4 +1,3 @@
-import { Context } from '../../context';
 import { Address } from '../../address';
 import { Template } from '../../template';
 import { PushNum, PushStr, PushTemp, PushFunc } from '../vm/op/push';
@@ -62,7 +61,7 @@ export class SpawnScript extends Script {
 
     constructor(
         public parent: Address,
-        public tmp: Template<Context, System>) {
+        public tmp: Template<System>) {
 
         super(
             <Constants>[[], [parent], [() => spawnFuncCode], [tmp], [], []],

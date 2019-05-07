@@ -56,9 +56,9 @@ export abstract class AbstractResident<C extends Context, S extends System>
 
     }
 
-    spawn(t: Template<C, S>): Address {
+    spawn(t: Template<S>): Address {
 
-        this.system.exec(this, new SpawnScript(this.self(), <any>t));
+        this.system.exec(this, new SpawnScript(this.self(), <Template<System>>t));
 
         return isRestricted(t.id) ?
             ADDRESS_DISCARD :

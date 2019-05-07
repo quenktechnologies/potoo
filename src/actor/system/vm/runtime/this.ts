@@ -58,7 +58,7 @@ export class This implements Runtime {
 
     }
 
-    allocate(addr: Address, t: template.Template<Context, System>): Context {
+    allocate(addr: Address, t: template.Template<System>): Context {
 
         let h = new This(addr, this.system);
         let act = t.create(this.system);

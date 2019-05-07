@@ -14,8 +14,7 @@ import { AbstractSystem } from './';
  * This system is provided for testing purposes. It provdies all the features
  * of the AbstractSystem.
  */
-export abstract class TestAbstractSystem<C extends Context>
-    extends AbstractSystem<C> {
+export abstract class TestAbstractSystem extends AbstractSystem {
 
     constructor(public configuration: config.Configuration = {}) {
 
@@ -38,7 +37,7 @@ export abstract class TestAbstractSystem<C extends Context>
 
     }
 
-    init(c: C): C {
+    init(c: Context): Context {
 
         return this.MOCK.record('init', [c], super.init(c));
 

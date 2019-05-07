@@ -39,7 +39,7 @@ export interface Runtime extends ErrorHandler {
     /**
      * allocate a new Context for an actor.
      */
-    allocate(self: Address, t: template.Template<Context, System>): Context
+    allocate(self: Address, t: template.Template<System>): Context
 
     /**
      * getContext from the system given its address.
