@@ -1,6 +1,5 @@
 import { assert } from '@quenk/test/lib/assert';
 import { Context } from '../../../src/actor/context';
-import { System } from '../../../src/actor/system';
 import {
     AbstractResident,
     Mutable,
@@ -12,7 +11,7 @@ import { ActorSystem, system } from '../../../src/actor/system/framework/default
 class Killer extends AbstractResident<Context, ActorSystem> {
 
     constructor(
-        public s: System<Context>,
+        public s: ActorSystem,
         public done: (k: Killer) => void) { super(s); }
 
     init(c: Context): Context {
@@ -67,7 +66,7 @@ class Victim extends Immutable<void, Context, ActorSystem> {
 class Exiter extends AbstractResident<Context, ActorSystem> {
 
     constructor(
-        public s: System<Context>,
+        public s: ActorSystem,
         public done: () => void) { super(s); }
 
     init(c: Context): Context {
@@ -102,7 +101,7 @@ class Exiter extends AbstractResident<Context, ActorSystem> {
 class ShouldWork extends Mutable<Context, ActorSystem> {
 
     constructor(
-        public s: System<Context>,
+        public s: ActorSystem,
         public done: () => void) {
 
         super(s);
@@ -138,7 +137,7 @@ class ShouldWork extends Mutable<Context, ActorSystem> {
 class MutableSelfTalk extends Mutable<Context, ActorSystem> {
 
     constructor(
-        public s: System<Context>,
+        public s: ActorSystem,
         public done: () => void) { super(s); }
 
     count = 0;
@@ -185,7 +184,7 @@ class MutableSelfTalk extends Mutable<Context, ActorSystem> {
 class ImmutableSelfTalk extends Immutable<string, Context, ActorSystem> {
 
     constructor(
-        public s: System<Context>,
+        public s: ActorSystem,
         public done: () => void) { super(s); }
 
     count = 0;
@@ -227,7 +226,7 @@ describe('resident', () => {
 
         describe('kill', () => {
 
-           it('should kill children', done => {
+            it('should kill children', done => {
 
                 let s = system({ log: { level: 1 } })
                     .spawn({
@@ -249,7 +248,7 @@ describe('resident', () => {
                 }, 200);
             })
 
-           it('should kill grand children', done => {
+            it('should kill grand children', done => {
 
                 let s = system({ log: { level: 1 } })
                     .spawn({
@@ -279,7 +278,7 @@ describe('resident', () => {
 
         describe('exit', () => {
 
-           it('should work', done => {
+            it('should work', done => {
 
                 let s = system({ log: { level: 1 } })
                     .spawn({
@@ -320,7 +319,7 @@ describe('resident', () => {
 
             })
 
-           it('should be able to talk to itself', done => {
+            it('should be able to talk to itself', done => {
 
                 system({ log: { level: 1 } })
                     .spawn({
@@ -337,7 +336,7 @@ describe('resident', () => {
 
     describe('Immutable', () => {
 
-       it('should be able to talk to itself', done => {
+        it('should be able to talk to itself', done => {
 
             system({ log: { level: 1 } })
                 .spawn({

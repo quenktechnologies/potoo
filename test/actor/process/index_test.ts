@@ -4,12 +4,11 @@ import { Case } from '../../../src/actor/resident/case';
 import { Mutable } from '../../../src/actor/resident';
 import { Context } from '../../../src/actor/context';
 import { Process } from '../../../src/actor/process';
-import { System } from '../../../src/actor/system';
 
 class Sender extends Mutable<Context, ActorSystem> {
 
     constructor(
-        public system: System<Context>,
+        public system: ActorSystem,
         public done: () => void) { super(system); }
 
     run() {
