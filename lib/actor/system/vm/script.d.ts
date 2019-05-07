@@ -1,4 +1,3 @@
-import { Context } from '../../context';
 import { Template } from '../../template';
 import { Message } from '../../message';
 import { System } from '../';
@@ -14,7 +13,7 @@ export declare type Foreign = (...arg: Value) => Value;
 /**
  * Value corresponds to the VM's supported types.
  */
-export declare type Value = number | string | Function | Template<Context, System> | Message;
+export declare type Value = number | string | Function | Template<System> | Message;
 /**
  * Constants is a tuple of immutable values available to a
  * Script at runtime.
@@ -22,7 +21,7 @@ export declare type Value = number | string | Function | Template<Context, Syste
  * Access to these values happens by using first the index of its type
  * then the following index within the type's table.
  */
-export declare type Constants = [number[], string[], Function[], Template<Context, System>[], Message[], Foreign[]];
+export declare type Constants = [number[], string[], Function[], Template<System>[], Message[], Foreign[]];
 /**
  * Script is a "program" an actor submits to the Runtime run execute.
  *

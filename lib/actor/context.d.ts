@@ -3,6 +3,7 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Runtime } from './system/vm/runtime';
 import { Template } from './template';
 import { Message } from './message';
+import { System } from './system';
 import { Behaviour, Instance } from './';
 /**
  * ErrorHandler processes errors that come up during an actor execution
@@ -40,6 +41,7 @@ export interface Contexts<C extends Context> {
  * Context stores all the information a system needs about a spawned actor.
  */
 export interface Context {
+    [key: string]: any;
     /**
      * mailbox for the actor.
      *
@@ -64,8 +66,6 @@ export interface Context {
     runtime: Runtime;
     /**
      * template used to create new instances of the actor.
-     *
-     * XXX: We use the any type here because there is a cyclical constraint.
      */
-    template: Template<any, any>;
+    template: Template<System>;
 }

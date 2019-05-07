@@ -132,7 +132,7 @@ export class Frame {
     /**
      * allocateTemplate
      */
-    allocateTemplate(t: Template<Context, System>): Data {
+    allocateTemplate(t: Template<System>): Data {
 
         return this.allocate(t, Type.Template);
 
@@ -285,7 +285,7 @@ export class Frame {
     /**
      * resolveTemplate
      */
-    resolveTemplate(data: Data): Either<Err, Template<Context, System>> {
+    resolveTemplate(data: Data): Either<Err, Template<System>> {
 
         if (data[Field.Type] !== Type.Template)
             return left(new error.TypeErr(Type.Template, data[Field.Type]));

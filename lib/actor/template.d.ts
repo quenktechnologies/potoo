@@ -21,7 +21,7 @@ export declare type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * Cons is applied to produce an instance of an actor.
  */
-export declare type Cons<C extends Context, S extends System> = (s: S) => Actor<C>;
+export declare type Cons<S extends System> = (s: S) => Actor<Context>;
 /**
  * DelayMilliseconds type.
  */
@@ -40,7 +40,7 @@ export declare type TrapFunc = (e: Err) => TrapAction;
  * The are the minimum amount of information required to create
  * a new actor instance.
  */
-export interface Template<C extends Context, S extends System> {
+export interface Template<S extends System> {
     /**
      * id of the actor used when constructing its address.
      */
@@ -52,7 +52,7 @@ export interface Template<C extends Context, S extends System> {
     /**
      * create function.
      */
-    create: Cons<C, S>;
+    create: Cons<S>;
     /**
      * trap is used to take action when the spanwed
      * action encounters an error.
@@ -70,5 +70,5 @@ export interface Template<C extends Context, S extends System> {
     /**
      * children is list of child actors that will automatically be spawned.
      */
-    children?: Template<C, S>[];
+    children?: Template<S>[];
 }

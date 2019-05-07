@@ -25,7 +25,7 @@ export declare class This implements Runtime {
     running: boolean;
     config(): Configuration;
     current(): Maybe<Frame>;
-    allocate(addr: Address, t: template.Template<Context, System>): Context;
+    allocate(addr: Address, t: template.Template<System>): Context;
     getContext(addr: Address): Maybe<Context>;
     getRouter(addr: Address): Maybe<Context>;
     getGroup(name: string): Maybe<Address[]>;

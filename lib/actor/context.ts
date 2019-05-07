@@ -3,6 +3,7 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Runtime } from './system/vm/runtime';
 import { Template } from './template';
 import { Message } from './message';
+import { System } from './system';
 import { Behaviour, Instance } from './';
 
 /**
@@ -53,6 +54,8 @@ export interface Contexts<C extends Context> {
  */
 export interface Context {
 
+    [key: string]: any
+
     /**
      * mailbox for the actor.
      *
@@ -82,9 +85,7 @@ export interface Context {
 
     /**
      * template used to create new instances of the actor.
-     *
-     * XXX: We use the any type here because there is a cyclical constraint.
      */
-    template: Template<any, any>
+    template: Template<System>
 
 }

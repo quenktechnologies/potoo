@@ -27,7 +27,7 @@ export declare abstract class AbstractResident<C extends Context, S extends Syst
     notify(): void;
     self(): string;
     accept(m: Message): void;
-    spawn(t: Template<C, S>): Address;
+    spawn(t: Template<S>): Address;
     tell<M>(ref: Address, m: M): AbstractResident<C, S>;
     kill(addr: Address): AbstractResident<C, S>;
     exit(): void;

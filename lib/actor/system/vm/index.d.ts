@@ -24,5 +24,5 @@ export interface Platform extends System, Actor<Context> {
     /**
      * allocate a new Context for an actor.
      */
-    allocate(a: Actor<Context>, h: Runtime, t: Template<Context, this>): Context;
+    allocate(a: Actor<Context>, h: Runtime, t: Template<this>): Context;
 }

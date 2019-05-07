@@ -15,7 +15,7 @@ export interface Api<C extends Context, S extends System> {
     /**
      * spawn a new child actor.
      */
-    spawn(t: Template<C, S>): Address;
+    spawn(t: Template<S>): Address;
     /**
      * tell a message to an actor address.
      */

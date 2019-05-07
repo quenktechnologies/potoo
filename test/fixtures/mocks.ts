@@ -22,7 +22,7 @@ export interface Contexts extends Ctxs<Context> { }
 
 export interface Context extends Ctx { }
 
-export interface Template extends T<Context, SystemImpl> { }
+export interface Template extends T<SystemImpl> { }
 
 export class InstanceImpl extends Mock implements Instance {
 

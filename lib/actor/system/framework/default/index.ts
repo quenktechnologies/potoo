@@ -16,14 +16,14 @@ import { AbstractSystem, newContext, newState } from '../../framework';
 /**
  * ActorSystem default implementation for general purpose work.
  */
-export class ActorSystem extends AbstractSystem<Context> {
+export class ActorSystem extends AbstractSystem {
 
     state: State<Context> = newState(this);
 
     allocate(
         a: Actor<Context>,
         h: Runtime,
-        t: Template<Context, ActorSystem>): Context {
+        t: Template<ActorSystem>): Context {
 
         return newContext(a, <Runtime>h, t);
 

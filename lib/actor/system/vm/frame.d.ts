@@ -85,7 +85,7 @@ export declare class Frame {
     /**
      * allocateTemplate
      */
-    allocateTemplate(t: Template<Context, System>): Data;
+    allocateTemplate(t: Template<System>): Data;
     /**
      * push onto the stack an Operand, indicating its type and storage location.
      */
@@ -125,7 +125,7 @@ export declare class Frame {
     /**
      * resolveTemplate
      */
-    resolveTemplate(data: Data): Either<Err, Template<Context, System>>;
+    resolveTemplate(data: Data): Either<Err, Template<System>>;
     /**
      * resolveMessage
      */

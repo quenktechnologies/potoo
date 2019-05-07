@@ -1,4 +1,3 @@
-import { Context } from '../../context';
 import { Address } from '../../address';
 import { Template } from '../../template';
 import { Script } from '../vm/script';
@@ -8,6 +7,6 @@ import { System } from '../';
  */
 export declare class SpawnScript extends Script {
     parent: Address;
-    tmp: Template<Context, System>;
-    constructor(parent: Address, tmp: Template<Context, System>);
+    tmp: Template<System>;
+    constructor(parent: Address, tmp: Template<System>);
 }

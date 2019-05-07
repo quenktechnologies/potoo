@@ -25,17 +25,17 @@ export declare class STemplate {
 /**
  * AbstractSystem can be extended to create a customized actor system.
  */
-export declare abstract class AbstractSystem<C extends Context> implements System, Platform {
+export declare abstract class AbstractSystem implements System, Platform {
     configuration: config.Configuration;
     constructor(configuration?: config.Configuration);
-    abstract state: State<C>;
-    abstract allocate(a: Actor<C>, h: Runtime, t: Template<C, AbstractSystem<C>>): Context;
+    abstract state: State<Context>;
+    abstract allocate(a: Actor<Context>, h: Runtime, t: Template<AbstractSystem>): Context;
     ident(i: Instance): Address;
     /**
      * spawn a new actor from a template.
      */
-    spawn(t: ActorTemplate<C, AbstractSystem<C>>): AbstractSystem<C>;
-    init(c: C): C;
+    spawn(t: ActorTemplate<AbstractSystem>): AbstractSystem;
+    init(c: Context): Context;
     notify(): void;
     accept(_: Message): void;
     stop(): void;
@@ -47,7 +47,7 @@ export declare abstract class AbstractSystem<C extends Context> implements Syste
  *
  * The value can be merged to satsify user defined Context types.
  */
-export declare const newContext: <C extends Context, S extends System>(actor: Instance, runtime: Runtime, template: ActorTemplate<C, S>) => Context;
+export declare const newContext: <S extends System>(actor: Instance, runtime: Runtime, template: ActorTemplate<S>) => Context;
 /**
  * newState produces the bare minimum needed for creating a State.
  *

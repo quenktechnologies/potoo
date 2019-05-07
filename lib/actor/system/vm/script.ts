@@ -1,4 +1,3 @@
-import { Context } from '../../context';
 import { Template } from '../../template';
 import { Message } from '../../message';
 import { System } from '../';
@@ -25,7 +24,7 @@ export type Value
     = number
     | string
     | Function
-    | Template<Context, System>
+    | Template<System>
     | Message
     ;
 
@@ -41,7 +40,7 @@ export type Constants
         number[],
         string[],
         Function[],
-        Template<Context, System>[],
+        Template<System>[],
         Message[],
         Foreign[]
     ]
