@@ -17,7 +17,7 @@ export declare abstract class TestAbstractSystem<C extends Context> extends Abst
     configuration: config.Configuration;
     constructor(configuration?: config.Configuration);
     MOCK: Data;
-    exec(i: Instance, s: Script<C, TestAbstractSystem<C>>): Maybe<Value<C, TestAbstractSystem<C>>>;
+    exec(i: Instance, s: Script): Maybe<Value>;
     ident(i: Instance): Address;
     init(c: C): C;
     accept(m: Message): void;

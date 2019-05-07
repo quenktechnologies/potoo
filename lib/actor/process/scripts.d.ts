@@ -1,10 +1,8 @@
 import { Script } from '../system/vm/script';
-import { Context } from '../context';
-import { System } from '../system';
 /**
  * RaiseScript
  */
-export declare class RaiseScript<C extends Context, S extends System<C>> extends Script<C, S> {
+export declare class RaiseScript extends Script {
     emsg: string;
     constructor(emsg: string);
 }

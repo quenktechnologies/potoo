@@ -1,8 +1,6 @@
 import { Type } from '@quenk/noni/lib/data/type';
-import { Context } from '../../../context';
 import { Data, Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 export declare const OP_CODE_NOOP = 0;
 export declare const OP_CODE_PUSH_NUM = 1;
 export declare const OP_CODE_PUSH_STR = 2;
@@ -56,7 +54,7 @@ export declare type Operand = number;
  * Implementations of this class carry out a single task
  * in the Runtime's context.
  */
-export interface Op<C extends Context, S extends System<C>> {
+export interface Op {
     /**
      * code for the Op.
      */
@@ -68,9 +66,9 @@ export interface Op<C extends Context, S extends System<C>> {
     /**
      * exec the instruction.
      */
-    exec(s: Runtime<C, S>): void;
+    exec(s: Runtime): void;
     /**
      * toLog turns the instruction into a loggable string.
      */
-    toLog(f: Frame<C, S>): Log;
+    toLog(f: Frame): Log;
 }

@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { Log, Level, Op } from './';
 /**
  * Cmp compares the top two values for equality.
@@ -15,9 +13,9 @@ import { Log, Level, Op } from './';
  *
  * 1 if true, 0 if false
  */
-export declare class Cmp<C extends Context, S extends System<C>> implements Op<C, S> {
+export declare class Cmp implements Op {
     code: number;
     level: Level;
-    exec(e: Runtime<C, S>): void;
-    toLog(f: Frame<C, S>): Log;
+    exec(e: Runtime): void;
+    toLog(f: Frame): Log;
 }

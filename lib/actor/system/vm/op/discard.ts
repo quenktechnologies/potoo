@@ -1,21 +1,19 @@
 import * as errors from '../error';
 import { fromArray } from '@quenk/noni/lib/data/maybe';
-import { Context } from '../../../context';
 import { Runtime } from '../runtime';
 import { Type, Location } from '../frame';
-import { System } from '../../';
 import { OP_CODE_DISCARD, Log, Op, Level } from './';
 
 /**
  * Discard removes and discards the first message in a Context's mailbox.
  */
-export class Discard<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Discard implements Op {
 
     public code = OP_CODE_DISCARD
 
     public level = Level.Actor;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
 

@@ -7,24 +7,25 @@ import { Op } from './op';
 /**
  * Function type.
  */
-export type Function<C extends Context, S extends System<C>>
-    = () => Op<C, S>[]
+export type Function
+    = () => Op[]
     ;
 
 /**
  * Foreign function type.
  */
-export type Foreign<C extends Context, S extends System<C>>
-    = (...arg: Value<C, S>) => Value<C, S>
+export type Foreign
+    = (...arg: Value) => Value
     ;
+
 /**
  * Value corresponds to the VM's supported types.
  */
-export type Value<C extends Context, S extends System<C>>
+export type Value
     = number
     | string
-    | Function<C, S>
-    | Template<C, S>
+    | Function
+    | Template<Context, System>
     | Message
     ;
 
@@ -35,16 +36,16 @@ export type Value<C extends Context, S extends System<C>>
  * Access to these values happens by using first the index of its type
  * then the following index within the type's table.
  */
-export type Constants<C extends Context, S extends System<C>>
+export type Constants
     = [
         number[],
         string[],
-        Function<C, S>[],
-        Template<C, S>[],
+        Function[],
+        Template<Context, System>[],
         Message[],
-        Foreign<C, S>[]
+        Foreign[]
     ]
-;
+    ;
 
 /**
  * Script is a "program" an actor submits to the Runtime run execute.
@@ -53,10 +54,10 @@ export type Constants<C extends Context, S extends System<C>>
  * 1. constants - Static values referenced in the code section.
  * 2. code - A list of one or more Op codes to execute in sequence.
  */
-export class Script<C extends Context, S extends System<C>>  {
+export class Script {
 
     constructor(
-        public constants: Constants<C, S> = [[], [], [], [], [], []],
-        public code: Op<C, S>[] = []) { }
+        public constants: Constants = [[], [], [], [], [], []],
+        public code: Op[] = []) { }
 
 }

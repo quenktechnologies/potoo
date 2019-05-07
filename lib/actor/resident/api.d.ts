@@ -7,7 +7,7 @@ import { Case } from './case';
  * Api describes the api for implementing an actor independant
  * of the system level methods.
  */
-export interface Api<C extends Context, S extends System<C>> {
+export interface Api<C extends Context, S extends System> {
     /**
      * self retrieves the path of this actor from the system.
      */

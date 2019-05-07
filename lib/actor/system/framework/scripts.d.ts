@@ -6,8 +6,8 @@ import { System } from '../';
 /**
  * SpawnScript for spawning new actors and children from templates.
  */
-export declare class SpawnScript<C extends Context, S extends System<C>> extends Script<C, S> {
+export declare class SpawnScript extends Script {
     parent: Address;
-    tmp: Template<C, S>;
-    constructor(parent: Address, tmp: Template<C, S>);
+    tmp: Template<Context, System>;
+    constructor(parent: Address, tmp: Template<Context, System>);
 }

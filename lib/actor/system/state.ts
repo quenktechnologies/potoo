@@ -11,7 +11,6 @@ import { Runtime } from './vm/runtime';
 import { Instance } from '../';
 import { ADDRESS_SYSTEM, Address, getParent as getParentAddress } from '../address';
 import { Context, Contexts } from '../context';
-import { System } from './';
 
 /**
  * Routers map.
@@ -100,7 +99,7 @@ export const getAddress = <C extends Context>
  * getRuntime attempts to retrieve the runtime for an Actor instance.
  */
 export const getRuntime = <C extends Context>
-    (s: State<C>, actor: Instance): Maybe<Runtime<Context, System<Context>>> =>
+    (s: State<C>, actor: Instance): Maybe<Runtime> =>
     reduce(s.contexts, nothing(), (p, c) =>
         c.actor === actor ? fromNullable(c.runtime) : p);
 
@@ -174,10 +173,10 @@ export const getGroup = <C extends Context>
 export const putMember = <C extends Context>
     (s: State<C>, group: string, member: Address): State<C> => {
 
-      if(s.groups[group] == null )
+    if (s.groups[group] == null)
         s.groups[group] = [];
 
-      s.groups[group].push(member);
+    s.groups[group].push(member);
 
     return s;
 
@@ -187,10 +186,10 @@ export const putMember = <C extends Context>
  * removeMember from a group.
  */
 export const removeMember = <C extends Context>
-  (s: State<C>, group:string, member: Address)    : State<C> => {
+    (s: State<C>, group: string, member: Address): State<C> => {
 
-    if(s.groups[group] != null) 
-    s.groups[group] =   s.groups[group].filter(m => m != member);
+    if (s.groups[group] != null)
+        s.groups[group] = s.groups[group].filter(m => m != member);
 
     return s;
 

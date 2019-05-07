@@ -15,7 +15,7 @@ import { AbstractSystem } from '../../framework';
  */
 export declare class ActorSystem extends AbstractSystem<Context> {
     state: State<Context>;
-    allocate(a: Actor<Context>, h: Runtime<Context, ActorSystem>, t: Template<Context, ActorSystem>): Context;
+    allocate(a: Actor<Context>, h: Runtime, t: Template<Context, ActorSystem>): Context;
 }
 /**
  * system creates a new actor system using the optionally passed

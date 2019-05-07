@@ -6,7 +6,6 @@ import { Instance } from '../../';
 import { Value, Script } from '../vm/script';
 import { Message } from '../../message';
 import { Context } from '../../context';
-import { System } from '../';
 import { AbstractSystem } from './';
 
 /**
@@ -26,11 +25,10 @@ export abstract class TestAbstractSystem<C extends Context>
 
     MOCK = new Data();
 
-    exec(i: Instance, s: Script<C, TestAbstractSystem<C>>)
-        : Maybe<Value<C, TestAbstractSystem<C>>> {
+    exec(i: Instance, s: Script): Maybe<Value> {
 
         this.MOCK.record('exec', [i, s], this);
-        return super.exec(i, <Script<C, System<C>>>s);
+        return super.exec(i, <Script>s);
 
     }
 

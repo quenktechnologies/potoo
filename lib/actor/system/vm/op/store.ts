@@ -1,7 +1,5 @@
-import { Context } from '../../../context';
 import { Type, Location, Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { OP_CODE_STORE, Log, Level, Op } from './';
 
 /**
@@ -11,7 +9,7 @@ import { OP_CODE_STORE, Log, Level, Op } from './';
  * Pops:
  * 1. Operand to store.
  */
-export class Store<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Store implements Op {
 
     constructor(public index: number) { }
 
@@ -19,7 +17,7 @@ export class Store<C extends Context, S extends System<C>> implements Op<C, S> {
 
     level = Level.Base;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
 
@@ -27,7 +25,7 @@ export class Store<C extends Context, S extends System<C>> implements Op<C, S> {
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(f: Frame): Log {
 
         return ['store', [this.index, Type.Number, Location.Literal], [f.peek()]];
 

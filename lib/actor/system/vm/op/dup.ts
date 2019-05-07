@@ -1,19 +1,17 @@
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
 import { OP_CODE_DUP, Log, Op, Level } from './';
 
 /**
  * Dup duplicates the current value at the top of the stack.
  */
-export class Dup<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Dup implements Op {
 
     code = OP_CODE_DUP;
 
     level = Level.Base;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
         let [value, type, location] = curr.pop();
@@ -23,7 +21,7 @@ export class Dup<C extends Context, S extends System<C>> implements Op<C, S> {
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(f: Frame): Log {
 
         return ['dup', [], [f.peek()]];
 

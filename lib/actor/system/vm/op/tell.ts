@@ -1,10 +1,9 @@
 import { tick } from '@quenk/noni/lib/control/timer';
 import { Message } from '../../../message';
 import { Envelope } from '../../../mailbox';
-import { Context } from '../../../context';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
-import { System } from '../../';
+import { Context } from '../../../context';
 import { OP_CODE_TELL, Log, Op, Level } from './';
 
 /**
@@ -19,13 +18,13 @@ import { OP_CODE_TELL, Log, Op, Level } from './';
  *
  * 1 if delivery is successful, 0 otherwise.
  */
-export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
+export class Tell implements Op {
 
     public code = OP_CODE_TELL;
 
     public level = Level.Actor;
 
-    exec(e: Runtime<C, S>): void {
+    exec(e: Runtime): void {
 
         let curr = e.current().get();
 
@@ -53,7 +52,7 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
         } else {
 
             let maybeCtx = e.getContext(addr);
-          let conf  = e.config();
+            let conf = e.config();
 
             if (maybeCtx.isJust()) {
 
@@ -63,7 +62,7 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
             } else if (conf.hooks &&
                 conf.hooks.drop) {
 
-              conf.hooks.drop(new Envelope(                    addr, e.self, msg));
+                conf.hooks.drop(new Envelope(addr, e.self, msg));
 
                 curr.pushNumber(1);
 
@@ -77,7 +76,7 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
 
     }
 
-    toLog(f: Frame<C, S>): Log {
+    toLog(f: Frame): Log {
 
         return ['tell', [], [f.peek(), f.peek(1)]];
 
@@ -85,17 +84,17 @@ export class Tell<C extends Context, S extends System<C>> implements Op<C, S> {
 
 }
 
-const deliver = <C extends Context>(ctx: C, msg: Message) => {
+const deliver = (ctx: Context, msg: Message) => {
 
-  if(ctx.mailbox.isJust()) {
+    if (ctx.mailbox.isJust()) {
 
-    tick(()=> { ctx.mailbox.get().push(msg); ctx.actor.notify(); });
+        tick(() => { ctx.mailbox.get().push(msg); ctx.actor.notify(); });
 
-  } else {
+    } else {
 
-    ctx.actor.accept(msg);
+        ctx.actor.accept(msg);
 
-  }
+    }
 
 }
 
