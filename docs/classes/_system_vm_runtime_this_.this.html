@@ -907,7 +907,7 @@ img { max-width: 100%; }
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
-		<li class="current tsd-kind-class tsd-parent-kind-external-module tsd-has-type-parameter">
+		<li class="current tsd-kind-class tsd-parent-kind-external-module">
 			<a href="_system_vm_runtime_this_.this.html" class="tsd-kind-icon">This</a>
 			<ul>
 				<li class=" tsd-kind-constructor tsd-parent-kind-class">
@@ -1000,17 +1000,6 @@ img { max-width: 100%; }
 				<p>It has all the methods and properties expected for Op code execution.</p>
 			</div>
 		</section>
-		<section class="tsd-panel tsd-type-parameters">
-			<h3>Type parameters</h3>
-			<ul class="tsd-type-parameters">
-				<li>
-					<h4>C<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
-				</li>
-				<li>
-					<h4>S<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_vm_index_.platform.html" class="tsd-signature-type">Platform</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
-				</li>
-			</ul>
-		</section>
 		<section class="tsd-panel tsd-hierarchy">
 			<h3>Hierarchy</h3>
 			<ul class="tsd-hierarchy">
@@ -1022,7 +1011,7 @@ img { max-width: 100%; }
 		<section class="tsd-panel">
 			<h3>Implements</h3>
 			<ul class="tsd-hierarchy">
-				<li><a href="../interfaces/_system_vm_runtime_index_.runtime.html" class="tsd-signature-type">Runtime</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
+				<li><a href="../interfaces/_system_vm_runtime_index_.runtime.html" class="tsd-signature-type">Runtime</a></li>
 			</ul>
 		</section>
 		<section class="tsd-panel-group tsd-index-group">
@@ -1078,13 +1067,13 @@ img { max-width: 100%; }
 				<a name="constructor" class="tsd-anchor"></a>
 				<h3>constructor</h3>
 				<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">new <wbr>This<span class="tsd-signature-symbol">(</span>self<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a>, system<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">S</span>, stack<span class="tsd-signature-symbol">?: </span><a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span>, queue<span class="tsd-signature-symbol">?: </span><a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
+					<li class="tsd-signature tsd-kind-icon">new <wbr>This<span class="tsd-signature-symbol">(</span>self<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a>, system<span class="tsd-signature-symbol">: </span><a href="../interfaces/_system_vm_index_.platform.html" class="tsd-signature-type">Platform</a>, stack<span class="tsd-signature-symbol">?: </span><a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">[]</span>, queue<span class="tsd-signature-symbol">?: </span><a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L36">system/vm/runtime/this.ts:36</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L37">system/vm/runtime/this.ts:37</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1093,13 +1082,13 @@ img { max-width: 100%; }
 								<h5>self: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 							<li>
-								<h5>system: <span class="tsd-signature-type">S</span></h5>
+								<h5>system: <a href="../interfaces/_system_vm_index_.platform.html" class="tsd-signature-type">Platform</a></h5>
 							</li>
 							<li>
-								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> stack: <a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></h5>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> stack: <a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></h5>
 							</li>
 							<li>
-								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> queue: <a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></h5>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> queue: <a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></h4>
@@ -1112,10 +1101,10 @@ img { max-width: 100%; }
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 				<a name="queue" class="tsd-anchor"></a>
 				<h3>queue</h3>
-				<div class="tsd-signature tsd-kind-icon">queue<span class="tsd-signature-symbol">:</span> <a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
+				<div class="tsd-signature tsd-kind-icon">queue<span class="tsd-signature-symbol">:</span> <a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">[]</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L42">system/vm/runtime/this.ts:42</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L43">system/vm/runtime/this.ts:43</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1125,7 +1114,7 @@ img { max-width: 100%; }
 				<div class="tsd-signature tsd-kind-icon">running<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;false</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L44">system/vm/runtime/this.ts:44</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L45">system/vm/runtime/this.ts:45</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1136,27 +1125,27 @@ img { max-width: 100%; }
 				<aside class="tsd-sources">
 					<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#self">self</a></p>
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L39">system/vm/runtime/this.ts:39</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L40">system/vm/runtime/this.ts:40</a></li>
 					</ul>
 				</aside>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 				<a name="stack" class="tsd-anchor"></a>
 				<h3>stack</h3>
-				<div class="tsd-signature tsd-kind-icon">stack<span class="tsd-signature-symbol">:</span> <a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
+				<div class="tsd-signature tsd-kind-icon">stack<span class="tsd-signature-symbol">:</span> <a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">[]</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L41">system/vm/runtime/this.ts:41</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L42">system/vm/runtime/this.ts:42</a></li>
 					</ul>
 				</aside>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 				<a name="system" class="tsd-anchor"></a>
 				<h3>system</h3>
-				<div class="tsd-signature tsd-kind-icon">system<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">S</span></div>
+				<div class="tsd-signature tsd-kind-icon">system<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_system_vm_index_.platform.html" class="tsd-signature-type">Platform</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L40">system/vm/runtime/this.ts:40</a></li>
+						<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L41">system/vm/runtime/this.ts:41</a></li>
 					</ul>
 				</aside>
 			</section>
@@ -1167,14 +1156,14 @@ img { max-width: 100%; }
 				<a name="allocate" class="tsd-anchor"></a>
 				<h3>allocate</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">allocate<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a>, t<span class="tsd-signature-symbol">: </span><a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">C</span></li>
+					<li class="tsd-signature tsd-kind-icon">allocate<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a>, t<span class="tsd-signature-symbol">: </span><a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a><span class="tsd-signature-symbol">, </span><a href="../interfaces/_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#allocate">allocate</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L60">system/vm/runtime/this.ts:60</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L61">system/vm/runtime/this.ts:61</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1183,10 +1172,10 @@ img { max-width: 100%; }
 								<h5>addr: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 							<li>
-								<h5>t: <a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>t: <a href="../interfaces/_template_.template.html" class="tsd-signature-type">Template</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a><span class="tsd-signature-symbol">, </span><a href="../interfaces/_system_index_.system.html" class="tsd-signature-type">System</a><span class="tsd-signature-symbol">&gt;</span></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">C</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1194,17 +1183,17 @@ img { max-width: 100%; }
 				<a name="clear" class="tsd-anchor"></a>
 				<h3>clear</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">clear<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">clear<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#clear">clear</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L142">system/vm/runtime/this.ts:142</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L143">system/vm/runtime/this.ts:143</a></li>
 							</ul>
 						</aside>
-						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1219,7 +1208,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#config">config</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L46">system/vm/runtime/this.ts:46</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L47">system/vm/runtime/this.ts:47</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-returns-title">Returns <a href="../interfaces/_system_configuration_.configuration.html" class="tsd-signature-type">Configuration</a></h4>
@@ -1230,17 +1219,17 @@ img { max-width: 100%; }
 				<a name="current" class="tsd-anchor"></a>
 				<h3>current</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">current<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">current<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#current">current</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L52">system/vm/runtime/this.ts:52</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L53">system/vm/runtime/this.ts:53</a></li>
 							</ul>
 						</aside>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -1248,14 +1237,14 @@ img { max-width: 100%; }
 				<a name="drop" class="tsd-anchor"></a>
 				<h3>drop</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">drop<span class="tsd-signature-symbol">(</span>m<span class="tsd-signature-symbol">: </span><a href="../modules/_message_.html#message" class="tsd-signature-type">Message</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">drop<span class="tsd-signature-symbol">(</span>m<span class="tsd-signature-symbol">: </span><a href="../modules/_message_.html#message" class="tsd-signature-type">Message</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#drop">drop</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L149">system/vm/runtime/this.ts:149</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L150">system/vm/runtime/this.ts:150</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1264,7 +1253,7 @@ img { max-width: 100%; }
 								<h5>m: <a href="../modules/_message_.html#message" class="tsd-signature-type">Message</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1272,23 +1261,23 @@ img { max-width: 100%; }
 				<a name="exec" class="tsd-anchor"></a>
 				<h3>exec</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../enums/_system_vm_frame_.field.html#value" class="tsd-signature-type">Value</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">exec<span class="tsd-signature-symbol">(</span>s<span class="tsd-signature-symbol">: </span><a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../enums/_system_vm_frame_.field.html#value" class="tsd-signature-type">Value</a><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#exec">exec</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L205">system/vm/runtime/this.ts:205</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L206">system/vm/runtime/this.ts:206</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>s: <a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>s: <a href="_system_vm_script_.script.html" class="tsd-signature-type">Script</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../enums/_system_vm_frame_.field.html#value" class="tsd-signature-type">Value</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../enums/_system_vm_frame_.field.html#value" class="tsd-signature-type">Value</a><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -1296,14 +1285,14 @@ img { max-width: 100%; }
 				<a name="getchildren" class="tsd-anchor"></a>
 				<h3>get<wbr>Children</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Children<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.contexts.html" class="tsd-signature-type">Contexts</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Children<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.contexts.html" class="tsd-signature-type">Contexts</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#getchildren">getChildren</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L87">system/vm/runtime/this.ts:87</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L88">system/vm/runtime/this.ts:88</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1312,7 +1301,7 @@ img { max-width: 100%; }
 								<h5>addr: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.contexts.html" class="tsd-signature-type">Contexts</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.contexts.html" class="tsd-signature-type">Contexts</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -1320,14 +1309,14 @@ img { max-width: 100%; }
 				<a name="getcontext" class="tsd-anchor"></a>
 				<h3>get<wbr>Context</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Context<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Context<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#getcontext">getContext</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L69">system/vm/runtime/this.ts:69</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L70">system/vm/runtime/this.ts:70</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1336,7 +1325,7 @@ img { max-width: 100%; }
 								<h5>addr: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -1351,7 +1340,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#getgroup">getGroup</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L81">system/vm/runtime/this.ts:81</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L82">system/vm/runtime/this.ts:82</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1368,14 +1357,14 @@ img { max-width: 100%; }
 				<a name="getrouter" class="tsd-anchor"></a>
 				<h3>get<wbr>Router</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Router<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Router<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#getrouter">getRouter</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L75">system/vm/runtime/this.ts:75</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L76">system/vm/runtime/this.ts:76</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1384,7 +1373,7 @@ img { max-width: 100%; }
 								<h5>addr: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -1392,23 +1381,23 @@ img { max-width: 100%; }
 				<a name="push" class="tsd-anchor"></a>
 				<h3>push</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">push<span class="tsd-signature-symbol">(</span>f<span class="tsd-signature-symbol">: </span><a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">push<span class="tsd-signature-symbol">(</span>f<span class="tsd-signature-symbol">: </span><a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#push">push</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L135">system/vm/runtime/this.ts:135</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L136">system/vm/runtime/this.ts:136</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>f: <a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								<h5>f: <a href="_system_vm_frame_.frame.html" class="tsd-signature-type">Frame</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1416,14 +1405,14 @@ img { max-width: 100%; }
 				<a name="putcontext" class="tsd-anchor"></a>
 				<h3>put<wbr>Context</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">put<wbr>Context<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a>, ctx<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">put<wbr>Context<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a>, ctx<span class="tsd-signature-symbol">: </span><a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#putcontext">putContext</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L93">system/vm/runtime/this.ts:93</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L94">system/vm/runtime/this.ts:94</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1432,10 +1421,10 @@ img { max-width: 100%; }
 								<h5>addr: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 							<li>
-								<h5>ctx: <span class="tsd-signature-type">C</span></h5>
+								<h5>ctx: <a href="../interfaces/_context_.context.html" class="tsd-signature-type">Context</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1443,14 +1432,14 @@ img { max-width: 100%; }
 				<a name="putmember" class="tsd-anchor"></a>
 				<h3>put<wbr>Member</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">put<wbr>Member<span class="tsd-signature-symbol">(</span>group<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">put<wbr>Member<span class="tsd-signature-symbol">(</span>group<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#putmember">putMember</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L121">system/vm/runtime/this.ts:121</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L122">system/vm/runtime/this.ts:122</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1462,7 +1451,7 @@ img { max-width: 100%; }
 								<h5>addr: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1470,14 +1459,14 @@ img { max-width: 100%; }
 				<a name="putroute" class="tsd-anchor"></a>
 				<h3>put<wbr>Route</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">put<wbr>Route<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a>, router<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">put<wbr>Route<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a>, router<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#putroute">putRoute</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L107">system/vm/runtime/this.ts:107</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L108">system/vm/runtime/this.ts:108</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1489,7 +1478,7 @@ img { max-width: 100%; }
 								<h5>router: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1504,7 +1493,7 @@ img { max-width: 100%; }
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#raise">raise</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L165">system/vm/runtime/this.ts:165</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L166">system/vm/runtime/this.ts:166</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1521,14 +1510,14 @@ img { max-width: 100%; }
 				<a name="removecontext" class="tsd-anchor"></a>
 				<h3>remove<wbr>Context</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">remove<wbr>Context<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">remove<wbr>Context<span class="tsd-signature-symbol">(</span>addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#removecontext">removeContext</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L100">system/vm/runtime/this.ts:100</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L101">system/vm/runtime/this.ts:101</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1537,7 +1526,7 @@ img { max-width: 100%; }
 								<h5>addr: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1545,14 +1534,14 @@ img { max-width: 100%; }
 				<a name="removemember" class="tsd-anchor"></a>
 				<h3>remove<wbr>Member</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">remove<wbr>Member<span class="tsd-signature-symbol">(</span>group<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">remove<wbr>Member<span class="tsd-signature-symbol">(</span>group<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, addr<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#removemember">removeMember</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L128">system/vm/runtime/this.ts:128</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L129">system/vm/runtime/this.ts:129</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1564,7 +1553,7 @@ img { max-width: 100%; }
 								<h5>addr: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1572,14 +1561,14 @@ img { max-width: 100%; }
 				<a name="removeroute" class="tsd-anchor"></a>
 				<h3>remove<wbr>Route</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">remove<wbr>Route<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">remove<wbr>Route<span class="tsd-signature-symbol">(</span>target<span class="tsd-signature-symbol">: </span><a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<p>Implementation of <a href="../interfaces/_system_vm_runtime_index_.runtime.html">Runtime</a>.<a href="../interfaces/_system_vm_runtime_index_.runtime.html#removeroute">removeRoute</a></p>
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L114">system/vm/runtime/this.ts:114</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L115">system/vm/runtime/this.ts:115</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1588,7 +1577,7 @@ img { max-width: 100%; }
 								<h5>target: <a href="../modules/_address_.html#address" class="tsd-signature-type">Address</a></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <a href="_system_vm_runtime_this_.this.html" class="tsd-signature-type">This</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -1596,16 +1585,16 @@ img { max-width: 100%; }
 				<a name="run" class="tsd-anchor"></a>
 				<h3>run</h3>
 				<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-					<li class="tsd-signature tsd-kind-icon">run<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../enums/_system_vm_frame_.field.html#value" class="tsd-signature-type">Value</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					<li class="tsd-signature tsd-kind-icon">run<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../enums/_system_vm_frame_.field.html#value" class="tsd-signature-type">Value</a><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/706de91/lib/actor/system/vm/runtime/this.ts#L223">system/vm/runtime/this.ts:223</a></li>
+								<li>Defined in <a href="https://github.com/quenktechnologies/potoo/blob/034f5bf/lib/actor/system/vm/runtime/this.ts#L224">system/vm/runtime/this.ts:224</a></li>
 							</ul>
 						</aside>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../enums/_system_vm_frame_.field.html#value" class="tsd-signature-type">Value</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">C</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">S</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Maybe</span><span class="tsd-signature-symbol">&lt;</span><a href="../enums/_system_vm_frame_.field.html#value" class="tsd-signature-type">Value</a><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
