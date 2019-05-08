@@ -54,8 +54,6 @@ export interface Contexts<C extends Context> {
  */
 export interface Context {
 
-    [key: string]: any
-
     /**
      * mailbox for the actor.
      *

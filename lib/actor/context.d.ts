@@ -41,7 +41,6 @@ export interface Contexts<C extends Context> {
  * Context stores all the information a system needs about a spawned actor.
  */
 export interface Context {
-    [key: string]: any;
     /**
      * mailbox for the actor.
      *

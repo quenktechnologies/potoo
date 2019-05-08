@@ -1,5 +1,4 @@
 import * as error from '../error';
-import { right, left } from '@quenk/noni/lib/data/either';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
 import { OP_CODE_TEMP_CHILD, Log, Op, Level } from './';
@@ -21,28 +20,32 @@ export class TempChild implements Op {
 
         let curr = e.current().get();
 
-        curr
-            .resolveTemplate(curr.pop())
-            .chain(t =>
-                curr
-                    .resolveNumber(curr.pop())
-                    .chain(n => {
+        let eitherTemplate = curr.resolveTemplate(curr.pop());
 
-                        if ((t.children && t.children.length > n) && (n > 0)) {
+        if (eitherTemplate.isLeft())
+            return e.raise(eitherTemplate.takeLeft());
 
-                            let [value, type, location] =
-                                curr.allocateTemplate(t.children[n]);
+        let t = eitherTemplate.takeRight();
 
-                            return right(curr.push(value, type, location));
+        let eitherNum = curr.resolveNumber(curr.pop());
 
-                        } else {
+        if (eitherNum.isLeft())
+            return e.raise(eitherNum.takeLeft());
 
-                            return left(new error.NullTemplatePointerErr(n));
+        let n = eitherNum.takeRight();
 
-                        }
+        if ((t.children && t.children.length > n) && (n > 0)) {
 
-                    }))
-            .lmap(err => e.raise(err))
+            let [value, type, location] =
+                curr.allocateTemplate(t.children[n]);
+
+            curr.push(value, type, location);
+
+        } else {
+
+            e.raise(new error.NullTemplatePointerErr(n));
+
+        }
 
     }
 
