@@ -70,7 +70,7 @@ export abstract class AbstractSystem
     /**
      * spawn a new actor from a template.
      */
-    spawn(t: ActorTemplate<AbstractSystem>): AbstractSystem {
+    spawn(t: ActorTemplate<this>): AbstractSystem {
 
         (new This('$', <Platform>this))
             .exec(new SpawnScript('', <Template<System>>t));

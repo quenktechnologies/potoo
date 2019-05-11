@@ -34,7 +34,7 @@ export declare abstract class AbstractSystem implements System, Platform {
     /**
      * spawn a new actor from a template.
      */
-    spawn(t: ActorTemplate<AbstractSystem>): AbstractSystem;
+    spawn(t: ActorTemplate<this>): AbstractSystem;
     init(c: Context): Context;
     notify(): void;
     accept(_: Message): void;
