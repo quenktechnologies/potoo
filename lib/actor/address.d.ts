@@ -11,6 +11,12 @@ export declare const ADDRESS_RESTRICTED: string[];
  */
 export declare type Address = string;
 /**
+ * AddressMap
+ */
+export interface AddressMap {
+    [key: string]: Address;
+}
+/**
  * isRestricted indicates whether an actor id is restricted or not.
  */
 export declare const isRestricted: (id: string) => boolean;

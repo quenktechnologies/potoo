@@ -1,12 +1,19 @@
 import { fromBoolean } from '@quenk/noni/lib/data/either';
 import { just } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
+import { map, merge } from '@quenk/noni/lib/data/record';
 import { StopScript } from '../system/vm/runtime/scripts';
 import { SpawnScript } from '../system/framework/scripts';
 import { System, Void } from '../system';
-import { ADDRESS_DISCARD, Address, isRestricted, make } from '../address';
+import {
+    ADDRESS_DISCARD,
+    Address,
+    AddressMap,
+    isRestricted,
+    make
+} from '../address';
 import { Message } from '../message';
-import { Template } from '../template';
+import { Template, Templates } from '../template';
 import { Context } from '../context';
 import { Actor } from '../';
 import { Case } from './case';
@@ -66,13 +73,22 @@ export abstract class AbstractResident<C extends Context, S extends System>
 
     }
 
+    /**
+     * group spawns a map of actors assigning them to the specified group.
+     */
+    group(name: string | string[], tmpls: Templates<S>): AddressMap {
+
+        return map(tmpls, (t: Template<S>) =>
+            this.spawn(merge(t, { group: name })));
+
+    }
+
     tell<M>(ref: Address, m: M): AbstractResident<C, S> {
 
         this.system.exec(this, new TellScript(ref, m));
         return this;
 
     }
-
 
     kill(addr: Address): AbstractResident<C, S> {
 

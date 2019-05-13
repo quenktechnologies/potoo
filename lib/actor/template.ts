@@ -38,6 +38,15 @@ export type DelayMilliseconds = number;
 export type TrapFunc = (e: Err) => TrapAction;
 
 /**
+ * Templates
+ */
+export interface Templates<S extends System> {
+
+    [key: string]: Template<S>
+
+}
+
+/**
  * Template of an actor.
  *
  * Actors are created using templates that describe how to spawn and manage them

@@ -21,6 +21,15 @@ export const ADDRESS_RESTRICTED = [
 export type Address = string;
 
 /**
+ * AddressMap
+ */
+export interface AddressMap {
+
+    [key: string]: Address
+
+}
+
+/**
  * isRestricted indicates whether an actor id is restricted or not.
  */
 export const isRestricted = (id: string) =>
@@ -87,10 +96,10 @@ export const getId = (addr: Address): string =>
  * isChild tests whether an address is a child of the parent address.
  */
 export const isChild = (parent: Address, child: Address): boolean =>
- (parent === ADDRESS_SYSTEM) || (parent !== child) && startsWith(child, parent);
+    (parent === ADDRESS_SYSTEM) || (parent !== child) && startsWith(child, parent);
 
 /**
  * isGroup determines if an address is a group reference.
  */
-export const isGroup = (addr:Address) : boolean => 
-  ((addr[0] === '$') && (addr !== '$'))
+export const isGroup = (addr: Address): boolean =>
+    ((addr[0] === '$') && (addr !== '$'))

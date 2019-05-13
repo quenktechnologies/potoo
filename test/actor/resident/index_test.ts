@@ -37,6 +37,39 @@ class Killer extends AbstractResident<Context, ActorSystem> {
 
 }
 
+class Group extends AbstractResident<Context, ActorSystem> {
+
+    init(c: Context): Context {
+
+        c.flags.immutable = true;
+        c.flags.buffered = true;
+        return c;
+
+    }
+
+    select<T>(_: Case<T>[]): Group {
+
+        return this;
+
+    }
+
+    run() {
+
+        this.group('test', {
+
+            b: { id: 'b', create: s => new Killable(s) },
+
+            c: { id: 'c', create: s => new Killable(s) },
+
+            d: { id: 'd', create: s => new Killable(s) }
+
+        });
+
+    }
+
+}
+
+
 class Killable extends Mutable<Context, ActorSystem> {
 
     receive = [];
@@ -299,6 +332,27 @@ describe('resident', () => {
 
                         })
                     })
+            })
+
+        })
+
+        describe('group', () => {
+
+            it('should assign actors to a group', done => {
+
+                let s = system({ log: { level: 1 } })
+                    .spawn({
+
+                        id: 'a',
+                        create: sys => new Group(sys)
+                    })
+
+                setTimeout(() => {
+
+                    assert(s.state.groups['test']).equate(['a/b', 'a/c', 'a/d']);
+                    done();
+
+                }, 200)
             })
 
         })
