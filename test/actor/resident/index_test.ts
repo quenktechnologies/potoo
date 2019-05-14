@@ -55,7 +55,7 @@ class Group extends AbstractResident<Context, ActorSystem> {
 
     run() {
 
-        this.group('test', {
+        this.spawnGroup('test', {
 
             b: { id: 'b', create: s => new Killable(s) },
 

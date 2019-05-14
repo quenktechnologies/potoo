@@ -74,9 +74,9 @@ export abstract class AbstractResident<C extends Context, S extends System>
     }
 
     /**
-     * group spawns a map of actors assigning them to the specified group.
+     * spawnGroup spawns a map of actors assigning them to the specified group.
      */
-    group(name: string | string[], tmpls: Templates<S>): AddressMap {
+    spawnGroup(name: string | string[], tmpls: Templates<S>): AddressMap {
 
         return map(tmpls, (t: Template<S>) =>
             this.spawn(merge(t, { group: name })));

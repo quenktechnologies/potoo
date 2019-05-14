@@ -29,9 +29,9 @@ export declare abstract class AbstractResident<C extends Context, S extends Syst
     accept(m: Message): void;
     spawn(t: Template<S>): Address;
     /**
-     * group spawns a map of actors assigning them to the specified group.
+     * spawnGroup spawns a map of actors assigning them to the specified group.
      */
-    group(name: string | string[], tmpls: Templates<S>): AddressMap;
+    spawnGroup(name: string | string[], tmpls: Templates<S>): AddressMap;
     tell<M>(ref: Address, m: M): AbstractResident<C, S>;
     kill(addr: Address): AbstractResident<C, S>;
     exit(): void;
