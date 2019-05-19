@@ -1,6 +1,7 @@
 import { fromBoolean } from '@quenk/noni/lib/data/either';
 import { just } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
+import { Err } from '@quenk/noni/lib/control/error';
 import { map, merge } from '@quenk/noni/lib/data/record';
 import { StopScript } from '../system/vm/runtime/scripts';
 import { SpawnScript } from '../system/framework/scripts';
@@ -18,7 +19,13 @@ import { Context } from '../context';
 import { Actor } from '../';
 import { Case } from './case';
 import { Api } from './api';
-import { TellScript, AcceptScript, ReceiveScript, NotifyScript } from './scripts';
+import {
+    TellScript,
+    AcceptScript,
+    ReceiveScript,
+    NotifyScript,
+    RaiseScript
+} from './scripts';
 
 /**
  * Reference to an actor address.
@@ -73,9 +80,6 @@ export abstract class AbstractResident<C extends Context, S extends System>
 
     }
 
-    /**
-     * spawnGroup spawns a map of actors assigning them to the specified group.
-     */
     spawnGroup(name: string | string[], tmpls: Templates<S>): AddressMap {
 
         return map(tmpls, (t: Template<S>) =>
@@ -86,6 +90,13 @@ export abstract class AbstractResident<C extends Context, S extends System>
     tell<M>(ref: Address, m: M): AbstractResident<C, S> {
 
         this.system.exec(this, new TellScript(ref, m));
+        return this;
+
+    }
+
+    raise(e: Err): AbstractResident<C, S> {
+
+        this.system.exec(this, new RaiseScript(e));
         return this;
 
     }

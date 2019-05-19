@@ -30,3 +30,10 @@ export declare class ReceiveScript extends Script {
 export declare class NotifyScript extends Script {
     constructor();
 }
+/**
+ * RaiseScript
+ */
+export declare class RaiseScript extends Script {
+    msg: Message;
+    constructor(msg: Message);
+}

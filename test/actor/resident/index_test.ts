@@ -5,6 +5,7 @@ import {
     Mutable,
     Immutable,
 } from '../../../src/actor/resident';
+import { ACTION_STOP } from '../../../src/actor/template';
 import { Case } from '../../../src/actor/resident/case';
 import { ActorSystem, system } from '../../../src/actor/system/framework/default';
 
@@ -126,6 +127,30 @@ class Exiter extends AbstractResident<Context, ActorSystem> {
 
 
         }, 200);
+
+    }
+
+}
+
+class Raiser extends AbstractResident<Context, ActorSystem> {
+
+    init(c: Context): Context {
+
+        c.flags.immutable = true;
+        c.flags.buffered = true;
+        return c;
+
+    }
+
+    select<T>(_: Case<T>[]): Raiser {
+
+        return this;
+
+    }
+
+    run() {
+
+        this.raise(new Error('risen'));
 
     }
 
@@ -289,7 +314,6 @@ describe('resident', () => {
                         id: 'a',
                         create: sys => new Killer(sys, k => {
 
-
                             setTimeout(() =>
                                 assert(s.state.contexts['a/targets/a'])
                                     .not.equal(undefined), 200);
@@ -356,6 +380,40 @@ describe('resident', () => {
             })
 
         })
+
+        it('should be able to talk to itself', done => {
+
+            let ok = false;
+
+            let s = system({ log: { level: 1 } })
+                .spawn({
+
+                    id: 'raiser',
+
+                    trap: e => {
+
+                        assert(e.message).equal('risen');
+                        ok = true;
+                        return ACTION_STOP
+                    },
+
+                    create: s => new Raiser(s)
+
+                });
+
+            assert(s.state.contexts['raiser']).object();
+
+            setTimeout(() => {
+
+                assert(ok).true();
+
+                assert(s.state.contexts['raiser']).undefined();
+
+                done();
+
+            }, 200);
+
+        });
 
     })
 

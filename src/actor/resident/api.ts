@@ -1,6 +1,7 @@
-import { Address } from '../address';
+import { Err } from '@quenk/noni/lib/control/error';
+import { Address, AddressMap } from '../address';
 import { System } from '../system';
-import { Template } from '../template';
+import { Templates, Template } from '../template';
 import { Context } from '../context';
 import { Case } from './case';
 
@@ -21,6 +22,11 @@ export interface Api<C extends Context, S extends System> {
     spawn(t: Template<S>): Address;
 
     /**
+     * spawnGroup spawns a map of actors assigning them to the specified group.
+     */
+    spawnGroup(name: string | string[], tmpls: Templates<S>): AddressMap;
+
+    /**
      * tell a message to an actor address.
      */
     tell<M>(ref: string, m: M): Api<C, S>;
@@ -30,6 +36,11 @@ export interface Api<C extends Context, S extends System> {
      * until one matches.
      */
     select<T>(c: Case<T>[]): Api<C, S>;
+
+    /**
+     * raise an error triggering the systems error handling mechanism.
+     */
+    raise(e: Err): Api<C, S>;
 
     /**
      * kill a child actor.

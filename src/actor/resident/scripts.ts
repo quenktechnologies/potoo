@@ -6,6 +6,7 @@ import { JumpIfOne } from '../system/vm/op/jump';
 import { Noop } from '../system/vm/op/noop';
 import { Receive } from '../system/vm/op/receive';
 import { Read } from '../system/vm/op/read';
+import { Raise } from '../system/vm/op/raise';
 import { Op } from '../system/vm/op';
 import { Constants, Foreign, Script } from '../system/vm/script';
 import { Address } from '../address';
@@ -41,6 +42,13 @@ const notifyCode: Op[] = [
     new JumpIfOne(3),
     new Discard(),
     new Noop()
+
+];
+
+const raiseCode: Op[] = [
+
+    new PushMsg(0),    //0: Push the error onto the stack. 
+    new Raise(),      //1: Raise the error.
 
 ];
 
@@ -96,6 +104,21 @@ export class NotifyScript extends Script {
     constructor() {
 
         super(<Constants>[[], [], [], [], [], []], notifyCode);
+
+    }
+
+}
+
+/**
+ * RaiseScript
+ */
+export class RaiseScript extends Script {
+
+    constructor(public msg: Message) {
+
+        super(
+            <Constants>[[], [], [], [], [msg], []],
+            <Op[]>raiseCode);
 
     }
 

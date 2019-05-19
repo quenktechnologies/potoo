@@ -1,3 +1,4 @@
+import { Err } from '@quenk/noni/lib/control/error';
 import { System } from '../system';
 import { Address, AddressMap } from '../address';
 import { Message } from '../message';
@@ -28,11 +29,9 @@ export declare abstract class AbstractResident<C extends Context, S extends Syst
     self(): string;
     accept(m: Message): void;
     spawn(t: Template<S>): Address;
-    /**
-     * spawnGroup spawns a map of actors assigning them to the specified group.
-     */
     spawnGroup(name: string | string[], tmpls: Templates<S>): AddressMap;
     tell<M>(ref: Address, m: M): AbstractResident<C, S>;
+    raise(e: Err): AbstractResident<C, S>;
     kill(addr: Address): AbstractResident<C, S>;
     exit(): void;
     stop(): void;
