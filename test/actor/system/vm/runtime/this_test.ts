@@ -221,6 +221,39 @@ describe('runtime', () => {
 
         });
 
+        describe('allocate', () => {
+
+            it('should not skip instructions after jumps', () => {
+
+                let s = new SystemImpl();
+
+                let three = { three: 3 };
+
+                let args: [number?, string?, object?] = [];
+
+                let r = new This('/', s);
+
+                r.allocate('x', {
+
+                    id: 'x',
+
+                    create: (_s: SystemImpl, a: number, b: string, c: object) => {
+
+                        args.push(a, b, c);
+                        return new InstanceImpl();
+
+                    },
+
+                    args: [1, 'two', three]
+
+                });
+
+                assert(args).equate([1, 'two', three]);
+
+            });
+
+        });
+
     });
 
 });

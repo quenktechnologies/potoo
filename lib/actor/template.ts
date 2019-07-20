@@ -1,3 +1,4 @@
+import { Type } from '@quenk/noni/lib/data/type';
 import { Err } from '@quenk/noni/lib/control/error';
 import { System } from './system';
 import { Context } from './context';
@@ -24,7 +25,7 @@ export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * Cons is applied to produce an instance of an actor.
  */
-export type Cons<S extends System> = (s: S) => Actor<Context>;
+export type Cons<S extends System> = (s: S, ...args: Type[]) => Actor<Context>;
 
 /**
  * DelayMilliseconds type.
@@ -71,6 +72,14 @@ export interface Template<S extends System> {
      * create function.
      */
     create: Cons<S>;
+
+    /**
+     * args are passed to the create function when creating a new instance.
+     *
+     * This method of passing arguments is not type safe and care should be
+     * taken to ensure they are used properly in the create function.
+     */
+    args?: Type[],
 
     /**
      * trap is used to take action when the spanwed
