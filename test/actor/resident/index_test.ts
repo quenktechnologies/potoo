@@ -278,6 +278,64 @@ class ImmutableSelfTalk extends Immutable<string, Context, ActorSystem> {
 
 }
 
+class ImmutableCrossTalk extends Immutable<string, Context, ActorSystem> {
+
+    constructor(
+        public s: ActorSystem,
+        public partner: string,
+        public done?: () => void) { super(s); }
+
+    receive = [
+
+        new Case('syn', () => this.tell(this.partner, 'ack')),
+
+        new Case('ack', () => {
+
+            if (this.done)
+                this.done()
+
+        })
+
+    ]
+
+    run() {
+
+        if (this.done)
+            this.tell(this.partner, 'syn');
+
+    }
+
+}
+
+class MutableCrossTalk extends Mutable<Context, ActorSystem> {
+
+    constructor(
+        public s: ActorSystem,
+        public partner: string,
+        public done?: () => void) { super(s); }
+
+    run() {
+
+        this.select([
+
+            new Case('syn', () => this.tell(this.partner, 'ack')),
+
+            new Case('ack', () => {
+
+                if (this.done)
+                    this.done()
+
+            })
+
+        ]);
+
+        if (this.done)
+            this.tell(this.partner, 'syn');
+
+    }
+
+}
+
 describe('resident', () => {
 
     describe('AbstractResident', () => {
@@ -444,6 +502,20 @@ describe('resident', () => {
 
         })
 
+        it('should be able to cross talk', done => {
+
+            system({ log: { level: 1 } })
+                .spawn({
+                    id: 'a',
+                    create: s => new MutableCrossTalk(s, 'b')
+                })
+                .spawn({
+                    id: 'b',
+                    create: s => new MutableCrossTalk(s, 'a', done)
+                });
+
+        });
+
     })
 
     describe('Immutable', () => {
@@ -454,6 +526,20 @@ describe('resident', () => {
                 .spawn({
                     id: 'selector',
                     create: s => new ImmutableSelfTalk(s, done)
+                });
+
+        });
+
+        it('should be able to cross talk', done => {
+
+            system({ log: { level: 1 } })
+                .spawn({
+                    id: 'a',
+                    create: s => new ImmutableCrossTalk(s, 'b')
+                })
+                .spawn({
+                    id: 'b',
+                    create: s => new ImmutableCrossTalk(s, 'a', done)
                 });
 
         });
