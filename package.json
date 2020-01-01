@@ -14,7 +14,7 @@
     "@quenk/test": "^2.1.1",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.6.8",
-    "mocha": "^6.2.0",
+    "mocha": "^6.2.2",
     "ts-node": "^8.3.0",
     "typedoc": "^0.14.2",
     "typescript": "^3.5.3"
@@ -22,6 +22,6 @@
   "author": "Quenk Technologies Limited",
   "license": "Apache-2.0",
   "dependencies": {
-    "@quenk/noni": "^1.24.0"
+    "@quenk/noni": "^1.35.1"
   }
 }
