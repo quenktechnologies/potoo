@@ -18,7 +18,7 @@ import { AbstractSystem, newContext, newState } from '../../framework';
  */
 export class ActorSystem extends AbstractSystem {
 
-    state: State<Context> = newState(this);
+    state: State = newState(this);
 
     allocate(
         a: Actor<Context>,
