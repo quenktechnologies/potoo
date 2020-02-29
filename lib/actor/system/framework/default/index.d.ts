@@ -14,7 +14,7 @@ import { AbstractSystem } from '../../framework';
  * ActorSystem default implementation for general purpose work.
  */
 export declare class ActorSystem extends AbstractSystem {
-    state: State<Context>;
+    state: State;
     allocate(a: Actor<Context>, h: Runtime, t: Template<ActorSystem>): Context;
 }
 /**

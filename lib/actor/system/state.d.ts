@@ -1,7 +1,7 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Runtime } from './vm/runtime';
-import { Instance } from '../';
 import { Address } from '../address';
+import { Instance } from '../';
 import { Context, Contexts } from '../context';
 /**
  * Routers map.
@@ -18,11 +18,11 @@ export interface Groups {
 /**
  * State contains Context entries for all actors in the system.
  */
-export interface State<C extends Context> {
+export interface State {
     /**
      * contexts for each actor in the system.
      */
-    contexts: Contexts<C>;
+    contexts: Contexts;
     /**
      * routers configured for transfers.
      */
@@ -35,35 +35,35 @@ export interface State<C extends Context> {
 /**
  * exists tests whether an address exists in the State.
  */
-export declare const exists: <C extends Context>(s: State<C>, addr: string) => boolean;
+export declare const exists: (s: State, addr: string) => boolean;
 /**
  * get a Context using an Address.
  */
-export declare const get: <C extends Context>(s: State<C>, addr: string) => Maybe<C>;
+export declare const get: (s: State, addr: string) => Maybe<Context>;
 /**
  * put a new Context in the State.
  */
-export declare const put: <C extends Context>(s: State<C>, addr: string, context: C) => State<C>;
+export declare const put: (s: State, addr: string, context: Context) => State;
 /**
  * remove an actor entry.
  */
-export declare const remove: <C extends Context>(s: State<C>, addr: string) => State<C>;
+export declare const remove: (s: State, addr: string) => State;
 /**
  * getAddress attempts to retrieve the address of an Actor instance.
  */
-export declare const getAddress: <C extends Context>(s: State<C>, actor: Instance) => Maybe<string>;
+export declare const getAddress: (s: State, actor: Instance) => Maybe<string>;
 /**
  * getRuntime attempts to retrieve the runtime for an Actor instance.
  */
-export declare const getRuntime: <C extends Context>(s: State<C>, actor: Instance) => Maybe<Runtime>;
+export declare const getRuntime: (s: State, actor: Instance) => Maybe<Runtime>;
 /**
  * getChildren returns the child contexts for an address.
  */
-export declare const getChildren: <C extends Context>(s: State<C>, addr: string) => Contexts<C>;
+export declare const getChildren: (s: State, addr: string) => Contexts;
 /**
  * getParent context using an Address.
  */
-export declare const getParent: <C extends Context>(s: State<C>, addr: string) => Maybe<C>;
+export declare const getParent: (s: State, addr: string) => Maybe<Context>;
 /**
  * getRouter will attempt to provide the
  * router context for an Address.
@@ -71,29 +71,29 @@ export declare const getParent: <C extends Context>(s: State<C>, addr: string) =
  * The value returned depends on whether the given
  * address begins with any of the installed router's address.
  */
-export declare const getRouter: <C extends Context>(s: State<C>, addr: string) => Maybe<C>;
+export declare const getRouter: (s: State, addr: string) => Maybe<Context>;
 /**
  * putRoute adds a route to the routing table.
  */
-export declare const putRoute: <C extends Context>(s: State<C>, target: string, router: string) => State<C>;
+export declare const putRoute: (s: State, target: string, router: string) => State;
 /**
  * removeRoute from the routing table.
  */
-export declare const removeRoute: <C extends Context>(s: State<C>, target: string) => State<C>;
+export declare const removeRoute: (s: State, target: string) => State;
 /**
  * getGroup attempts to provide the addresses of actors that have
  * been assigned to a group.
  *
  * Note that groups must be prefixed with a '$' to be resolved.
  */
-export declare const getGroup: <C extends Context>(s: State<C>, name: string) => Maybe<string[]>;
+export declare const getGroup: (s: State, name: string) => Maybe<string[]>;
 /**
  * putMember adds an address to a group.
  *
  * If the group does not exist, it will be created.
  */
-export declare const putMember: <C extends Context>(s: State<C>, group: string, member: string) => State<C>;
+export declare const putMember: (s: State, group: string, member: string) => State;
 /**
  * removeMember from a group.
  */
-export declare const removeMember: <C extends Context>(s: State<C>, group: string, member: string) => State<C>;
+export declare const removeMember: (s: State, group: string, member: string) => State;

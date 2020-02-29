@@ -28,7 +28,7 @@ export declare class STemplate {
 export declare abstract class AbstractSystem implements System, Platform {
     configuration: config.Configuration;
     constructor(configuration?: config.Configuration);
-    abstract state: State<Context>;
+    abstract state: State;
     abstract allocate(a: Actor<Context>, h: Runtime, t: Template<AbstractSystem>): Context;
     ident(i: Instance): Address;
     /**
@@ -53,4 +53,4 @@ export declare const newContext: <S extends System>(actor: Instance, runtime: Ru
  *
  * The value can be merged to statisfy user defined State.
  */
-export declare const newState: (sys: Platform) => State<Context>;
+export declare const newState: (sys: Platform) => State;

@@ -40,3 +40,7 @@ export declare const isChild: (parent: string, child: string) => boolean;
  * isGroup determines if an address is a group reference.
  */
 export declare const isGroup: (addr: string) => boolean;
+/**
+ * randomID generates a random id suitable for use by child actors.
+ */
+export declare const randomID: () => string;

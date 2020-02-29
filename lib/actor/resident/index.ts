@@ -3,6 +3,8 @@ import { just } from '@quenk/noni/lib/data/maybe';
 import { noop } from '@quenk/noni/lib/data/function';
 import { Err } from '@quenk/noni/lib/control/error';
 import { map, merge } from '@quenk/noni/lib/data/record';
+import { isObject } from '@quenk/noni/lib/data/type';
+
 import { StopScript } from '../system/vm/runtime/scripts';
 import { SpawnScript } from '../system/framework/scripts';
 import { System, Void } from '../system';
@@ -11,10 +13,11 @@ import {
     Address,
     AddressMap,
     isRestricted,
-    make
+    make,
+    randomID
 } from '../address';
 import { Message } from '../message';
-import { Template, Templates } from '../template';
+import { Template, Templates, Spawnable } from '../template';
 import { Context } from '../context';
 import { Actor } from '../';
 import { Case } from './case';
@@ -31,6 +34,7 @@ import {
  * Reference to an actor address.
  */
 export type Reference = (m: Message) => void;
+
 
 /**
  * Resident is an actor that exists in the current runtime.
@@ -70,20 +74,26 @@ export abstract class AbstractResident<C extends Context, S extends System>
 
     }
 
-    spawn(t: Template<S>): Address {
+    spawn(t: Spawnable<S>): Address {
 
-        this.system.exec(this, new SpawnScript(this.self(), <Template<System>>t));
+        let id = randomID();
 
-        return isRestricted(t.id) ?
+        let tmpl = isObject(t) ?
+            merge({ id }, <Template<System>>t) :
+            { id, create: t };
+
+        this.system.exec(this, new SpawnScript(this.self(), tmpl));
+
+        return isRestricted(<string>tmpl.id) ?
             ADDRESS_DISCARD :
-            make(this.self(), t.id);
+            make(this.self(), tmpl.id);
 
     }
 
-    spawnGroup(name: string | string[], tmpls: Templates<S>): AddressMap {
+    spawnGroup(group: string | string[], tmpls: Templates<S>): AddressMap {
 
-        return map(tmpls, (t: Template<S>) =>
-            this.spawn(merge(t, { group: name })));
+        return map(tmpls, (t: Spawnable<S>) => this.spawn(isObject(t) ?
+            merge(t, { group: group }) : { group, create: t }));
 
     }
 

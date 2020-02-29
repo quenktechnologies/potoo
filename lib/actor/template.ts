@@ -39,11 +39,16 @@ export type DelayMilliseconds = number;
 export type TrapFunc = (e: Err) => TrapAction;
 
 /**
+ * Spawnable is anything that can be spawned by an actor.
+ */
+export type Spawnable<S extends System> = Template<S> | Cons<S>;
+
+/**
  * Templates
  */
 export interface Templates<S extends System> {
 
-    [key: string]: Template<S>
+    [key: string]: Spawnable<S>
 
 }
 
@@ -60,8 +65,9 @@ export interface Template<S extends System> {
 
     /**
      * id of the actor used when constructing its address.
+     * If none is supplied, the system will generate one.
      */
-    id: string;
+    id?: string;
 
     /** 
      * group assignment for the actor.

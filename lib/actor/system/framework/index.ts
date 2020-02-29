@@ -1,6 +1,8 @@
 import * as config from '../configuration';
+
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
+
 import { This } from '../vm/runtime/this';
 import { Value, Script } from '../vm/script';
 import { Runtime } from '../vm/runtime';
@@ -54,7 +56,7 @@ export abstract class AbstractSystem
 
     constructor(public configuration: config.Configuration = {}) { }
 
-    abstract state: State<Context>;
+    abstract state: State;
 
     abstract allocate(
         a: Actor<Context>,
@@ -140,7 +142,7 @@ export const newContext = <S extends System>
  *
  * The value can be merged to statisfy user defined State.
  */
-export const newState = (sys: Platform): State<Context> => ({
+export const newState = (sys: Platform): State => ({
 
     contexts: {
 

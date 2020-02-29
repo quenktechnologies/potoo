@@ -23,7 +23,7 @@ export interface Platform extends System, Actor<Context> {
     /**
      * state table.
      */
-    state: State<Context>;
+    state: State;
 
     /**
      * allocate a new Context for an actor.

@@ -43,9 +43,9 @@ export interface Flags {
 /**
  * Contexts map.
  */
-export interface Contexts<C extends Context> {
+export interface Contexts {
 
-    [key: string]: C
+    [key: string]: Context
 
 }
 

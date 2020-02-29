@@ -49,7 +49,7 @@ export interface Runtime extends ErrorHandler {
     /**
      * getChildren provides the children context's for an address.
      */
-    getChildren(addr: Address): Maybe<Contexts<Context>>;
+    getChildren(addr: Address): Maybe<Contexts>;
     /**
      * putContext in the system at the specified address.
      */

@@ -34,8 +34,8 @@ export interface Flags {
 /**
  * Contexts map.
  */
-export interface Contexts<C extends Context> {
-    [key: string]: C;
+export interface Contexts {
+    [key: string]: Context;
 }
 /**
  * Context stores all the information a system needs about a spawned actor.

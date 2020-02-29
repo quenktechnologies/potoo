@@ -86,7 +86,7 @@ export class This implements Runtime {
 
     }
 
-    getChildren(addr: Address): Maybe<Contexts<Context>> {
+    getChildren(addr: Address): Maybe<Contexts> {
 
         return fromNullable(getChildren(this.system.state, addr));
 

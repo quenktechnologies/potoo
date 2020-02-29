@@ -1,5 +1,7 @@
 import * as template from '../../../template';
+
 import { Maybe } from '@quenk/noni/lib/data/maybe'
+
 import { Contexts, Context, ErrorHandler } from '../../../context';
 import { Address } from '../../../address';
 import { Message } from '../../../message';
@@ -59,7 +61,7 @@ export interface Runtime extends ErrorHandler {
     /**
      * getChildren provides the children context's for an address.
      */
-    getChildren(addr: Address): Maybe<Contexts<Context>>
+    getChildren(addr: Address): Maybe<Contexts>
 
     /**
      * putContext in the system at the specified address.

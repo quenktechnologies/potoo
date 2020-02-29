@@ -29,7 +29,7 @@ export declare class This implements Runtime {
     getContext(addr: Address): Maybe<Context>;
     getRouter(addr: Address): Maybe<Context>;
     getGroup(name: string): Maybe<Address[]>;
-    getChildren(addr: Address): Maybe<Contexts<Context>>;
+    getChildren(addr: Address): Maybe<Contexts>;
     putContext(addr: Address, ctx: Context): This;
     removeContext(addr: Address): This;
     putRoute(target: Address, router: Address): This;
