@@ -5,13 +5,13 @@ lib: $(shell find src -type f)
 	cp -R -u src/* lib
 	./node_modules/.bin/tsc --project lib
 
-.PHONY:
-public: public/api
-	echo 'DO NOT DELETE!' > public/api/.nojekyll 
+.PHONY: docs
+docs: docs/api
+	echo 'DO NOT DELETE!' > docs/.nojekyll 
 	touch $@
 
-# Generate typedoc documentation.
-public/api: src
+.PHONY: docs/api
+docs/api: src
 	rm -R $@ || true
 	./node_modules/.bin/typedoc \
 	--mode modules \
