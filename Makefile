@@ -5,9 +5,14 @@ lib: $(shell find src -type f)
 	cp -R -u src/* lib
 	./node_modules/.bin/tsc --project lib
 
+.PHONY:
+public: public/api
+	echo 'DO NOT DELETE!' > public/api/.nojekyll 
+	touch $@
+
 # Generate typedoc documentation.
-.PHONY: docs
-docs: 
+public/api: src
+	rm -R $@ || true
 	./node_modules/.bin/typedoc \
 	--mode modules \
 	--out $@ \
@@ -15,6 +20,5 @@ docs:
 	--excludeNotExported \
 	--excludePrivate \
 	--tsconfig lib/tsconfig.json \
-	--theme minimal && \
-	echo 'DO NOT DELETE!' > docs/.nojekyll 
+	--theme minimal 
 

@@ -13,10 +13,10 @@
   "devDependencies": {
     "@quenk/test": "^2.1.1",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.6.8",
-    "mocha": "^6.2.2",
+    "@types/node": "^12.12.29",
+    "mocha": "^7.1.0",
     "ts-node": "^8.3.0",
-    "typedoc": "^0.14.2",
+    "typedoc": "^0.16.11",
     "typescript": "^3.5.3"
   },
   "author": "Quenk Technologies Limited",
