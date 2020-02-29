@@ -11,7 +11,8 @@ import {
     Address,
     AddressMap,
     isRestricted,
-    make
+    make,
+    randomID
 } from '../address';
 import { Message } from '../message';
 import { Template, Templates } from '../template';
@@ -72,11 +73,13 @@ export abstract class AbstractResident<C extends Context, S extends System>
 
     spawn(t: Template<S>): Address {
 
-        this.system.exec(this, new SpawnScript(this.self(), <Template<System>>t));
+        let tmpl = merge({ id: randomID() }, <Template<System>>t);
 
-        return isRestricted(t.id) ?
+        this.system.exec(this, new SpawnScript(this.self(), tmpl));
+
+        return isRestricted(<string>tmpl.id) ?
             ADDRESS_DISCARD :
-            make(this.self(), t.id);
+            make(this.self(), tmpl.id);
 
     }
 

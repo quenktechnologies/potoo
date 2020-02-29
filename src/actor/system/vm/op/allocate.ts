@@ -1,5 +1,6 @@
 import * as error from '../error';
-import { isRestricted, make } from '../../../address';
+
+import { isRestricted, make, randomID } from '../../../address';
 import { Frame } from '../frame';
 import { Runtime } from '../runtime';
 import { OP_CODE_ALLOCATE, Log, Op, Level } from './';
@@ -37,10 +38,12 @@ export class Allocate implements Op {
         let p = parent.takeRight();
         let t = temp.takeRight();
 
-        if (isRestricted(t.id))
-            return e.raise(new error.InvalidIdErr(t.id));
+        let id = (t.id != null) ? t.id : randomID();
 
-        let addr = make(p, t.id);
+        if (isRestricted(id))
+            return e.raise(new error.InvalidIdErr(id));
+
+        let addr = make(p, id);
 
         if (e.getContext(addr).isJust())
             return e.raise(new error.DuplicateAddressErr(addr));

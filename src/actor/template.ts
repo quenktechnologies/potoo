@@ -60,8 +60,9 @@ export interface Template<S extends System> {
 
     /**
      * id of the actor used when constructing its address.
+     * If none is supplied, the system will generate one.
      */
-    id: string;
+    id?: string;
 
     /** 
      * group assignment for the actor.

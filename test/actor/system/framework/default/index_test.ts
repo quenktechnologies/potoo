@@ -1,4 +1,6 @@
 import { assert } from '@quenk/test/lib/assert';
+import { count } from '@quenk/noni/lib/data/record';
+
 import { Case } from '../../../../../src/actor/resident/case';
 import { Immutable, Mutable } from '../../../../../src/actor/resident';
 import { Context } from '../../../../../src/actor/context';
@@ -72,6 +74,18 @@ describe('system', function() {
                 }, 200);
 
             })
+
+            it('should spawn without ids', done => {
+
+                let s = system({}).spawn({ create: s => new A1(s) });
+
+                assert(s.state.contexts['undefined']).equal(undefined);
+                assert(count(s.state.contexts)).equal(2);
+
+                done();
+
+            })
+
 
         })
 
