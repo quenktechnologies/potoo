@@ -1,4 +1,4 @@
-import { Address, ADDRESS_RESTRICTED } from '../../address';
+import { Address, ADDRESS_RESTRICTED } from '../../../address';
 
 /**
  * Error
@@ -88,11 +88,14 @@ export class JumpOutOfBoundsErr extends Error {
 
 }
 
+/**
+ * NullPointerErr
+ */
 export class NullPointerErr extends Error {
 
-    constructor(public data: number[]) {
+    constructor(public data: number) {
 
-        super(`Reference: [${data}]`);
+        super(`Value: [${data.toString(16)}]`);
 
     }
 

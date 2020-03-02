@@ -1,15 +1,15 @@
-import * as indexes from '../script';
+import * as indexes from '../../script';
 import * as error from '../error';
 
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
 import { fromNullable } from '@quenk/noni/lib/data/maybe';
-import { Value } from '@quenk/noni/lib/data/json';
 
 import { Address } from '../../../../address';
 import { Context } from '../../../../context';
-import { Script } from '../script';
-import { Instruction, OperandU8, OperandU16 } from '../';
+import { Template } from '../../template';
+import { Script, PVM_Value } from '../../script';
+import { Instruction, OperandU8, OperandU16, Operand } from '../';
 
 export const DATA_RANGE_TYPE_HIGH = 0x7F000000;
 export const DATA_RANGE_TYPE_LOW = 0x1000000;
@@ -54,8 +54,8 @@ export const DATA_LOCATION_MAILBOX = DATA_RANGE_LOCATION_STEP * 5;
  * The highest byte is used to indicate the type of the data, the next byte,
  * it's location and the remaining bytes store  value.
  *
- * 11111111 11111111    11111111 11111111
- *  <type>  <location>  <     value      >
+ * 11111111 11111111  11111111 11111111
+ * <type>  <location> <     value      >
  * The way the value is calculated depends on the type.
  */
 export type Data = number;
@@ -138,9 +138,9 @@ export class Frame {
      * Care should be taken when using this method to ensure the value has 
      * the correct bits set.
      */
-    push(value: Data): Frame {
+    push(d: Data): Frame {
 
-        this.data.push(value);
+        this.data.push(d);
         return this;
 
     }
@@ -176,30 +176,32 @@ export class Frame {
     }
 
     /**
-     * pushAddress onto the stack.
-     *
-     * The actual address is stored on the heap.
-    pushAddress(value: Address): Frame {
+     * pushString from the constant pool onto the data stack.
+     */
+    pushString(idx: Operand): Frame {
 
-        let idx = this.heap.indexOf(value);
-
-        idx = (idx === -1) ? this.heap.push(value) - 1 : idx;
-
-        this.push(idx &
-            DATA_MASK_VALUE16 |
-            DATA_LOCATION_HEAP |
-            DATA_TYPE_ADDRESS);
+        this.push(idx | DATA_LOCATION_CONSTANTS | DATA_TYPE_STRING);
 
         return this;
 
     }
-    */
+
+    /**
+     * pushTemplate from the constant pool onto the data stack.
+     */
+    pushTemplate(idx: Operand): Frame {
+
+        this.push(idx | DATA_LOCATION_CONSTANTS | DATA_TYPE_TEMPLATE);
+
+        return this;
+
+    }
 
     /**
      * resolve a value from it's location, producing 
      * an error if it can not be found.
      */
-    resolve(data: Data): Either<Err, Value> {
+    resolve(data: Data): Either<Err, PVM_Value> {
 
         let { script, context } = this;
 
@@ -211,7 +213,6 @@ export class Frame {
 
             case DATA_LOCATION_IMMEDIATE:
                 return right(value);
-                break;
 
             case DATA_LOCATION_CONSTANTS:
 
@@ -225,9 +226,7 @@ export class Frame {
 
                 if (mVal.isNothing()) return nullErr(data);
 
-                return right<Err, Value>(mVal.get());
-
-                break;
+                return right<Err, PVM_Value>(mVal.get());
 
             case DATA_LOCATION_LOCALS:
 
@@ -237,8 +236,6 @@ export class Frame {
 
                 //TODO: review call stack safety of this recursive call.
                 return this.resolve(mRef.get());
-
-                break;
 
             case Location.Mailbox:
 
@@ -250,9 +247,7 @@ export class Frame {
 
                 if (mMsg.isNothing()) return nullErr(data);
 
-                return right<Err, Value>(mMsg.get());
-
-                break;
+                return right<Err, PVM_Value>(mMsg.get());
 
             default:
                 return nullErr(data);
@@ -261,7 +256,43 @@ export class Frame {
 
     }
 
+    /**
+     * pop the top most value from the data stack.
+     */
+    pop(): Data {
+
+        return <Data>this.data.pop();
+
+    }
+
+    /**
+     * popValue pops and attempts to resolve the top most value of the data stack.
+     */
+    popValue(): Either<Err, PVM_Value> {
+
+        return this.resolve(this.pop());
+
+    }
+
+    /**
+     *  popString from the top of the data stack.
+     */
+    popString(): Either<Err, string> {
+
+        return <Either<Err, string>>this.popValue();
+
+    }
+
+    /**
+     * popTemplate from the top of the data stack.
+     */
+    popTemplate(): Either<Err, Template> {
+
+        return <Either<Err, Template>>this.popValue();
+
+    }
+
 }
 
-const nullErr = (data: Data): Either<Err, Value> =>
+const nullErr = (data: Data): Either<Err, PVM_Value> =>
     left(new error.NullPointerErr(data));

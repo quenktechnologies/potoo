@@ -1,5 +1,6 @@
-import { Maybe } from '@quenk/noni/lib/data/maybe';
+import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
+
 import { Runtime } from './system/vm/runtime';
 import { Template } from './template';
 import { Message } from './message';
@@ -87,3 +88,24 @@ export interface Context {
     template: Template<System>
 
 }
+
+/**
+ * newContext 
+ */
+export const newContext =
+    (runtime: Runtime, actor: Instance, template: Template<System>)
+        : Context => ({
+
+            mailbox: nothing(),
+
+            actor,
+
+            behaviour: [],
+
+            flags: { immutable: false, buffered: false },
+
+            runtime,
+
+            template: <Template<System>>template
+
+        });

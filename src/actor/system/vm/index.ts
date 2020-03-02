@@ -1,33 +1,41 @@
-import { Context } from '../../context';
-import { Template } from '../../template';
-import { Actor } from '../../';
 import { Configuration } from '../configuration';
 import { State } from '../state';
+import { Instance } from '../../';
 import { System } from '../';
 import { Runtime } from './runtime';
+import { Script } from './script';
 
 /**
- * Platform contains a dynamic collection of actors that 
- * share the a JS runtime.
- *
- * A Platform implementor is used by other APIs in this module 
- * to execute scripts on behalf of actors.
+ * PVM is the Potoo Virtual Machine.
  */
-export interface Platform extends System, Actor<Context> {
+export class PVM<S extends System> {
+
+    constructor(
+        public system: S,
+        public config: Configuration) { }
 
     /**
-     * configuration of the Platform.
+     * state contains information about all the actors in the system, routers
+     * and groups.
      */
-    configuration: Configuration
+    state: State = {
+
+        contexts: {},
+
+        routers: {},
+
+        groups: {}
+
+    };
 
     /**
-     * state table.
+     * pending scripts to execute.
      */
-    state: State;
+    pending: Runtime[] = [];
 
-    /**
-     * allocate a new Context for an actor.
-     */
-    allocate(a: Actor<Context>, h: Runtime, t: Template<this>): Context;
+    exec(_actor: Instance, _s: Script): void {
+
+
+    }
 
 }
