@@ -1,23 +1,26 @@
 import { assert } from '@quenk/test/lib/assert';
 
-import { Script } from '../../../../../../src/actor/system/vm/runtime/script';
+import { Script } from '../../../../../../src/actor/system/vm/script';
 import {
     NullPointerErr
 } from '../../../../../../src/actor/system/vm/runtime/error';
 import {
-    Frame
+    Frame,
+    DATA_TYPE_STRING,
+    DATA_LOCATION_CONSTANTS,
+    DATA_TYPE_UINT8,
+    DATA_LOCATION_IMMEDIATE,
+    DATA_TYPE_UINT16,
+    DATA_TYPE_TEMPLATE,
+    DATA_TYPE_MESSAGE
 } from '../../../../../../src/actor/system/vm/runtime/stack/frame';
 import {
     Constants,
     newContext
 } from '../../../../../fixtures/mocks';
 
-
-const frame = (c: Constants) =>
+const newF = (c: Constants = [[], [], [], []]) =>
     new Frame('self', newContext(), new Script(c));
-
-const newF = () =>
-    new Frame('self', newContext(), new Script());
 
 describe('frame', () => {
 
@@ -37,7 +40,9 @@ describe('frame', () => {
 
             it('should store properly', () => {
 
-                assert(newF().push(8).data).equate([0x1010008]);
+                let addr = 8 | DATA_TYPE_UINT8 | DATA_LOCATION_IMMEDIATE;
+
+                assert(newF().pushUInt8(8).data).equate([addr]);
 
             });
 
@@ -47,67 +52,117 @@ describe('frame', () => {
 
             it('should store properly', () => {
 
-                assert(newF().push(0x8000).data).equate([0x1018000]);
+                let addr = 0x8000 | DATA_TYPE_UINT16 | DATA_LOCATION_IMMEDIATE;
+
+                assert(newF().pushUInt16(0x8000).data).equate([addr]);
 
             });
 
         });
 
-    });
+        describe('pushString', () => {
 
-    describe('resolve', () => {
+            it('should store properly', () => {
 
-        it('should return immediate values', () => {
+                let addr = 1 | DATA_TYPE_STRING | DATA_LOCATION_CONSTANTS;
 
-            let f = new Frame('self', newContext(), new Script());
-            assert(f.resolve(0x1018000).takeRight()).equate(0x8000);
+                assert(newF().pushString(1).data).equate([addr]);
 
-        });
+            });
 
-        it('should return values from the constants pool', () => {
+        })
 
-            let c: Constants = [[], ['hello'], [], [], [], []];
-            let f = frame(c);
+        describe('pushTemplate', () => {
 
-            assert(f.resolve(0xf020000).takeRight()).equate('hello');
+            it('should store properly', () => {
 
-        });
+                let addr = 1 | DATA_TYPE_TEMPLATE | DATA_LOCATION_CONSTANTS;
 
-        it('should resolve locals', () => {
+                assert(newF().pushTemplate(1).data).equate([addr]);
 
-            /*
-              let c: Constants = [
-                  [], ['hello', 'world'], [], [], [], []
-              ];
-  
-              let f = new Frame('self', newContext(), new Script(c), [], [
-                  1, Type.String, Location.Local
-              ]);
-  
-              assert(f.resolve([1, Type.String, Location.Constants]).takeRight())
-                  .equal('world');*/
+            });
 
-        });
+        })
 
-        it('should resolve from the heap', () => {
+        describe('pushMessage', () => {
 
-            /*
-              let f = new Frame('self', newContext(), new Script(), [], [], [], [
-                  Date
-              ]);
-  
-              assert(f.resolve([0, Type.Message, Location.Heap]).takeRight())
-                  .equal(Date);*/
+            it('should store properly', () => {
 
-        });
+                let addr = 1 | DATA_TYPE_MESSAGE | DATA_LOCATION_CONSTANTS;
 
-        it('should return an error if the reference does not exist', () => {
+                assert(newF().pushMessage(1).data).equate([addr]);
 
-            let f = new Frame('self', newContext(), new Script());
-            assert(f.resolve(0x1).takeLeft()).be.instance.of(NullPointerErr);
+            });
 
-        });
+        })
 
-    });
+        describe('resolve', () => {
 
-});
+            it('should return immediate values', () => {
+
+                let f = new Frame('self', newContext(), new Script());
+                assert(f.resolve(0x1018000).takeRight()).equate(0x8000);
+
+            });
+
+            it('should return values from the constants pool', () => {
+
+                let c: Constants =
+                    [[], ['hello'], [<any>{}], [{ v: 12 }]];
+
+                let f = newF(c);
+
+                let uint8 = 1 | DATA_TYPE_UINT8 | DATA_LOCATION_IMMEDIATE;
+                let uint16 = 0x8000 | DATA_TYPE_UINT16 | DATA_LOCATION_IMMEDIATE;
+                let str = 0 | DATA_TYPE_STRING | DATA_LOCATION_CONSTANTS;
+                let tmpl = 0 | DATA_TYPE_TEMPLATE | DATA_LOCATION_CONSTANTS;
+                let msg = 0 | DATA_TYPE_MESSAGE | DATA_LOCATION_CONSTANTS;
+
+                assert(f.resolve(uint8).takeRight()).equal(1);
+                assert(f.resolve(uint16).takeRight()).equal(0x8000);
+                assert(f.resolve(str).takeRight()).equal(c[1][0]);
+                assert(f.resolve(tmpl).takeRight()).equal(c[2][0]);
+                assert(f.resolve(msg).takeRight()).equal(c[3][0]);
+
+            });
+
+            it('should resolve locals', () => {
+
+                /*
+                  let c: Constants = [
+                      [], ['hello', 'world'], [], [], [], []
+                  ];
+      
+                  let f = new Frame('self', newContext(), new Script(c), [], [
+                      1, Type.String, Location.Local
+                  ]);
+      
+                  assert(f.resolve([1, Type.String, Location.Constants]).takeRight())
+                      .equal('world');*/
+
+            });
+
+            it('should resolve from the heap', () => {
+
+                /*
+                  let f = new Frame('self', newContext(), new Script(), [], [], [], [
+                      Date
+                  ]);
+      
+                  assert(f.resolve([0, Type.Message, Location.Heap]).takeRight())
+                      .equal(Date);*/
+
+            });
+
+            it('should return an error if the reference does not exist', () => {
+
+                let f = new Frame('self', newContext(), new Script());
+                assert(f.resolve(0x1).takeLeft()).be.instance.of(NullPointerErr);
+
+            })
+
+        })
+
+    })
+
+})

@@ -7,18 +7,17 @@ import { Instance, Actor } from '../../src/actor';
 import { Template as T } from '../../src/actor/template';
 import { State } from '../../src/actor/system/state';
 import { Runtime } from '../../src/actor/system/vm/runtime';
-import { Frame } from '../../src/actor/system/vm/frame';
+import { Frame } from '../../src/actor/system/vm/runtime/stack/frame';
 import { Address } from '../../src/actor/address';
 import { Message } from '../../src/actor/message';
-import { Constants as C, Value, Script } from '../../src/actor/system/vm/script';
+import { Constants as C, PVM_Value, Script } from '../../src/actor/system/vm/script';
 import { Configuration } from '../../src/actor/system/configuration';
 import { Contexts as Ctxs, Context as Ctx } from '../../src/actor/context';
 import { Envelope } from '../../src/actor/message';
-import { Platform } from '../../src/actor/system/vm';
 
 export type Constants = C;
 
-export interface Contexts extends Ctxs<Context> { }
+export interface Contexts extends Ctxs { }
 
 export interface Context extends Ctx { }
 
@@ -164,14 +163,14 @@ export class RuntimeImpl extends Mock implements Runtime {
 
     }
 
-    exec(s: Script): Maybe<Value> {
+    exec(s: Script): Maybe<PVM_Value> {
 
         return this.MOCK.record('exec', [s], nothing());
 
 
     }
 
-    run(): Maybe<Value> {
+    run(): Maybe<PVM_Value> {
 
         return this.MOCK.record('run', [], nothing());
 
@@ -180,9 +179,9 @@ export class RuntimeImpl extends Mock implements Runtime {
 }
 
 export class SystemImpl extends InstanceImpl
-    implements System, Platform {
+    implements System {
 
-    state: State<Context> = { contexts: {}, routers: {}, groups: {} };
+    state: State = { contexts: {}, routers: {}, groups: {} };
 
     configuration = {}
 
@@ -202,7 +201,7 @@ export class SystemImpl extends InstanceImpl
     }
 
     exec(i: Instance, s: Script)
-        : Maybe<Value> {
+        : Maybe<PVM_Value> {
 
         return this.MOCK.record('exec', [i, s], nothing());
 
