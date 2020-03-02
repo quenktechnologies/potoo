@@ -1,5 +1,5 @@
-import { Type } from '@quenk/noni/lib/data/type';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Type } from '@quenk/noni/lib/data/type';
 import { System } from './system';
 import { Context } from './context';
 import { Actor } from './';
@@ -89,5 +89,16 @@ export interface Template<S extends System> {
     /**
      * children is list of child actors that will automatically be spawned.
      */
-    children?: Template<S>[];
+    children?: Templates<S> | Template<S>[];
 }
+/**
+ * normalize a Template so that its is easier to work with.
+ */
+export declare const normalize: <S extends System>(t: Template<S>) => Template<S> & {
+    id: string;
+    children: Template<S>[] | ((Template<S> & {
+        id: string;
+    }) | (Cons<S> & {
+        id: string;
+    }))[] | undefined;
+};

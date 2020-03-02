@@ -1,8 +1,11 @@
-import { Type } from '@quenk/noni/lib/data/type';
+import { mapTo, merge, isRecord } from '@quenk/noni/lib/data/record';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Type } from '@quenk/noni/lib/data/type';
+
 import { System } from './system';
 import { Context } from './context';
 import { Actor } from './';
+import { randomID } from './address';
 
 export const ACTION_RAISE = -0x1;
 export const ACTION_IGNORE = 0x0;
@@ -107,6 +110,18 @@ export interface Template<S extends System> {
     /**
      * children is list of child actors that will automatically be spawned.
      */
-    children?: Template<S>[]
+    children?: Templates<S> | Template<S>[]
 
 }
+
+/**
+ * normalize a Template so that its is easier to work with.
+ */
+export const normalize = <S extends System>(t: Template<S>) => merge(t, {
+
+    id: t.id ? t.id : randomID(),
+
+    children: isRecord(t.children) ?
+        mapTo(t.children, (c, k) => merge(c, { id: k })) : t.children
+
+})

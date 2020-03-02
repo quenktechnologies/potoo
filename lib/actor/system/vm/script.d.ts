@@ -1,19 +1,36 @@
 import { Template } from '../../template';
 import { Message } from '../../message';
-import { System } from '../';
-import { Op } from './op';
+import { Instruction } from './runtime';
+import { System } from '..';
+export declare const PVM_TYPE_INDEX_FLOAT64 = 0;
+export declare const PVM_TYPE_INDEX_STRING = 1;
+export declare const PVM_TYPE_INDEX_ADDRESS = 1;
+export declare const PVM_TYPE_INDEX_TEMPLATE = 2;
+export declare const PVM_TYPE_INDEX_MESSAGE = 3;
 /**
- * Function type.
+ * PVMValue corresponds to the PVM supported data types that are stored
+ * in the constants pool.
  */
-export declare type Function = () => Op[];
+export declare type PVM_Value = PVM_Float64 | PVM_String | PVM_Template | PVM_Message;
 /**
- * Foreign function type.
+ * PVM_Float64 is the IEEE 754 double.
+ *
+ * Corresponds to the ECMAScript number type.
  */
-export declare type Foreign = (...arg: Value) => Value;
+export declare type PVM_Float64 = number;
 /**
- * Value corresponds to the VM's supported types.
+ * PVM_String is a UTF-16 formatted string corresponding to the ECMAScript
+ * string type.
  */
-export declare type Value = number | string | Function | Template<System> | Message;
+export declare type PVM_String = string;
+/**
+ * PVM_Template is a potoo template used to spawn new actors.
+ */
+export declare type PVM_Template = Template<System>;
+/**
+ * PVM_Message is an opaque value that can be passed between actors.
+ */
+export declare type PVM_Message = any;
 /**
  * Constants is a tuple of immutable values available to a
  * Script at runtime.
@@ -21,16 +38,18 @@ export declare type Value = number | string | Function | Template<System> | Mess
  * Access to these values happens by using first the index of its type
  * then the following index within the type's table.
  */
-export declare type Constants = [number[], string[], Function[], Template<System>[], Message[], Foreign[]];
+export declare type Constants = [PVM_Float64[], PVM_String[], PVM_Template[], Message[]];
 /**
- * Script is a "program" an actor submits to the Runtime run execute.
+ * Script contains the code and supporting information of an actor used by
+ * the VM for code execution.
  *
- * It consists of the following sections:
- * 1. constants - Static values referenced in the code section.
- * 2. code - A list of one or more Op codes to execute in sequence.
+ * @param constants - The constant pool for the actor where certain references
+ *                    are resolved from.
+ *
+ * @param code      - The actual instructions the VM will execute.
  */
 export declare class Script {
     constants: Constants;
-    code: Op[];
-    constructor(constants?: Constants, code?: Op[]);
+    code: Instruction[];
+    constructor(constants?: Constants, code?: Instruction[]);
 }

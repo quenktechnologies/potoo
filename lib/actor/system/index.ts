@@ -1,7 +1,7 @@
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Address } from '../address';
 import { Instance } from '../';
-import { Value, Script } from './vm/script';
+import { PVM_Value, Script } from './vm/script';
 
 /**
  * System represents a dynamic collection of actors that 
@@ -11,7 +11,7 @@ export interface System extends Instance {
 
     ident(i: Instance): Address
 
-    exec(i: Instance, s: Script): Maybe<Value>
+    exec(i: Instance, s: Script): Maybe<PVM_Value>
 
 }
 
@@ -46,7 +46,7 @@ export class Void implements System {
 
     }
 
-    exec(_: Instance, __: Script): Maybe<Value> {
+    exec(_: Instance, __: Script): Maybe<PVM_Value> {
 
         return nothing();
 

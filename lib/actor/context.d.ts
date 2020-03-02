@@ -68,3 +68,7 @@ export interface Context {
      */
     template: Template<System>;
 }
+/**
+ * newContext
+ */
+export declare const newContext: (runtime: Runtime, actor: Instance, template: Template<System>) => Context;
