@@ -3,115 +3,71 @@ import * as error from '../error';
 
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
-import { fromNullable } from '@quenk/noni/lib/data/maybe';
+import { fromNullable, Maybe } from '@quenk/noni/lib/data/maybe';
+import { tail } from '@quenk/noni/lib/data/array';
 
 import { Address } from '../../../../address';
 import { Context } from '../../../../context';
-import { Template } from '../../template';
-import { Script, PVM_Value } from '../../script';
+import {
+    Script,
+    PVM_Value,
+    PVM_Template,
+    PVM_Message,
+    PVM_Object,
+    PVM_Function,
+    ConsInfo,
+    PVM_Receiver
+} from '../../script';
 import { Instruction, OperandU8, OperandU16, Operand } from '../';
+import { Heap } from '../heap';
 
 export const DATA_RANGE_TYPE_HIGH = 0x7F000000;
 export const DATA_RANGE_TYPE_LOW = 0x1000000;
 export const DATA_RANGE_TYPE_STEP = 0x1000000;
 
-export const DATA_RANGE_LOCATION_HIGH = 0xFF0000;
-export const DATA_RANGE_LOCATION_LOW = 0x10000;
-export const DATA_RANGE_LOCATION_STEP = 0x10000;
-
-export const DATA_RANGE_VALUE_HIGH = 0xFFFF;
-export const DATA_RANGE_VALUE_LOW = 0x0;
-
 // Used to extract the desired part via &
 export const DATA_MASK_TYPE = 0xFF000000;
-export const DATA_MASK_LOCATION = 0xFF0000;
 export const DATA_MASK_VALUE8 = 0xFF;
 export const DATA_MASK_VALUE16 = 0xFFFF;
+export const DATA_MASK_VALUE24 = 0xFFFFFF;
+export const DATA_MASK_VALUE32 = 0xFFFFFFFF;
 
 export const DATA_MAX_SIZE = 0x7FFFFFFF;
+export const DATA_MAX_SAFE_UINT32 = 0x7fffffff;
 
 //Type indicators.
 export const DATA_TYPE_UINT8 = DATA_RANGE_TYPE_STEP;
 export const DATA_TYPE_UINT16 = DATA_RANGE_TYPE_STEP * 2;
-export const DATA_TYPE_FLOAT64 = DATA_RANGE_TYPE_STEP * 10;
 export const DATA_TYPE_STRING = DATA_RANGE_TYPE_STEP * 15;
-export const DATA_TYPE_ADDRESS = DATA_TYPE_STRING;
-export const DATA_TYPE_TEMPLATE = DATA_RANGE_TYPE_STEP * 20
-export const DATA_TYPE_MESSAGE = DATA_RANGE_TYPE_STEP * 25;
-
-//Storage location indicators.
-export const DATA_LOCATION_IMMEDIATE = DATA_RANGE_LOCATION_STEP;
-export const DATA_LOCATION_CONSTANTS = DATA_RANGE_LOCATION_STEP * 2;
-export const DATA_LOCATION_LOCALS = DATA_RANGE_LOCATION_STEP * 3;
-export const DATA_LOCATION_HEAP = DATA_RANGE_LOCATION_STEP * 4;
-export const DATA_LOCATION_MAILBOX = DATA_RANGE_LOCATION_STEP * 5;
+export const DATA_TYPE_FUNCTION = DATA_RANGE_TYPE_STEP * 20;
+export const DATA_TYPE_OBJECT = DATA_RANGE_TYPE_STEP * 25;
+export const DATA_TYPE_ARRAY = DATA_RANGE_TYPE_STEP * 26
+export const DATA_TYPE_RECEIVER = DATA_RANGE_TYPE_STEP * 27
+export const DATA_TYPE_LOCAL = DATA_RANGE_TYPE_STEP * 28;
+export const DATA_TYPE_MESSAGE = DATA_RANGE_TYPE_STEP * 29;
 
 /**
  * Data is the type of values that can appear on a Frame's data stack.
  *
  * It is a 32bit unsigned integer in the range 0x00000000-0x7FFFFFFF
  *
- * The highest byte is used to indicate the type of the data, the next byte,
- * it's location and the remaining bytes store  value.
+ * Typically, the  highest byte is used to indicate the type of the data
+ * in realtion to storage location and the remaining bytes store value.
  *
- * 11111111 11111111  11111111 11111111
- * <type>  <location> <     value      >
- * The way the value is calculated depends on the type.
+ * 11111111        111111111111111111111111
+ * <type/location> <     value      >
+ *
+ * The actual interpretation of the location and value part are dependant on
+ * the type.
  */
 export type Data = number;
-
-/**
- * DataType enum.
- */
-export enum DataType {
-
-    UInt8 = DATA_TYPE_UINT8,
-
-    UInt16 = DATA_TYPE_UINT16,
-
-    Float64 = DATA_TYPE_FLOAT64,
-
-    String = DATA_TYPE_STRING,
-
-    Address = DATA_TYPE_ADDRESS,
-
-    Template = DATA_TYPE_TEMPLATE,
-
-    Message = DATA_TYPE_MESSAGE,
-
-}
-
-/**
- * Location enum.
- */
-export enum Location {
-
-    Immediate = DATA_LOCATION_IMMEDIATE,
-
-    Constants = DATA_LOCATION_CONSTANTS,
-
-    Heap = DATA_LOCATION_HEAP,
-
-    Local = DATA_LOCATION_LOCALS,
-
-    Mailbox = DATA_LOCATION_MAILBOX
-
-}
 
 /**
  * typeMaps maps a type to its index in the contants pool.
  */
 export const typeMaps: { [key: number]: number } = {
 
-    [DATA_TYPE_FLOAT64]: indexes.PVM_TYPE_INDEX_FLOAT64,
-
-    [DATA_TYPE_STRING]: indexes.PVM_TYPE_INDEX_STRING,
-
-    [DATA_TYPE_ADDRESS]: indexes.PVM_TYPE_INDEX_ADDRESS,
-
-    [DATA_TYPE_TEMPLATE]: indexes.PVM_TYPE_INDEX_TEMPLATE,
-
-    [DATA_TYPE_MESSAGE]: indexes.PVM_TYPE_INDEX_MESSAGE
+    [DATA_TYPE_STRING]: indexes.CONSTANTS_INDEX_STRING,
 
 }
 
@@ -127,6 +83,7 @@ export class Frame {
         public actor: Address,
         public context: Context,
         public script: Script,
+        public heap: Heap = new Heap(),
         public code: Instruction[] = [],
         public data: Data[] = [],
         public locals: Data[] = [],
@@ -150,13 +107,10 @@ export class Frame {
      */
     pushUInt8(value: OperandU8): Frame {
 
-        this.push(
+        return this.push(
             value &
             DATA_MASK_VALUE8 |
-            DATA_LOCATION_IMMEDIATE |
             DATA_TYPE_UINT8);
-
-        return this;
 
     }
 
@@ -165,13 +119,19 @@ export class Frame {
      */
     pushUInt16(value: OperandU16): Frame {
 
-        this.push(
+        return this.push(
             value &
-            DATA_MASK_VALUE8 |
-            DATA_LOCATION_IMMEDIATE |
+            DATA_MASK_VALUE16 |
             DATA_TYPE_UINT16);
 
-        return this;
+    }
+
+    /**
+     * pushUInt32 pushes an unsigned 32bit integer onto the data stack.
+     */
+    pushUInt32(value: Operand): Frame {
+
+        return this.push(value & DATA_MASK_VALUE32);
 
     }
 
@@ -180,55 +140,116 @@ export class Frame {
      */
     pushString(idx: Operand): Frame {
 
-        this.push(idx | DATA_LOCATION_CONSTANTS | DATA_TYPE_STRING);
-
-        return this;
+        return this.push(idx | DATA_TYPE_STRING);
 
     }
 
     /**
-     * pushTemplate from the constant pool onto the data stack.
+     * pushFunctions from the funs section onto the stack.
      */
-    pushTemplate(idx: Operand): Frame {
+    pushFunction(idx: OperandU16): Frame {
 
-        this.push(idx | DATA_LOCATION_CONSTANTS | DATA_TYPE_TEMPLATE);
-
-        return this;
+        return this.push(idx | DATA_TYPE_FUNCTION);
 
     }
 
     /**
-     * resolve a value from it's location, producing 
-     * an error if it can not be found.
+     * pushReceiver from the receivers section onto the stack.
+     */
+    pushReceiver(idx: OperandU16): Frame {
+
+        return this.push(idx | DATA_TYPE_RECEIVER);
+
+    }
+
+    /**
+     * pushMessage from the receivers section onto the stack.
+     */
+    pushMessage(): Frame {
+
+        return this.push(0 | DATA_TYPE_MESSAGE);
+
+    }
+
+    /**
+     * peek at the top of the data stack.
+     */
+    peek(): Maybe<Data> {
+
+        //TODO: Return 0 instead of Maybe?
+        return fromNullable(tail(this.data));
+
+    }
+
+    /**
+     * peekConstructor peeks and resolves the constructor for the object 
+     * reference at the top of the stack.
+     */
+    peekConstructor(): Either<Err, ConsInfo> {
+
+        let mword = this.peek();
+
+        if (mword.isNothing()) return left(new error.NullPointerErr(0));
+
+        let word = DATA_MASK_VALUE24 & mword.get();
+
+        let info = this.script.cons[DATA_MASK_VALUE24 & word];
+
+        if (info == null) return left(new error.NullPointerErr(word));
+
+        return right(info);
+
+    }
+
+    /**
+     * resolve a value from its reference.
+     *
+     * An error will be produced if the value cannot be resolved.
      */
     resolve(data: Data): Either<Err, PVM_Value> {
 
         let { script, context } = this;
 
         let typ = data & DATA_MASK_TYPE;
-        let location = data & DATA_MASK_LOCATION;
-        let value = data & DATA_MASK_VALUE16;
 
-        switch (location) {
+        let value = data & DATA_MASK_VALUE24;
 
-            case DATA_LOCATION_IMMEDIATE:
-                return right(value);
+        switch (typ) {
 
-            case DATA_LOCATION_CONSTANTS:
+            case DATA_TYPE_STRING:
 
-                let mTypes = fromNullable(script.constants[typeMaps[typ]]);
+                let mstr = fromNullable(
+                    script.constants[indexes.CONSTANTS_INDEX_STRING][value]);
 
-                if (mTypes.isNothing()) return nullErr(data);
+                return right(mstr.get());
 
-                let types = mTypes.get();
+            case DATA_TYPE_FUNCTION:
 
-                let mVal = fromNullable(types[value]);
+                let info = this.script.funs[value];
 
-                if (mVal.isNothing()) return nullErr(data);
+                if (info == null)
+                    return left(new error.MissingFunInfoErr(value));
 
-                return right<Err, PVM_Value>(mVal.get());
+                return right(info);
 
-            case DATA_LOCATION_LOCALS:
+            case DATA_TYPE_RECEIVER:
+
+                let r = this.script.receivers[value];
+
+                return (r == null) ?
+                    left(new error.MissingFunInfoErr(value)) :
+                    right(r);
+
+            case DATA_TYPE_OBJECT:
+            case DATA_TYPE_ARRAY:
+
+                let mO = this.heap.get(typ);
+
+                if (mO.isNothing()) return left(new error.NullPointerErr(data));
+
+                return right(mO.get());
+
+            case DATA_TYPE_LOCAL:
 
                 let mRef = fromNullable(this.locals[value]);
 
@@ -237,20 +258,15 @@ export class Frame {
                 //TODO: review call stack safety of this recursive call.
                 return this.resolve(mRef.get());
 
-            case Location.Mailbox:
+            case DATA_TYPE_MESSAGE:
 
-                if (context.mailbox.isNothing()) return nullErr(data);
+                if (context.mailbox.length === 0) return nullErr(data);
 
-                let mailbox = context.mailbox.get();
-
-                let mMsg = fromNullable(mailbox[value]);
-
-                if (mMsg.isNothing()) return nullErr(data);
-
-                return right<Err, PVM_Value>(mMsg.get());
+                //messages are always accessed sequentially FIFO
+                return right<Err, PVM_Value>(context.mailbox.shift());
 
             default:
-                return nullErr(data);
+                return right(value);
 
         }
 
@@ -275,7 +291,7 @@ export class Frame {
     }
 
     /**
-     *  popString from the top of the data stack.
+     * popString from the top of the data stack.
      */
     popString(): Either<Err, string> {
 
@@ -284,11 +300,61 @@ export class Frame {
     }
 
     /**
+     * popFunction from the top of the data stack.
+     */
+    popFunction(): Either<Err, PVM_Function> {
+
+        return <Either<Err, PVM_Function>>this.popValue();
+
+    }
+
+    /**
+     * popReceiver from the top of the data stack.
+     */
+    popReceiver(): Either<Err, PVM_Receiver> {
+
+        return <Either<Err, PVM_Receiver>>this.popValue();
+
+    }
+
+    /**
+     * popObject from the top of the data stack.
+     */
+    popObject(): Either<Err, PVM_Object> {
+
+        return <Either<Err, PVM_Object>>this.popValue();
+
+    }
+
+    /**
      * popTemplate from the top of the data stack.
      */
-    popTemplate(): Either<Err, Template> {
+    popTemplate(): Either<Err, PVM_Template> {
 
-        return <Either<Err, Template>>this.popValue();
+        return <Either<Err, PVM_Template>>this.popValue();
+
+    }
+
+    /**
+     * popMessage from the top of the data stack.
+     */
+    popMessage(): Either<Err, PVM_Message> {
+
+        return <Either<Err, PVM_Message>>this.popValue();
+
+    }
+
+    /**
+     * duplicate the top of the stack.
+     */
+    duplicate(): Frame {
+
+        let top = <number>this.data.pop();
+
+        this.data.push(top);
+        this.data.push(top);
+
+        return this;
 
     }
 

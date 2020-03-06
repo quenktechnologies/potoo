@@ -1,4 +1,5 @@
 import { Address, ADDRESS_RESTRICTED } from '../../../address';
+import { DATA_MAX_SAFE_UINT32 } from './stack/frame';
 
 /**
  * Error
@@ -158,6 +159,45 @@ export class EmptyMailboxErr extends Error {
     constructor(public actor: string) {
 
         super(`Actor ${actor} 's mailbox is empty!`);
+
+    }
+
+}
+
+/**
+ * UnknownAddressErr
+ */
+export class UnknownAddressErr extends Error {
+
+    constructor(public actor: string) {
+
+        super(`The system has no actor for address "${actor}"!`);
+
+    }
+
+}
+
+/**
+ * MissingFunInfoErr
+ */
+export class MissingFunInfoErr extends Error {
+
+    constructor(public index: number) {
+
+        super(`Cannot locate fun at index 0x${index.toString(16)}`);
+
+    }
+
+}
+
+/**
+ * IntegerOverflowErr
+ */
+export class IntegerOverflowErr extends Error {
+
+    constructor() {
+
+        super(`DATA_MAX_SAFE_UINT32=${DATA_MAX_SAFE_UINT32}`);
 
     }
 

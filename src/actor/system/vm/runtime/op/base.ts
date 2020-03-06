@@ -75,26 +75,15 @@ export const pushfun = (_: Runtime, f: Frame, idx: OperandU16) => {
 }
 
 /**
- * pushTmpl pushes a template onto the stack.
+ * pushrec pushes a receiver onto the stack.
  *
  * Stack:
- *  -> <template>
- */
-export const pushtmpl = (_: Runtime, f: Frame, args: Operand) => {
-
-    f.pushTemplate(args);
-
-}
-
-/**
- * pushmsg pushes a message onto the stack.
  *
- * Stack:
- *  -> <message>
+ * -> <receiver>
  */
-export const pushmsg = (_: Runtime, f: Frame, args: Operand) => {
+export const pushrecv = (_: Runtime, f: Frame, idx: OperandU16) => {
 
-    f.pushMessage(args);
+    f.pushReceiver(idx);
 
 }
 

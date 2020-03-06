@@ -6,13 +6,7 @@ import { isRestricted, make } from '../../../../address';
 import { normalize } from '../../../../template';
 import { Receiver } from '../../../../context';
 import { isRouter, isBuffered } from '../../../../flags';
-import {
-    Frame,
-    DATA_TYPE_RECEIVER,
-    DATA_LOCATION_CONSTANTS,
-    DATA_LOCATION_MAILBOX,
-    DATA_TYPE_MESSAGE
-} from '../stack/frame';
+import { Frame } from '../stack/frame';
 import { Runtime, Operand } from '../';
 
 /**
@@ -187,15 +181,15 @@ export const read = (r: Runtime, f: Frame, _: Operand) => {
  * messages.
  *
  * Stack:
- *  -> 
+ * <receiver> -> 
  */
-export const recv = (r: Runtime, f: Frame, args: Operand) => {
+export const recv = (r: Runtime, f: Frame, _: Operand) => {
 
-    let eRec = f.resolve(args | DATA_TYPE_RECEIVER | DATA_LOCATION_CONSTANTS);
+    let erec = f.popReceiver();
 
-    if (eRec.isLeft()) return r.vm.raise(eRec.takeLeft());
+    if (erec.isLeft()) return r.vm.raise(erec.takeLeft());
 
-    r.context.behaviour.push(eRec.takeRight());
+    r.context.behaviour.push(erec.takeRight());
 
     if (r.context.mailbox.length > 0)
         r.context.actor.notify();
@@ -234,10 +228,8 @@ export const mailcount = (r: Runtime, f: Frame, _: Operand) => {
  *
  *  -> <message>?
  */
-export const maildq = (r: Runtime, f: Frame, _: Operand) => {
+export const maildq = (_: Runtime, f: Frame, __: Operand) => {
 
-    f.push((r.context.mailbox.length - 1) |
-        DATA_LOCATION_MAILBOX |
-        DATA_TYPE_MESSAGE);
+    f.pushMessage();
 
 }
