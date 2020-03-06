@@ -12,6 +12,7 @@ export const PUSHUI16 = 0x2;
 export const PUSHUI32 = 0x3;
 export const PUSHSTR = 0x4;
 export const PUSHFUN = 0x5;
+export const PUSHRECV = 0x6;
 export const DUP = 0x15;
 export const STORE = 0x16;
 export const LOAD = 0x20;
@@ -62,6 +63,8 @@ export const handlers: OpcodeHandlers = {
     [PUSHSTR]: base.pushstr,
 
     [PUSHFUN]: base.pushfun,
+
+    [PUSHRECV]: base.pushrecv,
 
     [DUP]: base.dup,
 
