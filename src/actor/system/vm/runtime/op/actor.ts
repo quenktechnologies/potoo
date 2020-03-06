@@ -4,8 +4,15 @@ import { tick } from '@quenk/noni/lib/control/timer';
 
 import { isRestricted, make } from '../../../../address';
 import { normalize } from '../../../../template';
+import { Receiver } from '../../../../context';
 import { isRouter, isBuffered } from '../../../../flags';
-import { Frame } from '../stack/frame';
+import {
+    Frame,
+    DATA_TYPE_RECEIVER,
+    DATA_LOCATION_CONSTANTS,
+    DATA_LOCATION_MAILBOX,
+    DATA_TYPE_MESSAGE
+} from '../stack/frame';
 import { Runtime, Operand } from '../';
 
 /**
@@ -135,34 +142,102 @@ export const send = (r: Runtime, f: Frame, _: Operand) => {
 
 }
 
+/**
+ * read applies the actors next Receiver to the message at the top of the stack.
+ *
+ * Pushes 1 if the message was accepted, 0 if dropped.
+ * Stack:
+ * <message> -> <uint32>
+ */
 export const read = (r: Runtime, f: Frame, _: Operand) => {
 
-    if (r.context.behaviour.length <= 0) {
+    if (r.context.behaviour.length <= 0)
+        return r.vm.raise(new error.NoReceiveErr(r.context.address));
 
-        r.vm.raise(new error.NoReceiveErr(r.context.address));
+    let b = <Receiver>r.context.behaviour.pop();
+
+    let eMsg = f.popMessage();
+
+    if (eMsg.isLeft())
+        return r.vm.raise(eMsg.takeLeft());
+
+    let m = eMsg.takeRight();
+
+    if (b.test(m)) {
+
+        //TODO: async support
+        b.apply(m);
+
+        f.push(1);
 
     } else {
 
-        let eMsg = f.popMessage();
+        //TODO: drop event
 
-        if (eMsg.isLeft()) return r.vm.raise(eMsg.takeLeft());
-
-        let m = eMsg.takeRight();
-
-        let b = r.context.behaviour.pop();
-
-        if (b.test(m)) {
-
-            b.apply(m);
-
-        } else {
-
-            //TODO: drop event
-
-        }
-
+        f.push(0);
 
     }
 
+}
+
+/**
+ * recv schedules a receiver for the next available message.
+ *
+ * Will invoke the actor's notify() method if there are pending
+ * messages.
+ *
+ * Stack:
+ *  -> 
+ */
+export const recv = (r: Runtime, f: Frame, args: Operand) => {
+
+    let eRec = f.resolve(args | DATA_TYPE_RECEIVER | DATA_LOCATION_CONSTANTS);
+
+    if (eRec.isLeft()) return r.vm.raise(eRec.takeLeft());
+
+    r.context.behaviour.push(eRec.takeRight());
+
+    if (r.context.mailbox.length > 0)
+        r.context.actor.notify();
+
+}
+
+/**
+ * recvcount pushes the total count of pending receives to the top of the stack.
+ *
+ * Stack:
+ *  -> <uint32>
+ */
+export const recvcount = (r: Runtime, f: Frame, _: Operand) => {
+
+    f.pushUInt32(r.context.behaviour.length);
+
+}
+
+/**
+ * mailcount pushes the number of messages in the actor's mailbox onto the top
+ * of the stack.
+ * 
+ * Stack:
+ *  -> <uint32>
+ */
+export const mailcount = (r: Runtime, f: Frame, _: Operand) => {
+
+    f.pushUInt32(r.context.mailbox.length);
+
+}
+
+/**
+ * maildq pushes the earliest message in the mailbox (if any).
+ *
+ * Stack:
+ *
+ *  -> <message>?
+ */
+export const maildq = (r: Runtime, f: Frame, _: Operand) => {
+
+    f.push((r.context.mailbox.length - 1) |
+        DATA_LOCATION_MAILBOX |
+        DATA_TYPE_MESSAGE);
 
 }
