@@ -87,6 +87,25 @@ export declare class NoMailboxErr extends Error {
  * EmptyMailboxErr
  */
 export declare class EmptyMailboxErr extends Error {
+    constructor();
+}
+/**
+ * UnknownAddressErr
+ */
+export declare class UnknownAddressErr extends Error {
     actor: string;
     constructor(actor: string);
+}
+/**
+ * MissingSymbolErr
+ */
+export declare class MissingSymbolErr extends Error {
+    index: number;
+    constructor(index: number);
+}
+/**
+ * IntegerOverflowErr
+ */
+export declare class IntegerOverflowErr extends Error {
+    constructor();
 }

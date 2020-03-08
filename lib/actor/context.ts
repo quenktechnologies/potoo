@@ -1,11 +1,17 @@
-import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
 
-import { Runtime } from './system/vm/runtime';
 import { Template } from './template';
 import { Message } from './message';
 import { System } from './system';
-import { Behaviour, Instance } from './';
+import { Instance } from './';
+import { Flags } from './flags';
+import { Script } from './system/vm/script';
+import { Address } from './address';
+
+/**
+ * Receiver
+ */
+export type Receiver = (m: Message) => boolean;
 
 /**
  * ErrorHandler processes errors that come up during an actor execution
@@ -18,26 +24,6 @@ export interface ErrorHandler {
      * the error handling machinery.
      */
     raise(e: Err): void;
-
-}
-
-/**
- * Flags used to indicate a Frame's state.
- */
-export interface Flags {
-
-    [key: string]: boolean
-
-    /**
-     * immutable indicates whether the Frame's current receive
-     * should remain after message consumption.
-     */
-    immutable: boolean,
-
-    /**
-     * buffered indicates whether the actor supports mailboxes or not.
-     */
-    buffered: boolean
 
 }
 
@@ -60,7 +46,7 @@ export interface Context {
      *
      * Some actors may not use mailboxes and instead accept messages directly.
      */
-    mailbox: Maybe<Message[]>,
+    mailbox: Message[],
 
     /**
      * actor instance.
@@ -70,7 +56,7 @@ export interface Context {
     /**
      * behaviour stack for the actor.
      */
-    behaviour: Behaviour[],
+    behaviour: Receiver[],
 
     /**
      * flags currently enabled for the actor.
@@ -78,14 +64,19 @@ export interface Context {
     flags: Flags,
 
     /**
-     * runtime for the Context.
+     * address assigned to the actor.
      */
-    runtime: Runtime,
+    address: Address,
 
     /**
      * template used to create new instances of the actor.
      */
-    template: Template<System>
+    template: Template<System>,
+
+    /**
+     * scripts is a pipeline of scripts submitted for the actor to execute.
+     */
+    scripts: Script[]
 
 }
 
@@ -93,19 +84,21 @@ export interface Context {
  * newContext 
  */
 export const newContext =
-    (runtime: Runtime, actor: Instance, template: Template<System>)
+    (actor: Instance, address: Address, template: Template<System>)
         : Context => ({
 
-            mailbox: nothing(),
+            mailbox: [],
 
             actor,
 
             behaviour: [],
 
-            flags: { immutable: false, buffered: false },
+            flags: 0,
 
-            runtime,
+            address,
 
-            template: <Template<System>>template
+            template: <Template<System>>template,
+
+            scripts: []
 
         });

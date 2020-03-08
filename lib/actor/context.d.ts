@@ -1,10 +1,15 @@
-import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
-import { Runtime } from './system/vm/runtime';
 import { Template } from './template';
 import { Message } from './message';
 import { System } from './system';
-import { Behaviour, Instance } from './';
+import { Instance } from './';
+import { Flags } from './flags';
+import { Script } from './system/vm/script';
+import { Address } from './address';
+/**
+ * Receiver
+ */
+export declare type Receiver = (m: Message) => boolean;
 /**
  * ErrorHandler processes errors that come up during an actor execution
  * or raised by a child.
@@ -15,21 +20,6 @@ export interface ErrorHandler {
      * the error handling machinery.
      */
     raise(e: Err): void;
-}
-/**
- * Flags used to indicate a Frame's state.
- */
-export interface Flags {
-    [key: string]: boolean;
-    /**
-     * immutable indicates whether the Frame's current receive
-     * should remain after message consumption.
-     */
-    immutable: boolean;
-    /**
-     * buffered indicates whether the actor supports mailboxes or not.
-     */
-    buffered: boolean;
 }
 /**
  * Contexts map.
@@ -46,7 +36,7 @@ export interface Context {
      *
      * Some actors may not use mailboxes and instead accept messages directly.
      */
-    mailbox: Maybe<Message[]>;
+    mailbox: Message[];
     /**
      * actor instance.
      */
@@ -54,21 +44,25 @@ export interface Context {
     /**
      * behaviour stack for the actor.
      */
-    behaviour: Behaviour[];
+    behaviour: Receiver[];
     /**
      * flags currently enabled for the actor.
      */
     flags: Flags;
     /**
-     * runtime for the Context.
+     * address assigned to the actor.
      */
-    runtime: Runtime;
+    address: Address;
     /**
      * template used to create new instances of the actor.
      */
     template: Template<System>;
+    /**
+     * scripts is a pipeline of scripts submitted for the actor to execute.
+     */
+    scripts: Script[];
 }
 /**
  * newContext
  */
-export declare const newContext: (runtime: Runtime, actor: Instance, template: Template<System>) => Context;
+export declare const newContext: (actor: Instance, address: string, template: Template<System>) => Context;

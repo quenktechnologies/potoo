@@ -1,4 +1,5 @@
 import { Address, ADDRESS_RESTRICTED } from '../../../address';
+import { DATA_MAX_SAFE_UINT32 } from './stack/frame';
 
 /**
  * Error
@@ -155,9 +156,48 @@ export class NoMailboxErr extends Error {
  */
 export class EmptyMailboxErr extends Error {
 
+    constructor() {
+
+        super('Mailbox empty.');
+
+    }
+
+}
+
+/**
+ * UnknownAddressErr
+ */
+export class UnknownAddressErr extends Error {
+
     constructor(public actor: string) {
 
-        super(`Actor ${actor} 's mailbox is empty!`);
+        super(`The system has no actor for address "${actor}"!`);
+
+    }
+
+}
+
+/**
+ * MissingSymbolErr
+ */
+export class MissingSymbolErr extends Error {
+
+    constructor(public index: number) {
+
+        super(`Cannot locate symbol at index 0x${index.toString(16)}`);
+
+    }
+
+}
+
+/**
+ * IntegerOverflowErr
+ */
+export class IntegerOverflowErr extends Error {
+
+    constructor() {
+
+        super(`DATA_MAX_SAFE_UINT32=${DATA_MAX_SAFE_UINT32}`);
 
     }
 
