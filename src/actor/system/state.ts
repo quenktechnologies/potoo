@@ -8,7 +8,6 @@ import {
 import { reduce, contains, partition } from '@quenk/noni/lib/data/record';
 import { startsWith } from '@quenk/noni/lib/data/string';
 
-import { Runtime } from './vm/runtime';
 import {
     ADDRESS_SYSTEM,
     Address,
@@ -99,14 +98,6 @@ export const getAddress =
     (s: State, actor: Instance): Maybe<Address> =>
         reduce(s.contexts, nothing(), (p: Maybe<Address>, c, k) =>
             c.actor === actor ? fromString(k) : p);
-
-/**
- * getRuntime attempts to retrieve the runtime for an Actor instance.
- */
-export const getRuntime =
-    (s: State, actor: Instance): Maybe<Runtime> =>
-        reduce(s.contexts, nothing(), (p, c) =>
-            c.actor === actor ? fromNullable(c.runtime) : p);
 
 /**
  * getChildren returns the child contexts for an address.
