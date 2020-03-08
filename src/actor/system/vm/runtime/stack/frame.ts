@@ -6,53 +6,49 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { fromNullable, Maybe } from '@quenk/noni/lib/data/maybe';
 import { tail } from '@quenk/noni/lib/data/array';
 
-import { Address } from '../../../../address';
 import { Context } from '../../../../context';
 import {
     Script,
     PVM_Value,
     PVM_Template,
-    PVM_Message,
     PVM_Object,
     PVM_Function,
-    ConsInfo,
-    PVM_Receiver
 } from '../../script';
 import { Instruction, OperandU8, OperandU16, Operand } from '../';
 import { Heap } from '../heap';
+import { ConstructorInfo, INFO_TYPE_CONSTRUCTOR } from '../../script/info';
 
-export const DATA_RANGE_TYPE_HIGH = 0x7F000000;
+export const DATA_RANGE_TYPE_HIGH = 0x7f000000;
 export const DATA_RANGE_TYPE_LOW = 0x1000000;
 export const DATA_RANGE_TYPE_STEP = 0x1000000;
 
 // Used to extract the desired part via &
-export const DATA_MASK_TYPE = 0xFF000000;
-export const DATA_MASK_VALUE8 = 0xFF;
-export const DATA_MASK_VALUE16 = 0xFFFF;
-export const DATA_MASK_VALUE24 = 0xFFFFFF;
-export const DATA_MASK_VALUE32 = 0xFFFFFFFF;
+export const DATA_MASK_TYPE = 0xff000000;
+export const DATA_MASK_VALUE8 = 0xff;
+export const DATA_MASK_VALUE16 = 0xffff;
+export const DATA_MASK_VALUE24 = 0xffffff;
+export const DATA_MASK_VALUE32 = 0xffffffff;
 
-export const DATA_MAX_SIZE = 0x7FFFFFFF;
+export const DATA_MAX_SIZE = 0x7fffffff;
 export const DATA_MAX_SAFE_UINT32 = 0x7fffffff;
 
-//Type indicators.
+//These really indicate where the actual value of an operand is stored.
+//They are not meant to be used to check the actual type of the underlying value.
 export const DATA_TYPE_UINT8 = DATA_RANGE_TYPE_STEP;
 export const DATA_TYPE_UINT16 = DATA_RANGE_TYPE_STEP * 2;
-export const DATA_TYPE_STRING = DATA_RANGE_TYPE_STEP * 15;
-export const DATA_TYPE_FUNCTION = DATA_RANGE_TYPE_STEP * 20;
-export const DATA_TYPE_OBJECT = DATA_RANGE_TYPE_STEP * 25;
-export const DATA_TYPE_ARRAY = DATA_RANGE_TYPE_STEP * 26
-export const DATA_TYPE_RECEIVER = DATA_RANGE_TYPE_STEP * 27
-export const DATA_TYPE_LOCAL = DATA_RANGE_TYPE_STEP * 28;
-export const DATA_TYPE_MESSAGE = DATA_RANGE_TYPE_STEP * 29;
+export const DATA_TYPE_STRING = DATA_RANGE_TYPE_STEP * 3;
+export const DATA_TYPE_SYMBOL = DATA_RANGE_TYPE_STEP * 4;
+export const DATA_TYPE_HEAP = DATA_RANGE_TYPE_STEP * 6;
+export const DATA_TYPE_LOCAL = DATA_RANGE_TYPE_STEP * 7;
+export const DATA_TYPE_MAILBOX = DATA_RANGE_TYPE_STEP * 8;
 
 /**
  * Data is the type of values that can appear on a Frame's data stack.
  *
  * It is a 32bit unsigned integer in the range 0x00000000-0x7FFFFFFF
  *
- * Typically, the  highest byte is used to indicate the type of the data
- * in realtion to storage location and the remaining bytes store value.
+ * Typically, the highest byte is used to indicate the type of the data
+ * in realtion to storage location and the remaining 3 bytes, value.
  *
  * 11111111        111111111111111111111111
  * <type/location> <     value      >
@@ -63,15 +59,6 @@ export const DATA_TYPE_MESSAGE = DATA_RANGE_TYPE_STEP * 29;
 export type Data = number;
 
 /**
- * typeMaps maps a type to its index in the contants pool.
- */
-export const typeMaps: { [key: number]: number } = {
-
-    [DATA_TYPE_STRING]: indexes.CONSTANTS_INDEX_STRING,
-
-}
-
-/**
  * Frame is the context for currently executing op codes.
  *
  * It provides methods for manipulating the stack common to each op code as 
@@ -80,12 +67,12 @@ export const typeMaps: { [key: number]: number } = {
 export class Frame {
 
     constructor(
-        public actor: Address,
-        public context: Context,
         public script: Script,
-        public heap: Heap = new Heap(),
+        public context: Context,
+        public heap: Heap,
         public code: Instruction[] = [],
         public data: Data[] = [],
+        public rdata: Data[] = [],
         public locals: Data[] = [],
         public ip = 0) { }
 
@@ -145,20 +132,11 @@ export class Frame {
     }
 
     /**
-     * pushFunctions from the funs section onto the stack.
+     * pushSymbol pushes a symbol from the info table at idx onto the stack.
      */
-    pushFunction(idx: OperandU16): Frame {
+    pushSymbol(idx: OperandU16): Frame {
 
-        return this.push(idx | DATA_TYPE_FUNCTION);
-
-    }
-
-    /**
-     * pushReceiver from the receivers section onto the stack.
-     */
-    pushReceiver(idx: OperandU16): Frame {
-
-        return this.push(idx | DATA_TYPE_RECEIVER);
+        return this.push(idx | DATA_TYPE_SYMBOL);
 
     }
 
@@ -167,7 +145,7 @@ export class Frame {
      */
     pushMessage(): Frame {
 
-        return this.push(0 | DATA_TYPE_MESSAGE);
+        return this.push(0 | DATA_TYPE_MAILBOX);
 
     }
 
@@ -185,7 +163,7 @@ export class Frame {
      * peekConstructor peeks and resolves the constructor for the object 
      * reference at the top of the stack.
      */
-    peekConstructor(): Either<Err, ConsInfo> {
+    peekConstructor(): Either<Err, ConstructorInfo> {
 
         let mword = this.peek();
 
@@ -193,11 +171,12 @@ export class Frame {
 
         let word = DATA_MASK_VALUE24 & mword.get();
 
-        let info = this.script.cons[DATA_MASK_VALUE24 & word];
+        let info = this.script.info[DATA_MASK_VALUE24 & word];
 
-        if (info == null) return left(new error.NullPointerErr(word));
+        if ((info == null) || (info.infoType !== INFO_TYPE_CONSTRUCTOR))
+            return left(new error.NullPointerErr(word));
 
-        return right(info);
+        return right(<ConstructorInfo>info);
 
     }
 
@@ -216,6 +195,12 @@ export class Frame {
 
         switch (typ) {
 
+            case DATA_TYPE_UINT8:
+                return right(DATA_MASK_VALUE8 & value);
+
+            case DATA_TYPE_UINT16:
+                return right(DATA_MASK_VALUE16 & value);
+
             case DATA_TYPE_STRING:
 
                 let mstr = fromNullable(
@@ -223,25 +208,16 @@ export class Frame {
 
                 return right(mstr.get());
 
-            case DATA_TYPE_FUNCTION:
+            case DATA_TYPE_SYMBOL:
 
-                let info = this.script.funs[value];
+                let info = this.script.info[value];
 
                 if (info == null)
-                    return left(new error.MissingFunInfoErr(value));
+                    return left(new error.MissingSymbolErr(value));
 
                 return right(info);
 
-            case DATA_TYPE_RECEIVER:
-
-                let r = this.script.receivers[value];
-
-                return (r == null) ?
-                    left(new error.MissingFunInfoErr(value)) :
-                    right(r);
-
-            case DATA_TYPE_OBJECT:
-            case DATA_TYPE_ARRAY:
+            case DATA_TYPE_HEAP:
 
                 let mO = this.heap.get(typ);
 
@@ -258,7 +234,7 @@ export class Frame {
                 //TODO: review call stack safety of this recursive call.
                 return this.resolve(mRef.get());
 
-            case DATA_TYPE_MESSAGE:
+            case DATA_TYPE_MAILBOX:
 
                 if (context.mailbox.length === 0) return nullErr(data);
 
@@ -309,15 +285,6 @@ export class Frame {
     }
 
     /**
-     * popReceiver from the top of the data stack.
-     */
-    popReceiver(): Either<Err, PVM_Receiver> {
-
-        return <Either<Err, PVM_Receiver>>this.popValue();
-
-    }
-
-    /**
      * popObject from the top of the data stack.
      */
     popObject(): Either<Err, PVM_Object> {
@@ -332,15 +299,6 @@ export class Frame {
     popTemplate(): Either<Err, PVM_Template> {
 
         return <Either<Err, PVM_Template>>this.popValue();
-
-    }
-
-    /**
-     * popMessage from the top of the data stack.
-     */
-    popMessage(): Either<Err, PVM_Message> {
-
-        return <Either<Err, PVM_Message>>this.popValue();
 
     }
 

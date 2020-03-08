@@ -4,9 +4,11 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Context } from '../../../context';
 import { Address } from '../../../address';
 import { Frame } from './stack/frame';
+import { FunInfo } from '../script/info';
+import { PVM_Value } from '../script';
 import { Platform } from '../';
 import { handlers } from './op';
-import { Heap } from './heap';
+import { Heap, HeapEntry } from './heap';
 
 /**
  * Opcode
@@ -71,6 +73,11 @@ export interface Runtime {
     context: Context
 
     /**
+     * exec a function in the current frame context.
+     */
+    exec(c: Frame, f: FunInfo, args: PVM_Value[]): void
+
+    /**
      * raise an error.
      */
     raise(e: Err): void
@@ -87,10 +94,36 @@ export class This implements Runtime {
         public heap: Heap,
         public context: Context,
         public self: Address,
-        public stack: Frame[] = []) { }
+        public stack: Frame[] = [],
+        public sp = 0) { }
 
     raise(_: Err) {
 
+
+    }
+
+    exec(c: Frame, f: FunInfo, args: PVM_Value[]) {
+
+        if (f.foreign) {
+
+            //Todo: Note the type of the heap entry is the function type.
+            //We should add some plumbing for strings, numbers etc.
+            c.push(this.heap.add(new HeapEntry(
+                f.type,
+                f.builtin,
+                <object>(<Function>f.exec).apply(null, args))));
+
+        } else {
+
+            this.stack.push(new Frame(
+                c.script,
+                this.context,
+                this.heap,
+                f.code.slice()));
+
+            this.sp = this.stack.length - 1;
+
+        }
 
     }
 
@@ -98,9 +131,10 @@ export class This implements Runtime {
 
         while (!empty(this.stack)) {
 
-            let frame = <Frame>this.stack.pop();
+            let sp = this.sp;
+            let frame = <Frame>this.stack[sp];
 
-            while (frame.ip !== frame.code.length) {
+            while (frame.ip < frame.code.length) {
 
                 //execute frame instructions
                 //TODO: Push return values unto next stack
@@ -113,6 +147,22 @@ export class This implements Runtime {
                 handlers[opcode](this, frame, operand);
 
                 frame.ip++;
+
+                //pause execution to allow another frame to compute.
+                if (sp !== this.sp) break;
+
+            }
+
+            //frame complete, pop it, advance the sp and pass any return value
+            //to the previous frame.
+            if (sp === this.sp) {
+
+                this.stack.pop();
+                this.sp--;
+
+                if (frame.rdata.length > 0)
+                    if (this.stack[this.sp])
+                        this.stack[this.sp].data.push(<number>frame.rdata.pop());
 
             }
 

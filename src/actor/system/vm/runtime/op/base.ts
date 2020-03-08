@@ -4,7 +4,6 @@ import { make } from '@quenk/noni/lib/data/array';
 
 import { Frame, DATA_MAX_SAFE_UINT32 } from '../stack/frame';
 import { Runtime, Operand, OperandU16 } from '../';
-import { HeapEntry } from '../heap';
 
 /**
  * nop does nothing.
@@ -63,27 +62,16 @@ export const pushstr = (_: Runtime, f: Frame, args: Operand) => {
 }
 
 /**
- * pushfun pushes a function onto the stack.
- *
- * Stack:
- * -> <fun>
- */
-export const pushfun = (_: Runtime, f: Frame, idx: OperandU16) => {
-
-    f.pushFunction(idx);
-
-}
-
-/**
- * pushrec pushes a receiver onto the stack.
+ * pushsym pushes the symbol at the specified index in the info section onto
+ * the stack.
  *
  * Stack:
  *
- * -> <receiver>
+ * -> <value>
  */
-export const pushrecv = (_: Runtime, f: Frame, idx: OperandU16) => {
+export const pushsym = (_: Runtime, f: Frame, idx: OperandU16) => {
 
-    f.pushReceiver(idx);
+    f.pushSymbol(idx);
 
 }
 
@@ -146,9 +134,9 @@ export const ceq = (r: Runtime, f: Frame, __: Operand) => {
 
     let eRhs = f.popValue();
 
-    if (eLhs.isLeft()) return r.vm.raise(eLhs.takeLeft());
+    if (eLhs.isLeft()) return r.raise(eLhs.takeLeft());
 
-    if (eRhs.isLeft()) return r.vm.raise(eRhs.takeLeft());
+    if (eRhs.isLeft()) return r.raise(eRhs.takeLeft());
 
     if (eLhs.takeRight() === eRhs.takeRight())
         f.push(1);
@@ -178,8 +166,6 @@ export const addui32 = (r: Runtime, f: Frame, _: Operand) => {
 /**
  * call a function placing its result on the heap.
  *
- * Note: only foreign functions are supported at this time.
- *
  * Stack:
  *
  * <arg>...? -> <result> 
@@ -196,11 +182,25 @@ export const call = (r: Runtime, f: Frame, n: Operand) => {
 
     let fn = einfo.takeRight();
 
-    //TODO: Support pvm functions.
+    r.exec(f, fn, args);
 
-    //Todo: Note the type of the heap entry is the function type.
-    //We should add some plumbing for strings, numbers etc.
-    f.push(f.heap.add(new HeapEntry(fn.type,
-        <object>(<Function>fn.exec).apply(null, args))));
+}
+
+/**
+ * ret ends execution of the current frame and places the TOS in the return
+ * stack.
+ *
+ * Stack:
+ *
+ * <value> -> 
+ */
+export const ret = (_: Runtime, f: Frame, __: Operand) => {
+
+    let data = f.pop();
+
+    if (data !== 0)
+        f.rdata.push(data);
+
+    f.ip = f.code.length;
 
 }

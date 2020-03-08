@@ -58,9 +58,9 @@ export const ifeqjmp = (r: Runtime, f: Frame, args: Operand) => {
     let eRhs = f.popValue();
 
     if (eLhs.isLeft())
-        r.vm.raise(eLhs.takeLeft());
+        r.raise(eLhs.takeLeft());
     else if (eRhs.isLeft())
-        r.vm.raise(eRhs.takeLeft());
+        r.raise(eRhs.takeLeft());
     else if (eLhs.takeRight() === eRhs.takeRight())
         f.ip = args;
 
@@ -78,9 +78,9 @@ export const ifneqjmp = (r: Runtime, f: Frame, args: Operand) => {
     let eRhs = f.popValue();
 
     if (eLhs.isLeft())
-        r.vm.raise(eLhs.takeLeft());
+        r.raise(eLhs.takeLeft());
     else if (eRhs.isLeft())
-        r.vm.raise(eRhs.takeLeft());
+        r.raise(eRhs.takeLeft());
     else if (eLhs.takeRight() !== eRhs.takeRight())
         f.ip = args;
 

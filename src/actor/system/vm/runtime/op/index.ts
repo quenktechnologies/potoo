@@ -11,14 +11,14 @@ export const PUSHUI8 = 0x1;
 export const PUSHUI16 = 0x2;
 export const PUSHUI32 = 0x3;
 export const PUSHSTR = 0x4;
-export const PUSHFUN = 0x5;
-export const PUSHRECV = 0x6;
+export const PUSHSYM = 0x5;
 export const DUP = 0x15;
 export const STORE = 0x16;
 export const LOAD = 0x20;
 export const CEQ = 0x2a;
 export const ADDUI32 = 0x34;
 export const CALL = 0x3e;
+export const RET = 0x3f;
 export const JMP = 0x48;
 export const IFZJMP = 0x49;
 export const IFNZJMP = 0x50;
@@ -29,9 +29,8 @@ export const RUN = 0x5d;
 export const SEND = 0x5e;
 export const RECV = 0x5f;
 export const RECVCOUNT = 0x60;
-export const READ = 0x61;
 export const MAILCOUNT = 0x62;
-export const MAILDQ = 0x63;
+export const PUSHMAIL = 0x63;
 
 /**
  * OpcodeHandler
@@ -62,9 +61,7 @@ export const handlers: OpcodeHandlers = {
 
     [PUSHSTR]: base.pushstr,
 
-    [PUSHFUN]: base.pushfun,
-
-    [PUSHRECV]: base.pushrecv,
+    [PUSHSYM]: base.pushsym,
 
     [DUP]: base.dup,
 
@@ -77,6 +74,8 @@ export const handlers: OpcodeHandlers = {
     [ADDUI32]: base.addui32,
 
     [CALL]: base.call,
+
+    [RET]: base.ret,
 
     [JMP]: jump.jmp,
 
@@ -98,10 +97,8 @@ export const handlers: OpcodeHandlers = {
 
     [RECVCOUNT]: actor.recvcount,
 
-    [READ]: actor.read,
-
     [MAILCOUNT]: actor.mailcount,
 
-    [MAILDQ]: actor.maildq
+    [PUSHMAIL]: actor.pushmsg
 
 };

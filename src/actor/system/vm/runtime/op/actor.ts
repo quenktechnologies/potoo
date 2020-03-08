@@ -2,9 +2,9 @@ import * as error from '../error';
 
 import { tick } from '@quenk/noni/lib/control/timer';
 
+import { Receiver } from '../../../../context';
 import { isRestricted, make } from '../../../../address';
 import { normalize } from '../../../../template';
-import { Receiver } from '../../../../context';
 import { isRouter, isBuffered } from '../../../../flags';
 import { Frame } from '../stack/frame';
 import { Runtime, Operand } from '../';
@@ -26,21 +26,21 @@ export const alloc = (r: Runtime, f: Frame, _: Operand) => {
 
     let eTemp = f.popTemplate();
 
-    if (eParent.isLeft()) return r.vm.raise(eParent.takeLeft());
+    if (eParent.isLeft()) return r.raise(eParent.takeLeft());
 
-    if (eTemp.isLeft()) return r.vm.raise(eTemp.takeLeft());
+    if (eTemp.isLeft()) return r.raise(eTemp.takeLeft());
 
     let parent = eParent.takeRight();
 
     let temp = normalize(eTemp.takeRight());
 
     if (isRestricted(temp.id))
-        return r.vm.raise(new error.InvalidIdErr(temp.id));
+        return r.raise(new error.InvalidIdErr(temp.id));
 
     let addr = make(parent, temp.id);
 
     if (r.vm.getContext(addr).isJust())
-        return r.vm.raise(new error.DuplicateAddressErr(addr));
+        return r.raise(new error.DuplicateAddressErr(addr));
 
     let ctx = r.vm.allocate(addr, temp);
 
@@ -70,14 +70,14 @@ export const run = (r: Runtime, f: Frame, _: Operand) => {
 
     let eTarget = f.popString();
 
-    if (eTarget.isLeft()) return r.vm.raise(eTarget.takeLeft());
+    if (eTarget.isLeft()) return r.raise(eTarget.takeLeft());
 
     let target = eTarget.takeRight();
 
     let mCtx = r.vm.getContext(target);
 
     if (mCtx.isNothing())
-        return r.vm.raise(new error.UnknownAddressErr(target));
+        return r.raise(new error.UnknownAddressErr(target));
 
     let ctx = mCtx.get();
 
@@ -96,13 +96,13 @@ export const run = (r: Runtime, f: Frame, _: Operand) => {
  */
 export const send = (r: Runtime, f: Frame, _: Operand) => {
 
-    let eMsg = f.popMessage();
+    let eMsg = f.popValue();
 
-    if (eMsg.isLeft()) return r.vm.raise(eMsg.takeLeft());
+    if (eMsg.isLeft()) return r.raise(eMsg.takeLeft());
 
     let eAddr = f.popString();
 
-    if (eAddr.isLeft()) return r.vm.raise(eAddr.takeLeft());
+    if (eAddr.isLeft()) return r.raise(eAddr.takeLeft());
 
     let msg = eMsg.takeRight();
 
@@ -142,20 +142,19 @@ export const send = (r: Runtime, f: Frame, _: Operand) => {
  * Pushes 1 if the message was accepted, 0 if dropped.
  * Stack:
  * <message> -> <uint32>
- */
 export const read = (r: Runtime, f: Frame, _: Operand) => {
 
     if (r.context.behaviour.length <= 0)
-        return r.vm.raise(new error.NoReceiveErr(r.context.address));
+        return r.raise(new error.NoReceiveErr(r.context.address));
 
     let b = <Receiver>r.context.behaviour.pop();
 
-    let eMsg = f.popMessage();
+    let mmsg = r.nextMessage();
 
-    if (eMsg.isLeft())
-        return r.vm.raise(eMsg.takeLeft());
+    if (mmsg.isNothing())
+        return r.raise(new error.EmptyMailboxErr());
 
-    let m = eMsg.takeRight();
+    let m = mmsg.get();
 
     if (b.test(m)) {
 
@@ -173,23 +172,30 @@ export const read = (r: Runtime, f: Frame, _: Operand) => {
     }
 
 }
+ */
 
 /**
- * recv schedules a receiver for the next available message.
+ * recv schedules a receiver function for the next available message.
  *
+ * Currently only supports foreign functions.
  * Will invoke the actor's notify() method if there are pending
  * messages.
  *
  * Stack:
- * <receiver> -> 
+ * <function> -> 
  */
 export const recv = (r: Runtime, f: Frame, _: Operand) => {
 
-    let erec = f.popReceiver();
+    let einfo = f.popFunction();
 
-    if (erec.isLeft()) return r.vm.raise(erec.takeLeft());
+    if (einfo.isLeft()) return r.raise(einfo.takeLeft());
 
-    r.context.behaviour.push(erec.takeRight());
+    let info = einfo.takeRight();
+
+    if (!info.foreign)
+        r.raise(new Error('recv: Only foriegn functions allowed!'));
+
+    r.context.behaviour.push(<Receiver>info.exec);
 
     if (r.context.mailbox.length > 0)
         r.context.actor.notify();
@@ -222,13 +228,13 @@ export const mailcount = (r: Runtime, f: Frame, _: Operand) => {
 }
 
 /**
- * maildq pushes the earliest message in the mailbox (if any).
+ * pushmsg pushes the earliest message in the mailbox (if any).
  *
  * Stack:
  *
  *  -> <message>?
  */
-export const maildq = (_: Runtime, f: Frame, __: Operand) => {
+export const pushmsg = (_: Runtime, f: Frame, __: Operand) => {
 
     f.pushMessage();
 

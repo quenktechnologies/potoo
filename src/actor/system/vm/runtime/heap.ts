@@ -5,7 +5,7 @@ import {
     nothing
 } from '@quenk/noni/lib/data/maybe';
 
-import { DATA_TYPE_OBJECT, DATA_MASK_TYPE } from './stack/frame';
+import { DATA_TYPE_HEAP, DATA_MASK_TYPE } from './stack/frame';
 
 /**
  * HeapReference identifies an object in the heap.
@@ -33,8 +33,10 @@ export interface HeapObject {
 
 /**
  * HeapEntry contains info about an object on the heap and the object itself.
- * @param type  - type is a pointer to a function in the cons section that 
- *                produced the object.
+ * @param type    - type is a pointer to a function in the cons section that 
+ *                  produced the object.
+ *
+ * @param builtin - indicates whether the type is one of the builtin types.
  *
  * @param value - value of the entry.
  */
@@ -42,6 +44,7 @@ export class HeapEntry {
 
     constructor(
         public type: number,
+        public builtin: boolean,
         public value: HeapValue) { }
 
 }
@@ -59,7 +62,7 @@ export class Heap {
     add(h: HeapEntry): HeapReference {
 
         //TODO: what if heap size is > 24bits?
-        return (this.pool.push(h) - 0) | DATA_TYPE_OBJECT;
+        return (this.pool.push(h) - 0) | DATA_TYPE_HEAP;
 
     }
 
@@ -78,7 +81,7 @@ export class Heap {
     ref(v: HeapValue): Maybe<HeapReference> {
 
         return this.pool.reduce((p, e, i) =>
-            (e.value === v) ? just(DATA_TYPE_OBJECT | i) : p,
+            (e.value === v) ? just(DATA_TYPE_HEAP | i) : p,
             <Maybe<HeapReference>>nothing());
 
     }

@@ -15,8 +15,6 @@ import { isNumber } from '@quenk/noni/lib/data/type';
  */
 export const getprop = (r: Runtime, f: Frame, idx: Operand) => {
 
-    let mword = f.peek();
-
     let econs = f.peekConstructor();
 
     if (econs.isLeft()) return r.raise(econs.takeLeft());
@@ -43,11 +41,9 @@ export const getprop = (r: Runtime, f: Frame, idx: Operand) => {
 
         let mref = f.heap.ref(value);
 
-        let typ = mword.get() & DATA_MASK_VALUE24;
-
         return mref.isJust() ?
             mref.get() :
-            f.push(f.heap.add(new HeapEntry(typ, value)));
+            f.push(f.heap.add(new HeapEntry(cons.type, cons.builtin, value)));
 
     }
 

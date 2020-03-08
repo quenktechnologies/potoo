@@ -20,6 +20,12 @@ import { System } from '../';
 import { Runtime } from './runtime';
 import { Script } from './script';
 
+/**
+ * Platform is the interface for a virtual machine.
+ *
+ * It provides methods for manipulating the state of the actors of the system.
+ * Some opcode handlers depend on this interface to do their work.
+ */
 export interface Platform extends ErrorHandler {
 
     /**

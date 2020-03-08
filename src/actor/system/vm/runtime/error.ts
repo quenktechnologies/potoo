@@ -156,9 +156,9 @@ export class NoMailboxErr extends Error {
  */
 export class EmptyMailboxErr extends Error {
 
-    constructor(public actor: string) {
+    constructor() {
 
-        super(`Actor ${actor} 's mailbox is empty!`);
+        super('Mailbox empty.');
 
     }
 
@@ -178,13 +178,13 @@ export class UnknownAddressErr extends Error {
 }
 
 /**
- * MissingFunInfoErr
+ * MissingSymbolErr
  */
-export class MissingFunInfoErr extends Error {
+export class MissingSymbolErr extends Error {
 
     constructor(public index: number) {
 
-        super(`Cannot locate fun at index 0x${index.toString(16)}`);
+        super(`Cannot locate symbol at index 0x${index.toString(16)}`);
 
     }
 
