@@ -67,6 +67,7 @@ export type Data = number;
 export class Frame {
 
     constructor(
+        public name: string,
         public script: Script,
         public context: Context,
         public heap: Heap,

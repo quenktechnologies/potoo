@@ -116,6 +116,7 @@ export class This implements Runtime {
         } else {
 
             this.stack.push(new Frame(
+                f.name,
                 c.script,
                 this.context,
                 this.heap,

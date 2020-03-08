@@ -137,44 +137,6 @@ export const send = (r: Runtime, f: Frame, _: Operand) => {
 }
 
 /**
- * read applies the actors next Receiver to the message at the top of the stack.
- *
- * Pushes 1 if the message was accepted, 0 if dropped.
- * Stack:
- * <message> -> <uint32>
-export const read = (r: Runtime, f: Frame, _: Operand) => {
-
-    if (r.context.behaviour.length <= 0)
-        return r.raise(new error.NoReceiveErr(r.context.address));
-
-    let b = <Receiver>r.context.behaviour.pop();
-
-    let mmsg = r.nextMessage();
-
-    if (mmsg.isNothing())
-        return r.raise(new error.EmptyMailboxErr());
-
-    let m = mmsg.get();
-
-    if (b.test(m)) {
-
-        //TODO: async support
-        b.apply(m);
-
-        f.push(1);
-
-    } else {
-
-        //TODO: drop event
-
-        f.push(0);
-
-    }
-
-}
- */
-
-/**
  * recv schedules a receiver function for the next available message.
  *
  * Currently only supports foreign functions.
