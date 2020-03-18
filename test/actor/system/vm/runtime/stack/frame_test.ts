@@ -1,8 +1,9 @@
 import { assert } from '@quenk/test/lib/assert';
 
 import {
-    Frame
-} from '../../../../../../src/actor/system/vm/runtime/stack/frame';
+    DATA_TYPE_STRING,
+    Frame,
+} from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
 import {
     newContext
 } from '../../../../../fixtures/context';
@@ -25,117 +26,91 @@ describe('frame', () => {
 
             });
 
-        });
-        /*
-                xdescribe('pushUInt8', () => {
-        
-                    it('should store properly', () => {
-        
-                        let addr = 8 | DATA_TYPE_UINT8;
-        
-                        assert(newF().pushUInt8(8).data).equate([addr]);
-        
-                    });
-        
-                });
-        
-                xdescribe('pushUInt16', () => {
-        
-                    it('should store properly', () => {
-        
-                        let addr = 0x8000 | DATA_TYPE_UINT16;
-        
-                        assert(newF().pushUInt16(0x8000).data).equate([addr]);
-        
-                    });
-        
-                });
-        
-                xdescribe('pushString', () => {
-        
-                    it('should store properly', () => {
-        
-                        let addr = 1 | DATA_TYPE_STRING;
-        
-                        assert(newF().pushString(1).data).equate([addr]);
-        
-                    });
-        
-                })
-        
-                describe('pushMessage', () => {
-        
-                    it('should store properly', () => {
-        
-                        let addr = 0 | DATA_TYPE_MESSAGE;
-        
-                        assert(newF().pushMessage().data).equate([addr]);
-        
-                    });
-        
-                })
-        
-                xdescribe('resolve', () => {
-        
-                    it('should return immediate values', () => {
-        
-                        let f = new Frame('self', newContext(), new Script());
-                        assert(f.resolve(0x1018000).takeRight()).equate(0x8000);
-        
-                    });
-        */
-        it('should return values from the constants pool', () => {
+            xit('should chop down integers > 2^32', () => {
 
-            /*              let c: Constants =
-                              [[], ['hello']];
-          
-                          let f = newF(c);
-          
-                          let uint8 = 1 | DATA_TYPE_UINT8;
-                          let uint16 = 0x8000 | DATA_TYPE_UINT16;
-                          let str = 0 | DATA_TYPE_STRING;
-                          let msg = 0 | DATA_TYPE_MESSAGE;
-          
-                          assert(f.resolve(uint8).takeRight()).equal(1);
-                          assert(f.resolve(uint16).takeRight()).equal(0x8000);
-                          assert(f.resolve(str).takeRight()).equal(c[1][0]);*/
+                let data = Number.MAX_SAFE_INTEGER;
+
+                assert(newF().push(data).data).equate([0xffffffff]);
+
+            });
 
         });
 
-        it('should resolve locals', () => {
+        describe('pushUInt8', () => {
 
-            /*
-              let c: Constants = [
-                  [], ['hello', 'world'], [], [], [], []
-              ];
-  
-              let f = new Frame('self', newContext(), new Script(c), [], [
-                  1, Type.String, Location.Local
-              ]);
-  
-              assert(f.resolve([1, Type.String, Location.Constants]).takeRight())
-                  .equal('world');*/
+            it('should store properly', () => {
+
+                let op = 8;
+
+                assert(newF().pushUInt8(op).data).equate([op]);
+
+            });
+
+            xit('should force values to be unsigned', () => {
+
+                let data = 0x80000000;
+
+                assert(newF().push(data).data).equate([data]);
+
+            });
+
+            it('should zero out un-needed bits', () => {
+
+                let value = 0x41100026;
+                let op = 38;
+
+                assert(newF().pushUInt8(value).data[0]).equal(op);
+
+            });
 
         });
 
-        it('should resolve from the heap', () => {
+        describe('pushUInt16', () => {
 
-            /*
-              let f = new Frame('self', newContext(), new Script(), [], [], [], [
-                  Date
-              ]);
-  
-              assert(f.resolve([0, Type.Message, Location.Heap]).takeRight())
-                  .equal(Date);*/
+            it('should store properly', () => {
+
+                let addr = 0x8000;
+
+                assert(newF().pushUInt16(addr).data).equate([addr]);
+
+            });
 
         });
 
-        it('should return an error if the reference does not exist', () => {
+        describe('pushUInt32', () => {
 
-            /*              let f = new Frame('self', newContext(), new Script());
-                          assert(f.resolve(0x1).takeLeft()).be.instance.of(NullPointerErr);
-          */
+            it('should store properly', () => {
+
+                let op = 0x7fffffff;
+
+                assert(newF().pushUInt32(op).data).equate([op]);
+
+            });
+
+            it('should only push 32 bit numbers', () => {
+
+                let op = 0xffffffff;
+                let op2 = 0x8300404002000100;
+
+                assert(newF().pushUInt32(op).data).equate([0xffffffff]);
+                assert(newF().pushUInt32(op2).data).equate([0x2000000]);
+
+            });
+
+        });
+
+        describe('pushString', () => {
+
+            it('should store properly', () => {
+
+                let addr = 1 | DATA_TYPE_STRING;
+
+                assert(newF().pushString(1).data).equate([addr]);
+
+            });
+
         })
+
 
     })
 

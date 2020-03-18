@@ -27,7 +27,7 @@ export const DATA_MASK_TYPE = 0xff000000;
 export const DATA_MASK_VALUE8 = 0xff;
 export const DATA_MASK_VALUE16 = 0xffff;
 export const DATA_MASK_VALUE24 = 0xffffff;
-export const DATA_MASK_VALUE32 = 0xffffffff;
+export const DATA_MASK_VALUE32 = 0x7fffffff;
 
 export const DATA_MAX_SIZE = 0x7fffffff;
 export const DATA_MAX_SAFE_UINT32 = 0x7fffffff;
@@ -78,10 +78,11 @@ export class Frame {
         public ip = 0) { }
 
     /**
-     * push a value onto the data stack.
+     * push an operand onto the data stack.
      * 
-     * Care should be taken when using this method to ensure the value has 
-     * the correct bits set.
+     * Values not in the range 0 - 2^32 (integer only) may yield unexpected
+     * results during computation. Care should be taken when using this method
+     * directly to ensure the desired value is actual on the stack.
      */
     push(d: Data): Frame {
 
@@ -95,10 +96,7 @@ export class Frame {
      */
     pushUInt8(value: OperandU8): Frame {
 
-        return this.push(
-            value &
-            DATA_MASK_VALUE8 |
-            DATA_TYPE_UINT8);
+        return this.push((value >>> 0) & DATA_MASK_VALUE8);
 
     }
 
@@ -107,10 +105,7 @@ export class Frame {
      */
     pushUInt16(value: OperandU16): Frame {
 
-        return this.push(
-            value &
-            DATA_MASK_VALUE16 |
-            DATA_TYPE_UINT16);
+        return this.push((value >>> 0) & DATA_MASK_VALUE16);
 
     }
 
@@ -119,7 +114,7 @@ export class Frame {
      */
     pushUInt32(value: Operand): Frame {
 
-        return this.push(value & DATA_MASK_VALUE32);
+        return this.push(value >>> 0);
 
     }
 
