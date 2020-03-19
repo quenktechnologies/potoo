@@ -3,7 +3,7 @@ import { Err } from '@quenk/noni/lib/control/error';
 
 import { Context } from '../../../context';
 import { Address } from '../../../address';
-import { Frame } from './stack/frame';
+import { Frame, StackFrame } from './stack/frame';
 import { FunInfo } from '../script/info';
 import { PVM_Value } from '../script';
 import { Platform } from '../';
@@ -73,9 +73,9 @@ export interface Runtime {
     context: Context
 
     /**
-     * exec a function in the current frame context.
+     * call a function in the current frame context.
      */
-    exec(c: Frame, f: FunInfo, args: PVM_Value[]): void
+    call(c: Frame, f: FunInfo, args: PVM_Value[]): void
 
     /**
      * raise an error.
@@ -102,7 +102,7 @@ export class This implements Runtime {
 
     }
 
-    exec(c: Frame, f: FunInfo, args: PVM_Value[]) {
+    call(c: Frame, f: FunInfo, args: PVM_Value[]) {
 
         if (f.foreign) {
 
@@ -115,7 +115,7 @@ export class This implements Runtime {
 
         } else {
 
-            this.stack.push(new Frame(
+            this.stack.push(new StackFrame(
                 f.name,
                 c.script,
                 this.context,
@@ -154,9 +154,10 @@ export class This implements Runtime {
 
             }
 
-            //frame complete, pop it, advance the sp and pass any return value
-            //to the previous frame.
             if (sp === this.sp) {
+
+                //frame complete, pop it, advance the sp and pass any return
+                //value to the previous frame.
 
                 this.stack.pop();
                 this.sp--;

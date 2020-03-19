@@ -53,9 +53,9 @@ export interface Runtime {
      */
     context: Context;
     /**
-     * exec a function in the current frame context.
+     * call a function in the current frame context.
      */
-    exec(c: Frame, f: FunInfo, args: PVM_Value[]): void;
+    call(c: Frame, f: FunInfo, args: PVM_Value[]): void;
     /**
      * raise an error.
      */
@@ -73,6 +73,6 @@ export declare class This implements Runtime {
     sp: number;
     constructor(vm: Platform, heap: Heap, context: Context, self: Address, stack?: Frame[], sp?: number);
     raise(_: Err): void;
-    exec(c: Frame, f: FunInfo, args: PVM_Value[]): void;
+    call(c: Frame, f: FunInfo, args: PVM_Value[]): void;
     run(): void;
 }

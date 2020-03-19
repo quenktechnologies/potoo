@@ -13,7 +13,7 @@ export declare const DATA_MASK_TYPE = 4278190080;
 export declare const DATA_MASK_VALUE8 = 255;
 export declare const DATA_MASK_VALUE16 = 65535;
 export declare const DATA_MASK_VALUE24 = 16777215;
-export declare const DATA_MASK_VALUE32 = 4294967295;
+export declare const DATA_MASK_VALUE32 = 2147483647;
 export declare const DATA_MAX_SIZE = 2147483647;
 export declare const DATA_MAX_SAFE_UINT32 = 2147483647;
 export declare const DATA_TYPE_UINT8 = 16777216;
@@ -44,22 +44,49 @@ export declare type Data = number;
  * It provides methods for manipulating the stack common to each op code as
  * well as access to other components of the system.
  */
-export declare class Frame {
-    name: string;
-    script: Script;
-    context: Context;
-    heap: Heap;
-    code: Instruction[];
-    data: Data[];
-    rdata: Data[];
-    locals: Data[];
-    ip: number;
-    constructor(name: string, script: Script, context: Context, heap: Heap, code?: Instruction[], data?: Data[], rdata?: Data[], locals?: Data[], ip?: number);
+export interface Frame {
     /**
-     * push a value onto the data stack.
+     * name of the routine this frame belongs too.
+     */
+    name: string;
+    /**
+     * script the routine is defined in.
+     */
+    script: Script;
+    /**
+     * context of the actor that is executing this frame.
+     */
+    context: Context;
+    /**
+     * heap of the current Runtime
+     */
+    heap: Heap;
+    /**
+     * code the frame executes as part of the routine.
+     */
+    code: Instruction[];
+    /**
+     * data stack or operand stack.
+     */
+    data: Data[];
+    /**
+     * rdata is the return stack used to pass results between frames.
+     */
+    rdata: Data[];
+    /**
+     * locals contains variables local to the routine.
+     */
+    locals: Data[];
+    /**
+     * ip is a pointer to the code instruction currently being executed.
+     */
+    ip: number;
+    /**
+     * push an operand onto the data stack.
      *
-     * Care should be taken when using this method to ensure the value has
-     * the correct bits set.
+     * Values not in the range 0 - 2^32 (integer only) may yield unexpected
+     * results during computation. Care should be taken when using this method
+     * directly to ensure the desired value is actual on the stack.
      */
     push(d: Data): Frame;
     /**
@@ -99,10 +126,13 @@ export declare class Frame {
      * resolve a value from its reference.
      *
      * An error will be produced if the value cannot be resolved.
+     * Do not use this method to retreive uint8,uint16 or uint32.
      */
     resolve(data: Data): Either<Err, PVM_Value>;
     /**
      * pop the top most value from the data stack.
+     *
+     * If the stack is empty the value 0 is returned.
      */
     pop(): Data;
     /**
@@ -128,5 +158,37 @@ export declare class Frame {
     /**
      * duplicate the top of the stack.
      */
+    duplicate(): Frame;
+}
+/**
+ * StackFrame (Frame implementation).
+ */
+export declare class StackFrame implements Frame {
+    name: string;
+    script: Script;
+    context: Context;
+    heap: Heap;
+    code: Instruction[];
+    data: Data[];
+    rdata: Data[];
+    locals: Data[];
+    ip: number;
+    constructor(name: string, script: Script, context: Context, heap: Heap, code?: Instruction[], data?: Data[], rdata?: Data[], locals?: Data[], ip?: number);
+    push(d: Data): Frame;
+    pushUInt8(value: OperandU8): Frame;
+    pushUInt16(value: OperandU16): Frame;
+    pushUInt32(value: Operand): Frame;
+    pushString(idx: Operand): Frame;
+    pushSymbol(idx: OperandU16): Frame;
+    pushMessage(): Frame;
+    peek(): Maybe<Data>;
+    peekConstructor(): Either<Err, ConstructorInfo>;
+    resolve(data: Data): Either<Err, PVM_Value>;
+    pop(): Data;
+    popValue(): Either<Err, PVM_Value>;
+    popString(): Either<Err, string>;
+    popFunction(): Either<Err, PVM_Function>;
+    popObject(): Either<Err, PVM_Object>;
+    popTemplate(): Either<Err, PVM_Template>;
     duplicate(): Frame;
 }

@@ -24,6 +24,7 @@ export declare const pushui16: (_: Runtime, f: Frame, args: number) => void;
 /**
  * pushui32 pushes an unsigned 32bit integer onto the stack.
  *
+ * NOTE: In a future revision, the operand may be treated as an index.
  * Stack:
  *  -> <uint32>
  */

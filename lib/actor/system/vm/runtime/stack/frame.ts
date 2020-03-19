@@ -27,7 +27,7 @@ export const DATA_MASK_TYPE = 0xff000000;
 export const DATA_MASK_VALUE8 = 0xff;
 export const DATA_MASK_VALUE16 = 0xffff;
 export const DATA_MASK_VALUE24 = 0xffffff;
-export const DATA_MASK_VALUE32 = 0xffffffff;
+export const DATA_MASK_VALUE32 = 0x7fffffff;
 
 export const DATA_MAX_SIZE = 0x7fffffff;
 export const DATA_MAX_SAFE_UINT32 = 0x7fffffff;
@@ -64,7 +64,154 @@ export type Data = number;
  * It provides methods for manipulating the stack common to each op code as 
  * well as access to other components of the system.
  */
-export class Frame {
+export interface Frame {
+
+    /**
+     * name of the routine this frame belongs too.
+     */
+    name: string;
+
+    /**
+     * script the routine is defined in.
+     */
+    script: Script;
+
+    /**
+     * context of the actor that is executing this frame.
+     */
+    context: Context;
+
+    /**
+     * heap of the current Runtime
+     */
+    heap: Heap;
+
+    /**
+     * code the frame executes as part of the routine.
+     */
+    code: Instruction[];
+
+    /**
+     * data stack or operand stack.
+     */
+    data: Data[];
+
+    /**
+     * rdata is the return stack used to pass results between frames.
+     */
+    rdata: Data[];
+
+    /**
+     * locals contains variables local to the routine.
+     */
+    locals: Data[];
+
+    /**
+     * ip is a pointer to the code instruction currently being executed.
+     */
+    ip: number;
+
+    /**
+     * push an operand onto the data stack.
+     * 
+     * Values not in the range 0 - 2^32 (integer only) may yield unexpected
+     * results during computation. Care should be taken when using this method
+     * directly to ensure the desired value is actual on the stack.
+     */
+    push(d: Data): Frame;
+
+    /**
+     * pushUInt8 pushes an unsigned 8bit integer onto the data stack.
+     */
+    pushUInt8(value: OperandU8): Frame;
+
+    /**
+     * pushUInt16 pushes an unsigned 16bit integer onto the data stack.
+     */
+    pushUInt16(value: OperandU16): Frame;
+
+    /**
+     * pushUInt32 pushes an unsigned 32bit integer onto the data stack.
+     */
+    pushUInt32(value: Operand): Frame;
+
+    /**
+     * pushString from the constant pool onto the data stack.
+     */
+    pushString(idx: Operand): Frame;
+
+    /**
+     * pushSymbol pushes a symbol from the info table at idx onto the stack.
+     */
+    pushSymbol(idx: OperandU16): Frame;
+
+    /**
+     * pushMessage from the receivers section onto the stack.
+     */
+    pushMessage(): Frame;
+
+    /**
+     * peek at the top of the data stack.
+     */
+    peek(): Maybe<Data>;
+
+    /**
+     * peekConstructor peeks and resolves the constructor for the object 
+     * reference at the top of the stack.
+     */
+    peekConstructor(): Either<Err, ConstructorInfo>;
+
+    /**
+     * resolve a value from its reference.
+     *
+     * An error will be produced if the value cannot be resolved.
+     * Do not use this method to retreive uint8,uint16 or uint32.
+     */
+    resolve(data: Data): Either<Err, PVM_Value>;
+
+    /**
+     * pop the top most value from the data stack.
+     *
+     * If the stack is empty the value 0 is returned.
+     */
+    pop(): Data;
+
+    /**
+     * popValue pops and attempts to resolve the top most value of the data stack.
+     */
+    popValue(): Either<Err, PVM_Value>;
+
+    /**
+     * popString from the top of the data stack.
+     */
+    popString(): Either<Err, string>;
+
+    /**
+     * popFunction from the top of the data stack.
+     */
+    popFunction(): Either<Err, PVM_Function>;
+
+    /**
+     * popObject from the top of the data stack.
+     */
+    popObject(): Either<Err, PVM_Object>;
+
+    /**
+     * popTemplate from the top of the data stack.
+     */
+    popTemplate(): Either<Err, PVM_Template>;
+
+    /**
+     * duplicate the top of the stack.
+     */
+    duplicate(): Frame;
+
+}
+
+/**
+ * StackFrame (Frame implementation).
+ */
+export class StackFrame implements Frame {
 
     constructor(
         public name: string,
@@ -77,12 +224,6 @@ export class Frame {
         public locals: Data[] = [],
         public ip = 0) { }
 
-    /**
-     * push a value onto the data stack.
-     * 
-     * Care should be taken when using this method to ensure the value has 
-     * the correct bits set.
-     */
     push(d: Data): Frame {
 
         this.data.push(d);
@@ -90,69 +231,42 @@ export class Frame {
 
     }
 
-    /**
-     * pushUInt8 pushes an unsigned 8bit integer onto the data stack.
-     */
     pushUInt8(value: OperandU8): Frame {
 
-        return this.push(
-            value &
-            DATA_MASK_VALUE8 |
-            DATA_TYPE_UINT8);
+        return this.push((value >>> 0) & DATA_MASK_VALUE8);
 
     }
 
-    /**
-     * pushUInt16 pushes an unsigned 16bit integer onto the data stack.
-     */
     pushUInt16(value: OperandU16): Frame {
 
-        return this.push(
-            value &
-            DATA_MASK_VALUE16 |
-            DATA_TYPE_UINT16);
+        return this.push((value >>> 0) & DATA_MASK_VALUE16);
 
     }
 
-    /**
-     * pushUInt32 pushes an unsigned 32bit integer onto the data stack.
-     */
     pushUInt32(value: Operand): Frame {
 
-        return this.push(value & DATA_MASK_VALUE32);
+        return this.push(value >>> 0);
 
     }
 
-    /**
-     * pushString from the constant pool onto the data stack.
-     */
     pushString(idx: Operand): Frame {
 
         return this.push(idx | DATA_TYPE_STRING);
 
     }
 
-    /**
-     * pushSymbol pushes a symbol from the info table at idx onto the stack.
-     */
     pushSymbol(idx: OperandU16): Frame {
 
         return this.push(idx | DATA_TYPE_SYMBOL);
 
     }
 
-    /**
-     * pushMessage from the receivers section onto the stack.
-     */
     pushMessage(): Frame {
 
         return this.push(0 | DATA_TYPE_MAILBOX);
 
     }
 
-    /**
-     * peek at the top of the data stack.
-     */
     peek(): Maybe<Data> {
 
         //TODO: Return 0 instead of Maybe?
@@ -160,10 +274,6 @@ export class Frame {
 
     }
 
-    /**
-     * peekConstructor peeks and resolves the constructor for the object 
-     * reference at the top of the stack.
-     */
     peekConstructor(): Either<Err, ConstructorInfo> {
 
         let mword = this.peek();
@@ -181,11 +291,6 @@ export class Frame {
 
     }
 
-    /**
-     * resolve a value from its reference.
-     *
-     * An error will be produced if the value cannot be resolved.
-     */
     resolve(data: Data): Either<Err, PVM_Value> {
 
         let { script, context } = this;
@@ -195,12 +300,6 @@ export class Frame {
         let value = data & DATA_MASK_VALUE24;
 
         switch (typ) {
-
-            case DATA_TYPE_UINT8:
-                return right(DATA_MASK_VALUE8 & value);
-
-            case DATA_TYPE_UINT16:
-                return right(DATA_MASK_VALUE16 & value);
 
             case DATA_TYPE_STRING:
 
@@ -249,63 +348,42 @@ export class Frame {
 
     }
 
-    /**
-     * pop the top most value from the data stack.
-     */
     pop(): Data {
 
-        return <Data>this.data.pop();
+        return (<Data>this.data.pop() | 0);
 
     }
 
-    /**
-     * popValue pops and attempts to resolve the top most value of the data stack.
-     */
     popValue(): Either<Err, PVM_Value> {
 
         return this.resolve(this.pop());
 
     }
 
-    /**
-     * popString from the top of the data stack.
-     */
     popString(): Either<Err, string> {
 
         return <Either<Err, string>>this.popValue();
 
     }
 
-    /**
-     * popFunction from the top of the data stack.
-     */
     popFunction(): Either<Err, PVM_Function> {
 
         return <Either<Err, PVM_Function>>this.popValue();
 
     }
 
-    /**
-     * popObject from the top of the data stack.
-     */
     popObject(): Either<Err, PVM_Object> {
 
         return <Either<Err, PVM_Object>>this.popValue();
 
     }
 
-    /**
-     * popTemplate from the top of the data stack.
-     */
     popTemplate(): Either<Err, PVM_Template> {
 
         return <Either<Err, PVM_Template>>this.popValue();
 
     }
 
-    /**
-     * duplicate the top of the stack.
-     */
     duplicate(): Frame {
 
         let top = <number>this.data.pop();
