@@ -40,6 +40,7 @@ export const pushui16 = (_: Runtime, f: Frame, args: Operand) => {
 /**
  * pushui32 pushes an unsigned 32bit integer onto the stack.
  *
+ * NOTE: In a future revision, the operand may be treated as an index.
  * Stack:
  *  -> <uint32>
  */
@@ -182,7 +183,7 @@ export const call = (r: Runtime, f: Frame, n: Operand) => {
 
     let fn = einfo.takeRight();
 
-    r.exec(f, fn, args);
+    r.call(f, fn, args);
 
 }
 
@@ -196,10 +197,7 @@ export const call = (r: Runtime, f: Frame, n: Operand) => {
  */
 export const ret = (_: Runtime, f: Frame, __: Operand) => {
 
-    let data = f.pop();
-
-    if (data !== 0)
-        f.rdata.push(data);
+    f.rdata.push(f.pop());
 
     f.ip = f.code.length;
 
