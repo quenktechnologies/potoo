@@ -11,7 +11,7 @@
     "test": "./node_modules/.bin/mocha --opts mocha.opts $(find test -name *.ts)"
   },
   "devDependencies": {
-    "@quenk/test": "^2.1.1",
+    "@quenk/test": "^2.2.0",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.29",
     "@types/uuid": "^7.0.0",
