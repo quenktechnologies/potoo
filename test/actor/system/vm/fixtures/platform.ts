@@ -98,3 +98,5 @@ export class FPVM<S extends System> implements Platform {
     }
 
 }
+
+export const newPlatform = () => new FPVM();
