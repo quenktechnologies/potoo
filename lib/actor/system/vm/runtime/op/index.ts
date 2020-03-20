@@ -5,32 +5,36 @@ import * as actor from './actor';
 import { Frame } from '../stack/frame';
 import { Runtime, Operand } from '../';
 
+export const OP_CODE_RANGE_LOW = 0x1000000;
+export const OP_CODE_RANGE_HIGH = 0xff000000;
+export const OP_CODE_RANGE_STEP = 0x1000000;
+
 //NOTE: these can only be one of the highest byte in a 32 bit number.
-export const NOP = 0x0;
-export const PUSHUI8 = 0x1;
-export const PUSHUI16 = 0x2;
-export const PUSHUI32 = 0x3;
-export const PUSHSTR = 0x4;
-export const PUSHSYM = 0x5;
-export const DUP = 0x15;
-export const STORE = 0x16;
-export const LOAD = 0x20;
-export const CEQ = 0x2a;
-export const ADDUI32 = 0x34;
-export const CALL = 0x3e;
-export const RET = 0x3f;
-export const JMP = 0x48;
-export const IFZJMP = 0x49;
-export const IFNZJMP = 0x50;
-export const IFEQJMP = 0x51;
-export const IFNEQJMP = 0x52;
-export const ALLOC = 0x5c;
-export const RUN = 0x5d;
-export const SEND = 0x5e;
-export const RECV = 0x5f;
-export const RECVCOUNT = 0x60;
-export const MAILCOUNT = 0x62;
-export const PUSHMAIL = 0x63;
+export const NOP = OP_CODE_RANGE_STEP;
+export const PUSHUI8 = OP_CODE_RANGE_STEP * 2;
+export const PUSHUI16 = OP_CODE_RANGE_STEP * 3;
+export const PUSHUI32 = OP_CODE_RANGE_STEP * 4;
+export const PUSHSTR = OP_CODE_RANGE_STEP * 5;
+export const PUSHSYM = OP_CODE_RANGE_STEP * 6;
+export const DUP = OP_CODE_RANGE_HIGH * 15;
+export const STORE = OP_CODE_RANGE_STEP * 16;
+export const LOAD = OP_CODE_RANGE_STEP * 20;
+export const CEQ = OP_CODE_RANGE_STEP * 42;
+export const ADDUI32 = OP_CODE_RANGE_STEP * 52;
+export const CALL = OP_CODE_RANGE_STEP * 62;
+export const RET = OP_CODE_RANGE_STEP * 63;
+export const JMP = OP_CODE_RANGE_STEP * 72;
+export const IFZJMP = OP_CODE_RANGE_STEP * 73
+export const IFNZJMP = OP_CODE_RANGE_STEP * 80;
+export const IFEQJMP = OP_CODE_RANGE_STEP * 81;
+export const IFNEQJMP = OP_CODE_RANGE_STEP * 82;
+export const ALLOC = OP_CODE_RANGE_STEP * 92;
+export const RUN = OP_CODE_RANGE_STEP * 93;
+export const SEND = OP_CODE_RANGE_STEP * 94;
+export const RECV = OP_CODE_RANGE_STEP * 95;
+export const RECVCOUNT = OP_CODE_RANGE_STEP * 96;
+export const MAILCOUNT = OP_CODE_RANGE_STEP * 97;
+export const PUSHMAIL = OP_CODE_RANGE_STEP * 98;
 
 /**
  * OpcodeHandler

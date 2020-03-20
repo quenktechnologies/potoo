@@ -18,7 +18,7 @@ import { Instruction, OperandU8, OperandU16, Operand } from '../';
 import { Heap } from '../heap';
 import { ConstructorInfo, INFO_TYPE_CONSTRUCTOR } from '../../script/info';
 
-export const DATA_RANGE_TYPE_HIGH = 0x7f000000;
+export const DATA_RANGE_TYPE_HIGH = 0xf0000000;
 export const DATA_RANGE_TYPE_LOW = 0x1000000;
 export const DATA_RANGE_TYPE_STEP = 0x1000000;
 
@@ -27,15 +27,13 @@ export const DATA_MASK_TYPE = 0xff000000;
 export const DATA_MASK_VALUE8 = 0xff;
 export const DATA_MASK_VALUE16 = 0xffff;
 export const DATA_MASK_VALUE24 = 0xffffff;
-export const DATA_MASK_VALUE32 = 0x7fffffff;
+export const DATA_MASK_VALUE32 = 0xffffffff;
 
-export const DATA_MAX_SIZE = 0x7fffffff;
+export const DATA_MAX_SIZE = 0xffffffff;
 export const DATA_MAX_SAFE_UINT32 = 0x7fffffff;
 
 //These really indicate where the actual value of an operand is stored.
 //They are not meant to be used to check the actual type of the underlying value.
-export const DATA_TYPE_UINT8 = DATA_RANGE_TYPE_STEP;
-export const DATA_TYPE_UINT16 = DATA_RANGE_TYPE_STEP * 2;
 export const DATA_TYPE_STRING = DATA_RANGE_TYPE_STEP * 3;
 export const DATA_TYPE_SYMBOL = DATA_RANGE_TYPE_STEP * 4;
 export const DATA_TYPE_HEAP = DATA_RANGE_TYPE_STEP * 6;
@@ -325,6 +323,7 @@ export class StackFrame implements Frame {
 
                 return right(mO.get());
 
+            //TODO: This is probably not needed.
             case DATA_TYPE_LOCAL:
 
                 let mRef = fromNullable(this.locals[value]);
