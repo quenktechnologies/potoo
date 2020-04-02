@@ -7,11 +7,9 @@ import { PVM_Value, Script } from './vm/script';
  * System represents a dynamic collection of actors that 
  * can communicate with each other via message passing.
  */
-export interface System extends Instance {
+export interface System {
 
-    ident(i: Instance): Address
-
-    exec(i: Instance, s: Script): Maybe<PVM_Value>
+    exec(i: Instance, s: Script): void
 
 }
 

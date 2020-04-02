@@ -1,12 +1,10 @@
 import { Err } from '@quenk/noni/lib/control/error';
 
-import { Template } from './template';
-import { Message } from './message';
-import { System } from './system';
-import { Instance } from './';
-import { Flags } from './flags';
-import { Script } from './system/vm/script';
-import { Address } from './address';
+import { Message } from '../../../message';
+import { Flags } from '../../../flags';
+import { Address } from '../../../address';
+import { Instance } from '../../../';
+import { Template } from '../template';
 
 /**
  * Receiver
@@ -71,12 +69,7 @@ export interface Context {
     /**
      * template used to create new instances of the actor.
      */
-    template: Template<System>,
-
-    /**
-     * scripts is a pipeline of scripts submitted for the actor to execute.
-     */
-    scripts: Script[]
+    template: Template,
 
 }
 
@@ -84,7 +77,7 @@ export interface Context {
  * newContext 
  */
 export const newContext =
-    (actor: Instance, address: Address, template: Template<System>)
+    (actor: Instance, address: Address, template: Template)
         : Context => ({
 
             mailbox: [],
@@ -97,8 +90,6 @@ export const newContext =
 
             address,
 
-            template: <Template<System>>template,
-
-            scripts: []
+            template: template
 
         });

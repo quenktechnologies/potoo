@@ -2,8 +2,8 @@ import * as template from '../../template';
 
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe'
+import { empty } from '@quenk/noni/lib/data/array';
 
-import { Context, newContext, ErrorHandler } from '../../context';
 import { Address } from '../../address';
 import {
     State,
@@ -13,12 +13,19 @@ import {
     putMember,
     removeRoute,
     getRouter,
-} from '../state';
+    getAddress,
+} from './state';
 import { Configuration } from '../configuration';
 import { Instance } from '../../';
 import { System } from '../';
+import { Context, newContext, ErrorHandler } from './runtime/context';
 import { Runtime } from './runtime';
 import { Script } from './script';
+
+/**
+ * Slot
+ */
+export type Slot = [Address, Script, Runtime];
 
 /**
  * Platform is the interface for a virtual machine.
@@ -78,6 +85,8 @@ export class PVM<S extends System> implements Platform {
 
         contexts: {},
 
+        runtimes: {},
+
         routers: {},
 
         groups: {}
@@ -85,9 +94,11 @@ export class PVM<S extends System> implements Platform {
     };
 
     /**
-     * pending scripts to execute.
+     * queue of scripts to be executed by the system in order. 
      */
-    pending: Runtime[] = [];
+    queue: Slot[] = [];
+
+    running = false;
 
     raise(_: Err): void {
 
@@ -145,9 +156,34 @@ export class PVM<S extends System> implements Platform {
 
     }
 
-    exec(_i: Instance, _s: Script): void {
+    exec(i: Instance, s: Script): void {
 
+        let maddress = getAddress(this.state, i);
 
+        //TODO: EVENT_INVALID_EXEC
+        if (maddress.isNothing()) return;
+
+        let addr = maddress.get();
+
+        this.queue.push([maddress.get(), s, this.state.runtimes[addr]]);
+
+        if (this.running === true) return;
+
+        this.running = true;
+
+        while ((!empty(this.queue)) && this.running) {
+
+            let next = this.queue.shift();
+
+            let [, script, runtime] = <Slot>next;
+
+            runtime.invokeMain(script);
+
+            runtime.run();
+
+        }
+
+        this.running = false;
 
     }
 

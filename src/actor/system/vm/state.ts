@@ -5,39 +5,47 @@ import {
     fromArray,
     nothing
 } from '@quenk/noni/lib/data/maybe';
-import { reduce, contains, partition } from '@quenk/noni/lib/data/record';
+import {
+    Record,
+    reduce,
+    contains,
+    partition
+} from '@quenk/noni/lib/data/record';
 import { startsWith } from '@quenk/noni/lib/data/string';
 
 import {
     ADDRESS_SYSTEM,
     Address,
     getParent as getParentAddress
-} from '../address';
-import { Instance } from '../';
-import { Context, Contexts } from '../context';
+} from '../../address';
+import { Instance } from '../../';
+import { Context, Contexts } from './runtime/context';
+import { Runtime } from './runtime';
+
+/**
+ * Runtimes map.
+ */
+export interface Runtimes extends Record<Runtime> { }
 
 /**
  * Routers map.
  */
-export interface Routers {
-
-    [key: string]: Address
-
-}
+export interface Routers extends Record<Address> { }
 
 /**
  * Groups map.
  */
-export interface Groups {
-
-    [key: string]: Address[]
-
-}
+export interface Groups extends Record<Address[]> { }
 
 /**
  * State contains Context entries for all actors in the system.
  */
 export interface State {
+
+    /**
+     * runtimes for each actor within the system.
+     */
+    runtimes: Runtimes,
 
     /**
      * contexts for each actor in the system.

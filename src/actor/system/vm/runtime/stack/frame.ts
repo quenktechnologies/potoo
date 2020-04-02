@@ -6,7 +6,7 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { fromNullable, Maybe } from '@quenk/noni/lib/data/maybe';
 import { tail } from '@quenk/noni/lib/data/array';
 
-import { Context } from '../../../../context';
+import { Context } from '../context';
 import {
     Script,
     PVM_Value,
@@ -321,7 +321,7 @@ export class StackFrame implements Frame {
 
                 if (mO.isNothing()) return left(new error.NullPointerErr(data));
 
-                return right(mO.get());
+                return right(mO.get().value);
 
             //TODO: This is probably not needed.
             case DATA_TYPE_LOCAL:

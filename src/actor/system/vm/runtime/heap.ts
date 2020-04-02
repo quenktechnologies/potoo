@@ -5,7 +5,7 @@ import {
     nothing
 } from '@quenk/noni/lib/data/maybe';
 
-import { DATA_TYPE_HEAP, DATA_MASK_TYPE } from './stack/frame';
+import { DATA_TYPE_HEAP, DATA_MASK_VALUE24 } from './stack/frame';
 
 /**
  * HeapReference identifies an object in the heap.
@@ -62,16 +62,16 @@ export class Heap {
     add(h: HeapEntry): HeapReference {
 
         //TODO: what if heap size is > 24bits?
-        return (this.pool.push(h) - 0) | DATA_TYPE_HEAP;
+        return (this.pool.push(h) - 1) | DATA_TYPE_HEAP;
 
     }
 
     /**
      * get an object from the heap.
      */
-    get(r: HeapReference): Maybe<HeapValue> {
+    get(r: HeapReference): Maybe<HeapEntry> {
 
-        return fromNullable(this.pool[r & DATA_MASK_TYPE]);
+        return fromNullable(this.pool[r & DATA_MASK_VALUE24]);
 
     }
 

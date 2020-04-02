@@ -1,11 +1,11 @@
 import { empty } from '@quenk/noni/lib/data/array';
 import { Err } from '@quenk/noni/lib/control/error';
 
-import { Context } from '../../../context';
+import { Context } from './context';
 import { Address } from '../../../address';
 import { Frame, StackFrame } from './stack/frame';
 import { FunInfo } from '../script/info';
-import { PVM_Value } from '../script';
+import { PVM_Value, Script } from '../script';
 import { Platform } from '../';
 import { handlers } from './op';
 import { Heap, HeapEntry } from './heap';
@@ -29,29 +29,38 @@ export class Proc implements Runtime {
 
     }
 
-    call(c: Frame, f: FunInfo, args: PVM_Value[]) {
+    invokeMain(s: Script) {
 
-        if (f.foreign) {
+        this.stack.push(new StackFrame('main', s, this.context, this.heap,
+            s.code.slice()));
 
-            //Todo: Note the type of the heap entry is the function type.
-            //We should add some plumbing for strings, numbers etc.
-            c.push(this.heap.add(new HeapEntry(
-                f.type,
-                f.builtin,
-                <object>(<Function>f.exec).apply(null, args))));
+    }
 
-        } else {
+    invokeVM(p: Frame, f: FunInfo) {
 
-            this.stack.push(new StackFrame(
-                f.name,
-                c.script,
-                this.context,
-                this.heap,
-                f.code.slice()));
+        let frm = new StackFrame(f.name, p.script, this.context,
+            this.heap, f.code.slice());
 
-            this.sp = this.stack.length - 1;
+        for (let i = 0; i <= f.argc; i++)
+            frm.push(p.pop());
 
-        }
+        this.stack.push(frm);
+
+        this.sp = this.stack.length - 1;
+
+    }
+
+    invokeForeign(p: Frame, f: FunInfo, args: PVM_Value[]) {
+
+        //TODO: 
+        // 1) Note the type of the heap entry is the function type.
+        //    We should add some plumbing for strings, numbers etc.
+        // 2) Support async functions.   
+        p.push(this.heap.add(new HeapEntry(
+            f.type,
+            f.builtin,
+            <object>(<Function>f.exec).apply(null, args))));
+
 
     }
 
