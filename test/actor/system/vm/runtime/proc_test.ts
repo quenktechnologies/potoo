@@ -5,9 +5,29 @@ import { assert } from '@quenk/test/lib/assert';
 import { StackFrame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { Proc } from '../../../../../lib/actor/system/vm/runtime/proc';
 import { Heap } from '../../../../../lib/actor/system/vm/runtime/heap';
-import { PScript } from '../../../../../lib/actor/system/vm/script';
+import { PScript, INFO_TYPE_FUNCTION } from '../../../../../lib/actor/system/vm/script';
 import { newPlatform } from '../fixtures/platform';
 import { newContext } from '../fixtures/context';
+
+let foreignFunc = {
+
+    infoType: INFO_TYPE_FUNCTION,
+
+    type: 0,
+
+    builtin: true,
+
+    name: 'func',
+
+    foreign: true,
+
+    argc: 0,
+
+    code: [],
+
+    exec: (n: number) => n * n
+
+}
 
 describe('runtime', () => {
 
@@ -36,6 +56,33 @@ describe('runtime', () => {
 
                 assert(p.stack.length).equal(0);
                 assert(frm.data[0]).equal(0xc005);
+
+            })
+
+        })
+
+        describe('call', () => {
+
+            it('it should call foreign functions', () => {
+
+                let heap = new Heap();
+
+                let frame = new StackFrame(
+                    'main',
+                    new PScript(),
+                    newContext(),
+                    heap, []);
+
+                let p = new Proc(
+                    newPlatform(),
+                    heap,
+                    newContext(),
+                    '/',
+                    []);
+
+                p.call(frame, foreignFunc, [12]);
+
+                assert(heap.get(frame.data.pop()).get().value).equal(144);
 
             })
 
