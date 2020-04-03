@@ -1,10 +1,11 @@
 import { Err } from '@quenk/noni/lib/control/error';
-import { Context } from '../../../context';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Frame } from './stack/frame';
 import { FunInfo } from '../script/info';
-import { PVM_Value } from '../script';
+import { PVM_Value, Script } from '../script';
 import { Platform } from '../';
 import { Heap } from './heap';
+import { Context } from './context';
 /**
  * Opcode
  */
@@ -52,11 +53,30 @@ export interface Runtime {
      */
     context: Context;
     /**
-     * call a function in the current frame context.
+     * invokeMain invokes the main function of a script.
      */
-    call(c: Frame, f: FunInfo, args: PVM_Value[]): void;
+    invokeMain(s: Script): void;
+    /**
+     * invokeForeign invokes a foreign function.
+     *
+     * The frame specified is the parent frame that will receive it's result.
+     */
+    invokeForeign(c: Frame, f: FunInfo, args: PVM_Value[]): void;
+    /**
+     * invokeVM invokes a VM function.
+     *
+     * The frame specified is the parent frame and arguments will be sourced
+     * from its data stack.
+     */
+    invokeVM(p: Frame, f: FunInfo): void;
     /**
      * raise an error.
      */
     raise(e: Err): void;
+    /**
+     * run executes all the pending frames of the Runtime.
+     *
+     * This method should be called after invokeMain().
+     */
+    run(): Maybe<PVM_Value>;
 }

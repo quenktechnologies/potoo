@@ -173,17 +173,25 @@ export const addui32 = (r: Runtime, f: Frame, _: Operand) => {
  */
 export const call = (r: Runtime, f: Frame, n: Operand) => {
 
-    //TODO: This is unsafe but the extent of its effect on overall stability
-    // should be compared to the time taken to ensure each value.
-    let args = make(n, () => f.popValue().takeRight());
-
     let einfo = f.popFunction();
 
     if (einfo.isLeft()) return r.raise(einfo.takeLeft());
 
     let fn = einfo.takeRight();
 
-    r.call(f, fn, args);
+    if (fn.foreign === true) {
+
+        //TODO: This is unsafe but the extent of its effect on overall stability
+        // should be compared to the time taken to ensure each value.
+        let args = make(n, () => f.popValue().takeRight());
+
+        r.invokeForeign(f, fn, args);
+
+    } else {
+
+        r.invokeVM(f, fn);
+
+    }
 
 }
 

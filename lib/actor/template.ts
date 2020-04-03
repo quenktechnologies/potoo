@@ -3,7 +3,6 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Type } from '@quenk/noni/lib/data/type';
 
 import { System } from './system';
-import { Context } from './context';
 import { Actor } from './';
 import { randomID } from './address';
 
@@ -28,7 +27,7 @@ export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * Cons is applied to produce an instance of an actor.
  */
-export type Cons<S extends System> = (s: S, ...args: Type[]) => Actor<Context>;
+export type Cons<S extends System> = (s: S, ...args: Type[]) => Actor;
 
 /**
  * DelayMilliseconds type.

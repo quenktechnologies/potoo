@@ -41,7 +41,7 @@ export declare class Heap {
     /**
      * get an object from the heap.
      */
-    get(r: HeapReference): Maybe<HeapValue>;
+    get(r: HeapReference): Maybe<HeapEntry>;
     /**
      * ref returns a reference for an entry in the pool.
      */

@@ -1,7 +1,7 @@
 import { Either } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Context } from '../../../../context';
+import { Context } from '../context';
 import { Script, PVM_Value, PVM_Template, PVM_Object, PVM_Function } from '../../script';
 import { Instruction, OperandU8, OperandU16, Operand } from '../';
 import { Heap } from '../heap';

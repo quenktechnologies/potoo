@@ -1,10 +1,13 @@
 import * as template from '../../template';
 
 import { Err } from '@quenk/noni/lib/control/error';
-import { Maybe } from '@quenk/noni/lib/data/maybe'
+import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
+import { empty } from '@quenk/noni/lib/data/array';
 
-import { Context, newContext, ErrorHandler } from '../../context';
 import { Address } from '../../address';
+import { Instance } from '../../';
+import { System } from '../';
+import { Context, newContext, ErrorHandler } from './runtime/context';
 import {
     State,
     get,
@@ -13,12 +16,15 @@ import {
     putMember,
     removeRoute,
     getRouter,
-} from '../state';
-import { Configuration } from '../configuration';
-import { Instance } from '../../';
-import { System } from '../';
+} from './state';
 import { Runtime } from './runtime';
-import { Script } from './script';
+import { Script, PVM_Value } from './script';
+import { reduce } from '@quenk/noni/lib/data/record';
+
+/**
+ * Slot
+ */
+export type Slot = [Address, Script, Runtime];
 
 /**
  * Platform is the interface for a virtual machine.
@@ -67,8 +73,7 @@ export interface Platform extends ErrorHandler {
 export class PVM<S extends System> implements Platform {
 
     constructor(
-        public system: S,
-        public config: Configuration) { }
+        public system: S) { }
 
     /**
      * state contains information about all the actors in the system, routers
@@ -78,6 +83,8 @@ export class PVM<S extends System> implements Platform {
 
         contexts: {},
 
+        runtimes: {},
+
         routers: {},
 
         groups: {}
@@ -85,9 +92,11 @@ export class PVM<S extends System> implements Platform {
     };
 
     /**
-     * pending scripts to execute.
+     * queue of scripts to be executed by the system in order. 
      */
-    pending: Runtime[] = [];
+    queue: Slot[] = [];
+
+    running = false;
 
     raise(_: Err): void {
 
@@ -145,10 +154,43 @@ export class PVM<S extends System> implements Platform {
 
     }
 
-    exec(_i: Instance, _s: Script): void {
+    exec(i: Instance, s: Script): Maybe<PVM_Value> {
 
+        let ret: Maybe<PVM_Value> = nothing();
 
+        let mslot = getSlot(this.state, i);
+
+        //TODO: EVENT_INVALID_EXEC
+        if (mslot.isNothing()) return nothing();
+
+        let [addr, rtime] = mslot.get();
+
+        this.queue.push([addr, s, rtime]);
+
+        if (this.running === true) nothing();
+
+        this.running = true;
+
+        while ((!empty(this.queue)) && this.running) {
+
+            let next = this.queue.shift();
+
+            let [, script, runtime] = <Slot>next;
+
+            runtime.invokeMain(script);
+
+            ret = runtime.run();
+
+        }
+
+        this.running = false;
+
+        return ret;
 
     }
 
 }
+
+const getSlot = (s: State, actor: Instance): Maybe<[Address, Runtime]> =>
+    reduce(s.runtimes, nothing(), (p: Maybe<[Address, Runtime]>, c, k) =>
+        c.context.actor === actor ? fromNullable([k, c]) : p);

@@ -1,7 +1,6 @@
 import { Err } from '@quenk/noni/lib/control/error';
 import { Type } from '@quenk/noni/lib/data/type';
 import { System } from './system';
-import { Context } from './context';
 import { Actor } from './';
 export declare const ACTION_RAISE = -1;
 export declare const ACTION_IGNORE = 0;
@@ -22,7 +21,7 @@ export declare type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * Cons is applied to produce an instance of an actor.
  */
-export declare type Cons<S extends System> = (s: S, ...args: Type[]) => Actor<Context>;
+export declare type Cons<S extends System> = (s: S, ...args: Type[]) => Actor;
 /**
  * DelayMilliseconds type.
  */

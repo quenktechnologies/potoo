@@ -1,14 +1,17 @@
 import * as template from '../../template';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Context, ErrorHandler } from '../../context';
 import { Address } from '../../address';
-import { State } from '../state';
-import { Configuration } from '../configuration';
 import { Instance } from '../../';
 import { System } from '../';
+import { Context, ErrorHandler } from './runtime/context';
+import { State } from './state';
 import { Runtime } from './runtime';
-import { Script } from './script';
+import { Script, PVM_Value } from './script';
+/**
+ * Slot
+ */
+export declare type Slot = [Address, Script, Runtime];
 /**
  * Platform is the interface for a virtual machine.
  *
@@ -47,17 +50,17 @@ export interface Platform extends ErrorHandler {
  */
 export declare class PVM<S extends System> implements Platform {
     system: S;
-    config: Configuration;
-    constructor(system: S, config: Configuration);
+    constructor(system: S);
     /**
      * state contains information about all the actors in the system, routers
      * and groups.
      */
     state: State;
     /**
-     * pending scripts to execute.
+     * queue of scripts to be executed by the system in order.
      */
-    pending: Runtime[];
+    queue: Slot[];
+    running: boolean;
     raise(_: Err): void;
     allocate(addr: Address, t: template.Template<System>): Context;
     getContext(addr: Address): Maybe<Context>;
@@ -66,5 +69,5 @@ export declare class PVM<S extends System> implements Platform {
     putMember(group: string, addr: Address): PVM<S>;
     putRoute(target: Address, router: Address): PVM<S>;
     removeRoute(target: Address): PVM<S>;
-    exec(_i: Instance, _s: Script): void;
+    exec(i: Instance, s: Script): Maybe<PVM_Value>;
 }

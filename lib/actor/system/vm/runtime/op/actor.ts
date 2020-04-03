@@ -2,11 +2,11 @@ import * as error from '../error';
 
 import { tick } from '@quenk/noni/lib/control/timer';
 
-import { Receiver } from '../../../../context';
 import { isRestricted, make } from '../../../../address';
 import { normalize } from '../../../../template';
 import { isRouter, isBuffered } from '../../../../flags';
 import { Frame } from '../stack/frame';
+import { Receiver } from '../context';
 import { Runtime, Operand } from '../';
 
 /**

@@ -1,6 +1,6 @@
 import { Either } from '@quenk/noni/lib/data/either';
+import { Context } from './system/vm/runtime/context';
 import { Message } from './message';
-import { Context } from './context';
 /**
  * Behaviour of an actor.
  *
@@ -9,12 +9,6 @@ import { Context } from './context';
  * was processed or rejected.
  */
 export declare type Behaviour = (m: Message) => Either<Message, void>;
-/**
- * Contexts map.
- */
-export interface Contexts<C extends Context> {
-    [key: string]: C;
-}
 /**
  * Instance of an actor already running in its context.
  */
@@ -51,12 +45,12 @@ export interface Instance {
  * The system expects all actors to satisfy this interface so they
  * can be managed properly.
  */
-export interface Actor<C extends Context> extends Instance {
+export interface Actor extends Instance {
     /**
      * init the Actor.
      *
      * This method allows an actor to configure its Context just
      * before it is added to the system.
      */
-    init(c: C): C;
+    init(c: Context): Context;
 }
