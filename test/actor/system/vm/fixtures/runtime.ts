@@ -5,7 +5,7 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Runtime } from '../../../../../lib/actor/system/vm/runtime';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { Message } from '../../../../../lib/actor/message';
-import { PVM_Value } from '../../../../../lib/actor/system/vm/script';
+import { PVM_Value, Script } from '../../../../../lib/actor/system/vm/script';
 import { FunInfo } from '../../../../../lib/actor/system/vm/script/info';
 import { Heap } from '../../../../../lib/actor/system/vm/runtime/heap';
 import { FPVM } from './vm';
@@ -39,9 +39,21 @@ export class RuntimeImpl implements Runtime {
 
     }
 
-    call(c: Frame, f: FunInfo, args: PVM_Value[]) {
+    invokeMain(s: Script) {
 
-        this.mock.invoke('call', [c, f, args], nothing());
+        this.mock.invoke('invokeMain', [s], undefined);
+
+    }
+
+    invokeVM(p: Frame, f: FunInfo) {
+
+        this.mock.invoke('invokeVM', [p, f], undefined);
+
+    }
+
+    invokeForeign(p: Frame, f: FunInfo, args: PVM_Value[]) {
+
+        this.mock.invoke('invokeForeign', [p, f, args], nothing());
 
     }
 

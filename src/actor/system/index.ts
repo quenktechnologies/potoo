@@ -1,5 +1,5 @@
-import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
-import { Address } from '../address';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
+
 import { Instance } from '../';
 import { PVM_Value, Script } from './vm/script';
 
@@ -9,45 +9,6 @@ import { PVM_Value, Script } from './vm/script';
  */
 export interface System {
 
-    exec(i: Instance, s: Script): void
-
-}
-
-/**
- * Void system.
- *
- * This can be used to prevent a stopped actor from executing further commands.
- */
-export class Void implements System {
-
-    ident(): Address {
-
-        return '?';
-
-    }
-
-    accept(): void {
-
-    }
-
-    run(): void {
-
-    }
-
-    notify(): void {
-
-
-    }
-
-    stop(): void {
-
-
-    }
-
-    exec(_: Instance, __: Script): Maybe<PVM_Value> {
-
-        return nothing();
-
-    }
+    exec(i: Instance, s: Script): Maybe<PVM_Value>
 
 }

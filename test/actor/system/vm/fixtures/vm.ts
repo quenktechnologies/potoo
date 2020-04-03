@@ -4,16 +4,16 @@ import { Err } from '@quenk/noni/lib/control/error';
 
 import { System } from '../../../../../lib/actor/system';
 import { Template } from '../../../../../lib/actor/template';
-import { State } from '../../../../../lib/actor/system/state';
+import { State } from '../../../../../lib/actor/system/vm/state';
 import { Address } from '../../../../../lib/actor/address';
 import { PVM_Value, Script } from '../../../../../lib/actor/system/vm/script';
+import { Context } from '../../../../../lib/actor/system/vm/runtime/context';
 import { Platform } from '../../../../../lib/actor/system/vm';
-import { Context } from '../../../../../lib/actor/context';
 import { newContext } from './context';
 
 export class FPVM<S extends System> implements Platform {
 
-    state: State = { contexts: {}, routers: {}, groups: {} };
+    state: State = { runtimes: {}, contexts: {}, routers: {}, groups: {} };
 
     configuration = {};
 

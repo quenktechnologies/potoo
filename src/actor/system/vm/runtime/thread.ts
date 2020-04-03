@@ -1,9 +1,10 @@
-import { empty } from '@quenk/noni/lib/data/array';
 import { Err } from '@quenk/noni/lib/control/error';
+import { empty } from '@quenk/noni/lib/data/array';
+import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 
 import { Context } from './context';
 import { Address } from '../../../address';
-import { Frame, StackFrame } from './stack/frame';
+import { Frame, StackFrame, Data } from './stack/frame';
 import { FunInfo } from '../script/info';
 import { PVM_Value, Script } from '../script';
 import { Platform } from '../';
@@ -12,16 +13,17 @@ import { Heap, HeapEntry } from './heap';
 import { Runtime, OPCODE_MASK, OPERAND_MASK } from './';
 
 /**
- * Proc is a Runtime implementation for exactly one actor.
+ * Thread is the Runtime implementation for exactly one actor.
  */
-export class Proc implements Runtime {
+export class Thread implements Runtime {
 
     constructor(
         public vm: Platform,
         public heap: Heap,
         public context: Context,
         public self: Address,
-        public stack: Frame[] = [],
+        public fstack: Frame[] = [],
+        public rstack: Data[],
         public sp = 0) { }
 
     raise(_: Err) {
@@ -31,7 +33,7 @@ export class Proc implements Runtime {
 
     invokeMain(s: Script) {
 
-        this.stack.push(new StackFrame('main', s, this.context, this.heap,
+        this.fstack.push(new StackFrame('main', s, this.context, this.heap,
             s.code.slice()));
 
     }
@@ -44,9 +46,9 @@ export class Proc implements Runtime {
         for (let i = 0; i <= f.argc; i++)
             frm.push(p.pop());
 
-        this.stack.push(frm);
+        this.fstack.push(frm);
 
-        this.sp = this.stack.length - 1;
+        this.sp = this.fstack.length - 1;
 
     }
 
@@ -64,17 +66,24 @@ export class Proc implements Runtime {
 
     }
 
-    run() {
+    run(): Maybe<PVM_Value> {
 
-        while (!empty(this.stack)) {
+        let ret: Maybe<PVM_Value> = nothing();
+
+        console.error('is it empty ? ', empty(this.fstack));
+
+        while (!empty(this.fstack)) {
 
             let sp = this.sp;
-            let frame = <Frame>this.stack[sp];
+            let frame = <Frame>this.fstack[sp];
 
+            if (!empty(this.rstack))
+                frame.data.push(<Data>this.rstack.pop());
+            console.error('frame ip ', frame.ip, frame.code);
             while (frame.ip < frame.code.length) {
 
                 //execute frame instructions
-                //TODO: Push return values unto next stack
+                //TODO: Push return values unto next fstack
 
                 let next = (frame.code[frame.ip] >>> 0);
                 let opcode = next & OPCODE_MASK;
@@ -92,19 +101,26 @@ export class Proc implements Runtime {
 
             if (sp === this.sp) {
 
-                //frame complete, pop it, advance the sp and pass any return
-                //value to the previous frame.
+                //frame complete, pop it, advance the sp and push the return
+                //value onto the rstack.
 
-                this.stack.pop();
+                this.fstack.pop();
                 this.sp--;
 
-                if (frame.rdata.length > 0)
-                    if (this.stack[this.sp])
-                        this.stack[this.sp].data.push(<number>frame.rdata.pop());
+                this.rstack.push(<Data>frame.data.pop());
+
+                if (empty(this.fstack)) {
+
+                    //provide the TOS value from the rstack to the caller.
+                    ret = frame.popValue().toMaybe();
+
+                }
 
             }
 
         }
+
+        return ret;
 
     }
 

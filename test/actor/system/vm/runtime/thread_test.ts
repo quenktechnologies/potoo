@@ -3,10 +3,10 @@ import * as op from '../../../../../lib/actor/system/vm/runtime/op';
 import { assert } from '@quenk/test/lib/assert';
 
 import { StackFrame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
-import { Proc } from '../../../../../lib/actor/system/vm/runtime/proc';
+import { Thread } from '../../../../../lib/actor/system/vm/runtime/thread';
 import { Heap } from '../../../../../lib/actor/system/vm/runtime/heap';
 import { PScript, INFO_TYPE_FUNCTION } from '../../../../../lib/actor/system/vm/script';
-import { newPlatform } from '../fixtures/platform';
+import { newPlatform } from '../fixtures/vm';
 import { newContext } from '../fixtures/context';
 
 let foreignFunc = {
@@ -31,7 +31,7 @@ let foreignFunc = {
 
 describe('runtime', () => {
 
-    describe('Proc', () => {
+    describe('Thread', () => {
 
         describe('run', () => {
 
@@ -46,22 +46,22 @@ describe('runtime', () => {
 
                 ]);
 
-                let p = new Proc(newPlatform(),
+                let p = new Thread(newPlatform(),
                     new Heap(),
                     newContext(),
                     '/',
-                    [frm]);
+                    [frm], []);
 
                 p.run();
 
-                assert(p.stack.length).equal(0);
+                assert(p.fstack.length).equal(0);
                 assert(frm.data[0]).equal(0xc005);
 
             })
 
         })
 
-        describe('call', () => {
+        describe('invokeForeign', () => {
 
             it('it should call foreign functions', () => {
 
@@ -73,16 +73,16 @@ describe('runtime', () => {
                     newContext(),
                     heap, []);
 
-                let p = new Proc(
+                let p = new Thread(
                     newPlatform(),
                     heap,
                     newContext(),
                     '/',
-                    []);
+                    [], []);
 
-                p.call(frame, foreignFunc, [12]);
+                p.invokeForeign(frame, foreignFunc, [12]);
 
-                assert(heap.get(frame.data.pop()).get().value).equal(144);
+                assert(heap.get(<number>frame.data.pop()).get().value).equal(144);
 
             })
 

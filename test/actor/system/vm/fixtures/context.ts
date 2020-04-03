@@ -1,10 +1,10 @@
 import { just } from '@quenk/noni/lib/data/maybe';
-import { rmerge } from '@quenk/noni/lib/data/record';
+import { merge } from '@quenk/noni/lib/data/record';
 
-import { Context } from '../../../../../lib/actor/context';
+import { Context } from '../../../../../lib/actor/system/vm/runtime/context';
 import { InstanceImpl } from './instance';
 
-export const newContext = (o: Partial<Context> = {}): Context => rmerge({
+export const newContext = (o: Partial<Context> = {}): Context => merge({
 
     mailbox: just([]),
 

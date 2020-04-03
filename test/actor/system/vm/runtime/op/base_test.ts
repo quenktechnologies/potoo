@@ -3,11 +3,7 @@ import * as base from '../../../../../../lib/actor/system/vm/runtime/op/base';
 import { assert } from '@quenk/test/lib/assert';
 import { right } from '@quenk/noni/lib/data/either';
 
-import { Frame } from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
-import { PScript, INFO_TYPE_FUNCTION } from '../../../../../../lib/actor/system/vm/script';
-import { Constants } from '../../../../../../lib/actor/system/vm/script';
-import { Heap } from '../../../../../../lib/actor/system/vm/runtime/heap';
-import { newContext } from '../../fixtures/context';
+import { INFO_TYPE_FUNCTION } from '../../../../../../lib/actor/system/vm/script';
 import { newRuntime } from '../../fixtures/runtime';
 import { newFrame } from '../../fixtures/frame';
 

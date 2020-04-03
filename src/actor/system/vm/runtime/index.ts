@@ -1,4 +1,5 @@
 import { Err } from '@quenk/noni/lib/control/error';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
 
 import { Frame } from './stack/frame';
 import { FunInfo } from '../script/info';
@@ -99,6 +100,6 @@ export interface Runtime {
      *
      * This method should be called after invokeMain().
      */
-    run(): void
+    run(): Maybe<PVM_Value>
 
 }

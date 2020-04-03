@@ -1,10 +1,13 @@
 import * as template from '../../template';
 
 import { Err } from '@quenk/noni/lib/control/error';
-import { Maybe } from '@quenk/noni/lib/data/maybe'
+import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
 import { empty } from '@quenk/noni/lib/data/array';
 
 import { Address } from '../../address';
+import { Instance } from '../../';
+import { System } from '../';
+import { Context, newContext, ErrorHandler } from './runtime/context';
 import {
     State,
     get,
@@ -13,14 +16,10 @@ import {
     putMember,
     removeRoute,
     getRouter,
-    getAddress,
 } from './state';
-import { Configuration } from '../configuration';
-import { Instance } from '../../';
-import { System } from '../';
-import { Context, newContext, ErrorHandler } from './runtime/context';
 import { Runtime } from './runtime';
-import { Script } from './script';
+import { Script, PVM_Value } from './script';
+import { reduce } from '@quenk/noni/lib/data/record';
 
 /**
  * Slot
@@ -74,8 +73,7 @@ export interface Platform extends ErrorHandler {
 export class PVM<S extends System> implements Platform {
 
     constructor(
-        public system: S,
-        public config: Configuration) { }
+        public system: S) { }
 
     /**
      * state contains information about all the actors in the system, routers
@@ -156,18 +154,20 @@ export class PVM<S extends System> implements Platform {
 
     }
 
-    exec(i: Instance, s: Script): void {
+    exec(i: Instance, s: Script): Maybe<PVM_Value> {
 
-        let maddress = getAddress(this.state, i);
+        let ret: Maybe<PVM_Value> = nothing();
+
+        let mslot = getSlot(this.state, i);
 
         //TODO: EVENT_INVALID_EXEC
-        if (maddress.isNothing()) return;
+        if (mslot.isNothing()) return nothing();
 
-        let addr = maddress.get();
+        let [addr, rtime] = mslot.get();
 
-        this.queue.push([maddress.get(), s, this.state.runtimes[addr]]);
+        this.queue.push([addr, s, rtime]);
 
-        if (this.running === true) return;
+        if (this.running === true) nothing();
 
         this.running = true;
 
@@ -179,12 +179,18 @@ export class PVM<S extends System> implements Platform {
 
             runtime.invokeMain(script);
 
-            runtime.run();
+            ret = runtime.run();
 
         }
 
         this.running = false;
 
+        return ret;
+
     }
 
 }
+
+const getSlot = (s: State, actor: Instance): Maybe<[Address, Runtime]> =>
+    reduce(s.runtimes, nothing(), (p: Maybe<[Address, Runtime]>, c, k) =>
+        c.context.actor === actor ? fromNullable([k, c]) : p);

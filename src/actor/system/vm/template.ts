@@ -1,5 +1,5 @@
 import { Template as T } from '../../template';
-import { System } from '..';
+import { System } from '../';
 
 /**
  * Template

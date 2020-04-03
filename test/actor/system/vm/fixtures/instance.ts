@@ -2,7 +2,7 @@ import { Mock } from '@quenk/test/lib/mock';
 
 import { Instance } from '../../../../../lib/actor';
 import { Envelope } from '../../../../../lib/actor/message';
-import { Context } from '../../../../../lib/actor/context';
+import { Context } from '../../../../../lib/actor/system/vm/runtime/context';
 
 export class InstanceImpl implements Instance {
 
@@ -39,3 +39,5 @@ export class InstanceImpl implements Instance {
     }
 
 }
+
+export const newInstance = () => new InstanceImpl()
