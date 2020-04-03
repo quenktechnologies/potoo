@@ -63,14 +63,13 @@ export const pushstr = (_: Runtime, f: Frame, args: Operand) => {
 }
 
 /**
- * pushsym pushes the symbol at the specified index in the info section onto
- * the stack.
+ * ldn loads a named symbol from the info section to on to the stack.
  *
  * Stack:
  *
  * -> <value>
  */
-export const pushsym = (_: Runtime, f: Frame, idx: OperandU16) => {
+export const ldn = (_: Runtime, f: Frame, idx: OperandU16) => {
 
     f.pushSymbol(idx);
 
@@ -192,21 +191,5 @@ export const call = (r: Runtime, f: Frame, n: Operand) => {
         r.invokeVM(f, fn);
 
     }
-
-}
-
-/**
- * ret ends execution of the current frame and places the TOS in the return
- * stack.
- *
- * Stack:
- *
- * <value> -> 
- */
-export const ret = (_: Runtime, f: Frame, __: Operand) => {
-
-    f.rdata.push(f.pop());
-
-    f.ip = f.code.length;
 
 }

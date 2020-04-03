@@ -33,7 +33,6 @@ export class Thread implements Runtime {
 
         throw new Error(e.message);
 
-
     }
 
     invokeMain(s: Script) {
@@ -75,8 +74,6 @@ export class Thread implements Runtime {
 
         let ret: Maybe<PVM_Value> = nothing();
 
-        console.error('is it empty ? ', empty(this.fstack));
-
         while (!empty(this.fstack)) {
 
             let sp = this.sp;
@@ -84,7 +81,7 @@ export class Thread implements Runtime {
 
             if (!empty(this.rstack))
                 frame.data.push(<Data>this.rstack.pop());
-            console.error('frame ip ', frame.ip, frame.code);
+
             while (frame.ip < frame.code.length) {
 
                 //execute frame instructions
@@ -124,6 +121,8 @@ export class Thread implements Runtime {
             }
 
         }
+
+        this.heap.release();
 
         return ret;
 

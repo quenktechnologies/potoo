@@ -86,4 +86,13 @@ export class Heap {
 
     }
 
+    /**
+     * release old objects in the heap.
+     */
+    release(): void {
+
+        this.pool = [];
+
+    }
+
 }
