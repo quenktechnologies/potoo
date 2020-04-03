@@ -26,7 +26,12 @@ export class Thread implements Runtime {
         public rstack: Data[],
         public sp = 0) { }
 
-    raise(_: Err) {
+    raise(e: Err) {
+
+        ///TODO: Supervision
+        if (e instanceof Error) throw e;
+
+        throw new Error(e.message);
 
 
     }
