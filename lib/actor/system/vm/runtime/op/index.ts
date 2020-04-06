@@ -15,14 +15,13 @@ export const PUSHUI8 = OP_CODE_RANGE_STEP * 2;
 export const PUSHUI16 = OP_CODE_RANGE_STEP * 3;
 export const PUSHUI32 = OP_CODE_RANGE_STEP * 4;
 export const PUSHSTR = OP_CODE_RANGE_STEP * 5;
-export const PUSHSYM = OP_CODE_RANGE_STEP * 6;
+export const LDN = OP_CODE_RANGE_STEP * 6;
 export const DUP = OP_CODE_RANGE_HIGH * 15;
 export const STORE = OP_CODE_RANGE_STEP * 16;
 export const LOAD = OP_CODE_RANGE_STEP * 20;
 export const CEQ = OP_CODE_RANGE_STEP * 42;
 export const ADDUI32 = OP_CODE_RANGE_STEP * 52;
 export const CALL = OP_CODE_RANGE_STEP * 62;
-export const RET = OP_CODE_RANGE_STEP * 63;
 export const JMP = OP_CODE_RANGE_STEP * 72;
 export const IFZJMP = OP_CODE_RANGE_STEP * 73
 export const IFNZJMP = OP_CODE_RANGE_STEP * 80;
@@ -34,7 +33,9 @@ export const SEND = OP_CODE_RANGE_STEP * 94;
 export const RECV = OP_CODE_RANGE_STEP * 95;
 export const RECVCOUNT = OP_CODE_RANGE_STEP * 96;
 export const MAILCOUNT = OP_CODE_RANGE_STEP * 97;
-export const PUSHMAIL = OP_CODE_RANGE_STEP * 98;
+export const MAILDQ = OP_CODE_RANGE_STEP * 98;
+export const SELF = OP_CODE_RANGE_STEP * 99;
+export const READ = OP_CODE_RANGE_STEP * 100;
 
 /**
  * OpcodeHandler
@@ -65,7 +66,7 @@ export const handlers: OpcodeHandlers = {
 
     [PUSHSTR]: base.pushstr,
 
-    [PUSHSYM]: base.pushsym,
+    [LDN]: base.ldn,
 
     [DUP]: base.dup,
 
@@ -78,8 +79,6 @@ export const handlers: OpcodeHandlers = {
     [ADDUI32]: base.addui32,
 
     [CALL]: base.call,
-
-    [RET]: base.ret,
 
     [JMP]: jump.jmp,
 
@@ -103,6 +102,10 @@ export const handlers: OpcodeHandlers = {
 
     [MAILCOUNT]: actor.mailcount,
 
-    [PUSHMAIL]: actor.pushmsg
+    [MAILDQ]: actor.maildq,
+
+    [SELF]: actor.self,
+
+    [READ]: actor.read
 
 };

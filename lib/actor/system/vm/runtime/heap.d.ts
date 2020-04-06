@@ -46,4 +46,8 @@ export declare class Heap {
      * ref returns a reference for an entry in the pool.
      */
     ref(v: HeapValue): Maybe<HeapReference>;
+    /**
+     * release old objects in the heap.
+     */
+    release(): void;
 }

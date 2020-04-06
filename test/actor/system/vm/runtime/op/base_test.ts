@@ -25,7 +25,7 @@ describe('base', () => {
 
     })
 
-    describe('pushuint8', function() {
+    describe('pushui8', function() {
 
         it('should call Frame#pushUInt8', () => {
 
@@ -41,7 +41,7 @@ describe('base', () => {
 
     })
 
-    describe('pushuint16', function() {
+    describe('pushui16', function() {
 
         it('should call Frame#pushUInt16', () => {
 
@@ -57,7 +57,7 @@ describe('base', () => {
 
     })
 
-    describe('pushuint32', function() {
+    describe('pushui32', function() {
 
         it('should call Frame#pushUInt32', () => {
 
@@ -89,7 +89,7 @@ describe('base', () => {
 
     })
 
-    describe('pushsym', function() {
+    describe('ldn', function() {
 
         it('should call Frame#pushSymbol', () => {
 
@@ -97,7 +97,7 @@ describe('base', () => {
 
             let r = newRuntime();
 
-            base.pushsym(r, f, 1);
+            base.ldn(r, f, 1);
 
             assert(f.mock.getCalledList()).equate(['pushSymbol']);
 
@@ -113,9 +113,9 @@ describe('base', () => {
 
             let r = newRuntime();
 
-            base.pushsym(r, f, 1);
+            base.dup(r, f, 1);
 
-            assert(f.mock.getCalledList()).equate(['pushSymbol']);
+            assert(f.mock.getCalledList()).equate(['duplicate']);
 
         })
 
@@ -303,27 +303,22 @@ describe('base', () => {
 
     })
 
-    describe('ret', () => {
+    describe('raise', () => {
 
-        it('should move the top of the stack to the return stack', () => {
+        it('should raise exceptions', () => {
 
             let f = newFrame();
 
             let r = newRuntime();
 
-            f.mock.setReturnValue('pop', 12);
+            f.mock.setReturnCallback('popString', () => right('err'));
 
-            f.code = [1, 2];
+            base.raise(r, f, 0);
 
-            base.ret(r, f, 0);
+            assert(r.mock.getCalledArgs('raise')[0].message).equate('err');
 
-            assert(f.data).equate([]);
+        });
 
-            assert(f.rdata).equate([12]);
-
-            assert(f.ip).equal(2);
-
-        })
     })
 
 })

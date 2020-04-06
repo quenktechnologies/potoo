@@ -26,8 +26,12 @@ export class Thread implements Runtime {
         public rstack: Data[],
         public sp = 0) { }
 
-    raise(_: Err) {
+    raise(e: Err) {
 
+        ///TODO: Supervision
+        if (e instanceof Error) throw e;
+
+        throw new Error(e.message);
 
     }
 
@@ -70,8 +74,6 @@ export class Thread implements Runtime {
 
         let ret: Maybe<PVM_Value> = nothing();
 
-        console.error('is it empty ? ', empty(this.fstack));
-
         while (!empty(this.fstack)) {
 
             let sp = this.sp;
@@ -79,7 +81,7 @@ export class Thread implements Runtime {
 
             if (!empty(this.rstack))
                 frame.data.push(<Data>this.rstack.pop());
-            console.error('frame ip ', frame.ip, frame.code);
+
             while (frame.ip < frame.code.length) {
 
                 //execute frame instructions
@@ -119,6 +121,8 @@ export class Thread implements Runtime {
             }
 
         }
+
+        this.heap.release();
 
         return ret;
 

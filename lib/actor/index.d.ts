@@ -10,32 +10,30 @@ import { Message } from './message';
  */
 export declare type Behaviour = (m: Message) => Either<Message, void>;
 /**
- * Instance of an actor already running in its context.
+ * Instance of an actor that resides within the system.
+ *
+ * The interface is implemetned by actors to react to the lifecycle the
+ * system takes them through.
  */
 export interface Instance {
     /**
      * accept a message directly.
      *
-     * Some actors may have a mailbox disabling usage
-     * of this method.
+     * This method is used by actors that skip the mailbox.
      */
     accept(m: Message): void;
     /**
-     * run the actor instance.
+     * start the Instance.
      *
-     * Once instantiated this method is called to allow the actor to begin
-     * execution.
      */
-    run(): void;
+    start(): void;
     /**
      * notify is called by the system to indicate new messages
      * have been placed in the actor's mailbox.
-     *
-     * (Buffered actors only!)
      */
     notify(): void;
     /**
-     * stop the actor instance.
+     * stop the Instance.
      */
     stop(): void;
 }

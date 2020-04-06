@@ -37,14 +37,13 @@ export declare const pushui32: (_: Runtime, f: Frame, args: number) => void;
  */
 export declare const pushstr: (_: Runtime, f: Frame, args: number) => void;
 /**
- * pushsym pushes the symbol at the specified index in the info section onto
- * the stack.
+ * ldn loads a named symbol from the info section to on to the stack.
  *
  * Stack:
  *
  * -> <value>
  */
-export declare const pushsym: (_: Runtime, f: Frame, idx: number) => void;
+export declare const ldn: (_: Runtime, f: Frame, idx: number) => void;
 /**
  * dup duplicates the value on top of the data stack.
  *
@@ -96,12 +95,3 @@ export declare const addui32: (r: Runtime, f: Frame, _: number) => void;
  * <arg>...? -> <result>
  */
 export declare const call: (r: Runtime, f: Frame, n: number) => void;
-/**
- * ret ends execution of the current frame and places the TOS in the return
- * stack.
- *
- * Stack:
- *
- * <value> ->
- */
-export declare const ret: (_: Runtime, f: Frame, __: number) => void;

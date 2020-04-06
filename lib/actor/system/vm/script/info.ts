@@ -5,6 +5,14 @@ export const INFO_TYPE_FUNCTION = 'f';
 export const INFO_TYPE_VALUE = 'v';
 export const INFO_TYPE_CONSTRUCTOR = 'c';
 
+export const TYPE_VOID = 0;
+export const TYPE_UINT8 = 1;
+export const TYPE_UINT16 = 2;
+export const TYPE_UINT32 = 3;
+export const TYPE_ARRAY = 20;
+export const TYPE_OBJECT = 21;
+export const TYPE_TEMPLATE = 32;
+
 /**
  * Info objects provide information about named symbols appearing in the
  * scripts source.

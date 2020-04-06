@@ -1,19 +1,20 @@
 import { Mock } from '@quenk/test/lib/mock';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Either, right } from '@quenk/noni/lib/data/either';
 
 import { System } from '../../../../../lib/actor/system';
 import { Template } from '../../../../../lib/actor/template';
-import { State } from '../../../../../lib/actor/system/vm/state';
+import { State, Runtimes } from '../../../../../lib/actor/system/vm/state';
 import { Address } from '../../../../../lib/actor/address';
-import { PVM_Value, Script } from '../../../../../lib/actor/system/vm/script';
 import { Context } from '../../../../../lib/actor/system/vm/runtime/context';
 import { Platform } from '../../../../../lib/actor/system/vm';
-import { newContext } from './context';
+import { Runtime } from '../../../../../lib/actor/system/vm/runtime';
+import { Message } from '../../../../../lib/actor/message';
 
 export class FPVM<S extends System> implements Platform {
 
-    state: State = { runtimes: {}, contexts: {}, routers: {}, groups: {} };
+    state: State = { runtimes: {}, routers: {}, groups: {} };
 
     configuration = {};
 
@@ -25,13 +26,25 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    allocate(addr: Address, t: Template<System>): Context {
+    allocate(addr: Address, t: Template<System>): Either<Err, Address> {
 
-        return this.mock.invoke('allocate', [addr, t], newContext());
+        return this.mock.invoke('allocate', [addr, t], right('?'));
 
     }
 
-    getContext(addr: Address): Maybe<Context> {
+    runActor(addr: Address): Either<Err, void> {
+
+        return this.mock.invoke('runActor', [addr], right(undefined));
+
+    }
+
+    sendMessage(addr: Address, m: Message): boolean {
+
+        return this.mock.invoke('sendMessage', [addr, m], true);
+
+    }
+
+    getRuntime(addr: Address): Maybe<Runtime> {
 
         return this.mock.invoke('getContext', [addr], nothing());
 
@@ -43,15 +56,27 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    putContext(addr: Address, ctx: Context): FPVM<S> {
+    getGroup(addr: Address): Maybe<Address[]> {
 
-        return this.mock.invoke('putContext', [addr, ctx], this);
+        return this.mock.invoke('getGroup', [addr], nothing());
 
     }
 
-    removeContext(addr: Address): FPVM<S> {
+    putRuntime(addr: Address, ctx: Runtime): FPVM<S> {
 
-        return this.mock.invoke('removeContext', [addr], this);
+        return this.mock.invoke('putRuntime', [addr, ctx], this);
+
+    }
+
+    getChildren(addr: Address): Maybe<Runtimes> {
+
+        return this.mock.invoke('getChildren', [addr], nothing());
+
+    }
+
+    remove(addr: Address): FPVM<S> {
+
+        return this.mock.invoke('remove', [addr], this);
 
     }
 
@@ -85,15 +110,9 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    exec(s: Script): void {
+    kill(addr: Address) {
 
-        this.mock.invoke('exec', [s], nothing());
-
-    }
-
-    run(): Maybe<PVM_Value> {
-
-        return this.mock.invoke('run', [], nothing());
+        return this.mock.invoke('kill', [addr], undefined);
 
     }
 

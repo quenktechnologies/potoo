@@ -26,9 +26,9 @@ export class InstanceImpl implements Instance {
 
     }
 
-    run() {
+    start() {
 
-        this.mock.invoke('run', [], undefined);
+        this.mock.invoke('start', [], undefined);
 
     }
 

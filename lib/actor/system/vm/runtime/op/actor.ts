@@ -61,6 +61,15 @@ export const alloc = (r: Runtime, f: Frame, _: Operand) => {
 }
 
 /**
+ * self puts the address of the current actor on to the stack.
+ */
+export const self = (_: Runtime, f: Frame, __: Operand) => {
+
+    f.pushSelf();
+
+}
+
+/**
  * run triggers the run code for an actor.
  * 
  * Stack:
@@ -82,7 +91,7 @@ export const run = (r: Runtime, f: Frame, _: Operand) => {
     let ctx = mCtx.get();
 
     //TODO: Why do we run in the next tick?
-    tick(() => ctx.actor.run());
+    tick(() => ctx.actor.start());
 
 }
 
@@ -120,16 +129,20 @@ export const send = (r: Runtime, f: Frame, _: Operand) => {
 
             ctx.mailbox.push(msg);
 
+            ctx.actor.notify();
+
         } else {
 
             ctx.actor.accept(msg);
 
         }
 
+        //TODO: EVENT_MESSAGE_SEND_OK
         f.pushUInt8(1);
 
     } else {
 
+        //TODO: EVENT_MESSAGE_SEND_FAILED
         f.pushUInt8(0);
 
     }
@@ -190,14 +203,42 @@ export const mailcount = (r: Runtime, f: Frame, _: Operand) => {
 }
 
 /**
- * pushmsg pushes the earliest message in the mailbox (if any).
+ * maildq pushes the earliest message in the mailbox (if any).
  *
  * Stack:
  *
  *  -> <message>?
  */
-export const pushmsg = (_: Runtime, f: Frame, __: Operand) => {
+export const maildq = (_: Runtime, f: Frame, __: Operand) => {
 
     f.pushMessage();
+
+}
+
+/**
+ * read a message from the top of the stack.
+ *
+ * A receiver function is applied from the actors pending receiver list.
+ * <message> -> <uint8>
+ */
+export const read = (r: Runtime, f: Frame, __: Operand) => {
+
+    let emsg = f.popValue();
+
+    if (emsg.isLeft())
+        return r.raise(emsg.takeLeft());
+
+    let msg = emsg.takeRight();
+
+    let func = r.context.behaviour.shift();
+
+    if (func == null)
+        return r.raise(new error.NoReceiveErr(r.context.address));
+
+    ///TODO: EVENT_MESSAGE_READ | EVENT_MESSAGE_REJECTED
+    if (func(msg))
+        f.pushUInt8(1);
+    else
+        f.pushUInt8(0);
 
 }

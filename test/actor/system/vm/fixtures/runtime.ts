@@ -1,6 +1,7 @@
 import { Mock } from '@quenk/test/lib/mock';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
+import { right, Either } from '@quenk/noni/lib/data/either';
 
 import { Runtime } from '../../../../../lib/actor/system/vm/runtime';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
@@ -8,6 +9,7 @@ import { Message } from '../../../../../lib/actor/message';
 import { PVM_Value, Script } from '../../../../../lib/actor/system/vm/script';
 import { FunInfo } from '../../../../../lib/actor/system/vm/script/info';
 import { Heap } from '../../../../../lib/actor/system/vm/runtime/heap';
+import { Address } from '../../../../../lib/actor/address';
 import { FPVM } from './vm';
 import { newContext } from './context';
 
@@ -53,7 +55,19 @@ export class RuntimeImpl implements Runtime {
 
     invokeForeign(p: Frame, f: FunInfo, args: PVM_Value[]) {
 
-        this.mock.invoke('invokeForeign', [p, f, args], nothing());
+        this.mock.invoke('invokeForeign', [p, f, args], undefined);
+
+    }
+
+    terminate() {
+
+        this.mock.invoke('terminate', [], undefined);
+
+    }
+
+    kill(target: Address): Either<Err, void> {
+
+        return this.mock.invoke('kill', [target], right(undefined));
 
     }
 

@@ -72,6 +72,12 @@ export class FrameImpl implements Frame {
 
     }
 
+    pushSelf(): Frame {
+
+        return this.mock.invoke('pushSelf', [], this);
+
+    }
+
     peek(): Maybe<number> {
 
         return <Maybe<number>>this.mock.invoke('peek', [], nothing());
@@ -87,7 +93,7 @@ export class FrameImpl implements Frame {
 
     resolve(data: number): Either<Err, PVM_Value> {
 
-        return <Either<Err, PVM_Value>>this.mock.invoke('resolve', [],
+        return <Either<Err, PVM_Value>>this.mock.invoke('resolve', [data],
             left(new Error('?')));
 
     }

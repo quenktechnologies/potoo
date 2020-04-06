@@ -1,10 +1,16 @@
 import * as template from '../../template';
+import * as errors from './runtime/error';
 
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
+import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { empty } from '@quenk/noni/lib/data/array';
+import { reduce } from '@quenk/noni/lib/data/record';
 
-import { Address } from '../../address';
+import { Address, isGroup, isRestricted, make } from '../../address';
+import { normalize, Template } from '../../template';
+import { isRouter, isBuffered } from '../../flags';
+import { Message } from '../../message';
 import { Instance } from '../../';
 import { System } from '../';
 import { Context, newContext, ErrorHandler } from './runtime/context';
@@ -16,10 +22,15 @@ import {
     putMember,
     removeRoute,
     getRouter,
+    getGroup,
+    getChildren,
+    remove,
+    Runtimes
 } from './state';
 import { Runtime } from './runtime';
 import { Script, PVM_Value } from './script';
-import { reduce } from '@quenk/noni/lib/data/record';
+import { Thread } from './runtime/thread';
+import { Heap } from './runtime/heap';
 
 /**
  * Slot
@@ -35,14 +46,31 @@ export type Slot = [Address, Script, Runtime];
 export interface Platform extends ErrorHandler {
 
     /**
-     * allocate a new Context for an actor.
+     * allocate a new Runtime for an actor.
+     *
+     * It is an error if a Runtime has already been allocated for the actor.
      */
-    allocate(self: Address, t: template.Template<System>): Context
+    allocate(self: Address, t: template.Template<System>): Either<Err, Address>
 
     /**
-     * getContext from the system given its address.
+     * runActor triggers the run code/method for an actor in the system.
+     *
+     * It is an error if the actor does not exist.
      */
-    getContext(addr: Address): Maybe<Context>
+    runActor(target: Address): Either<Err, void>
+
+    /**
+     * sendMessage to an actor in the system.
+     *
+     * The result is true if the actor was found or false
+     * if the actor is not in the system.
+     */
+    sendMessage(to: Address, msg: Message): boolean
+
+    /**
+     * getRuntime from the system given its address.
+     */
+    getRuntime(addr: Address): Maybe<Runtime>
 
     /**
      * getRouter attempts to retrieve a router for the address specified.
@@ -50,9 +78,19 @@ export interface Platform extends ErrorHandler {
     getRouter(addr: Address): Maybe<Context>
 
     /**
-     * putContext in the system at the specified address.
+     * getGroup attemps to retreive all the members of a group.
      */
-    putContext(addr: Address, ctx: Context): Platform
+    getGroup(name: string): Maybe<Address[]>
+
+    /**
+     * getChildren provides the children contexts for an address.
+     */
+    getChildren(addr: Address): Maybe<Runtimes>
+
+    /**
+     * putRuntime in the system at the specified address.
+     */
+    putRuntime(addr: Address, r: Runtime): Platform
 
     /**
      * putRoute configures a router for all actors that are under the
@@ -65,6 +103,21 @@ export interface Platform extends ErrorHandler {
      */
     putMember(group: string, addr: Address): Platform
 
+    /**
+     * remove a Runtime from the system.
+     */
+    remove(addr: Address): Platform
+
+    /**
+     * removeRoute configuration.
+     */
+    removeRoute(target: Address): Platform
+
+    /**
+     * kill terminates the actor at the specified address.
+     */
+    kill(addr: Address): void
+
 }
 
 /**
@@ -72,16 +125,13 @@ export interface Platform extends ErrorHandler {
  */
 export class PVM<S extends System> implements Platform {
 
-    constructor(
-        public system: S) { }
+    constructor(public system: S) { }
 
     /**
      * state contains information about all the actors in the system, routers
      * and groups.
      */
     state: State = {
-
-        contexts: {},
 
         runtimes: {},
 
@@ -104,17 +154,97 @@ export class PVM<S extends System> implements Platform {
 
     }
 
-    allocate(addr: Address, t: template.Template<System>): Context {
+    allocate(parent: Address, t: Template<System>): Either<Err, Address> {
+
+        let temp = normalize(t);
+
+        if (isRestricted(temp.id))
+            return left(new errors.InvalidIdErr(temp.id));
+
+        let addr = make(parent, temp.id);
+
+        if (this.getRuntime(addr).isJust())
+            return left(new errors.DuplicateAddressErr(addr));
 
         let args = Array.isArray(t.args) ? t.args : [];
+
         let act = t.create(this.system, ...args);
 
-        //TODO: review instance init.
-        return newContext(act, addr, t);
+        let thr = new Thread(this, new Heap(),
+            act.init(newContext(act, addr, t)));
+
+        this.putRuntime(addr, thr);
+
+        if (isRouter(thr.context.flags))
+            this.putRoute(addr, addr);
+
+        if (temp.group) {
+
+            let groups = (typeof temp.group === 'string') ?
+                [temp.group] : temp.group;
+
+            groups.forEach(g => this.putMember(g, addr));
+
+        }
+
+        return right(addr);
 
     }
 
-    getContext(addr: Address): Maybe<Context> {
+    runActor(target: Address): Either<Err, void> {
+
+        //TODO: async support
+
+        let mrtime = this.getRuntime(target);
+
+        if (mrtime.isNothing())
+            return left(new errors.UnknownAddressErr(target));
+
+        let rtime = mrtime.get();
+
+        rtime.context.actor.start();
+
+        return right(undefined);
+
+    }
+
+    sendMessage(to: Address, msg: Message): boolean {
+
+        let mRouter = this.getRouter(to);
+
+        let mctx = mRouter.isJust() ?
+            mRouter :
+            this.getRuntime(to).map(r => r.context)
+
+        if (mctx.isJust()) {
+
+            let ctx = mctx.get();
+
+            if (isBuffered(ctx.flags)) {
+
+                ctx.mailbox.push(msg);
+
+                ctx.actor.notify();
+
+            } else {
+
+                ctx.actor.accept(msg);
+
+            }
+
+            //TODO: EVENT_MESSAGE_SEND_OK
+            return true;
+
+        } else {
+
+            //TODO: EVENT_MESSAGE_SEND_FAILED
+            return false;
+
+        }
+
+    }
+
+    getRuntime(addr: Address): Maybe<Runtime> {
 
         return get(this.state, addr);
 
@@ -122,13 +252,25 @@ export class PVM<S extends System> implements Platform {
 
     getRouter(addr: Address): Maybe<Context> {
 
-        return getRouter(this.state, addr);
+        return getRouter(this.state, addr).map(r => r.context);
 
     }
 
-    putContext(addr: Address, ctx: Context): PVM<S> {
+    getGroup(name: string): Maybe<Address[]> {
 
-        this.state = put(this.state, addr, ctx);
+        return getGroup(this.state, name.split('$').join(''));
+
+    }
+
+    getChildren(addr: Address): Maybe<Runtimes> {
+
+        return fromNullable(getChildren(this.state, addr));
+
+    }
+
+    putRuntime(addr: Address, r: Runtime): PVM<S> {
+
+        this.state = put(this.state, addr, r);
         return this;
 
     }
@@ -151,6 +293,31 @@ export class PVM<S extends System> implements Platform {
 
         removeRoute(this.state, target);
         return this;
+
+    }
+
+    remove(addr: Address): PVM<S> {
+
+        this.state = remove(this.state, addr);
+        return this;
+
+    }
+
+    kill(addr: Address) {
+
+        let addrs = isGroup(addr) ?
+            this.getGroup(addr).orJust(() => []).get() : [addr];
+
+        addrs.every(a => {
+
+            //TODO: async support
+
+            let mrun = this.getRuntime(a);
+
+            if (mrun.isJust())
+                mrun.get().terminate();
+
+        });
 
     }
 

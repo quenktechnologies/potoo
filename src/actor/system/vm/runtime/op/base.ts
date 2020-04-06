@@ -193,3 +193,18 @@ export const call = (r: Runtime, f: Frame, n: Operand) => {
     }
 
 }
+
+/**
+ * raise an exception.
+ *
+ * Stack:
+ *
+ * <message> -> 
+ */
+export const raise = (r: Runtime, f: Frame, _: Operand) => {
+
+    let emsg = f.popString();
+
+    r.raise(new Error(emsg.takeRight()));
+
+}

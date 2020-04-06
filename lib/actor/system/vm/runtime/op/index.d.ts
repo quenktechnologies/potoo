@@ -8,14 +8,13 @@ export declare const PUSHUI8: number;
 export declare const PUSHUI16: number;
 export declare const PUSHUI32: number;
 export declare const PUSHSTR: number;
-export declare const PUSHSYM: number;
+export declare const LDN: number;
 export declare const DUP: number;
 export declare const STORE: number;
 export declare const LOAD: number;
 export declare const CEQ: number;
 export declare const ADDUI32: number;
 export declare const CALL: number;
-export declare const RET: number;
 export declare const JMP: number;
 export declare const IFZJMP: number;
 export declare const IFNZJMP: number;
@@ -27,7 +26,9 @@ export declare const SEND: number;
 export declare const RECV: number;
 export declare const RECVCOUNT: number;
 export declare const MAILCOUNT: number;
-export declare const PUSHMAIL: number;
+export declare const MAILDQ: number;
+export declare const SELF: number;
+export declare const READ: number;
 /**
  * OpcodeHandler
  */

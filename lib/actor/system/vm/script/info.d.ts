@@ -3,6 +3,13 @@ import { PVM_Value } from './';
 export declare const INFO_TYPE_FUNCTION = "f";
 export declare const INFO_TYPE_VALUE = "v";
 export declare const INFO_TYPE_CONSTRUCTOR = "c";
+export declare const TYPE_VOID = 0;
+export declare const TYPE_UINT8 = 1;
+export declare const TYPE_UINT16 = 2;
+export declare const TYPE_UINT32 = 3;
+export declare const TYPE_ARRAY = 20;
+export declare const TYPE_OBJECT = 21;
+export declare const TYPE_TEMPLATE = 32;
 /**
  * Info objects provide information about named symbols appearing in the
  * scripts source.

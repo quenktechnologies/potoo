@@ -21,6 +21,7 @@ export declare const DATA_TYPE_SYMBOL: number;
 export declare const DATA_TYPE_HEAP: number;
 export declare const DATA_TYPE_LOCAL: number;
 export declare const DATA_TYPE_MAILBOX: number;
+export declare const DATA_TYPE_SELF: number;
 /**
  * Data is the type of values that can appear on a Frame's data stack.
  *
@@ -68,10 +69,6 @@ export interface Frame {
      */
     data: Data[];
     /**
-     * rdata is the return stack used to pass results between frames.
-     */
-    rdata: Data[];
-    /**
      * locals contains variables local to the routine.
      */
     locals: Data[];
@@ -108,9 +105,13 @@ export interface Frame {
      */
     pushSymbol(idx: OperandU16): Frame;
     /**
-     * pushMessage from the receivers section onto the stack.
+     * pushMessage from the mailbox onto the stack.
      */
     pushMessage(): Frame;
+    /**
+     * pushSelf pushes the address of the executing actor on to the stack.
+     */
+    pushSelf(): Frame;
     /**
      * peek at the top of the data stack.
      */
@@ -168,10 +169,9 @@ export declare class StackFrame implements Frame {
     heap: Heap;
     code: Instruction[];
     data: Data[];
-    rdata: Data[];
     locals: Data[];
     ip: number;
-    constructor(name: string, script: Script, context: Context, heap: Heap, code?: Instruction[], data?: Data[], rdata?: Data[], locals?: Data[], ip?: number);
+    constructor(name: string, script: Script, context: Context, heap: Heap, code?: Instruction[], data?: Data[], locals?: Data[], ip?: number);
     push(d: Data): Frame;
     pushUInt8(value: OperandU8): Frame;
     pushUInt16(value: OperandU16): Frame;
@@ -179,6 +179,7 @@ export declare class StackFrame implements Frame {
     pushString(idx: Operand): Frame;
     pushSymbol(idx: OperandU16): Frame;
     pushMessage(): Frame;
+    pushSelf(): Frame;
     peek(): Maybe<Data>;
     peekConstructor(): Either<Err, ConstructorInfo>;
     resolve(data: Data): Either<Err, PVM_Value>;

@@ -39,6 +39,7 @@ export const DATA_TYPE_SYMBOL = DATA_RANGE_TYPE_STEP * 4;
 export const DATA_TYPE_HEAP = DATA_RANGE_TYPE_STEP * 6;
 export const DATA_TYPE_LOCAL = DATA_RANGE_TYPE_STEP * 7;
 export const DATA_TYPE_MAILBOX = DATA_RANGE_TYPE_STEP * 8;
+export const DATA_TYPE_SELF = DATA_RANGE_TYPE_STEP * 9;
 
 /**
  * Data is the type of values that can appear on a Frame's data stack.
@@ -95,11 +96,6 @@ export interface Frame {
     data: Data[];
 
     /**
-     * rdata is the return stack used to pass results between frames.
-     */
-    rdata: Data[];
-
-    /**
      * locals contains variables local to the routine.
      */
     locals: Data[];
@@ -144,9 +140,14 @@ export interface Frame {
     pushSymbol(idx: OperandU16): Frame;
 
     /**
-     * pushMessage from the receivers section onto the stack.
+     * pushMessage from the mailbox onto the stack.
      */
     pushMessage(): Frame;
+
+    /**
+     * pushSelf pushes the address of the executing actor on to the stack.
+     */
+    pushSelf(): Frame;
 
     /**
      * peek at the top of the data stack.
@@ -218,7 +219,6 @@ export class StackFrame implements Frame {
         public heap: Heap,
         public code: Instruction[] = [],
         public data: Data[] = [],
-        public rdata: Data[] = [],
         public locals: Data[] = [],
         public ip = 0) { }
 
@@ -262,6 +262,12 @@ export class StackFrame implements Frame {
     pushMessage(): Frame {
 
         return this.push(0 | DATA_TYPE_MAILBOX);
+
+    }
+
+    pushSelf(): Frame {
+
+        return this.push(DATA_TYPE_SELF);
 
     }
 
@@ -339,6 +345,9 @@ export class StackFrame implements Frame {
 
                 //messages are always accessed sequentially FIFO
                 return right<Err, PVM_Value>(context.mailbox.shift());
+
+            case DATA_TYPE_SELF:
+                return right<Err, PVM_Value>(context.address);
 
             default:
                 return right(value);

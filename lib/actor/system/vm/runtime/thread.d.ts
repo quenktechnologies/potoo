@@ -20,7 +20,7 @@ export declare class Thread implements Runtime {
     rstack: Data[];
     sp: number;
     constructor(vm: Platform, heap: Heap, context: Context, self: Address, fstack: Frame[], rstack: Data[], sp?: number);
-    raise(_: Err): void;
+    raise(e: Err): void;
     invokeMain(s: Script): void;
     invokeVM(p: Frame, f: FunInfo): void;
     invokeForeign(p: Frame, f: FunInfo, args: PVM_Value[]): void;

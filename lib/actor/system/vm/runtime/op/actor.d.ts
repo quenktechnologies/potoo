@@ -13,6 +13,10 @@ import { Runtime } from '../';
  */
 export declare const alloc: (r: Runtime, f: Frame, _: number) => void;
 /**
+ * self puts the address of the current actor on to the stack.
+ */
+export declare const self: (_: Runtime, f: Frame, __: number) => void;
+/**
  * run triggers the run code for an actor.
  *
  * Stack:
@@ -55,10 +59,17 @@ export declare const recvcount: (r: Runtime, f: Frame, _: number) => void;
  */
 export declare const mailcount: (r: Runtime, f: Frame, _: number) => void;
 /**
- * pushmsg pushes the earliest message in the mailbox (if any).
+ * maildq pushes the earliest message in the mailbox (if any).
  *
  * Stack:
  *
  *  -> <message>?
  */
-export declare const pushmsg: (_: Runtime, f: Frame, __: number) => void;
+export declare const maildq: (_: Runtime, f: Frame, __: number) => void;
+/**
+ * read a message from the top of the stack.
+ *
+ * A receiver function is applied from the actors pending receiver list.
+ * <message> -> <uint8>
+ */
+export declare const read: (r: Runtime, f: Frame, __: number) => void;
