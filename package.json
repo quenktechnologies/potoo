@@ -11,19 +11,19 @@
     "test": "./node_modules/.bin/mocha --opts mocha.opts $(find test -name *.ts)"
   },
   "devDependencies": {
-    "@quenk/test": "^2.2.0",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^12.12.29",
-    "@types/uuid": "^7.0.0",
-    "mocha": "^7.1.0",
-    "ts-node": "^8.3.0",
-    "typedoc": "^0.16.11",
-    "typescript": "^3.5.3"
+    "@quenk/test": "^2.2.1",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.0",
+    "@types/uuid": "^7.0.2",
+    "mocha": "^7.1.1",
+    "ts-node": "^8.8.1",
+    "typedoc": "^0.17.3",
+    "typescript": "^3.8.3"
   },
   "author": "Quenk Technologies Limited",
   "license": "Apache-2.0",
   "dependencies": {
-    "@quenk/noni": "^1.38.3",
-    "uuid": "^7.0.1"
+    "@quenk/noni": "^1.39.1",
+    "uuid": "^7.0.3"
   }
 }
