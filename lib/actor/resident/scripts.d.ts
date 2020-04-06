@@ -1,4 +1,4 @@
-import { ForeignFunInfo } from '../system/vm/script/info';
+import { ForeignFunInfo, ForeignValueInfo } from '../system/vm/script/info';
 import { Script, Constants } from '../system/vm/script';
 import { Template } from '../template';
 import { System } from '../system';
@@ -29,8 +29,8 @@ export declare class Tell implements Script {
  * Receive schedules a receiver for the actor.
  */
 export declare class Receive implements Script {
-    f: Function;
-    constructor(f: Function);
+    f: (m: Message) => boolean;
+    constructor(f: (m: Message) => boolean);
     constants: Constants;
     info: ForeignFunInfo[];
     code: number[];
@@ -41,5 +41,27 @@ export declare class Receive implements Script {
 export declare class Notify implements Script {
     constants: Constants;
     info: never[];
+    code: number[];
+}
+/**
+ * Raise an exception triggering the systems error handling mechanism.
+ * TODO: implement
+ */
+export declare class Raise implements Script {
+    msg: string;
+    constructor(msg: string);
+    constants: Constants;
+    info: ForeignValueInfo[];
+    code: number[];
+}
+/**
+ * Kill stops an actor within the executing actor's process tree (inclusive).
+ * TODO: implement.
+ */
+export declare class Kill implements Script {
+    addr: string;
+    constructor(addr: string);
+    constants: Constants;
+    info: ForeignValueInfo[];
     code: number[];
 }

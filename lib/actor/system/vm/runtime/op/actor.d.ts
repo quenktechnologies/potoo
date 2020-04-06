@@ -1,12 +1,10 @@
 import { Frame } from '../stack/frame';
 import { Runtime } from '../';
 /**
- * alloc a Context for a new actor.
+ * alloc a Runtime for a new actor.
  *
- * The context is stored in the vm's state table. If the generated address
+ * The Runtime is stored in the vm's state table. If the generated address
  * already exists or is invalid an error will be raised.
- *
- * TODO: push address.
  *
  * Stack:
  * <template>,<address> -> <address>
@@ -25,8 +23,6 @@ export declare const self: (_: Runtime, f: Frame, __: number) => void;
 export declare const run: (r: Runtime, f: Frame, _: number) => void;
 /**
  * send a message to another actor.
- *
- * The value
  *
  * Stack:
  * <message>,<address> -> <uint8>
@@ -70,6 +66,16 @@ export declare const maildq: (_: Runtime, f: Frame, __: number) => void;
  * read a message from the top of the stack.
  *
  * A receiver function is applied from the actors pending receiver list.
- * <message> -> <uint8>
+ * <message> -> <uint32>
  */
 export declare const read: (r: Runtime, f: Frame, __: number) => void;
+/**
+ * stop an actor in the system.
+ *
+ * The actor will be removed.
+ *
+ * Stack:
+ *
+ * <address> ->
+ */
+export declare const stop: (r: Runtime, f: Frame, _: number) => void;

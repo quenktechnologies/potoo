@@ -7,6 +7,7 @@ export declare const TYPE_VOID = 0;
 export declare const TYPE_UINT8 = 1;
 export declare const TYPE_UINT16 = 2;
 export declare const TYPE_UINT32 = 3;
+export declare const TYPE_STRING = 10;
 export declare const TYPE_ARRAY = 20;
 export declare const TYPE_OBJECT = 21;
 export declare const TYPE_TEMPLATE = 32;
@@ -125,8 +126,8 @@ export declare class ForeignValueInfo implements ValueInfo {
     name: string;
     type: number;
     builtin: boolean;
-    value: PVM_Value[];
-    constructor(name: string, type: number, builtin: boolean, value: PVM_Value[]);
+    value: PVM_Value;
+    constructor(name: string, type: number, builtin: boolean, value: PVM_Value);
     infoType: string;
     foreign: boolean;
     code: never[];

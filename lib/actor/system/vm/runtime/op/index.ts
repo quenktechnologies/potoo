@@ -22,6 +22,7 @@ export const LOAD = OP_CODE_RANGE_STEP * 20;
 export const CEQ = OP_CODE_RANGE_STEP * 42;
 export const ADDUI32 = OP_CODE_RANGE_STEP * 52;
 export const CALL = OP_CODE_RANGE_STEP * 62;
+export const RAISE = OP_CODE_RANGE_STEP * 63;
 export const JMP = OP_CODE_RANGE_STEP * 72;
 export const IFZJMP = OP_CODE_RANGE_STEP * 73
 export const IFNZJMP = OP_CODE_RANGE_STEP * 80;
@@ -36,6 +37,7 @@ export const MAILCOUNT = OP_CODE_RANGE_STEP * 97;
 export const MAILDQ = OP_CODE_RANGE_STEP * 98;
 export const SELF = OP_CODE_RANGE_STEP * 99;
 export const READ = OP_CODE_RANGE_STEP * 100;
+export const STOP = OP_CODE_RANGE_STEP * 101;
 
 /**
  * OpcodeHandler
@@ -80,6 +82,8 @@ export const handlers: OpcodeHandlers = {
 
     [CALL]: base.call,
 
+    [RAISE]: base.raise,
+
     [JMP]: jump.jmp,
 
     [IFZJMP]: jump.ifzjmp,
@@ -106,6 +110,8 @@ export const handlers: OpcodeHandlers = {
 
     [SELF]: actor.self,
 
-    [READ]: actor.read
+    [READ]: actor.read,
+
+    [STOP]: actor.stop
 
 };

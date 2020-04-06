@@ -1,16 +1,20 @@
+import * as errors from './error';
+
 import { Err } from '@quenk/noni/lib/control/error';
 import { empty } from '@quenk/noni/lib/data/array';
+import { map } from '@quenk/noni/lib/data/record';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 
 import { Context } from './context';
-import { Address } from '../../../address';
-import { Frame, StackFrame, Data } from './stack/frame';
 import { FunInfo } from '../script/info';
 import { PVM_Value, Script } from '../script';
 import { Platform } from '../';
+import { Frame, StackFrame, Data } from './stack/frame';
 import { handlers } from './op';
 import { Heap, HeapEntry } from './heap';
 import { Runtime, OPCODE_MASK, OPERAND_MASK } from './';
+import { isGroup, Address, isChild } from '../../../address';
+import { Either, right, left } from '@quenk/noni/lib/data/either';
 
 /**
  * Thread is the Runtime implementation for exactly one actor.
@@ -21,9 +25,8 @@ export class Thread implements Runtime {
         public vm: Platform,
         public heap: Heap,
         public context: Context,
-        public self: Address,
         public fstack: Frame[] = [],
-        public rstack: Data[],
+        public rstack: Data[] = [],
         public sp = 0) { }
 
     raise(e: Err) {
@@ -67,6 +70,61 @@ export class Thread implements Runtime {
             f.builtin,
             <object>(<Function>f.exec).apply(null, args))));
 
+    }
+
+    terminate() {
+
+        let current = this.context.address;
+
+        let maybeChilds = this.vm.getChildren(current);
+
+        if (maybeChilds.isJust()) {
+
+            let childs = maybeChilds.get();
+
+            map(childs, (c, k) => {
+
+                //TODO: async support
+                c.context.actor.stop();
+
+                this.vm.remove(k);
+
+            });
+
+        }
+
+        this.heap.release();
+
+        //TODO: async support
+        this.context.actor.stop();
+
+        this.vm.remove(current);
+
+    }
+
+    kill(target: Address): Either<Err, void> {
+
+        let self = this.context.address;
+
+        let addrs = isGroup(target) ?
+            this.vm.getGroup(target).orJust(() => []).get() : [target];
+
+        let ret: Either<Err, void> = addrs.reduce((p, c) => {
+
+            if (p.isLeft()) return p;
+
+            if ((!isChild(self, c)) && (c !== self))
+                return left(new errors.IllegalStopErr(target, c));
+
+            this.vm.kill(c);
+
+            return p;
+
+        }, <Either<Err, void>>right(undefined));
+
+        this.terminate();
+
+        return ret;
 
     }
 

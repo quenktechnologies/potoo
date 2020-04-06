@@ -1,7 +1,9 @@
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Frame } from './stack/frame';
+import { Either } from '@quenk/noni/lib/data/either';
+import { Address } from '../../../address';
 import { FunInfo } from '../script/info';
+import { Frame } from './stack/frame';
 import { PVM_Value, Script } from '../script';
 import { Platform } from '../';
 import { Heap } from './heap';
@@ -73,6 +75,19 @@ export interface Runtime {
      * raise an error.
      */
     raise(e: Err): void;
+    /**
+     * terminate the Runtime.
+     *
+     * All child runtimes will be terminiated first.
+     */
+    terminate(): void;
+    /**
+     * kill attempts to terminate the Runtime for another actor.
+     *
+     * This operation fails if the actor is not in the current actor's
+     * tree.
+     */
+    kill(target: Address): Either<Err, void>;
     /**
      * run executes all the pending frames of the Runtime.
      *

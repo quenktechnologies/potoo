@@ -4,6 +4,10 @@ import { Maybe } from '@quenk/noni/lib/data/maybe';
  */
 export declare type HeapReference = number;
 /**
+ * StringReference identifies a string in the heap.
+ */
+export declare type StringReference = number;
+/**
  * HeapValue
  */
 export declare type HeapValue = number | string | HeapObject | HeapValue[];
@@ -33,15 +37,28 @@ export declare class HeapEntry {
  */
 export declare class Heap {
     pool: HeapEntry[];
-    constructor(pool?: HeapEntry[]);
+    strings: string[];
+    constructor(pool?: HeapEntry[], strings?: string[]);
     /**
      * add an entry to the heap
      */
     add(h: HeapEntry): HeapReference;
     /**
+     * addString value to the heap.
+     *
+     * Strings are stored in a separate pool/
+     */
+    addString(value: string): HeapReference;
+    /**
      * get an object from the heap.
      */
     get(r: HeapReference): Maybe<HeapEntry>;
+    /**
+     * getString from the strings pool.
+     *
+     * If no string exists at the reference and empty string is provided.
+     */
+    getString(r: StringReference): string;
     /**
      * ref returns a reference for an entry in the pool.
      */

@@ -19,7 +19,6 @@ import {
     getParent as getParentAddress
 } from '../../address';
 import { Instance } from '../../';
-import { Context, Contexts } from './runtime/context';
 import { Runtime } from './runtime';
 
 /**
@@ -48,11 +47,6 @@ export interface State {
     runtimes: Runtimes,
 
     /**
-     * contexts for each actor in the system.
-     */
-    contexts: Contexts,
-
-    /**
      * routers configured for transfers.
      */
     routers: Routers,
@@ -68,21 +62,21 @@ export interface State {
  * exists tests whether an address exists in the State.
  */
 export const exists =
-    (s: State, addr: Address): boolean => contains(s.contexts, addr);
+    (s: State, addr: Address): boolean => contains(s.runtimes, addr);
 
 /**
- * get a Context using an Address.
+ * get a Runtime from the State using an address.
  */
 export const get =
-    (s: State, addr: Address): Maybe<Context> => fromNullable(s.contexts[addr]);
+    (s: State, addr: Address): Maybe<Runtime> => fromNullable(s.runtimes[addr]);
 
 /**
- * put a new Context in the State.
+ * put a new Runtime in the State.
  */
 export const put =
-    (s: State, addr: Address, context: Context): State => {
+    (s: State, addr: Address, r: Runtime): State => {
 
-        s.contexts[addr] = context;
+        s.runtimes[addr] = r;
         return s;
 
     }
@@ -93,7 +87,7 @@ export const put =
 export const remove =
     (s: State, addr: Address): State => {
 
-        delete s.contexts[addr];
+        delete s.runtimes[addr];
 
         return s;
 
@@ -104,25 +98,25 @@ export const remove =
  */
 export const getAddress =
     (s: State, actor: Instance): Maybe<Address> =>
-        reduce(s.contexts, nothing(), (p: Maybe<Address>, c, k) =>
-            c.actor === actor ? fromString(k) : p);
+        reduce(s.runtimes, nothing(), (p: Maybe<Address>, c, k) =>
+            c.context.actor === actor ? fromString(k) : p);
 
 /**
  * getChildren returns the child contexts for an address.
  */
 export const getChildren =
-    (s: State, addr: Address): Contexts =>
+    (s: State, addr: Address): Runtimes =>
         (addr === ADDRESS_SYSTEM) ?
-            s.contexts :
-            <Contexts>partition(s.contexts, (_, key) =>
+            s.runtimes :
+            <Runtimes>partition(s.runtimes, (_, key) =>
                 (startsWith(key, addr) && key !== addr))[0];
 
 /**
  * getParent context using an Address.
  */
 export const getParent =
-    (s: State, addr: Address): Maybe<Context> =>
-        fromNullable(s.contexts[getParentAddress(addr)]);
+    (s: State, addr: Address): Maybe<Runtime> =>
+        fromNullable(s.runtimes[getParentAddress(addr)]);
 
 /**
  * getRouter will attempt to provide the 
@@ -132,9 +126,9 @@ export const getParent =
  * address begins with any of the installed router's address.
  */
 export const getRouter =
-    (s: State, addr: Address): Maybe<Context> =>
+    (s: State, addr: Address): Maybe<Runtime> =>
         reduce(s.routers, nothing(), (p, k) =>
-            startsWith(addr, k) ? fromNullable(s.contexts[k]) : p);
+            startsWith(addr, k) ? fromNullable(s.runtimes[k]) : p);
 
 /**
  * putRoute adds a route to the routing table.

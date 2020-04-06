@@ -9,6 +9,7 @@ export const TYPE_VOID = 0;
 export const TYPE_UINT8 = 1;
 export const TYPE_UINT16 = 2;
 export const TYPE_UINT32 = 3;
+export const TYPE_STRING = 10;
 export const TYPE_ARRAY = 20;
 export const TYPE_OBJECT = 21;
 export const TYPE_TEMPLATE = 32;
@@ -162,7 +163,7 @@ export class ForeignValueInfo implements ValueInfo {
         public name: string,
         public type: number,
         public builtin: boolean,
-        public value: PVM_Value[]) { }
+        public value: PVM_Value) { }
 
     infoType = INFO_TYPE_VALUE;
 

@@ -37,9 +37,10 @@ export const DATA_MAX_SAFE_UINT32 = 0x7fffffff;
 export const DATA_TYPE_STRING = DATA_RANGE_TYPE_STEP * 3;
 export const DATA_TYPE_SYMBOL = DATA_RANGE_TYPE_STEP * 4;
 export const DATA_TYPE_HEAP = DATA_RANGE_TYPE_STEP * 6;
-export const DATA_TYPE_LOCAL = DATA_RANGE_TYPE_STEP * 7;
-export const DATA_TYPE_MAILBOX = DATA_RANGE_TYPE_STEP * 8;
-export const DATA_TYPE_SELF = DATA_RANGE_TYPE_STEP * 9;
+export const DATA_TYPE_HEAP_STRING = DATA_RANGE_TYPE_STEP * 7
+export const DATA_TYPE_LOCAL = DATA_RANGE_TYPE_STEP * 8;
+export const DATA_TYPE_MAILBOX = DATA_RANGE_TYPE_STEP * 9;
+export const DATA_TYPE_SELF = DATA_RANGE_TYPE_STEP * 10;
 
 /**
  * Data is the type of values that can appear on a Frame's data stack.
@@ -323,11 +324,14 @@ export class StackFrame implements Frame {
 
             case DATA_TYPE_HEAP:
 
-                let mO = this.heap.get(typ);
+                let mO = this.heap.get(value);
 
                 if (mO.isNothing()) return left(new error.NullPointerErr(data));
 
                 return right(mO.get().value);
+
+            case DATA_TYPE_HEAP_STRING:
+                return right(this.heap.getString(value));
 
             //TODO: This is probably not needed.
             case DATA_TYPE_LOCAL:

@@ -3,7 +3,9 @@ import * as op from '../system/vm/runtime/op';
 import {
     ForeignFunInfo,
     TYPE_TEMPLATE,
-    TYPE_OBJECT
+    TYPE_OBJECT,
+    ForeignValueInfo,
+    TYPE_STRING
 } from '../system/vm/script/info';
 import { Script, Constants } from '../system/vm/script';
 import { Template } from '../template';
@@ -86,7 +88,7 @@ export class Tell implements Script {
  */
 export class Receive implements Script {
 
-    constructor(public f: Function) { }
+    constructor(public f: (m: Message) => boolean) { }
 
     constants = <Constants>[[], []];
 
@@ -127,6 +129,56 @@ export class Notify implements Script {
         op.MAILDQ,            //Push the earliest message on to the stack.
         op.READ,              //Apply the earliest receiver to the message.
         op.NOP                //End
+
+    ];
+
+}
+
+/**
+ * Raise an exception triggering the systems error handling mechanism.
+ * TODO: implement
+ */
+export class Raise implements Script {
+
+    constructor(public msg: string) { }
+
+    constants = <Constants>[[], []];
+
+    info = [
+
+        new ForeignValueInfo('message', TYPE_STRING, false, this.msg)
+
+    ];
+
+    code = [
+
+        op.LDN | 0,
+        op.RAISE
+
+    ];
+
+}
+
+/**
+ * Kill stops an actor within the executing actor's process tree (inclusive).
+ * TODO: implement.
+ */
+export class Kill implements Script {
+
+    constructor(public addr: string) { }
+
+    constants = <Constants>[[], []];
+
+    info = [
+
+        new ForeignValueInfo('address', TYPE_STRING, false, this.addr)
+
+    ];
+
+    code = [
+
+        op.LDN | 0,
+        op.STOP
 
     ];
 

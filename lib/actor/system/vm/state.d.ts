@@ -2,7 +2,6 @@ import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Record } from '@quenk/noni/lib/data/record';
 import { Address } from '../../address';
 import { Instance } from '../../';
-import { Context, Contexts } from './runtime/context';
 import { Runtime } from './runtime';
 /**
  * Runtimes map.
@@ -28,10 +27,6 @@ export interface State {
      */
     runtimes: Runtimes;
     /**
-     * contexts for each actor in the system.
-     */
-    contexts: Contexts;
-    /**
      * routers configured for transfers.
      */
     routers: Routers;
@@ -45,13 +40,13 @@ export interface State {
  */
 export declare const exists: (s: State, addr: string) => boolean;
 /**
- * get a Context using an Address.
+ * get a Runtime from the State using an address.
  */
-export declare const get: (s: State, addr: string) => Maybe<Context>;
+export declare const get: (s: State, addr: string) => Maybe<Runtime>;
 /**
- * put a new Context in the State.
+ * put a new Runtime in the State.
  */
-export declare const put: (s: State, addr: string, context: Context) => State;
+export declare const put: (s: State, addr: string, r: Runtime) => State;
 /**
  * remove an actor entry.
  */
@@ -63,11 +58,11 @@ export declare const getAddress: (s: State, actor: Instance) => Maybe<string>;
 /**
  * getChildren returns the child contexts for an address.
  */
-export declare const getChildren: (s: State, addr: string) => Contexts;
+export declare const getChildren: (s: State, addr: string) => Runtimes;
 /**
  * getParent context using an Address.
  */
-export declare const getParent: (s: State, addr: string) => Maybe<Context>;
+export declare const getParent: (s: State, addr: string) => Maybe<Runtime>;
 /**
  * getRouter will attempt to provide the
  * router context for an Address.
@@ -75,7 +70,7 @@ export declare const getParent: (s: State, addr: string) => Maybe<Context>;
  * The value returned depends on whether the given
  * address begins with any of the installed router's address.
  */
-export declare const getRouter: (s: State, addr: string) => Maybe<Context>;
+export declare const getRouter: (s: State, addr: string) => Maybe<Runtime>;
 /**
  * putRoute adds a route to the routing table.
  */

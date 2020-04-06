@@ -19,6 +19,7 @@ export declare const DATA_MAX_SAFE_UINT32 = 2147483647;
 export declare const DATA_TYPE_STRING: number;
 export declare const DATA_TYPE_SYMBOL: number;
 export declare const DATA_TYPE_HEAP: number;
+export declare const DATA_TYPE_HEAP_STRING: number;
 export declare const DATA_TYPE_LOCAL: number;
 export declare const DATA_TYPE_MAILBOX: number;
 export declare const DATA_TYPE_SELF: number;

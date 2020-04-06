@@ -15,6 +15,7 @@ export declare const LOAD: number;
 export declare const CEQ: number;
 export declare const ADDUI32: number;
 export declare const CALL: number;
+export declare const RAISE: number;
 export declare const JMP: number;
 export declare const IFZJMP: number;
 export declare const IFNZJMP: number;
@@ -29,6 +30,7 @@ export declare const MAILCOUNT: number;
 export declare const MAILDQ: number;
 export declare const SELF: number;
 export declare const READ: number;
+export declare const STOP: number;
 /**
  * OpcodeHandler
  */

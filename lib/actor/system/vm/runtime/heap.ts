@@ -5,12 +5,21 @@ import {
     nothing
 } from '@quenk/noni/lib/data/maybe';
 
-import { DATA_TYPE_HEAP, DATA_MASK_VALUE24 } from './stack/frame';
+import {
+    DATA_TYPE_HEAP,
+    DATA_MASK_VALUE24,
+    DATA_TYPE_HEAP_STRING
+} from './stack/frame';
 
 /**
  * HeapReference identifies an object in the heap.
  */
 export type HeapReference = number;
+
+/**
+ * StringReference identifies a string in the heap.
+ */
+export type StringReference = number;
 
 /**
  * HeapValue
@@ -54,7 +63,9 @@ export class HeapEntry {
  */
 export class Heap {
 
-    constructor(public pool: HeapEntry[] = []) { }
+    constructor(
+        public pool: HeapEntry[] = [],
+        public strings: string[] = []) { }
 
     /**
      * add an entry to the heap
@@ -67,11 +78,44 @@ export class Heap {
     }
 
     /**
+     * addString value to the heap.
+     *
+     * Strings are stored in a separate pool/
+     */
+    addString(value: string): HeapReference {
+
+        let idx = this.strings.indexOf(value);
+
+        if (idx === -1) {
+
+            this.strings.push(value);
+            idx = this.strings.length - 1;
+
+        }
+
+        return idx | DATA_TYPE_HEAP_STRING
+
+    }
+
+    /**
      * get an object from the heap.
      */
     get(r: HeapReference): Maybe<HeapEntry> {
 
         return fromNullable(this.pool[r & DATA_MASK_VALUE24]);
+
+    }
+
+    /**
+     * getString from the strings pool.
+     *
+     * If no string exists at the reference and empty string is provided.
+     */
+    getString(r: StringReference): string {
+
+        let value = this.strings[r & DATA_MASK_VALUE24];
+
+        return (value != null) ? value : '';
 
     }
 

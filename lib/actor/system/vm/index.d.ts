@@ -1,11 +1,14 @@
 import * as template from '../../template';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
+import { Either } from '@quenk/noni/lib/data/either';
 import { Address } from '../../address';
+import { Template } from '../../template';
+import { Message } from '../../message';
 import { Instance } from '../../';
 import { System } from '../';
 import { Context, ErrorHandler } from './runtime/context';
-import { State } from './state';
+import { State, Runtimes } from './state';
 import { Runtime } from './runtime';
 import { Script, PVM_Value } from './script';
 /**
@@ -20,21 +23,44 @@ export declare type Slot = [Address, Script, Runtime];
  */
 export interface Platform extends ErrorHandler {
     /**
-     * allocate a new Context for an actor.
+     * allocate a new Runtime for an actor.
+     *
+     * It is an error if a Runtime has already been allocated for the actor.
      */
-    allocate(self: Address, t: template.Template<System>): Context;
+    allocate(self: Address, t: template.Template<System>): Either<Err, Address>;
     /**
-     * getContext from the system given its address.
+     * runActor triggers the run code/method for an actor in the system.
+     *
+     * It is an error if the actor does not exist.
      */
-    getContext(addr: Address): Maybe<Context>;
+    runActor(target: Address): Either<Err, void>;
+    /**
+     * sendMessage to an actor in the system.
+     *
+     * The result is true if the actor was found or false
+     * if the actor is not in the system.
+     */
+    sendMessage(to: Address, msg: Message): boolean;
+    /**
+     * getRuntime from the system given its address.
+     */
+    getRuntime(addr: Address): Maybe<Runtime>;
     /**
      * getRouter attempts to retrieve a router for the address specified.
      */
     getRouter(addr: Address): Maybe<Context>;
     /**
-     * putContext in the system at the specified address.
+     * getGroup attemps to retreive all the members of a group.
      */
-    putContext(addr: Address, ctx: Context): Platform;
+    getGroup(name: string): Maybe<Address[]>;
+    /**
+     * getChildren provides the children contexts for an address.
+     */
+    getChildren(addr: Address): Maybe<Runtimes>;
+    /**
+     * putRuntime in the system at the specified address.
+     */
+    putRuntime(addr: Address, r: Runtime): Platform;
     /**
      * putRoute configures a router for all actors that are under the
      * target address.
@@ -44,6 +70,18 @@ export interface Platform extends ErrorHandler {
      * putMember puts an address into a group.
      */
     putMember(group: string, addr: Address): Platform;
+    /**
+     * remove a Runtime from the system.
+     */
+    remove(addr: Address): Platform;
+    /**
+     * removeRoute configuration.
+     */
+    removeRoute(target: Address): Platform;
+    /**
+     * kill terminates the actor at the specified address.
+     */
+    kill(addr: Address): void;
 }
 /**
  * PVM is the Potoo Virtual Machine.
@@ -62,12 +100,18 @@ export declare class PVM<S extends System> implements Platform {
     queue: Slot[];
     running: boolean;
     raise(_: Err): void;
-    allocate(addr: Address, t: template.Template<System>): Context;
-    getContext(addr: Address): Maybe<Context>;
+    allocate(parent: Address, t: Template<System>): Either<Err, Address>;
+    runActor(target: Address): Either<Err, void>;
+    sendMessage(to: Address, msg: Message): boolean;
+    getRuntime(addr: Address): Maybe<Runtime>;
     getRouter(addr: Address): Maybe<Context>;
-    putContext(addr: Address, ctx: Context): PVM<S>;
+    getGroup(name: string): Maybe<Address[]>;
+    getChildren(addr: Address): Maybe<Runtimes>;
+    putRuntime(addr: Address, r: Runtime): PVM<S>;
     putMember(group: string, addr: Address): PVM<S>;
     putRoute(target: Address, router: Address): PVM<S>;
     removeRoute(target: Address): PVM<S>;
+    remove(addr: Address): PVM<S>;
+    kill(addr: Address): void;
     exec(i: Instance, s: Script): Maybe<PVM_Value>;
 }
