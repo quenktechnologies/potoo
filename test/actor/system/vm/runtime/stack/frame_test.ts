@@ -2,35 +2,31 @@ import { assert } from '@quenk/test/lib/assert';
 
 import {
     DATA_TYPE_STRING,
-    Frame,
+    StackFrame,
+    DATA_TYPE_HEAP,
 } from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
 import {
     newContext
-} from '../../../../../fixtures/context';
-import { Heap } from '../../../../../../lib/actor/system/vm/runtime/heap';
+} from '../../fixtures/context';
+import { Heap, HeapEntry } from '../../../../../../lib/actor/system/vm/runtime/heap';
 import { PScript } from '../../../../../../lib/actor/system/vm/script';
 import { Constants } from '../../../../../../src/actor/system/vm/script';
+import { Info, PVMValueInfo } from '../../../../../../lib/actor/system/vm/script/info';
+import { TYPE_STRING, TYPE_OBJECT } from '../../../../../../src/actor/system/vm/script/info';
+import { DATA_TYPE_INFO, DATA_TYPE_HEAP_STRING } from '../../../../../../src/actor/system/vm/runtime/stack/frame';
 
-const newF = (c: Constants = [[], []]) =>
-    new Frame('main', new PScript(c), newContext(), new Heap());
+const newF = (c: Constants = [[], []], i: Info[] = []) =>
+    new StackFrame('main', new PScript(c, i), newContext(), new Heap());
 
 describe('frame', () => {
 
-    describe('Frame', () => {
+    describe('StackFrame', () => {
 
         describe('push', () => {
 
             it('should push values onto the stack', () => {
 
                 assert(newF().push(0x10100ff).data).equate([0x10100ff]);
-
-            });
-
-            xit('should chop down integers > 2^32', () => {
-
-                let data = Number.MAX_SAFE_INTEGER;
-
-                assert(newF().push(data).data).equate([0xffffffff]);
 
             });
 
@@ -111,6 +107,73 @@ describe('frame', () => {
 
         })
 
+        describe('resolve', () => {
+
+            it('should resolve strings from the constants pool', () => {
+
+                let f = newF([[], ['hello', 'world']]);
+
+                let eres = f.resolve(DATA_TYPE_STRING | 1);
+
+                assert(eres.isRight()).true();
+
+                assert(eres.takeRight()).equal('world');
+
+            });
+
+            it('should resolve strings from the constants pool', () => {
+
+                let foo = new PVMValueInfo('foo', TYPE_STRING, false, []);
+                let bar = new PVMValueInfo('bar', TYPE_STRING, false, []);
+
+                let f = newF([[], []], [foo, bar]);
+
+                let eres = f.resolve(DATA_TYPE_INFO | 1);
+
+                assert(eres.isRight()).true();
+
+                assert(eres.takeRight()).equal(bar);
+
+            });
+
+            it('should resolve heap objects', () => {
+
+                let heap = new Heap();
+
+                let f = new StackFrame('main', new PScript(),
+                    newContext(), heap);
+
+                let foo = { a: 1 };
+                let bar = { b: 2 };
+
+                heap.add(new HeapEntry(TYPE_OBJECT, true, foo));
+                heap.add(new HeapEntry(TYPE_OBJECT, true, bar));
+
+                let eres = f.resolve(DATA_TYPE_HEAP | 1);
+
+                assert(eres.isRight()).true();
+                assert(eres.takeRight()).equal(bar);
+
+            });
+
+            it('should resolve heap strings', () => {
+
+                let heap = new Heap();
+
+                let f = new StackFrame('main', new PScript(),
+                    newContext(), heap);
+
+                heap.addString('foo');
+                heap.addString('bar');
+
+                let eres = f.resolve(DATA_TYPE_HEAP_STRING | 1);
+
+                assert(eres.isRight()).true();
+                assert(eres.takeRight()).equal('bar');
+
+            });
+
+        });
 
     })
 

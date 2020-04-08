@@ -35,7 +35,7 @@ export const DATA_MAX_SAFE_UINT32 = 0x7fffffff;
 //These really indicate where the actual value of an operand is stored.
 //They are not meant to be used to check the actual type of the underlying value.
 export const DATA_TYPE_STRING = DATA_RANGE_TYPE_STEP * 3;
-export const DATA_TYPE_SYMBOL = DATA_RANGE_TYPE_STEP * 4;
+export const DATA_TYPE_INFO = DATA_RANGE_TYPE_STEP * 4;
 export const DATA_TYPE_HEAP = DATA_RANGE_TYPE_STEP * 6;
 export const DATA_TYPE_HEAP_STRING = DATA_RANGE_TYPE_STEP * 7
 export const DATA_TYPE_LOCAL = DATA_RANGE_TYPE_STEP * 8;
@@ -256,7 +256,7 @@ export class StackFrame implements Frame {
 
     pushSymbol(idx: OperandU16): Frame {
 
-        return this.push(idx | DATA_TYPE_SYMBOL);
+        return this.push(idx | DATA_TYPE_INFO);
 
     }
 
@@ -311,9 +311,11 @@ export class StackFrame implements Frame {
                 let mstr = fromNullable(
                     script.constants[indexes.CONSTANTS_INDEX_STRING][value]);
 
-                return right(mstr.get());
+                return mstr.isJust() ?
+                    right(mstr.get()) :
+                    left(new error.MissingSymbolErr(value));
 
-            case DATA_TYPE_SYMBOL:
+            case DATA_TYPE_INFO:
 
                 let info = this.script.info[value];
 
