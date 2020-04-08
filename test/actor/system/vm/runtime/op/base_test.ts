@@ -321,4 +321,150 @@ describe('base', () => {
 
     })
 
+    describe('jmp', () => {
+
+        it('should adjust the ip', () => {
+
+            let f = newFrame();
+
+            let r = newRuntime();
+
+            base.jmp(r, f, 6);
+
+            assert(f.ip).equate(6);
+
+        });
+
+    });
+
+    describe('ifzjmp', () => {
+
+        it('should jump if TOS is 0', () => {
+
+            let f = newFrame();
+
+            let r = newRuntime();
+
+            f.mock.setReturnValue('popValue', right(0));
+
+            base.ifzjmp(r, f, 12);
+
+            assert(f.ip).equate(12);
+
+        });
+
+        it('should not jump if TOS is not 0', () => {
+
+            let f = newFrame();
+
+            let r = newRuntime();
+
+            f.mock.setReturnValue('popValue', right(1));
+
+            base.ifzjmp(r, f, 12);
+
+            assert(f.ip).equate(0);
+
+        })
+
+    });
+
+    describe('ifnzjmp', () => {
+
+        it('should not jump if TOS is 0', () => {
+
+            let f = newFrame();
+
+            let r = newRuntime();
+
+            f.mock.setReturnValue('popValue', right(0));
+
+            base.ifnzjmp(r, f, 12);
+
+            assert(f.ip).equate(0);
+
+        });
+
+        it('should jump if TOS is not 0', () => {
+
+            let f = newFrame();
+
+            let r = newRuntime();
+
+            f.mock.setReturnValue('popValue', right(1));
+
+            base.ifnzjmp(r, f, 12);
+
+            assert(f.ip).equate(12);
+
+        })
+
+    });
+
+    describe('ifeqjmp', () => {
+
+        it('should jump if top 2 items are strictly equal', () => {
+
+            let f = newFrame();
+
+            let r = newRuntime();
+
+            f.mock.setReturnValue('popValue', right(1));
+
+            base.ifeqjmp(r, f, 12);
+
+            assert(f.ip).equate(12);
+
+        });
+
+        it('should not jump if top 2 items are not strictly equal', () => {
+
+            let items = [1, '1'];
+
+            let f = newFrame();
+
+            let r = newRuntime();
+
+            f.mock.setReturnCallback('popValue', () => right(items.pop()));
+
+            base.ifeqjmp(r, f, 12);
+
+            assert(f.ip).equate(0);
+
+        })
+
+    });
+
+    describe('ifneqjmp', () => {
+
+        it('should jump if top 2 items are not strictly equal', () => {
+
+            let items = [1, '1'];
+            let f = newFrame();
+            let r = newRuntime();
+
+            f.mock.setReturnCallback('popValue', () => right(items.pop()));
+
+            base.ifneqjmp(r, f, 12);
+
+            assert(f.ip).equate(12);
+
+        });
+
+        it('should not jump if top 2 items are strictly equal', () => {
+
+
+            let f = newFrame();
+            let r = newRuntime();
+
+            f.mock.setReturnCallback('popValue', () => right(1));
+
+            base.ifneqjmp(r, f, 12);
+
+            assert(f.ip).equate(0);
+
+        })
+
+    });
+
 })

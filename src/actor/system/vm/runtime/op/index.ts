@@ -1,5 +1,4 @@
 import * as base from './base';
-import * as jump from './jump';
 import * as actor from './actor';
 
 import { Frame } from '../stack/frame';
@@ -84,15 +83,15 @@ export const handlers: OpcodeHandlers = {
 
     [RAISE]: base.raise,
 
-    [JMP]: jump.jmp,
+    [JMP]: base.jmp,
 
-    [IFZJMP]: jump.ifzjmp,
+    [IFZJMP]: base.ifzjmp,
 
-    [IFNZJMP]: jump.ifnzjmp,
+    [IFNZJMP]: base.ifnzjmp,
 
-    [IFEQJMP]: jump.ifeqjmp,
+    [IFEQJMP]: base.ifeqjmp,
 
-    [IFNEQJMP]: jump.ifneqjmp,
+    [IFNEQJMP]: base.ifneqjmp,
 
     [ALLOC]: actor.alloc,
 
