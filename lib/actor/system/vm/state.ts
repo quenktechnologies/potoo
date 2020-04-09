@@ -153,6 +153,17 @@ export const removeRoute = (s: State, target: Address)
 }
 
 /**
+ * removeGroup from the groups table.
+ */
+export const removeGroup = (s: State, target: Address)
+    : State => {
+
+    delete s.groups[target];
+    return s;
+
+}
+
+/**
  * getGroup attempts to provide the addresses of actors that have
  * been assigned to a group.
  *

@@ -80,6 +80,10 @@ export declare const putRoute: (s: State, target: string, router: string) => Sta
  */
 export declare const removeRoute: (s: State, target: string) => State;
 /**
+ * removeGroup from the groups table.
+ */
+export declare const removeGroup: (s: State, target: string) => State;
+/**
  * getGroup attempts to provide the addresses of actors that have
  * been assigned to a group.
  *

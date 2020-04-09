@@ -7,10 +7,10 @@ import { Template } from '../../template';
 import { Message } from '../../message';
 import { Instance } from '../../';
 import { System } from '../';
-import { Context, ErrorHandler } from './runtime/context';
 import { State, Runtimes } from './state';
-import { Runtime } from './runtime';
 import { Script, PVM_Value } from './script';
+import { Context } from './runtime/context';
+import { Runtime } from './runtime';
 /**
  * Slot
  */
@@ -21,7 +21,7 @@ export declare type Slot = [Address, Script, Runtime];
  * It provides methods for manipulating the state of the actors of the system.
  * Some opcode handlers depend on this interface to do their work.
  */
-export interface Platform extends ErrorHandler {
+export interface Platform {
     /**
      * allocate a new Runtime for an actor.
      *
@@ -82,6 +82,10 @@ export interface Platform extends ErrorHandler {
      * kill terminates the actor at the specified address.
      */
     kill(addr: Address): void;
+    /**
+     * raise does the error handling on behalf of Runtimes.
+     */
+    raise(addr: Address, err: Err): void;
 }
 /**
  * PVM is the Potoo Virtual Machine.
@@ -99,7 +103,6 @@ export declare class PVM<S extends System> implements Platform {
      */
     queue: Slot[];
     running: boolean;
-    raise(_: Err): void;
     allocate(parent: Address, t: Template<System>): Either<Err, Address>;
     runActor(target: Address): Either<Err, void>;
     sendMessage(to: Address, msg: Message): boolean;
@@ -110,8 +113,9 @@ export declare class PVM<S extends System> implements Platform {
     putRuntime(addr: Address, r: Runtime): PVM<S>;
     putMember(group: string, addr: Address): PVM<S>;
     putRoute(target: Address, router: Address): PVM<S>;
-    removeRoute(target: Address): PVM<S>;
     remove(addr: Address): PVM<S>;
+    removeRoute(target: Address): PVM<S>;
+    raise(addr: Address, err: Err): void;
     kill(addr: Address): void;
     exec(i: Instance, s: Script): Maybe<PVM_Value>;
 }
