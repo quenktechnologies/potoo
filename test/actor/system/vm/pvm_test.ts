@@ -13,6 +13,7 @@ import {
     FLAG_ROUTER,
     FLAG_BUFFERED
 } from '../../../../lib/actor/flags';
+import { ACTION_IGNORE, ACTION_RESTART, ACTION_RAISE } from '../../../../lib/actor/template';
 
 const add2Five = new PScript([[], []], [], [
     op.PUSHUI8 | 0x5,
@@ -222,6 +223,114 @@ describe('vm', () => {
 
         });
 
+        describe('raise', () => {
+
+            it('should use the template\'s trap function', () => {
+
+                let vm = new PVM(newSystem());
+                let r = newRuntime();
+                let called = false;
+
+                r.context.template.trap = () => {
+
+                    called = true;
+                    return ACTION_IGNORE;
+
+                }
+
+                vm.state.runtimes['self'] = r;
+
+                vm.raise('self', new Error('err'));
+
+                assert(called).true();
+
+            });
+
+            it('should escalate by default', () => {
+
+                let vm = new PVM(newSystem());
+                let r = newRuntime();
+                let called = false;
+
+                r.context.template.trap = () => {
+
+                    called = true;
+                    return ACTION_IGNORE;
+
+                }
+
+                vm.state.runtimes['self'] = r;
+                vm.state.runtimes['self/0'] = newRuntime();
+                vm.state.runtimes['self/0'].context.template.trap = undefined;
+
+                vm.raise('self/0', new Error('err'));
+
+                assert(called).true();
+
+            });
+
+            it('should restart actors', () => {
+
+                let vm = new PVM(newSystem());
+                let act = newInstance();
+                let r = newRuntime();
+                let called = false;
+
+                r.context.template.create = () => {
+
+                    called = true;
+                    return act
+
+                };
+
+                r.context.template.trap = () => ACTION_RESTART;
+
+                vm.state.runtimes['self'] = r;
+                vm.raise('self', new Error('err'));
+
+                assert(called).true();
+                assert(act.mock.wasCalled('start')).true();
+
+            });
+
+            it('should throw if unhandled', () => {
+
+                let vm = new PVM(newSystem());
+                let caught = false;
+
+                let act1 = newInstance();
+                let r1 = newRuntime();
+
+                let act2 = newInstance();
+                let r2 = newRuntime();
+
+                let act3 = newInstance();
+                let r3 = newRuntime();
+
+                r3.context.template.trap = () => ACTION_RAISE;
+                r2.context.template.trap = () => ACTION_RAISE;
+                r1.context.template.trap = () => ACTION_RAISE;
+
+                vm.state.runtimes['self'] = r1;
+                vm.state.runtimes['self/2'] = r2;
+                vm.state.runtimes['self/2/3'] = r3;
+
+                try {
+
+                    vm.raise('self/2/3', new Error('err'));
+
+                } catch (e) {
+
+                    assert(e.message).equal('err');
+                    caught = true;
+
+                }
+
+                assert(caught).true();
+
+            });
+
+        });
 
     });
 

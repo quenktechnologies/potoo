@@ -31,10 +31,7 @@ export class Thread implements Runtime {
 
     raise(e: Err) {
 
-        ///TODO: Supervision
-        if (e instanceof Error) throw e;
-
-        throw new Error(e.message);
+        this.vm.raise(this.context.address, e);
 
     }
 
@@ -95,10 +92,10 @@ export class Thread implements Runtime {
 
         this.heap.release();
 
+        this.vm.remove(current);
+
         //TODO: async support
         this.context.actor.stop();
-
-        this.vm.remove(current);
 
     }
 

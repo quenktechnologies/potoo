@@ -5,15 +5,21 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { empty } from '@quenk/noni/lib/data/array';
-import { reduce } from '@quenk/noni/lib/data/record';
+import { reduce, map } from '@quenk/noni/lib/data/record';
 
-import { Address, isGroup, isRestricted, make } from '../../address';
+import {
+    Address,
+    isGroup,
+    isRestricted,
+    make,
+    getParent,
+    ADDRESS_SYSTEM
+} from '../../address';
 import { normalize, Template } from '../../template';
 import { isRouter, isBuffered } from '../../flags';
 import { Message } from '../../message';
 import { Instance } from '../../';
 import { System } from '../';
-import { Context, newContext, ErrorHandler } from './runtime/context';
 import {
     State,
     get,
@@ -27,10 +33,11 @@ import {
     remove,
     Runtimes
 } from './state';
-import { Runtime } from './runtime';
 import { Script, PVM_Value } from './script';
+import { Context, newContext } from './runtime/context';
 import { Thread } from './runtime/thread';
 import { Heap } from './runtime/heap';
+import { Runtime } from './runtime';
 
 /**
  * Slot
@@ -43,7 +50,7 @@ export type Slot = [Address, Script, Runtime];
  * It provides methods for manipulating the state of the actors of the system.
  * Some opcode handlers depend on this interface to do their work.
  */
-export interface Platform extends ErrorHandler {
+export interface Platform {
 
     /**
      * allocate a new Runtime for an actor.
@@ -118,6 +125,11 @@ export interface Platform extends ErrorHandler {
      */
     kill(addr: Address): void
 
+    /**
+     * raise does the error handling on behalf of Runtimes.
+     */
+    raise(addr: Address, err: Err): void
+
 }
 
 /**
@@ -147,12 +159,6 @@ export class PVM<S extends System> implements Platform {
     queue: Slot[] = [];
 
     running = false;
-
-    raise(_: Err): void {
-
-        //TODO: implement
-
-    }
 
     allocate(parent: Address, t: Template<System>): Either<Err, Address> {
 
@@ -289,6 +295,21 @@ export class PVM<S extends System> implements Platform {
 
     }
 
+    remove(addr: Address): PVM<S> {
+
+        this.state = remove(this.state, addr);
+
+        map(this.state.routers, (r, k) => {
+
+            if (r === addr)
+                delete this.state.routers[k];
+
+        });
+
+        return this;
+
+    }
+
     removeRoute(target: Address): PVM<S> {
 
         removeRoute(this.state, target);
@@ -296,10 +317,64 @@ export class PVM<S extends System> implements Platform {
 
     }
 
-    remove(addr: Address): PVM<S> {
+    raise(addr: Address, err: Err): void {
 
-        this.state = remove(this.state, addr);
-        return this;
+        //TODO: pause the runtime.
+        let next = addr;
+
+        loop:
+        while (true) {
+
+            let mrtime = this.getRuntime(next);
+
+            if (next === ADDRESS_SYSTEM) {
+
+                if (err instanceof Error)
+                    throw err;
+
+                throw new Error(err.message);
+
+            }
+
+            //TODO: This risks swallowing errors.
+            if (mrtime.isNothing()) return;
+
+            let rtime = mrtime.get();
+
+            let trap = rtime.context.template.trap ||
+                (() => template.ACTION_RAISE);
+
+            //TODO: async support
+            switch (trap(err)) {
+
+                case template.ACTION_IGNORE:
+                    break loop;
+
+                case template.ACTION_RESTART:
+
+                    this.kill(next);
+
+                    let eRes = this
+                        .allocate(getParent(next), rtime.context.template)
+                        .chain(a => this.runActor(a));
+
+                    if (eRes.isLeft())
+                        throw new Error(eRes.takeLeft().message);
+
+                    break loop;
+
+                case template.ACTION_STOP:
+                    this.kill(next);
+                    break loop;
+
+                default:
+                    //escalate
+                    next = getParent(next);
+                    break;
+
+            }
+
+        }
 
     }
 

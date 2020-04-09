@@ -104,9 +104,9 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    raise(err: Err): void {
+    raise(addr: Address, err: Err): void {
 
-        return this.mock.invoke<undefined>('raise', [err], undefined);
+        return this.mock.invoke<undefined>('raise', [addr, err], undefined);
 
     }
 
