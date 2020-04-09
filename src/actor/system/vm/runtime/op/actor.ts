@@ -1,4 +1,5 @@
 import * as error from '../error';
+import * as events from '../../event';
 
 import { isImmutable } from '../../../../flags';
 import { Frame } from '../stack/frame';
@@ -82,7 +83,7 @@ export const send = (r: Runtime, f: Frame, _: Operand) => {
 
     if (eAddr.isLeft()) return r.raise(eAddr.takeLeft());
 
-    if (r.vm.sendMessage(eAddr.takeRight(), eMsg.takeRight()))
+    if (r.vm.sendMessage(eAddr.takeRight(), r.context.address, eMsg.takeRight()))
         f.pushUInt8(1);
     else
         f.pushUInt8(0);
@@ -176,11 +177,19 @@ export const read = (r: Runtime, f: Frame, __: Operand) => {
     if (func == null)
         return r.raise(new error.NoReceiveErr(r.context.address));
 
-    ///TODO: EVENT_MESSAGE_READ | EVENT_MESSAGE_REJECTED
-    if (func(msg))
+    if (func(msg)) {
+
+        r.vm.trigger(events.EVENT_MESSAGE_READ, r.context.address, msg);
+
         f.push(1);
-    else
+
+    } else {
+
+        r.vm.trigger(events.EVENT_MESSAGE_DROPPED, r.context.address, msg);
+
         f.push(0);
+
+    }
 
 }
 

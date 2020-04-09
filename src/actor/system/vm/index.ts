@@ -1,11 +1,13 @@
 import * as template from '../../template';
 import * as errors from './runtime/error';
+import * as events from './event';
 
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { empty } from '@quenk/noni/lib/data/array';
 import { reduce, map } from '@quenk/noni/lib/data/record';
+import { Type } from '@quenk/noni/lib/data/type';
 
 import {
     Address,
@@ -38,6 +40,7 @@ import { Context, newContext } from './runtime/context';
 import { Thread } from './runtime/thread';
 import { Heap } from './runtime/heap';
 import { Runtime } from './runtime';
+import { Conf, defaults } from './conf';
 
 /**
  * Slot
@@ -72,7 +75,7 @@ export interface Platform {
      * The result is true if the actor was found or false
      * if the actor is not in the system.
      */
-    sendMessage(to: Address, msg: Message): boolean
+    sendMessage(to: Address, from: Address, msg: Message): boolean
 
     /**
      * getRuntime from the system given its address.
@@ -130,6 +133,11 @@ export interface Platform {
      */
     raise(addr: Address, err: Err): void
 
+    /**
+     * trigger is used to generate events as the system runs.
+     */
+    trigger(addr: Address, evt: string, ...args: Type[]): void
+
 }
 
 /**
@@ -137,7 +145,7 @@ export interface Platform {
  */
 export class PVM<S extends System> implements Platform {
 
-    constructor(public system: S) { }
+    constructor(public system: S, public conf: Conf = defaults()) { }
 
     /**
      * state contains information about all the actors in the system, routers
@@ -214,7 +222,7 @@ export class PVM<S extends System> implements Platform {
 
     }
 
-    sendMessage(to: Address, msg: Message): boolean {
+    sendMessage(to: Address, from: Address, msg: Message): boolean {
 
         let mRouter = this.getRouter(to);
 
@@ -238,12 +246,12 @@ export class PVM<S extends System> implements Platform {
 
             }
 
-            //TODO: EVENT_MESSAGE_SEND_OK
+            this.trigger(events.EVENT_SEND_OK, from, to, msg);
             return true;
 
         } else {
 
-            //TODO: EVENT_MESSAGE_SEND_FAILED
+            this.trigger(events.EVENT_SEND_FAILED, from, to, msg);
             return false;
 
         }
@@ -378,6 +386,13 @@ export class PVM<S extends System> implements Platform {
 
     }
 
+    trigger(addr: Address, evt: string, ...args: Type[]) {
+
+        if (this.conf.log)
+            this.conf.log(evt, addr, args);
+
+    }
+
     kill(addr: Address) {
 
         let addrs = isGroup(addr) ?
@@ -402,8 +417,12 @@ export class PVM<S extends System> implements Platform {
 
         let mslot = getSlot(this.state, i);
 
-        //TODO: EVENT_INVALID_EXEC
-        if (mslot.isNothing()) return nothing();
+        if (mslot.isNothing()) {
+
+            this.trigger(events.EVENT_INVALID_EXEC, '$', i);
+            return nothing();
+
+        }
 
         let [addr, rtime] = mslot.get();
 
