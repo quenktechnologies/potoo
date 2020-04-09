@@ -184,8 +184,6 @@ export abstract class Temp<T, S extends System>
 
 }
 
-
-
 /**
  * Mutable actors can change their behaviour after message processing.
  */

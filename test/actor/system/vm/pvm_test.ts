@@ -14,6 +14,7 @@ import {
     FLAG_BUFFERED
 } from '../../../../lib/actor/flags';
 import { ACTION_IGNORE, ACTION_RESTART, ACTION_RAISE } from '../../../../lib/actor/template';
+import { just, nothing } from '@quenk/noni/lib/data/maybe';
 
 const add2Five = new PScript([[], []], [], [
     op.PUSHUI8 | 0x5,
@@ -27,13 +28,15 @@ describe('vm', () => {
 
         describe('exec', () => {
 
-            it('should execute scripts', () => {
+            it('should return the value of an executed script', () => {
 
                 let vm = new PVM(newSystem());
 
                 let actor = newInstance();
 
                 let rtime = newRuntime('test', newContext({ actor }));
+
+                rtime.mock.setReturnValue('run', just(12));
 
                 vm.state.runtimes['test'] = rtime;
 
@@ -44,6 +47,8 @@ describe('vm', () => {
                     'invokeMain', 'run'
 
                 ]);
+
+                assert(result.get()).equal(12);
 
             });
 
@@ -62,6 +67,89 @@ describe('vm', () => {
                 vm.exec(actor, add2Five);
 
                 assert(rtime.mock.getCalledList().length === 0).true();
+
+            });
+
+            it('should queue scripts', () => {
+
+                let vm = new PVM(newSystem());
+
+                let actor = newInstance();
+
+                let rtime = newRuntime('test', newContext({ actor }));
+
+                let turn = 0;
+
+                let done = false;
+
+                rtime.mock.setReturnCallback('run', () => {
+
+                    if (turn === 0) {
+
+                        assert(vm.exec(actor, new PScript()).isNothing()).true();
+                        assert(vm.queue.length).equal(1);
+
+                        turn = turn + 1;
+                        return nothing();
+
+                    } else {
+
+                        done = true;
+
+                        return just(12);
+
+                    }
+
+                });
+
+                vm.state.runtimes['test'] = rtime;
+
+                vm.exec(actor, new PScript());
+
+                assert(done).true();
+
+            });
+
+            it('should prioritize immediate scripts', () => {
+
+                let vm = new PVM(newSystem());
+
+                let actor = newInstance();
+
+                let rtime = newRuntime('test', newContext({ actor }));
+
+                let turn = 0;
+
+                let done = false;
+
+                rtime.mock.setReturnCallback('run', () => {
+
+                    if (turn === 0) {
+
+                        turn = turn + 1;
+
+                        let ret = vm.exec(actor,
+                            new PScript([[], []], [], [], true));
+
+                        assert(vm.queue.length).equal(0);
+                        assert(ret.get()).equal(12);
+
+                        return nothing();
+
+                    } else {
+
+                        done = true;
+                        return just(12);
+
+                    }
+
+                });
+
+                vm.state.runtimes['test'] = rtime;
+
+                vm.exec(actor, new PScript());
+
+                assert(done).true();
 
             });
 
@@ -170,7 +258,7 @@ describe('vm', () => {
 
                 vm.state.runtimes['to'] = r;
 
-                assert(vm.sendMessage('to', 'msg')).true();
+                assert(vm.sendMessage('to', 'from', 'msg')).true();
 
                 assert(act.mock.getCalledArgs('accept')).equate(['msg']);
 
@@ -190,7 +278,7 @@ describe('vm', () => {
 
                 vm.state.runtimes['to'] = r;
 
-                assert(vm.sendMessage('to', 'msg')).true();
+                assert(vm.sendMessage('to', 'from', 'msg')).true();
 
                 assert(vm.state.runtimes['to'].context.mailbox)
                     .equate(['msg']);
@@ -203,7 +291,7 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
 
-                assert(vm.sendMessage('to', 'msg')).false();
+                assert(vm.sendMessage('to', 'from', 'msg')).false();
 
             })
 

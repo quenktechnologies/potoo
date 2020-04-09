@@ -23,6 +23,8 @@ export class Spawn implements Script {
 
     constants = <Constants>[[], []];
 
+    immediate = true;
+
     info = [
 
         new ForeignFunInfo(

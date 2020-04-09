@@ -3,7 +3,7 @@ import * as errors from './runtime/error';
 import * as events from './event';
 
 import { Err } from '@quenk/noni/lib/control/error';
-import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
+import { Maybe, nothing, fromNullable, just } from '@quenk/noni/lib/data/maybe'
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { empty } from '@quenk/noni/lib/data/array';
 import { reduce, map } from '@quenk/noni/lib/data/record';
@@ -42,10 +42,7 @@ import { Heap } from './runtime/heap';
 import { Runtime } from './runtime';
 import { Conf, defaults } from './conf';
 
-/**
- * Slot
- */
-export type Slot = [Address, Script, Runtime];
+type Slot = [Address, Script, Runtime];
 
 /**
  * Platform is the interface for a virtual machine.
@@ -413,8 +410,6 @@ export class PVM<S extends System> implements Platform {
 
     exec(i: Instance, s: Script): Maybe<PVM_Value> {
 
-        let ret: Maybe<PVM_Value> = nothing();
-
         let mslot = getSlot(this.state, i);
 
         if (mslot.isNothing()) {
@@ -426,27 +421,48 @@ export class PVM<S extends System> implements Platform {
 
         let [addr, rtime] = mslot.get();
 
-        this.queue.push([addr, s, rtime]);
+        let ret: Maybe<Maybe<PVM_Value>> = nothing();
 
-        if (this.running === true) nothing();
+        if (s.immediate === true) {
 
-        this.running = true;
+            rtime.invokeMain(s);
 
-        while ((!empty(this.queue)) && this.running) {
+            ret = just(rtime.run());
 
-            let next = this.queue.shift();
+        } else {
 
-            let [, script, runtime] = <Slot>next;
+            this.queue.push([addr, s, rtime]);
 
-            runtime.invokeMain(script);
+            if (this.running === true) return nothing();
 
-            ret = runtime.run();
+            this.running = true;
+
+            while ((!empty(this.queue)) && this.running) {
+
+                let next = this.queue.shift();
+
+                let [, script, runtime] = <Slot>next;
+
+                runtime.invokeMain(script);
+
+                if (ret.isNothing()) {
+
+                    //Always return the first executed script.
+                    ret = just(runtime.run());
+
+                } else {
+
+                    runtime.run();
+
+                }
+
+            }
+
+            this.running = false;
 
         }
 
-        this.running = false;
-
-        return ret;
+        return ret.isJust() ? ret.get() : <Maybe<PVM_Value>>ret;
 
     }
 

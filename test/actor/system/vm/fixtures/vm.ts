@@ -116,6 +116,12 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
+    trigger(addr: Address, evt: string, ...args: any[]) {
+
+        return this.mock.invoke('kill', [addr, evt, args], undefined);
+
+    }
+
 }
 
 export const newPlatform = () => new FPVM();
