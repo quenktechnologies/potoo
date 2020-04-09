@@ -2,6 +2,7 @@ import * as template from '../../template';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Either } from '@quenk/noni/lib/data/either';
+import { Type } from '@quenk/noni/lib/data/type';
 import { Address } from '../../address';
 import { Template } from '../../template';
 import { Message } from '../../message';
@@ -11,6 +12,7 @@ import { State, Runtimes } from './state';
 import { Script, PVM_Value } from './script';
 import { Context } from './runtime/context';
 import { Runtime } from './runtime';
+import { Conf } from './conf';
 /**
  * Slot
  */
@@ -40,7 +42,7 @@ export interface Platform {
      * The result is true if the actor was found or false
      * if the actor is not in the system.
      */
-    sendMessage(to: Address, msg: Message): boolean;
+    sendMessage(to: Address, from: Address, msg: Message): boolean;
     /**
      * getRuntime from the system given its address.
      */
@@ -86,13 +88,18 @@ export interface Platform {
      * raise does the error handling on behalf of Runtimes.
      */
     raise(addr: Address, err: Err): void;
+    /**
+     * trigger is used to generate events as the system runs.
+     */
+    trigger(addr: Address, evt: string, ...args: Type[]): void;
 }
 /**
  * PVM is the Potoo Virtual Machine.
  */
 export declare class PVM<S extends System> implements Platform {
     system: S;
-    constructor(system: S);
+    conf: Conf;
+    constructor(system: S, conf?: Conf);
     /**
      * state contains information about all the actors in the system, routers
      * and groups.
@@ -105,7 +112,7 @@ export declare class PVM<S extends System> implements Platform {
     running: boolean;
     allocate(parent: Address, t: Template<System>): Either<Err, Address>;
     runActor(target: Address): Either<Err, void>;
-    sendMessage(to: Address, msg: Message): boolean;
+    sendMessage(to: Address, from: Address, msg: Message): boolean;
     getRuntime(addr: Address): Maybe<Runtime>;
     getRouter(addr: Address): Maybe<Context>;
     getGroup(name: string): Maybe<Address[]>;
@@ -116,6 +123,7 @@ export declare class PVM<S extends System> implements Platform {
     remove(addr: Address): PVM<S>;
     removeRoute(target: Address): PVM<S>;
     raise(addr: Address, err: Err): void;
+    trigger(addr: Address, evt: string, ...args: Type[]): void;
     kill(addr: Address): void;
     exec(i: Instance, s: Script): Maybe<PVM_Value>;
 }
