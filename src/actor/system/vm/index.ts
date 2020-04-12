@@ -475,8 +475,11 @@ export class PVM<S extends System> implements Platform, Actor {
     logOp(r: Runtime, f: Frame, op: Opcode, oper: Operand) {
 
         if (this.conf.log.level >= LOG_LEVEL_DEBUG)
-            this.conf.log.logger.debug.apply(null,
-                [r.context.address, f.script.name, ...toLog(op, r, f, oper)]);
+            this.conf.log.logger.debug.apply(null, [
+                `[${r.context.address}]`,
+                `(${f.script.name})`,
+                ...toLog(op, r, f, oper)
+            ]);
 
     }
 
@@ -533,9 +536,11 @@ export class PVM<S extends System> implements Platform, Actor {
 
         if (s.immediate === true) {
 
-            rtime.invokeMain(s);
+            let thr = new Thread(this, new Heap(), rtime.context);
 
-            ret = just(rtime.run());
+            thr.invokeMain(s);
+
+            ret = just(thr.run());
 
         } else {
 

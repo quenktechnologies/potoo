@@ -151,7 +151,7 @@ export class Thread implements Runtime {
                 // TODO: Error if the opcode is invalid, out of range etc.
                 handlers[opcode](this, frame, operand);
 
-                frame.ip++;
+                frame.ip = frame.ip + 1;
 
                 //pause execution to allow another frame to compute.
                 if (sp !== this.sp) break;
