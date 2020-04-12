@@ -4,7 +4,8 @@ import {
     ForeignFunInfo,
     TYPE_TEMPLATE,
     TYPE_OBJECT,
-    TYPE_STRING
+    TYPE_STRING,
+    TYPE_VOID
 } from '../system/vm/script/info';
 import { Script, Constants } from '../system/vm/script';
 import { Template } from '../template';
@@ -106,7 +107,7 @@ export class Tell implements Script {
         op.CALL,
         op.LDN | 1,
         op.CALL,
-        op.ALLOC
+        op.SEND
 
     ];
 
@@ -126,17 +127,18 @@ export class Receive implements Script {
     info = [
 
         new ForeignFunInfo(
-            'getAddress',
+            'receiver',
             0,
-            TYPE_OBJECT,
+            TYPE_VOID,
             false,
-            () => this.f),
+            this.f),
 
     ];
 
     code = [
 
-        op.RECV | 0,
+        op.LDN | 0,
+        op.RECV
 
     ];
 
