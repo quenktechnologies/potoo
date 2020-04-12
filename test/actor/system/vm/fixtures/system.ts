@@ -3,7 +3,6 @@ import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 
 import { Script, PVM_Value } from '../../../../../lib/actor/system/vm/script';
 import { System } from '../../../../../lib/actor/system';
-import { Address } from '../../../../../lib/actor/address';
 import { Instance } from '../../../../../lib/actor';
 
 export class SystemImpl implements System {
@@ -13,12 +12,6 @@ export class SystemImpl implements System {
     exec(i: Instance, s: Script): Maybe<PVM_Value> {
 
         return this.mock.invoke('exec', [i, s], nothing());
-
-    }
-
-    ident(i: Instance): Address {
-
-        return this.mock.invoke('exec', [i], '?');
 
     }
 

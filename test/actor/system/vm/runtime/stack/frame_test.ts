@@ -175,6 +175,19 @@ describe('frame', () => {
 
         });
 
+        describe('popValue', function() {
+
+            it('should be left if the there is nothing on the stack ', () => {
+
+                let f = new StackFrame('main', new PScript(),
+                    newContext(), new Heap());
+
+                assert(f.popValue().isLeft()).true();
+
+            });
+
+        });
+
     })
 
 })
