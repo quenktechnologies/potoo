@@ -4,7 +4,6 @@ import {
     ForeignFunInfo,
     TYPE_TEMPLATE,
     TYPE_OBJECT,
-    ForeignValueInfo,
     TYPE_STRING
 } from '../system/vm/script/info';
 import { Script, Constants } from '../system/vm/script';
@@ -20,6 +19,8 @@ export class Spawn implements Script {
 
     constructor(
         public template: Template<System>) { }
+
+    name = '<spawn>';
 
     constants = <Constants>[[], []];
 
@@ -38,11 +39,33 @@ export class Spawn implements Script {
 
     code = [
 
+        op.LDN | 0,
+        op.CALL,
         op.SELF,
-        op.CALL | 1,
         op.ALLOC,
         op.DUP,
         op.RUN
+
+    ];
+
+}
+
+/**
+ * Self provides the address of the current instance.
+ */
+export class Self implements Script {
+
+    constants = <Constants>[[], []];
+
+    name = '<self>';
+
+    immediate = true;
+
+    info = [];
+
+    code = [
+
+        op.SELF
 
     ];
 
@@ -56,6 +79,8 @@ export class Tell implements Script {
     constructor(public to: Address, public msg: Message) { }
 
     constants = <Constants>[[], []];
+
+    name = '<tell>';
 
     info = [
 
@@ -77,8 +102,10 @@ export class Tell implements Script {
 
     code = [
 
-        op.CALL | 0,
-        op.CALL | 1,
+        op.LDN | 0,
+        op.CALL,
+        op.LDN | 1,
+        op.CALL,
         op.ALLOC
 
     ];
@@ -93,6 +120,8 @@ export class Receive implements Script {
     constructor(public f: (m: Message) => boolean) { }
 
     constants = <Constants>[[], []];
+
+    name = 'receive';
 
     info = [
 
@@ -120,6 +149,8 @@ export class Notify implements Script {
 
     constants = <Constants>[[], []];
 
+    name = '<notify>';
+
     info = [];
 
     code = [
@@ -144,17 +175,25 @@ export class Raise implements Script {
 
     constructor(public msg: string) { }
 
+    name = '<raise>';
+
     constants = <Constants>[[], []];
 
     info = [
 
-        new ForeignValueInfo('message', TYPE_STRING, false, this.msg)
+        new ForeignFunInfo(
+            'getMessage',
+            0,
+            TYPE_STRING,
+            false,
+            () => this.msg)
 
     ];
 
     code = [
 
         op.LDN | 0,
+        op.CALL,
         op.RAISE
 
     ];
@@ -169,17 +208,25 @@ export class Kill implements Script {
 
     constructor(public addr: string) { }
 
+    name = '<kill>';
+
     constants = <Constants>[[], []];
 
     info = [
 
-        new ForeignValueInfo('address', TYPE_STRING, false, this.addr)
+        new ForeignFunInfo(
+            'getAddress',
+            0,
+            TYPE_STRING,
+            false,
+            () => this.addr)
 
     ];
 
     code = [
 
         op.LDN | 0,
+        op.CALL,
         op.STOP
 
     ];

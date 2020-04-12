@@ -170,7 +170,7 @@ export const addui32 = (r: Runtime, f: Frame, _: Operand) => {
  *
  * <arg>...? -> <result> 
  */
-export const call = (r: Runtime, f: Frame, n: Operand) => {
+export const call = (r: Runtime, f: Frame, _: Operand) => {
 
     let einfo = f.popFunction();
 
@@ -182,7 +182,7 @@ export const call = (r: Runtime, f: Frame, n: Operand) => {
 
         //TODO: This is unsafe but the extent of its effect on overall stability
         // should be compared to the time taken to ensure each value.
-        let args = make(n, () => f.popValue().takeRight());
+        let args = make(fn.argc || 0, () => f.popValue().takeRight());
 
         r.invokeForeign(f, fn, args);
 

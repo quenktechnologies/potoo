@@ -202,3 +202,17 @@ export class IntegerOverflowErr extends Error {
     }
 
 }
+
+/**
+ * StackEmptyErr
+ */
+export class StackEmptyErr extends Error {
+
+    constructor() {
+
+        super('Stack is empty.');
+
+    }
+
+
+}

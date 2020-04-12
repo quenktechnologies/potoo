@@ -9,15 +9,12 @@ import { System } from '../system';
 import {
     ADDRESS_DISCARD,
     Address,
-    AddressMap,
-    isRestricted,
-    make,
-    randomID
+    AddressMap
 } from '../address';
 import { Message } from '../message';
 import { Template, Templates, Spawnable } from '../template';
 import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_TEMPORARY } from '../flags';
-import { Actor } from '../';
+import { Actor, Instance } from '../';
 import { Case } from './case';
 import { Api } from './api';
 
@@ -57,7 +54,11 @@ export abstract class AbstractResident<S extends System>
 
     self() {
 
-        return this.system.ident(this);
+        return <Address>this
+            .system
+            .exec(this, new scripts.Self())
+            .orJust(() => ADDRESS_DISCARD)
+            .get();
 
     }
 
@@ -67,17 +68,7 @@ export abstract class AbstractResident<S extends System>
 
     spawn(t: Spawnable<S>): Address {
 
-        let id = randomID();
-
-        let tmpl = isObject(t) ?
-            merge({ id }, <Template<System>>t) :
-            { id, create: t };
-
-        this.system.exec(this, new scripts.Spawn(tmpl));
-
-        return isRestricted(<string>tmpl.id) ?
-            ADDRESS_DISCARD :
-            make(this.self(), tmpl.id);
+        return spawn(this.system, this, t);
 
     }
 
@@ -221,3 +212,18 @@ export const ref = <S extends System>
     (res: Resident<S>, addr: Address): Reference =>
     (m: Message) =>
         res.tell(addr, m);
+
+/**
+ * spawn an actor using the Spawn script.
+ */
+export const spawn = <S extends System>
+    (sys: S, i: Instance, t: Spawnable<S>): Address => {
+
+    let tmpl = isObject(t) ? <Template<System>>t : { create: t };
+
+    return <Address>sys
+        .exec(i, new scripts.Spawn(tmpl))
+        .orJust(() => ADDRESS_DISCARD)
+        .get();
+
+}
