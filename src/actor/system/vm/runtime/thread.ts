@@ -35,13 +35,6 @@ export class Thread implements Runtime {
 
     }
 
-    invokeMain(s: Script) {
-
-        this.fstack.push(new StackFrame('main', s, this.context, this.heap,
-            s.code.slice()));
-
-    }
-
     invokeVM(p: Frame, f: FunInfo) {
 
         let frm = new StackFrame(f.name, p.script, this.context,
@@ -125,9 +118,12 @@ export class Thread implements Runtime {
 
     }
 
-    run(): Maybe<PVM_Value> {
+    run(s: Script): Maybe<PVM_Value> {
 
         let ret: Maybe<PVM_Value> = nothing();
+
+        this.fstack.push(new StackFrame('main', s, this.context, this.heap,
+            s.code.slice()));
 
         while (!empty(this.fstack)) {
 

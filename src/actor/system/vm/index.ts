@@ -536,11 +536,7 @@ export class PVM<S extends System> implements Platform, Actor {
 
         if (s.immediate === true) {
 
-            let thr = new Thread(this, new Heap(), rtime.context);
-
-            thr.invokeMain(s);
-
-            ret = just(thr.run());
+            ret = just(new Thread(this, new Heap(), rtime.context).run(s));
 
         } else {
 
@@ -556,16 +552,14 @@ export class PVM<S extends System> implements Platform, Actor {
 
                 let [, script, runtime] = <Slot>next;
 
-                runtime.invokeMain(script);
-
                 if (ret.isNothing()) {
 
                     //Always return the first executed script.
-                    ret = just(runtime.run());
+                    ret = just(runtime.run(script));
 
                 } else {
 
-                    runtime.run();
+                    runtime.run(script);
 
                 }
 
