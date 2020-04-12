@@ -94,7 +94,7 @@ export declare const addui32: (r: Runtime, f: Frame, _: number) => void;
  *
  * <arg>...? -> <result>
  */
-export declare const call: (r: Runtime, f: Frame, n: number) => void;
+export declare const call: (r: Runtime, f: Frame, _: number) => void;
 /**
  * raise an exception.
  *

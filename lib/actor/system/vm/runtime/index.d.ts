@@ -55,10 +55,6 @@ export interface Runtime {
      */
     context: Context;
     /**
-     * invokeMain invokes the main function of a script.
-     */
-    invokeMain(s: Script): void;
-    /**
      * invokeForeign invokes a foreign function.
      *
      * The frame specified is the parent frame that will receive it's result.
@@ -93,5 +89,5 @@ export interface Runtime {
      *
      * This method should be called after invokeMain().
      */
-    run(): Maybe<PVM_Value>;
+    run(s: Script): Maybe<PVM_Value>;
 }

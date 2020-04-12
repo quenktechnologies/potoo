@@ -109,3 +109,9 @@ export declare class MissingSymbolErr extends Error {
 export declare class IntegerOverflowErr extends Error {
     constructor();
 }
+/**
+ * StackEmptyErr
+ */
+export declare class StackEmptyErr extends Error {
+    constructor();
+}

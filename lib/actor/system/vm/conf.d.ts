@@ -1,13 +1,12 @@
-import { Type } from '@quenk/noni/lib/data/type';
-import { Address } from '../../address';
+import { Logger } from './log';
 /**
  * Conf values for an actor system.
  */
 export interface Conf {
-    /**
-     * log is a function that can be supplied to log VM events.
-     */
-    log: (addr: Address, evt: string, ...args: Type[]) => void;
+    log: {
+        level: number;
+        logger: Logger;
+    };
 }
 /**
  * defaults Conf settings.

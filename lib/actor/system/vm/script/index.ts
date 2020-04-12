@@ -82,6 +82,17 @@ export type Constants = [PVM_Number[], PVM_String[]];
 export interface Script {
 
     /**
+     * name of the Script.
+     * This is an absolute path or an id for dynamically generated scripts.
+     */
+    name: string,
+
+    /**
+     * immediate indicates the Script should not be queued up for execution.
+     */
+    immediate?: boolean,
+
+    /**
      * constants pool for the actor where certain references are resolved from.
      */
     constants: Constants,
@@ -104,8 +115,10 @@ export interface Script {
 export class PScript implements Script {
 
     constructor(
+        public name: string,
         public constants: Constants = [[], []],
         public info: Info[] = [],
-        public code: Instruction[] = []) { }
+        public code: Instruction[] = [],
+        public immediate = false) { }
 
 }

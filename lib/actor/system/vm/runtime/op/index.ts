@@ -1,7 +1,18 @@
 import * as base from './base';
 import * as actor from './actor';
 
-import { Frame } from '../stack/frame';
+import { Record, map } from '@quenk/noni/lib/data/record';
+import { Either } from '@quenk/noni/lib/data/either';
+import { Err } from '@quenk/noni/lib/control/error';
+import { Type } from '@quenk/noni/lib/data/type';
+
+import {
+    Frame,
+    DATA_TYPE_INFO,
+    DATA_TYPE_STRING,
+    DATA_TYPE_LOCAL
+} from '../stack/frame';
+import { PVM_Value } from '../../script';
 import { Runtime, Operand } from '../';
 
 export const OP_CODE_RANGE_LOW = 0x1000000;
@@ -15,7 +26,7 @@ export const PUSHUI16 = OP_CODE_RANGE_STEP * 3;
 export const PUSHUI32 = OP_CODE_RANGE_STEP * 4;
 export const PUSHSTR = OP_CODE_RANGE_STEP * 5;
 export const LDN = OP_CODE_RANGE_STEP * 6;
-export const DUP = OP_CODE_RANGE_HIGH * 15;
+export const DUP = OP_CODE_RANGE_STEP * 15;
 export const STORE = OP_CODE_RANGE_STEP * 16;
 export const LOAD = OP_CODE_RANGE_STEP * 20;
 export const CEQ = OP_CODE_RANGE_STEP * 42;
@@ -39,9 +50,42 @@ export const READ = OP_CODE_RANGE_STEP * 100;
 export const STOP = OP_CODE_RANGE_STEP * 101;
 
 /**
+ * Opcode
+ */
+export type Opcode = number;
+
+/**
  * OpcodeHandler
  */
 export type OpcodeHandler = (r: Runtime, f: Frame, o: Operand) => void;
+
+/**
+ * OpcodeInfo provides needed details of a single opcode.
+ */
+export interface OpcodeInfo {
+
+    /**
+     * name is the mnemonic for the opcode.
+     */
+    name: string,
+
+    /**
+     * handler is the implementation function.
+     */
+    handler: OpcodeHandler,
+
+    /**
+     * log is a function that is applied to convert the op into an op log
+     * entry.
+     */
+    log: (r: Runtime, f: Frame, oper: Operand) => Type[]
+
+}
+
+/**
+ * OpcodeInfos is a map of opcode numbers to their respective OpCodeInfo objects.
+ */
+export interface OpcodeInfos extends Record<OpcodeInfo> { }
 
 /**
  * OpcodeHandlers
@@ -53,64 +97,314 @@ export interface OpcodeHandlers {
 }
 
 /**
- * handlers for the supported op codes.
+ * opcodes
  */
-export const handlers: OpcodeHandlers = {
+export const opcodes: OpcodeInfos = {
 
-    [NOP]: base.nop,
+    [NOP]: {
 
-    [PUSHUI8]: base.pushui8,
+        name: 'nop',
 
-    [PUSHUI16]: base.pushui16,
+        handler: base.nop,
 
-    [PUSHUI32]: base.pushui32,
+        log: () => ['nop']
 
-    [PUSHSTR]: base.pushstr,
+    },
 
-    [LDN]: base.ldn,
+    [PUSHUI8]: {
 
-    [DUP]: base.dup,
+        name: 'pushui8',
 
-    [STORE]: base.store,
+        handler: base.pushui8,
 
-    [LOAD]: base.load,
+        log: (_: Runtime, __: Frame, oper: Operand) => ['pushui8', oper]
 
-    [CEQ]: base.ceq,
+    },
 
-    [ADDUI32]: base.addui32,
+    [PUSHUI16]: {
 
-    [CALL]: base.call,
+        name: 'pushui16',
 
-    [RAISE]: base.raise,
+        handler: base.pushui16,
 
-    [JMP]: base.jmp,
+        log: (_: Runtime, __: Frame, oper: Operand) => ['pushui16', oper]
 
-    [IFZJMP]: base.ifzjmp,
+    },
 
-    [IFNZJMP]: base.ifnzjmp,
+    [PUSHUI32]: {
 
-    [IFEQJMP]: base.ifeqjmp,
+        name: 'pushui32',
 
-    [IFNEQJMP]: base.ifneqjmp,
+        handler: base.pushui32,
 
-    [ALLOC]: actor.alloc,
+        log: (_: Runtime, __: Frame, oper: Operand) => ['pushui32', oper]
 
-    [RUN]: actor.run,
+    },
 
-    [SEND]: actor.send,
+    [PUSHSTR]: {
 
-    [RECV]: actor.recv,
+        name: 'pushstr',
 
-    [RECVCOUNT]: actor.recvcount,
+        handler: base.pushstr,
 
-    [MAILCOUNT]: actor.mailcount,
+        log: (_: Runtime, f: Frame, oper: Operand) =>
+            ['pushstr', oper, eToLog(f.resolve(DATA_TYPE_STRING | oper))]
 
-    [MAILDQ]: actor.maildq,
+    },
 
-    [SELF]: actor.self,
+    [LDN]: {
 
-    [READ]: actor.read,
+        name: 'ldn',
 
-    [STOP]: actor.stop
+        handler: base.ldn,
+
+        log: (_: Runtime, f: Frame, oper: Operand) =>
+            ['ldn', oper, eToLog(f.resolve(DATA_TYPE_INFO | oper))]
+
+    },
+
+    [DUP]: {
+
+        name: 'dup',
+
+        handler: base.dup,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['dup']
+    },
+
+    [STORE]: {
+
+        name: 'store',
+
+        handler: base.store,
+
+        log: (_: Runtime, __: Frame, oper: Operand) =>
+            ['store', oper]
+
+    },
+
+    [LOAD]: {
+
+        name: 'load',
+
+        handler: base.load,
+
+        log: (_: Runtime, f: Frame, oper: Operand) =>
+            ['load', oper, eToLog(f.resolve(DATA_TYPE_LOCAL | oper))]
+
+    },
+
+    [CEQ]: {
+
+        name: 'ceq',
+
+        handler: base.ceq,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['ceq']
+
+    },
+
+    [ADDUI32]: {
+
+        name: 'addui32',
+
+        handler: base.addui32,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['addui32']
+
+    },
+
+    [CALL]: {
+
+        name: 'call',
+
+        handler: base.call,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['call']
+
+    },
+
+    [RAISE]: {
+
+        name: 'raise',
+
+        handler: base.raise,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['raise']
+
+    },
+
+    [JMP]: {
+
+        name: 'jmp',
+
+        handler: base.jmp,
+
+        log: (_: Runtime, __: Frame, oper: Operand) => ['jmp', oper]
+
+    },
+
+    [IFZJMP]: {
+
+        name: 'ifzjmp',
+
+        handler: base.ifzjmp,
+
+        log: (_: Runtime, __: Frame, oper: Operand) => ['ifzjmp', oper]
+
+    },
+
+    [IFNZJMP]: {
+
+        name: 'ifnzjmp',
+
+        handler: base.ifnzjmp,
+
+        log: (_: Runtime, __: Frame, oper: Operand) => ['ifnzjmp', oper]
+
+    },
+
+    [IFEQJMP]: {
+
+        name: 'ifeqjmp',
+
+        handler: base.ifeqjmp,
+
+        log: (_: Runtime, __: Frame, oper: Operand) => ['ifeqjmp', oper]
+
+    },
+
+    [IFNEQJMP]: {
+
+        name: 'ifneqjmp',
+
+        handler: base.ifneqjmp,
+
+        log: (_: Runtime, __: Frame, oper: Operand) => ['ifneqjmp', oper]
+
+    },
+
+    [ALLOC]: {
+
+        name: 'alloc',
+
+        handler: actor.alloc,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['alloc']
+
+    },
+
+    [RUN]: {
+
+        name: 'run',
+
+        handler: actor.run,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['run']
+
+    },
+
+    [SEND]: {
+
+        name: 'send',
+
+        handler: actor.send,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['send']
+
+    },
+
+    [RECV]: {
+
+        name: 'recv',
+
+        handler: actor.recv,
+
+        log: (_: Runtime, f: Frame, oper: Operand) =>
+            ['recv', oper, eToLog(f.resolve(DATA_TYPE_INFO | oper))]
+
+    },
+
+    [RECVCOUNT]: {
+
+        name: 'recvcount',
+
+        handler: actor.recvcount,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['recvcount']
+
+    },
+
+    [MAILCOUNT]: {
+
+        name: 'mailcount',
+
+        handler: actor.mailcount,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['mailcount']
+
+    },
+
+    [MAILDQ]: {
+
+        name: 'maildq',
+
+        handler: actor.maildq,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['maildq']
+
+    },
+
+    [SELF]: {
+
+        name: 'self',
+
+        handler: actor.self,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['self']
+
+    },
+
+    [READ]: {
+
+        name: 'read',
+
+        handler: actor.read,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['read']
+
+    },
+
+    [STOP]: {
+
+        name: 'stop',
+
+        handler: actor.stop,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['stop']
+
+    }
 
 };
+
+const eToLog = (e: Either<Err, PVM_Value>) => e.isLeft() ?
+    e.takeLeft().message : e.takeRight();
+
+/**
+ * handlers maps opcode numbers to their handler
+ */
+export const handlers: OpcodeHandlers = map(opcodes, i => i.handler);
+
+/**
+ * toName converts an opcode to it's mnemonic.
+ */
+export const toName = (op: Opcode) => opcodes.hasOwnProperty(op) ?
+    opcodes[op].name : '<unknown>';
+
+/**
+ * toLog provides a log line for an op.
+ *
+ * If the op is invalid an empty line is produced.
+ */
+export const toLog = (op: Opcode, r: Runtime, f: Frame, oper: Operand) =>
+    opcodes.hasOwnProperty(op) ? opcodes[op].log(r, f, oper) : []

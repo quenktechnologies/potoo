@@ -3,12 +3,13 @@ import * as errors from './runtime/error';
 import * as events from './event';
 
 import { Err } from '@quenk/noni/lib/control/error';
-import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
+import { Maybe, nothing, fromNullable, just } from '@quenk/noni/lib/data/maybe'
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { empty } from '@quenk/noni/lib/data/array';
-import { reduce, map } from '@quenk/noni/lib/data/record';
+import { Record, reduce, map, rmerge } from '@quenk/noni/lib/data/record';
 import { Type } from '@quenk/noni/lib/data/type';
 
+import { spawn } from '../../resident';
 import {
     Address,
     isGroup,
@@ -20,7 +21,7 @@ import {
 import { normalize, Template } from '../../template';
 import { isRouter, isBuffered } from '../../flags';
 import { Message } from '../../message';
-import { Instance } from '../../';
+import { Instance, Actor } from '../../';
 import { System } from '../';
 import {
     State,
@@ -39,13 +40,20 @@ import { Script, PVM_Value } from './script';
 import { Context, newContext } from './runtime/context';
 import { Thread } from './runtime/thread';
 import { Heap } from './runtime/heap';
-import { Runtime } from './runtime';
+import { Runtime, Operand } from './runtime';
 import { Conf, defaults } from './conf';
+import { Frame } from './runtime/stack/frame';
+import { Opcode, toLog } from './runtime/op';
+import {
+    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_NOTICE,
+    LOG_LEVEL_WARN,
+    LOG_LEVEL_ERROR
+} from './log';
+import { getLevel } from './event';
 
-/**
- * Slot
- */
-export type Slot = [Address, Script, Runtime];
+type Slot = [Address, Script, Runtime];
 
 /**
  * Platform is the interface for a virtual machine.
@@ -138,14 +146,25 @@ export interface Platform {
      */
     trigger(addr: Address, evt: string, ...args: Type[]): void
 
+    /**
+     * logOp is used by Runtimes to log which opcodes are executed.
+     */
+    logOp(r: Runtime, f: Frame, op: Opcode, operand: Operand): void
+
 }
 
 /**
  * PVM is the Potoo Virtual Machine.
  */
-export class PVM<S extends System> implements Platform {
+export class PVM<S extends System> implements Platform, Actor {
 
     constructor(public system: S, public conf: Conf = defaults()) { }
+
+    static create<S extends System>(s: S, conf: Partial<Conf>): PVM<S> {
+
+        return new PVM(s, <Conf>rmerge(<Record<Type>>defaults(), conf));
+
+    }
 
     /**
      * state contains information about all the actors in the system, routers
@@ -153,13 +172,41 @@ export class PVM<S extends System> implements Platform {
      */
     state: State = {
 
-        runtimes: {},
+        runtimes: {
+
+            $: new Thread(this, new Heap(),
+                (newContext(this, '$', { create: () => this })))
+
+        },
 
         routers: {},
 
         groups: {}
 
     };
+
+    init(c: Context): Context {
+
+        return c;
+
+    }
+
+    accept(_: Message): void {
+
+    }
+
+    start() {
+
+    }
+
+    notify(): void {
+
+
+    }
+
+    stop(): void {
+
+    }
 
     /**
      * queue of scripts to be executed by the system in order. 
@@ -189,6 +236,8 @@ export class PVM<S extends System> implements Platform {
 
         this.putRuntime(addr, thr);
 
+        this.trigger(events.EVENT_ACTOR_CREATED, addr);
+
         if (isRouter(thr.context.flags))
             this.putRoute(addr, addr);
 
@@ -217,6 +266,8 @@ export class PVM<S extends System> implements Platform {
         let rtime = mrtime.get();
 
         rtime.context.actor.start();
+
+        this.trigger(events.EVENT_ACTOR_STARTED, rtime.context.address);
 
         return right(undefined);
 
@@ -388,8 +439,47 @@ export class PVM<S extends System> implements Platform {
 
     trigger(addr: Address, evt: string, ...args: Type[]) {
 
-        if (this.conf.log)
-            this.conf.log(evt, addr, args);
+        let elvl = getLevel(evt);
+        let { level, logger } = this.conf.log;
+
+        if (level >= elvl) {
+
+            switch (elvl) {
+
+                case LOG_LEVEL_DEBUG:
+                    logger.debug(addr, evt, args);
+                    break;
+
+                case LOG_LEVEL_INFO:
+                    logger.info(addr, evt, args);
+                    break;
+
+                case LOG_LEVEL_NOTICE:
+                case LOG_LEVEL_WARN:
+                    logger.warn(addr, evt, args);
+                    break;
+
+                case LOG_LEVEL_ERROR:
+                    logger.error(addr, evt, args);
+                    break;
+
+                default:
+                    break;
+
+            }
+
+        }
+
+    }
+
+    logOp(r: Runtime, f: Frame, op: Opcode, oper: Operand) {
+
+        if (this.conf.log.level >= LOG_LEVEL_DEBUG)
+            this.conf.log.logger.debug.apply(null, [
+                `[${r.context.address}]`,
+                `(${f.script.name})`,
+                ...toLog(op, r, f, oper)
+            ]);
 
     }
 
@@ -404,16 +494,32 @@ export class PVM<S extends System> implements Platform {
 
             let mrun = this.getRuntime(a);
 
-            if (mrun.isJust())
-                mrun.get().terminate();
+            if (mrun.isJust()) {
+
+                let rtime = mrun.get();
+
+                rtime.terminate();
+
+                this.trigger(events.EVENT_ACTOR_STOPPED, rtime.context.address);
+
+            }
 
         });
 
     }
 
-    exec(i: Instance, s: Script): Maybe<PVM_Value> {
+    /**
+     * spawn an actor.
+     *
+     * This actor will be a direct child of the root.
+     */
+    spawn(t: Template<S>): Address {
 
-        let ret: Maybe<PVM_Value> = nothing();
+        return spawn(this.system, this, t);
+
+    }
+
+    exec(i: Instance, s: Script): Maybe<PVM_Value> {
 
         let mslot = getSlot(this.state, i);
 
@@ -426,27 +532,44 @@ export class PVM<S extends System> implements Platform {
 
         let [addr, rtime] = mslot.get();
 
-        this.queue.push([addr, s, rtime]);
+        let ret: Maybe<Maybe<PVM_Value>> = nothing();
 
-        if (this.running === true) nothing();
+        if (s.immediate === true) {
 
-        this.running = true;
+            ret = just(new Thread(this, new Heap(), rtime.context).run(s));
 
-        while ((!empty(this.queue)) && this.running) {
+        } else {
 
-            let next = this.queue.shift();
+            this.queue.push([addr, s, rtime]);
 
-            let [, script, runtime] = <Slot>next;
+            if (this.running === true) return nothing();
 
-            runtime.invokeMain(script);
+            this.running = true;
 
-            ret = runtime.run();
+            while ((!empty(this.queue)) && this.running) {
+
+                let next = this.queue.shift();
+
+                let [, script, runtime] = <Slot>next;
+
+                if (ret.isNothing()) {
+
+                    //Always return the first executed script.
+                    ret = just(runtime.run(script));
+
+                } else {
+
+                    runtime.run(script);
+
+                }
+
+            }
+
+            this.running = false;
 
         }
 
-        this.running = false;
-
-        return ret;
+        return ret.isJust() ? ret.get() : <Maybe<PVM_Value>>ret;
 
     }
 

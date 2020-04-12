@@ -1,4 +1,4 @@
-import { ForeignFunInfo, ForeignValueInfo } from '../system/vm/script/info';
+import { ForeignFunInfo } from '../system/vm/script/info';
 import { Script, Constants } from '../system/vm/script';
 import { Template } from '../template';
 import { System } from '../system';
@@ -10,8 +10,20 @@ import { Message } from '../message';
 export declare class Spawn implements Script {
     template: Template<System>;
     constructor(template: Template<System>);
+    name: string;
     constants: Constants;
+    immediate: boolean;
     info: ForeignFunInfo[];
+    code: number[];
+}
+/**
+ * Self provides the address of the current instance.
+ */
+export declare class Self implements Script {
+    constants: Constants;
+    name: string;
+    immediate: boolean;
+    info: never[];
     code: number[];
 }
 /**
@@ -22,6 +34,7 @@ export declare class Tell implements Script {
     msg: Message;
     constructor(to: Address, msg: Message);
     constants: Constants;
+    name: string;
     info: ForeignFunInfo[];
     code: number[];
 }
@@ -32,6 +45,7 @@ export declare class Receive implements Script {
     f: (m: Message) => boolean;
     constructor(f: (m: Message) => boolean);
     constants: Constants;
+    name: string;
     info: ForeignFunInfo[];
     code: number[];
 }
@@ -40,6 +54,7 @@ export declare class Receive implements Script {
  */
 export declare class Notify implements Script {
     constants: Constants;
+    name: string;
     info: never[];
     code: number[];
 }
@@ -50,8 +65,9 @@ export declare class Notify implements Script {
 export declare class Raise implements Script {
     msg: string;
     constructor(msg: string);
+    name: string;
     constants: Constants;
-    info: ForeignValueInfo[];
+    info: ForeignFunInfo[];
     code: number[];
 }
 /**
@@ -61,7 +77,8 @@ export declare class Raise implements Script {
 export declare class Kill implements Script {
     addr: string;
     constructor(addr: string);
+    name: string;
     constants: Constants;
-    info: ForeignValueInfo[];
+    info: ForeignFunInfo[];
     code: number[];
 }

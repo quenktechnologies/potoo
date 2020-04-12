@@ -6,17 +6,16 @@ import { Type } from '@quenk/noni/lib/data/type';
 import { Address } from '../../address';
 import { Template } from '../../template';
 import { Message } from '../../message';
-import { Instance } from '../../';
+import { Instance, Actor } from '../../';
 import { System } from '../';
 import { State, Runtimes } from './state';
 import { Script, PVM_Value } from './script';
 import { Context } from './runtime/context';
-import { Runtime } from './runtime';
+import { Runtime, Operand } from './runtime';
 import { Conf } from './conf';
-/**
- * Slot
- */
-export declare type Slot = [Address, Script, Runtime];
+import { Frame } from './runtime/stack/frame';
+import { Opcode } from './runtime/op';
+declare type Slot = [Address, Script, Runtime];
 /**
  * Platform is the interface for a virtual machine.
  *
@@ -92,19 +91,29 @@ export interface Platform {
      * trigger is used to generate events as the system runs.
      */
     trigger(addr: Address, evt: string, ...args: Type[]): void;
+    /**
+     * logOp is used by Runtimes to log which opcodes are executed.
+     */
+    logOp(r: Runtime, f: Frame, op: Opcode, operand: Operand): void;
 }
 /**
  * PVM is the Potoo Virtual Machine.
  */
-export declare class PVM<S extends System> implements Platform {
+export declare class PVM<S extends System> implements Platform, Actor {
     system: S;
     conf: Conf;
     constructor(system: S, conf?: Conf);
+    static create<S extends System>(s: S, conf: Partial<Conf>): PVM<S>;
     /**
      * state contains information about all the actors in the system, routers
      * and groups.
      */
     state: State;
+    init(c: Context): Context;
+    accept(_: Message): void;
+    start(): void;
+    notify(): void;
+    stop(): void;
     /**
      * queue of scripts to be executed by the system in order.
      */
@@ -124,6 +133,14 @@ export declare class PVM<S extends System> implements Platform {
     removeRoute(target: Address): PVM<S>;
     raise(addr: Address, err: Err): void;
     trigger(addr: Address, evt: string, ...args: Type[]): void;
+    logOp(r: Runtime, f: Frame, op: Opcode, oper: Operand): void;
     kill(addr: Address): void;
+    /**
+     * spawn an actor.
+     *
+     * This actor will be a direct child of the root.
+     */
+    spawn(t: Template<S>): Address;
     exec(i: Instance, s: Script): Maybe<PVM_Value>;
 }
+export {};

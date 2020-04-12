@@ -4,7 +4,7 @@ import { System } from '../system';
 import { Address, AddressMap } from '../address';
 import { Message } from '../message';
 import { Templates, Spawnable } from '../template';
-import { Actor } from '../';
+import { Actor, Instance } from '../';
 import { Case } from './case';
 import { Api } from './api';
 /**
@@ -78,3 +78,7 @@ export declare abstract class Mutable<S extends System> extends AbstractResident
  * ref produces a function for sending messages to an actor address.
  */
 export declare const ref: <S extends System>(res: Resident<S>, addr: string) => Reference;
+/**
+ * spawn an actor using the Spawn script.
+ */
+export declare const spawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>) => string;

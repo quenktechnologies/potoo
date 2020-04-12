@@ -115,8 +115,10 @@ export interface Frame {
     pushSelf(): Frame;
     /**
      * peek at the top of the data stack.
+     *
+     * An offset can be specified to peek further down the stack.
      */
-    peek(): Maybe<Data>;
+    peek(n?: number): Maybe<Data>;
     /**
      * peekConstructor peeks and resolves the constructor for the object
      * reference at the top of the stack.
@@ -181,7 +183,7 @@ export declare class StackFrame implements Frame {
     pushSymbol(idx: OperandU16): Frame;
     pushMessage(): Frame;
     pushSelf(): Frame;
-    peek(): Maybe<Data>;
+    peek(n?: number): Maybe<Data>;
     peekConstructor(): Either<Err, ConstructorInfo>;
     resolve(data: Data): Either<Err, PVM_Value>;
     pop(): Data;

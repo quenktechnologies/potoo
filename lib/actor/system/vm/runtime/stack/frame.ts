@@ -4,7 +4,6 @@ import * as error from '../error';
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
 import { fromNullable, Maybe } from '@quenk/noni/lib/data/maybe';
-import { tail } from '@quenk/noni/lib/data/array';
 
 import { Context } from '../context';
 import {
@@ -152,8 +151,10 @@ export interface Frame {
 
     /**
      * peek at the top of the data stack.
+     *
+     * An offset can be specified to peek further down the stack.
      */
-    peek(): Maybe<Data>;
+    peek(n?: number): Maybe<Data>;
 
     /**
      * peekConstructor peeks and resolves the constructor for the object 
@@ -272,10 +273,9 @@ export class StackFrame implements Frame {
 
     }
 
-    peek(): Maybe<Data> {
+    peek(n = 0): Maybe<Data> {
 
-        //TODO: Return 0 instead of Maybe?
-        return fromNullable(tail(this.data));
+        return fromNullable(this.data.length - (n + 1));
 
     }
 
@@ -355,6 +355,10 @@ export class StackFrame implements Frame {
             case DATA_TYPE_SELF:
                 return right<Err, PVM_Value>(context.address);
 
+            //TODO: This sometimes results in us treating 0 as a legitimate
+            //value whereas it should be an error. However, 0 is a valid value
+            //for numbers, and booleans. Needs review, solution may be in ops
+            //rather than here.
             default:
                 return right(value);
 
@@ -370,7 +374,9 @@ export class StackFrame implements Frame {
 
     popValue(): Either<Err, PVM_Value> {
 
-        return this.resolve(this.pop());
+        return (this.data.length === 0) ?
+            left(new error.StackEmptyErr()) :
+            this.resolve(this.pop());
 
     }
 

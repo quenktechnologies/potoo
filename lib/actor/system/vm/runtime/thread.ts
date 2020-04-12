@@ -1,9 +1,10 @@
 import * as errors from './error';
 
 import { Err } from '@quenk/noni/lib/control/error';
-import { empty } from '@quenk/noni/lib/data/array';
+import { empty, tail } from '@quenk/noni/lib/data/array';
 import { map } from '@quenk/noni/lib/data/record';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
+import { Either, right, left } from '@quenk/noni/lib/data/either';
 
 import { Context } from './context';
 import { FunInfo } from '../script/info';
@@ -14,7 +15,6 @@ import { handlers } from './op';
 import { Heap, HeapEntry } from './heap';
 import { Runtime, OPCODE_MASK, OPERAND_MASK } from './';
 import { isGroup, Address, isChild } from '../../../address';
-import { Either, right, left } from '@quenk/noni/lib/data/either';
 
 /**
  * Thread is the Runtime implementation for exactly one actor.
@@ -32,13 +32,6 @@ export class Thread implements Runtime {
     raise(e: Err) {
 
         this.vm.raise(this.context.address, e);
-
-    }
-
-    invokeMain(s: Script) {
-
-        this.fstack.push(new StackFrame('main', s, this.context, this.heap,
-            s.code.slice()));
 
     }
 
@@ -125,9 +118,12 @@ export class Thread implements Runtime {
 
     }
 
-    run(): Maybe<PVM_Value> {
+    run(s: Script): Maybe<PVM_Value> {
 
         let ret: Maybe<PVM_Value> = nothing();
+
+        this.fstack.push(new StackFrame('main', s, this.context, this.heap,
+            s.code.slice()));
 
         while (!empty(this.fstack)) {
 
@@ -146,10 +142,12 @@ export class Thread implements Runtime {
                 let opcode = next & OPCODE_MASK;
                 let operand = next & OPERAND_MASK;
 
+                this.vm.logOp(this, frame, opcode, operand);
+
                 // TODO: Error if the opcode is invalid, out of range etc.
                 handlers[opcode](this, frame, operand);
 
-                frame.ip++;
+                frame.ip = frame.ip + 1;
 
                 //pause execution to allow another frame to compute.
                 if (sp !== this.sp) break;
@@ -169,7 +167,7 @@ export class Thread implements Runtime {
                 if (empty(this.fstack)) {
 
                     //provide the TOS value from the rstack to the caller.
-                    ret = frame.popValue().toMaybe();
+                    ret = frame.resolve(tail(this.rstack)).toMaybe();
 
                 }
 
@@ -178,6 +176,7 @@ export class Thread implements Runtime {
         }
 
         this.heap.release();
+        this.sp = 0;
 
         return ret;
 
