@@ -2,6 +2,7 @@ import { Mock } from '@quenk/test/lib/mock';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Either, right } from '@quenk/noni/lib/data/either';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 
 import { System } from '../../../../../lib/actor/system';
 import { Template } from '../../../../../lib/actor/template';
@@ -9,8 +10,9 @@ import { State, Runtimes } from '../../../../../lib/actor/system/vm/state';
 import { Address } from '../../../../../lib/actor/address';
 import { Context } from '../../../../../lib/actor/system/vm/runtime/context';
 import { Platform } from '../../../../../lib/actor/system/vm';
-import { Runtime } from '../../../../../lib/actor/system/vm/runtime';
+import { Runtime, Operand, Opcode } from '../../../../../lib/actor/system/vm/runtime';
 import { Message } from '../../../../../lib/actor/message';
+import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 
 export class FPVM<S extends System> implements Platform {
 
@@ -38,9 +40,9 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    sendMessage(addr: Address, m: Message): boolean {
+    sendMessage(to: Address, from: Address, m: Message): boolean {
 
-        return this.mock.invoke('sendMessage', [addr, m], true);
+        return this.mock.invoke('sendMessage', [to, from, m], true);
 
     }
 
@@ -119,6 +121,18 @@ export class FPVM<S extends System> implements Platform {
     trigger(addr: Address, evt: string, ...args: any[]) {
 
         return this.mock.invoke('kill', [addr, evt, args], undefined);
+
+    }
+
+    logOp(r: Runtime, f: Frame, op: Opcode, oper: Operand) {
+
+        return this.mock.invoke('logOp', [r, f, op, oper], undefined);
+
+    }
+
+    runTask(addr: Address, ft: Future<void>) {
+
+        return this.mock.invoke('runTask', [addr, ft], undefined);
 
     }
 

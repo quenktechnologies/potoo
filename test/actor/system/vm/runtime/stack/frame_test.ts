@@ -16,7 +16,7 @@ import { TYPE_STRING, TYPE_OBJECT } from '../../../../../../src/actor/system/vm/
 import { DATA_TYPE_INFO, DATA_TYPE_HEAP_STRING } from '../../../../../../src/actor/system/vm/runtime/stack/frame';
 
 const newF = (c: Constants = [[], []], i: Info[] = []) =>
-    new StackFrame('main', new PScript(c, i), newContext(), new Heap());
+    new StackFrame('main', new PScript('test', c, i), newContext(), new Heap());
 
 describe('frame', () => {
 
@@ -39,14 +39,6 @@ describe('frame', () => {
                 let op = 8;
 
                 assert(newF().pushUInt8(op).data).equate([op]);
-
-            });
-
-            xit('should force values to be unsigned', () => {
-
-                let data = 0x80000000;
-
-                assert(newF().push(data).data).equate([data]);
 
             });
 
@@ -140,7 +132,7 @@ describe('frame', () => {
 
                 let heap = new Heap();
 
-                let f = new StackFrame('main', new PScript(),
+                let f = new StackFrame('main', new PScript('test'),
                     newContext(), heap);
 
                 let foo = { a: 1 };
@@ -160,7 +152,7 @@ describe('frame', () => {
 
                 let heap = new Heap();
 
-                let f = new StackFrame('main', new PScript(),
+                let f = new StackFrame('main', new PScript('test'),
                     newContext(), heap);
 
                 heap.addString('foo');
@@ -179,7 +171,7 @@ describe('frame', () => {
 
             it('should be left if the there is nothing on the stack ', () => {
 
-                let f = new StackFrame('main', new PScript(),
+                let f = new StackFrame('main', new PScript('test'),
                     newContext(), new Heap());
 
                 assert(f.popValue().isLeft()).true();

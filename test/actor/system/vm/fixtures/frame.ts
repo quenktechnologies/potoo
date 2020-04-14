@@ -19,7 +19,7 @@ export class FrameImpl implements Frame {
 
     constructor(
         public name = 'main',
-        public script = new PScript(),
+        public script = new PScript('test'),
         public context = newContext(),
         public heap = new Heap(),
         public code = [],
@@ -146,7 +146,7 @@ export class FrameImpl implements Frame {
 
 export const newFrame = (
     name = 'main',
-    script = new PScript(),
+    script = new PScript('test'),
     context = newContext(),
     heap = new Heap(),
     code = [],

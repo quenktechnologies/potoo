@@ -2,6 +2,7 @@ import { Mock } from '@quenk/test/lib/mock';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
 import { right, Either } from '@quenk/noni/lib/data/either';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 
 import { Runtime } from '../../../../../lib/actor/system/vm/runtime';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
@@ -41,12 +42,6 @@ export class RuntimeImpl implements Runtime {
 
     }
 
-    invokeMain(s: Script) {
-
-        this.mock.invoke('invokeMain', [s], undefined);
-
-    }
-
     invokeVM(p: Frame, f: FunInfo) {
 
         this.mock.invoke('invokeVM', [p, f], undefined);
@@ -71,9 +66,15 @@ export class RuntimeImpl implements Runtime {
 
     }
 
-    run(): Maybe<PVM_Value> {
+    runTask(ft: Future<void>) {
 
-        return this.mock.invoke('run', [], nothing());
+        return this.mock.invoke('runTask', [ft], right(undefined));
+
+    }
+
+    exec(s: Script): Maybe<PVM_Value> {
+
+        return this.mock.invoke('exec', [s], nothing());
 
     }
 

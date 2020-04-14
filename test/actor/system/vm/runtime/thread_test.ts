@@ -39,8 +39,8 @@ describe('runtime', () => {
 
             it('should execute instructions', () => {
 
-                let frm = new StackFrame('main', new PScript(), newContext(),
-                    new Heap(), [
+                let frm = new StackFrame('main', new PScript('test'),
+                    newContext(), new Heap(), [
 
                     op.PUSHUI8 | 0x5,
                     op.PUSHUI16 | 0xc000,
@@ -73,7 +73,7 @@ describe('runtime', () => {
 
                 let frame = new StackFrame(
                     'main',
-                    new PScript(),
+                    new PScript('test'),
                     newContext(),
                     heap, []);
 

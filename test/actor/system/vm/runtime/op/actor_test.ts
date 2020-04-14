@@ -89,7 +89,8 @@ describe('actor', () => {
 
             actor.send(r, f, 0);
 
-            assert(r.vm.mock.getCalledArgs('sendMessage')).equate(['self', 'msg']);
+            assert(r.vm.mock.getCalledArgs('sendMessage'))
+                .equate(['self', '?', 'msg']);
 
             assert(f.mock.getCalledArgs('pushUInt8')).equate([1]);
 

@@ -7,6 +7,8 @@ export const newContext = (o: Partial<Context> = {}): Context => merge({
 
     mailbox: [],
 
+    address: '?',
+
     actor: new InstanceImpl(),
 
     behaviour: [],

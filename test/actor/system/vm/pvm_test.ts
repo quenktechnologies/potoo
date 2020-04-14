@@ -16,7 +16,7 @@ import {
 import { ACTION_IGNORE, ACTION_RESTART, ACTION_RAISE } from '../../../../lib/actor/template';
 import { just, nothing } from '@quenk/noni/lib/data/maybe';
 
-const add2Five = new PScript([[], []], [], [
+const add2Five = new PScript('add2Five', [[], []], [], [
     op.PUSHUI8 | 0x5,
     op.PUSHUI16 | 0xc000,
     op.ADDUI32
@@ -28,7 +28,7 @@ describe('vm', () => {
 
         describe('exec', () => {
 
-            it('should return the value of an executed script', () => {
+            it('should execute scripts', () => {
 
                 let vm = new PVM(newSystem());
 
@@ -36,19 +36,11 @@ describe('vm', () => {
 
                 let rtime = newRuntime('test', newContext({ actor }));
 
-                rtime.mock.setReturnValue('run', just(12));
-
                 vm.state.runtimes['test'] = rtime;
 
-                let result = vm.exec(actor, add2Five);
+                vm.exec(actor, add2Five);
 
-                assert(rtime.mock.getCalledList()).equate([
-
-                    'invokeMain', 'run'
-
-                ]);
-
-                assert(result.get()).equal(12);
+                assert(rtime.mock.getCalledList()).equate(['exec']);
 
             });
 
@@ -70,7 +62,7 @@ describe('vm', () => {
 
             });
 
-            it('should queue scripts', () => {
+            it('should queue scripts if running', () => {
 
                 let vm = new PVM(newSystem());
 
@@ -82,14 +74,16 @@ describe('vm', () => {
 
                 let done = false;
 
-                rtime.mock.setReturnCallback('run', () => {
+                rtime.mock.setReturnCallback('exec', () => {
 
                     if (turn === 0) {
 
-                        assert(vm.exec(actor, new PScript()).isNothing()).true();
-                        assert(vm.queue.length).equal(1);
+                        vm.exec(actor, new PScript('<test>'));
+
+                        assert(vm.runQ.length).equal(1);
 
                         turn = turn + 1;
+
                         return nothing();
 
                     } else {
@@ -104,52 +98,27 @@ describe('vm', () => {
 
                 vm.state.runtimes['test'] = rtime;
 
-                vm.exec(actor, new PScript());
+                vm.exec(actor, new PScript('<test2>'));
 
                 assert(done).true();
 
             });
 
-            it('should prioritize immediate scripts', () => {
+            it('should no execute blocked actors', () => {
 
                 let vm = new PVM(newSystem());
+                let unblocked = newRuntime();
+                let blocked = newRuntime();
 
-                let actor = newInstance();
+                vm.state.runtimes['unblocked'] = unblocked;
+                vm.state.runtimes['blocked'] = blocked;
+                vm.blocked = ['blocked'];
 
-                let rtime = newRuntime('test', newContext({ actor }));
+                vm.exec(blocked.context.actor, new PScript('<test2>'));
+                vm.exec(unblocked.context.actor, new PScript('<test2>'));
 
-                let turn = 0;
-
-                let done = false;
-
-                rtime.mock.setReturnCallback('run', () => {
-
-                    if (turn === 0) {
-
-                        turn = turn + 1;
-
-                        let ret = vm.exec(actor,
-                            new PScript([[], []], [], [], true));
-
-                        assert(vm.queue.length).equal(0);
-                        assert(ret.get()).equal(12);
-
-                        return nothing();
-
-                    } else {
-
-                        done = true;
-                        return just(12);
-
-                    }
-
-                });
-
-                vm.state.runtimes['test'] = rtime;
-
-                vm.exec(actor, new PScript());
-
-                assert(done).true();
+                assert(blocked.mock.wasCalled('exec')).false();
+                assert(unblocked.mock.wasCalled('exec')).true();
 
             });
 
