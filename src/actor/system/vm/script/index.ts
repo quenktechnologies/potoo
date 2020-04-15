@@ -88,11 +88,6 @@ export interface Script {
     name: string,
 
     /**
-     * immediate indicates the Script should not be queued up for execution.
-     */
-    immediate?: boolean,
-
-    /**
      * constants pool for the actor where certain references are resolved from.
      */
     constants: Constants,
@@ -118,7 +113,6 @@ export class PScript implements Script {
         public name: string,
         public constants: Constants = [[], []],
         public info: Info[] = [],
-        public code: Instruction[] = [],
-        public immediate = false) { }
+        public code: Instruction[] = []) { }
 
 }

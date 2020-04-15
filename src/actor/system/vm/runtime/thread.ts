@@ -5,16 +5,21 @@ import { empty, tail } from '@quenk/noni/lib/data/array';
 import { map } from '@quenk/noni/lib/data/record';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Either, right, left } from '@quenk/noni/lib/data/either';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 
-import { Context } from './context';
+import { isGroup, Address, isChild } from '../../../address';
 import { FunInfo } from '../script/info';
 import { PVM_Value, Script } from '../script';
 import { Platform } from '../';
 import { Frame, StackFrame, Data } from './stack/frame';
 import { handlers } from './op';
+import { Context } from './context';
 import { Heap, HeapEntry } from './heap';
-import { Runtime, OPCODE_MASK, OPERAND_MASK } from './';
-import { isGroup, Address, isChild } from '../../../address';
+import {
+    Runtime,
+    OPCODE_MASK,
+    OPERAND_MASK
+} from './';
 
 /**
  * Thread is the Runtime implementation for exactly one actor.
@@ -118,12 +123,24 @@ export class Thread implements Runtime {
 
     }
 
-    run(s: Script): Maybe<PVM_Value> {
-
-        let ret: Maybe<PVM_Value> = nothing();
+    exec(s: Script): Maybe<PVM_Value> {
 
         this.fstack.push(new StackFrame('main', s, this.context, this.heap,
             s.code.slice()));
+
+        return this.run();
+
+    }
+
+    runTask(ft: Future<void>) {
+
+        return this.vm.runTask(this.context.address, ft);
+
+    }
+
+    run(): Maybe<PVM_Value> {
+
+        let ret: Maybe<PVM_Value> = nothing();
 
         while (!empty(this.fstack)) {
 

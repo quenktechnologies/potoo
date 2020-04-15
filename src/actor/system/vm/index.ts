@@ -3,10 +3,12 @@ import * as errors from './runtime/error';
 import * as events from './event';
 
 import { Err } from '@quenk/noni/lib/control/error';
-import { Maybe, nothing, fromNullable, just } from '@quenk/noni/lib/data/maybe'
+import { Future, pure } from '@quenk/noni/lib/control/monad/future';
+import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
 import { Either, left, right } from '@quenk/noni/lib/data/either';
-import { empty } from '@quenk/noni/lib/data/array';
+import { empty, dedupe, contains, partition } from '@quenk/noni/lib/data/array';
 import { Record, reduce, map, rmerge } from '@quenk/noni/lib/data/record';
+import { remove as arremove } from '@quenk/noni/lib/data/array';
 import { Type } from '@quenk/noni/lib/data/type';
 
 import { spawn } from '../../resident';
@@ -36,7 +38,7 @@ import {
     remove,
     Runtimes
 } from './state';
-import { Script, PVM_Value } from './script';
+import { Script } from './script';
 import { Context, newContext } from './runtime/context';
 import { Thread } from './runtime/thread';
 import { Heap } from './runtime/heap';
@@ -151,6 +153,11 @@ export interface Platform {
      */
     logOp(r: Runtime, f: Frame, op: Opcode, operand: Operand): void
 
+    /**
+     * runTask executes an async operation on behalf of a Runtime.
+     */
+    runTask(addr: Address, ft: Future<void>): void
+
 }
 
 /**
@@ -185,13 +192,31 @@ export class PVM<S extends System> implements Platform, Actor {
 
     };
 
+    /**
+     * runQ is the queue of pending Scripts to be executed.
+     */
+    runQ: Slot[] = [];
+
+    /**
+     * waitQ is the queue of pending Scripts for Runtimes that are awaiting
+     * the completion of an async task.
+     */
+    waitQ: Slot[] = [];
+
+    /**
+     * blocked is a 
+     */
+    blocked: Address[] = [];
+
+    running = false;
+
     init(c: Context): Context {
 
         return c;
 
     }
 
-    accept(_: Message): void {
+    accept(_: Message) {
 
     }
 
@@ -199,21 +224,13 @@ export class PVM<S extends System> implements Platform, Actor {
 
     }
 
-    notify(): void {
-
-
-    }
-
-    stop(): void {
+    notify() {
 
     }
 
-    /**
-     * queue of scripts to be executed by the system in order. 
-     */
-    queue: Slot[] = [];
+    stop() {
 
-    running = false;
+    }
 
     allocate(parent: Address, t: Template<System>): Either<Err, Address> {
 
@@ -265,11 +282,39 @@ export class PVM<S extends System> implements Platform, Actor {
 
         let rtime = mrtime.get();
 
-        rtime.context.actor.start();
+        rtime.context.actor.start(target);
 
         this.trigger(events.EVENT_ACTOR_STARTED, rtime.context.address);
 
         return right(undefined);
+
+    }
+
+    runTask(addr: Address, ft: Future<void>) {
+
+        this.blocked = dedupe(this.blocked.concat(addr));
+
+        //XXX: Fork is used here instead of finally because the raise() method
+        // may trigger side-effects. For example the actor being stopped or 
+        // restarted.
+        ft
+            .fork(
+                (e: Error) => {
+
+                    this.blocked = arremove(this.blocked, addr);
+
+                    this.raise(addr, e);
+
+                    return pure(<void>undefined);
+
+                },
+                () => {
+
+                    this.blocked = arremove(this.blocked, addr);
+
+                    return pure(<void>undefined);
+
+                });
 
     }
 
@@ -411,6 +456,8 @@ export class PVM<S extends System> implements Platform, Actor {
 
                 case template.ACTION_RESTART:
 
+                    //TODO: This may unintentionally trigger exit code in
+                    // Actor#stop while in an error state.
                     this.kill(next);
 
                     let eRes = this
@@ -423,6 +470,7 @@ export class PVM<S extends System> implements Platform, Actor {
                     break loop;
 
                 case template.ACTION_STOP:
+                    //TODO: See previous note.
                     this.kill(next);
                     break loop;
 
@@ -515,61 +563,76 @@ export class PVM<S extends System> implements Platform, Actor {
      */
     spawn(t: Template<S>): Address {
 
-        return spawn(this.system, this, t);
+        return spawn(this.system, this, t, ADDRESS_SYSTEM);
 
     }
 
-    exec(i: Instance, s: Script): Maybe<PVM_Value> {
+    exec(i: Instance, s: Script): void {
 
         let mslot = getSlot(this.state, i);
 
         if (mslot.isNothing()) {
 
-            this.trigger(events.EVENT_INVALID_EXEC, '$', i);
-            return nothing();
-
-        }
-
-        let [addr, rtime] = mslot.get();
-
-        let ret: Maybe<Maybe<PVM_Value>> = nothing();
-
-        if (s.immediate === true) {
-
-            ret = just(new Thread(this, new Heap(), rtime.context).run(s));
+            this.trigger(events.EVENT_EXEC_INSTANCE_STALE, '$');
 
         } else {
 
-            this.queue.push([addr, s, rtime]);
+            let [addr, rtime] = mslot.get();
 
-            if (this.running === true) return nothing();
+            this.runQ.push([addr, s, rtime]);
+
+            if (this.running === true) return;
 
             this.running = true;
 
-            while ((!empty(this.queue)) && this.running) {
+            run:
+            while (this.running) {
 
-                let next = this.queue.shift();
+                while (!empty(this.runQ)) {
 
-                let [, script, runtime] = <Slot>next;
+                    let next = <Slot>this.runQ.shift();
 
-                if (ret.isNothing()) {
+                    let [addr, script, rtime] = next;
 
-                    //Always return the first executed script.
-                    ret = just(runtime.run(script));
+                    let mctime = this.getRuntime(addr);
 
-                } else {
+                    //is the runtime still here?
+                    if (mctime.isNothing()) {
 
-                    runtime.run(script);
+                        this.trigger(addr, events.EVENT_EXEC_ACTOR_GONE);
+
+                        //is it the same instance?
+                    } else if (mctime.get() !== rtime) {
+
+                        this.trigger(addr, events.EVENT_EXEC_ACTOR_CHANGED);
+
+                        // is the runtime awaiting an async task?
+                    } else if (contains(this.blocked, addr)) {
+
+                        this.waitQ.push(next);
+
+                    } else {
+
+                        rtime.exec(script);
+
+                    }
 
                 }
 
+                let [unblocked] = partition(this.waitQ, s =>
+                    !contains(this.blocked, s[0]));
+
+                if (unblocked.length > 0) {
+
+                    this.runQ = this.runQ.concat(unblocked);
+                    continue run;
+
+                }
+
+                this.running = false;
+
             }
-
-            this.running = false;
-
         }
-
-        return ret.isJust() ? ret.get() : <Maybe<PVM_Value>>ret;
 
     }
 
