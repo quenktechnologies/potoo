@@ -1,5 +1,6 @@
 import * as template from '../../template';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Either } from '@quenk/noni/lib/data/either';
 import { Type } from '@quenk/noni/lib/data/type';
@@ -9,7 +10,7 @@ import { Message } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
 import { State, Runtimes } from './state';
-import { Script, PVM_Value } from './script';
+import { Script } from './script';
 import { Context } from './runtime/context';
 import { Runtime, Operand } from './runtime';
 import { Conf } from './conf';
@@ -95,6 +96,10 @@ export interface Platform {
      * logOp is used by Runtimes to log which opcodes are executed.
      */
     logOp(r: Runtime, f: Frame, op: Opcode, operand: Operand): void;
+    /**
+     * runTask executes an async operation on behalf of a Runtime.
+     */
+    runTask(addr: Address, ft: Future<void>): void;
 }
 /**
  * PVM is the Potoo Virtual Machine.
@@ -109,18 +114,28 @@ export declare class PVM<S extends System> implements Platform, Actor {
      * and groups.
      */
     state: State;
+    /**
+     * runQ is the queue of pending Scripts to be executed.
+     */
+    runQ: Slot[];
+    /**
+     * waitQ is the queue of pending Scripts for Runtimes that are awaiting
+     * the completion of an async task.
+     */
+    waitQ: Slot[];
+    /**
+     * blocked is a
+     */
+    blocked: Address[];
+    running: boolean;
     init(c: Context): Context;
     accept(_: Message): void;
     start(): void;
     notify(): void;
     stop(): void;
-    /**
-     * queue of scripts to be executed by the system in order.
-     */
-    queue: Slot[];
-    running: boolean;
     allocate(parent: Address, t: Template<System>): Either<Err, Address>;
     runActor(target: Address): Either<Err, void>;
+    runTask(addr: Address, ft: Future<void>): void;
     sendMessage(to: Address, from: Address, msg: Message): boolean;
     getRuntime(addr: Address): Maybe<Runtime>;
     getRouter(addr: Address): Maybe<Context>;
@@ -141,6 +156,6 @@ export declare class PVM<S extends System> implements Platform, Actor {
      * This actor will be a direct child of the root.
      */
     spawn(t: Template<S>): Address;
-    exec(i: Instance, s: Script): Maybe<PVM_Value>;
+    exec(i: Instance, s: Script): void;
 }
 export {};

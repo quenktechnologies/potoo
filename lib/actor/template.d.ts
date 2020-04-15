@@ -95,9 +95,9 @@ export interface Template<S extends System> {
  */
 export declare const normalize: <S extends System>(t: Template<S>) => Template<S> & {
     id: string;
-    children: Template<S>[] | ((Template<S> & {
+    children: Template<S>[] | ((Cons<S> & {
         id: string;
-    }) | (Cons<S> & {
+    }) | (Template<S> & {
         id: string;
     }))[] | undefined;
 };

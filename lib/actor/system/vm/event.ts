@@ -9,7 +9,9 @@ import {
 
 export const EVENT_SEND_OK = 'message-send-ok';
 export const EVENT_SEND_FAILED = 'message-send-failed';
-export const EVENT_INVALID_EXEC = 'invalid-exec';
+export const EVENT_EXEC_INSTANCE_STALE = 'exec-instance-stale';
+export const EVENT_EXEC_ACTOR_GONE = 'exec-actor-gone';
+export const EVENT_EXEC_ACTOR_CHANGED = 'exec-actor-changed';
 export const EVENT_MESSAGE_READ = 'message-read';
 export const EVENT_MESSAGE_DROPPED = 'message-dropped';
 export const EVENT_ACTOR_CREATED = 'actor-created';
@@ -74,7 +76,19 @@ export const events: EventInfos = {
 
     },
 
-    [EVENT_INVALID_EXEC]: {
+    [EVENT_EXEC_INSTANCE_STALE]: {
+
+        level: LOG_LEVEL_WARN
+
+    },
+
+    [EVENT_EXEC_ACTOR_GONE]: {
+
+        level: LOG_LEVEL_WARN
+
+    },
+
+    [EVENT_EXEC_ACTOR_CHANGED]: {
 
         level: LOG_LEVEL_WARN
 

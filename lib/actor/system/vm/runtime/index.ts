@@ -1,6 +1,7 @@
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Either } from '@quenk/noni/lib/data/either';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 
 import { Address } from '../../../address';
 import { FunInfo } from '../script/info';
@@ -9,6 +10,8 @@ import { PVM_Value, Script } from '../script';
 import { Platform } from '../';
 import { Heap } from './heap';
 import { Context } from './context';
+
+//TODO: Relocate some of these types.
 
 /**
  * Opcode
@@ -24,6 +27,11 @@ export type Operand = OperandU8 | OperandU16;
  * OperandU8
  */
 export type OperandU8 = number;
+
+/**
+ * State type for the runtime.
+ */
+export type State = number;
 
 /**
  * OperandU16
@@ -50,10 +58,11 @@ export const OPERAND_RANGE_END = 0xffffff;
 export const MAX_INSTRUCTION = 0xFFFFFFFF;
 
 /**
- * Runtime is responsible for executing the instructions an actor's script
- * requests.
+ * Runtime for an actor.
  *
- * It also allows for appropriate access to the rest of the system.
+ * The VM executes scripts by passing them to Runtime's for execution. Opcodes
+ * are executed one by one in sequence. A VM should not call execute more than 
+ * one script in the same Runtime.
  */
 export interface Runtime {
 
@@ -108,10 +117,18 @@ export interface Runtime {
     kill(target: Address): Either<Err, void>
 
     /**
-     * run executes all the pending frames of the Runtime.
+     * runTask allows an async operation to be carried out by the Runtime.
      *
-     * This method should be called after invokeMain().
+     * While awaiting the end of this operation, the VM should not execute 
+     * any additional scripts in the Runtime.
+     *
+     * This methods main purpose is to hook into async JS functions.
      */
-    run(s: Script): Maybe<PVM_Value>
+    runTask(ft: Future<void>): void
+
+    /**
+     * exec the Script passed to the Runtime.
+     */
+    exec(s: Script): Maybe<PVM_Value>
 
 }

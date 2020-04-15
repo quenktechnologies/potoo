@@ -88,11 +88,6 @@ export interface Script {
     name: string,
 
     /**
-     * immediate indicates the Script should not be queued up for execution.
-     */
-    immediate?: boolean,
-
-    /**
      * constants pool for the actor where certain references are resolved from.
      */
     constants: Constants,

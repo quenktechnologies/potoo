@@ -2,6 +2,7 @@ import { Either } from '@quenk/noni/lib/data/either';
 
 import { Context } from './system/vm/runtime/context';
 import { Message } from './message';
+import { Address } from './address';
 
 /**
  * Behaviour of an actor.
@@ -30,8 +31,9 @@ export interface Instance {
     /**
      * start the Instance.
      *
+     * The address provided is the address of the newly spawned instance.
      */
-    start(): void;
+    start(addr: Address): void;
 
     /**
      * notify is called by the system to indicate new messages

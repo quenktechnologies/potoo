@@ -22,11 +22,11 @@ export interface Resident<S extends System> extends Api<S>, Actor {
 export declare abstract class AbstractResident<S extends System> implements Resident<S> {
     system: S;
     constructor(system: S);
+    self: () => string;
     abstract init(c: Context): Context;
     abstract select<T>(_: Case<T>[]): AbstractResident<S>;
     abstract run(): void;
     notify(): void;
-    self(): string;
     accept(_: Message): void;
     spawn(t: Spawnable<S>): Address;
     spawnGroup(group: string | string[], tmpls: Templates<S>): AddressMap;
@@ -34,7 +34,7 @@ export declare abstract class AbstractResident<S extends System> implements Resi
     raise(e: Err): AbstractResident<S>;
     kill(addr: Address): AbstractResident<S>;
     exit(): void;
-    start(): void;
+    start(addr: Address): void;
     stop(): void;
 }
 /**
@@ -81,4 +81,4 @@ export declare const ref: <S extends System>(res: Resident<S>, addr: string) => 
 /**
  * spawn an actor using the Spawn script.
  */
-export declare const spawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>) => string;
+export declare const spawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>, parent: string) => string;

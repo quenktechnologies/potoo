@@ -9,10 +9,12 @@ import { System } from '../system';
 import {
     ADDRESS_DISCARD,
     Address,
-    AddressMap
+    AddressMap,
+    isRestricted,
+    make
 } from '../address';
 import { Message } from '../message';
-import { Template, Templates, Spawnable } from '../template';
+import { Template, Templates, Spawnable, normalize } from '../template';
 import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_TEMPORARY } from '../flags';
 import { Actor, Instance } from '../';
 import { Case } from './case';
@@ -40,6 +42,8 @@ export abstract class AbstractResident<S extends System>
 
     constructor(public system: S) { }
 
+    self = (): Address => ADDRESS_DISCARD;
+
     abstract init(c: Context): Context;
 
     abstract select<T>(_: Case<T>[]): AbstractResident<S>;
@@ -52,23 +56,13 @@ export abstract class AbstractResident<S extends System>
 
     }
 
-    self() {
-
-        return <Address>this
-            .system
-            .exec(this, new scripts.Self())
-            .orJust(() => ADDRESS_DISCARD)
-            .get();
-
-    }
-
     accept(_: Message) {
 
     }
 
     spawn(t: Spawnable<S>): Address {
 
-        return spawn(this.system, this, t);
+        return spawn(this.system, this, t, this.self());
 
     }
 
@@ -106,7 +100,9 @@ export abstract class AbstractResident<S extends System>
 
     }
 
-    start(): void {
+    start(addr: Address): void {
+
+        this.self = () => addr;
 
         this.run();
 
@@ -217,13 +213,14 @@ export const ref = <S extends System>
  * spawn an actor using the Spawn script.
  */
 export const spawn = <S extends System>
-    (sys: S, i: Instance, t: Spawnable<S>): Address => {
+    (sys: S, i: Instance, t: Spawnable<S>, parent: Address): Address => {
 
-    let tmpl = isObject(t) ? <Template<System>>t : { create: t };
+    let tmpl = normalize(isObject(t) ? <Template<System>>t : { create: t });
 
-    return <Address>sys
-        .exec(i, new scripts.Spawn(tmpl))
-        .orJust(() => ADDRESS_DISCARD)
-        .get();
+    sys.exec(i, new scripts.Spawn(tmpl));
+
+    return isRestricted(<string>tmpl.id) ?
+        ADDRESS_DISCARD :
+        make(parent, <string>tmpl.id)
 
 }

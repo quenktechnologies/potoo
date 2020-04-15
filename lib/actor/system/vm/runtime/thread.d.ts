@@ -1,14 +1,15 @@
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Either } from '@quenk/noni/lib/data/either';
-import { Context } from './context';
+import { Future } from '@quenk/noni/lib/control/monad/future';
+import { Address } from '../../../address';
 import { FunInfo } from '../script/info';
 import { PVM_Value, Script } from '../script';
 import { Platform } from '../';
 import { Frame, Data } from './stack/frame';
+import { Context } from './context';
 import { Heap } from './heap';
 import { Runtime } from './';
-import { Address } from '../../../address';
 /**
  * Thread is the Runtime implementation for exactly one actor.
  */
@@ -25,5 +26,7 @@ export declare class Thread implements Runtime {
     invokeForeign(p: Frame, f: FunInfo, args: PVM_Value[]): void;
     terminate(): void;
     kill(target: Address): Either<Err, void>;
-    run(s: Script): Maybe<PVM_Value>;
+    exec(s: Script): Maybe<PVM_Value>;
+    runTask(ft: Future<void>): void;
+    run(): Maybe<PVM_Value>;
 }
