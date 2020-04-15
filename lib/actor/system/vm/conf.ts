@@ -1,4 +1,5 @@
 import { LOG_LEVEL_ERROR, Logger } from './log';
+import { Handlers } from './event';
 
 /**
  * Conf values for an actor system.
@@ -11,7 +12,9 @@ export interface Conf {
 
         logger: Logger
 
-    }
+    },
+
+    on: Handlers
 
 }
 
@@ -26,6 +29,8 @@ export const defaults = (): Conf => ({
 
         logger: console
 
-    }
+    },
+
+    on: {}
 
 });

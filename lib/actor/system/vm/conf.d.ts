@@ -1,4 +1,5 @@
 import { Logger } from './log';
+import { Handlers } from './event';
 /**
  * Conf values for an actor system.
  */
@@ -7,6 +8,7 @@ export interface Conf {
         level: number;
         logger: Logger;
     };
+    on: Handlers;
 }
 /**
  * defaults Conf settings.

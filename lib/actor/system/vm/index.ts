@@ -22,7 +22,7 @@ import {
 } from '../../address';
 import { normalize, Template } from '../../template';
 import { isRouter, isBuffered } from '../../flags';
-import { Message } from '../../message';
+import { Message, Envelope } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
 import {
@@ -230,6 +230,8 @@ export class PVM<S extends System> implements Platform, Actor {
 
     stop() {
 
+        //TODO: Provide a way to stop all actors.
+
     }
 
     allocate(parent: Address, t: Template<System>): Either<Err, Address> {
@@ -253,7 +255,7 @@ export class PVM<S extends System> implements Platform, Actor {
 
         this.putRuntime(addr, thr);
 
-        this.trigger(events.EVENT_ACTOR_CREATED, addr);
+        this.trigger(addr, events.EVENT_ACTOR_CREATED);
 
         if (isRouter(thr.context.flags))
             this.putRoute(addr, addr);
@@ -284,7 +286,7 @@ export class PVM<S extends System> implements Platform, Actor {
 
         rtime.context.actor.start(target);
 
-        this.trigger(events.EVENT_ACTOR_STARTED, rtime.context.address);
+        this.trigger(rtime.context.address, events.EVENT_ACTOR_STARTED);
 
         return right(undefined);
 
@@ -326,28 +328,32 @@ export class PVM<S extends System> implements Platform, Actor {
             mRouter :
             this.getRuntime(to).map(r => r.context)
 
+        //routers revceive enveloped messages.
+        let actualMessage = mRouter.isJust() ?
+            new Envelope(to, from, msg) : msg;
+
         if (mctx.isJust()) {
 
             let ctx = mctx.get();
 
             if (isBuffered(ctx.flags)) {
 
-                ctx.mailbox.push(msg);
+                ctx.mailbox.push(actualMessage);
 
                 ctx.actor.notify();
 
             } else {
 
-                ctx.actor.accept(msg);
+                ctx.actor.accept(actualMessage);
 
             }
 
-            this.trigger(events.EVENT_SEND_OK, from, to, msg);
+            this.trigger(from, events.EVENT_SEND_OK, to, msg);
             return true;
 
         } else {
 
-            this.trigger(events.EVENT_SEND_FAILED, from, to, msg);
+            this.trigger(from, events.EVENT_SEND_FAILED, to, msg);
             return false;
 
         }
@@ -518,6 +524,10 @@ export class PVM<S extends System> implements Platform, Actor {
 
         }
 
+        //forward the event to relevant hooks.
+        if (this.conf.on[evt] != null)
+            this.conf.on[evt].apply(null, [addr, evt, ...args]);
+
     }
 
     logOp(r: Runtime, f: Frame, op: Opcode, oper: Operand) {
@@ -548,7 +558,7 @@ export class PVM<S extends System> implements Platform, Actor {
 
                 rtime.terminate();
 
-                this.trigger(events.EVENT_ACTOR_STOPPED, rtime.context.address);
+                this.trigger(rtime.context.address, events.EVENT_ACTOR_STOPPED);
 
             }
 
@@ -573,7 +583,7 @@ export class PVM<S extends System> implements Platform, Actor {
 
         if (mslot.isNothing()) {
 
-            this.trigger(events.EVENT_EXEC_INSTANCE_STALE, '$');
+            this.trigger(ADDRESS_SYSTEM, events.EVENT_EXEC_INSTANCE_STALE);
 
         } else {
 
