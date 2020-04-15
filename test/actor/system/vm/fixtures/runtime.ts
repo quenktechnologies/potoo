@@ -17,7 +17,6 @@ import { newContext } from './context';
 export class RuntimeImpl implements Runtime {
 
     constructor(
-        public self = '/',
         public context = newContext(),
         public vm = new FPVM(),
         public heap = new Heap()) { }
@@ -81,7 +80,6 @@ export class RuntimeImpl implements Runtime {
 }
 
 export const newRuntime = (
-    self = '/',
     context = newContext(),
     vm = new FPVM(),
-    heap = new Heap()) => new RuntimeImpl(self, context, vm, heap);
+    heap = new Heap()) => new RuntimeImpl(context, vm, heap);
