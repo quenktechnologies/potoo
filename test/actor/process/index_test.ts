@@ -1,14 +1,14 @@
 import { assert } from '@quenk/test/lib/assert';
-import { ActorSystem, system } from '../../../src/actor/system/framework/default';
-import { Case } from '../../../src/actor/resident/case';
-import { Mutable } from '../../../src/actor/resident';
-import { Context } from '../../../src/actor/context';
-import { Process } from '../../../src/actor/process';
 
-class Sender extends Mutable<Context, ActorSystem> {
+import { Case } from '../../../src/actor/resident/case';
+import { Mutable } from '../../../lib/actor/resident';
+import { Process } from '../../../lib/actor/process';
+import { TestSystem, system } from '../resident/fixtures/system';
+
+class Sender extends Mutable<TestSystem> {
 
     constructor(
-        public system: ActorSystem,
+        public system: TestSystem,
         public done: () => void) { super(system); }
 
     run() {
@@ -35,20 +35,24 @@ describe('process', () => {
 
         it('should be spawnable', done => {
 
-            system({ log: { level: 1 } })
+            let s = system();
 
-                .spawn({
+            s.spawn({
 
-                    id: 'echo',
-                    create: s => new Process(`${__dirname}/echo.js`, s)
+                id: 'echo',
+                create: s => new Process(`${__dirname}/echo.js`, s)
 
-                })
-                .spawn({
+            });
 
-                    id: 'sender',
-                    create: s => new Sender(s, done)
+            s.spawn({
 
-                })
+                id: 'sender',
+                create: s => new Sender(s, done)
+
+            });
+
+            s.stop();
+
         })
 
     })

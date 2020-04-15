@@ -1,8 +1,6 @@
-import { Maybe } from '@quenk/noni/lib/data/maybe';
-
 import { PVM } from '../../../../lib/actor/system/vm';
 import { Instance } from '../../../../lib/actor';
-import { PVM_Value, Script } from '../../../../lib/actor/system/vm/script';
+import { Script } from '../../../../lib/actor/system/vm/script';
 import { Conf } from '../../../../lib/actor/system/vm/conf';
 import { Template } from '../../../../lib/actor/template';
 
@@ -12,9 +10,15 @@ export class TestSystem {
 
     vm = PVM.create(this, this.conf);
 
-    exec(i: Instance, s: Script): Maybe<PVM_Value> {
+    exec(i: Instance, s: Script) {
 
-        return this.vm.exec(i, s);
+        this.vm.exec(i, s);
+
+    }
+
+    stop() {
+
+        this.vm.stop();
 
     }
 

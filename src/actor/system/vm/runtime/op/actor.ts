@@ -179,13 +179,13 @@ export const read = (r: Runtime, f: Frame, __: Operand) => {
 
     if (func(msg)) {
 
-        r.vm.trigger(events.EVENT_MESSAGE_READ, r.context.address, msg);
+        r.vm.trigger(r.context.address, events.EVENT_MESSAGE_READ, msg);
 
         f.push(1);
 
     } else {
 
-        r.vm.trigger(events.EVENT_MESSAGE_DROPPED, r.context.address, msg);
+        r.vm.trigger(r.context.address, events.EVENT_MESSAGE_DROPPED, msg);
 
         f.push(0);
 

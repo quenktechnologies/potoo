@@ -1,5 +1,7 @@
 import { Record } from '@quenk/noni/lib/data/record';
+import { Type } from '@quenk/noni/lib/data/type';
 
+import { Address } from '../../address';
 import {
     LOG_LEVEL_INFO,
     LOG_LEVEL_WARN,
@@ -17,6 +19,20 @@ export const EVENT_MESSAGE_DROPPED = 'message-dropped';
 export const EVENT_ACTOR_CREATED = 'actor-created';
 export const EVENT_ACTOR_STARTED = 'actor-started';
 export const EVENT_ACTOR_STOPPED = 'actor-stopped';
+
+/**
+ * Handler for events.
+ */
+export type Handler = (addr: Address, evt: string, ...args: Type[]) => void;
+
+/**
+ * Handlers is a map of even Handler functions.
+ */
+export interface Handlers {
+
+    [key: string]: Handler
+
+}
 
 /**
  * EventInfo holds needed information about events the system can generate.
