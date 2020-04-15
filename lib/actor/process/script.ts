@@ -9,7 +9,6 @@ import { EVENT_SEND_FAILED } from '../system/vm/event';
 import { Script } from '../system/vm/script';
 import { Conf } from '../system/vm/conf';
 import { PVM } from '../system/vm';
-import { System } from '../system';
 import { Message } from '../message';
 import { Address } from '../address';
 import { Instance } from '../';
@@ -114,7 +113,7 @@ const main = () => {
 
 }
 
-const filterTell = (vm: PVM<System>) =>
+const filterTell = (vm: PVM<Sys>) =>
     ({ to, message }: { to: string, from: string, message: Message }) =>
         vm.exec(vm, new Tell(to, message));
 

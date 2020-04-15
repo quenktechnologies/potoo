@@ -248,7 +248,7 @@ export class PVM<S extends System> implements Platform, Actor {
 
         let args = Array.isArray(t.args) ? t.args : [];
 
-        let act = t.create(this.system, ...args);
+        let act = t.create(this.system, t, ...args);
 
         let thr = new Thread(this, new Heap(),
             act.init(newContext(act, addr, t)));

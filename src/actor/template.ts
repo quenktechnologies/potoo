@@ -27,7 +27,8 @@ export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * Cons is applied to produce an instance of an actor.
  */
-export type Cons<S extends System> = (s: S, ...args: Type[]) => Actor;
+export type Cons<S extends System> =
+    (s: S, t: Template<S>, ...args: Type[]) => Actor;
 
 /**
  * DelayMilliseconds type.

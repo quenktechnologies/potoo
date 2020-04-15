@@ -7,9 +7,9 @@ import { Message } from '../message';
 /**
  * Spawn spawns a single child actor from a template.
  */
-export declare class Spawn implements Script {
-    template: Template<System>;
-    constructor(template: Template<System>);
+export declare class Spawn<S extends System> implements Script {
+    template: Template<S>;
+    constructor(template: Template<S>);
     name: string;
     constants: Constants;
     immediate: boolean;

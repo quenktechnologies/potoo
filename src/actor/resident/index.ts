@@ -215,9 +215,9 @@ export const ref = <S extends System>
 export const spawn = <S extends System>
     (sys: S, i: Instance, t: Spawnable<S>, parent: Address): Address => {
 
-    let tmpl = normalize(isObject(t) ? <Template<System>>t : { create: t });
+    let tmpl = normalize(isObject(t) ? <Template<S>>t : { create: t });
 
-    sys.exec(i, new scripts.Spawn(tmpl));
+    sys.exec(i, new scripts.Spawn<S>(tmpl));
 
     return isRestricted(<string>tmpl.id) ?
         ADDRESS_DISCARD :

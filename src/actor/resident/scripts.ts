@@ -16,10 +16,10 @@ import { Message } from '../message';
 /**
  * Spawn spawns a single child actor from a template.
  */
-export class Spawn implements Script {
+export class Spawn<S extends System> implements Script {
 
     constructor(
-        public template: Template<System>) { }
+        public template: Template<S>) { }
 
     name = '<spawn>';
 
