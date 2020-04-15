@@ -83,6 +83,5 @@ export declare class PScript implements Script {
     constants: Constants;
     info: Info[];
     code: Instruction[];
-    immediate: boolean;
-    constructor(name: string, constants?: Constants, info?: Info[], code?: Instruction[], immediate?: boolean);
+    constructor(name: string, constants?: Constants, info?: Info[], code?: Instruction[]);
 }

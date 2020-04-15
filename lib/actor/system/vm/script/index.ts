@@ -113,7 +113,6 @@ export class PScript implements Script {
         public name: string,
         public constants: Constants = [[], []],
         public info: Info[] = [],
-        public code: Instruction[] = [],
-        public immediate = false) { }
+        public code: Instruction[] = []) { }
 
 }
