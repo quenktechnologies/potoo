@@ -383,7 +383,7 @@ export class StackFrame implements Frame {
             .popName()
             .chain(nfo => {
 
-                if ((nfo.descriptor & BYTE_TYPE) !== TYPE_FUN)
+                if (((<FunInfo>nfo).descriptor & BYTE_TYPE) !== TYPE_FUN)
                     return notAFunction(nfo.name);
 
                 return right(nfo);
