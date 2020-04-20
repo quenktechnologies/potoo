@@ -5,14 +5,12 @@ import { Err } from '@quenk/noni/lib/control/error';
 
 import {
     PScript,
-    PVM_Value,
-    PVM_Function,
-    PVM_Object,
-    PVM_Template
 } from '../../../../../lib/actor/system/vm/script';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
-import { ConstructorInfo } from '../../../../../lib/actor/system/vm/script/info';
+import { FunInfo, Info } from '../../../../../lib/actor/system/vm/script/info';
 import { Heap } from '../../../../../lib/actor/system/vm/runtime/heap';
+import { HeapObject } from '../../../../../lib/actor/system/vm/runtime/heap/object';
+import { PTValue } from '../../../../../lib/actor/system/vm/type';
 import { newContext } from './context';
 
 export class FrameImpl implements Frame {
@@ -60,9 +58,9 @@ export class FrameImpl implements Frame {
 
     }
 
-    pushSymbol(idx: number): Frame {
+    pushName(idx: number): Frame {
 
-        return <Frame>this.mock.invoke('pushSymbol', [idx], this);
+        return <Frame>this.mock.invoke('pushName', [idx], this);
 
     }
 
@@ -84,16 +82,9 @@ export class FrameImpl implements Frame {
 
     }
 
-    peekConstructor(): Either<Err, ConstructorInfo> {
+    resolve(data: number): Either<Err, PTValue> {
 
-        return <Either<Err, ConstructorInfo>>this.mock.invoke('peekConstructor',
-            [], left(new Error('?')));
-
-    }
-
-    resolve(data: number): Either<Err, PVM_Value> {
-
-        return <Either<Err, PVM_Value>>this.mock.invoke('resolve', [data],
+        return <Either<Err, PTValue>>this.mock.invoke('resolve', [data],
             left(new Error('?')));
 
     }
@@ -104,9 +95,9 @@ export class FrameImpl implements Frame {
 
     }
 
-    popValue(): Either<Err, PVM_Value> {
+    popValue(): Either<Err, PTValue> {
 
-        return <Either<Err, PVM_Value>>this.mock.invoke('popValue',
+        return <Either<Err, PTValue>>this.mock.invoke('popValue',
             [], left(new Error('?')));
 
     }
@@ -118,21 +109,22 @@ export class FrameImpl implements Frame {
 
     }
 
-    popFunction(): Either<Err, PVM_Function> {
+    popName(): Either<Err, Info> {
+
+        return <Either<Err, Info>>this.mock.invoke('popName',
+            [], left(new Error('?')));
+
+    }
+
+    popFunction(): Either<Err, FunInfo> {
 
         return this.mock.invoke('popFunction', [], left(new Error('?')));
 
     }
 
-    popObject(): Either<Err, PVM_Object> {
+    popObject(): Either<Err, HeapObject> {
 
         return this.mock.invoke('popObject', [], left(new Error('?')));
-
-    }
-
-    popTemplate(): Either<Err, PVM_Template> {
-
-        return this.mock.invoke('popTemplate', [], left(new Error('?')));
 
     }
 

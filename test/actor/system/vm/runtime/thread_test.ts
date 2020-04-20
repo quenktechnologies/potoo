@@ -1,35 +1,19 @@
 import * as op from '../../../../../lib/actor/system/vm/runtime/op';
 
 import { assert } from '@quenk/test/lib/assert';
+import { just } from '@quenk/noni/lib/data/maybe';
 
+import { NewForeignFunInfo } from '../../../../../lib/actor/system/vm/script/info';
 import { StackFrame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { Thread } from '../../../../../lib/actor/system/vm/runtime/thread';
 import { Heap } from '../../../../../lib/actor/system/vm/runtime/heap';
-import { PScript, INFO_TYPE_FUNCTION } from '../../../../../lib/actor/system/vm/script';
+import { PScript } from '../../../../../lib/actor/system/vm/script';
 import { newPlatform } from '../fixtures/vm';
 import { newContext } from '../fixtures/context';
 import { newRuntime } from '../fixtures/runtime';
-import { just } from '@quenk/noni/lib/data/maybe';
 
-let foreignFunc = {
-
-    infoType: INFO_TYPE_FUNCTION,
-
-    type: 0,
-
-    builtin: true,
-
-    name: 'func',
-
-    foreign: true,
-
-    argc: 0,
-
-    code: [],
-
-    exec: (n: number) => n * n
-
-}
+let foreignFunc = new NewForeignFunInfo('func', 0,
+    (r: Thread, n: number) => n * n);
 
 describe('runtime', () => {
 
@@ -85,7 +69,7 @@ describe('runtime', () => {
 
                 p.invokeForeign(frame, foreignFunc, [12]);
 
-                assert(heap.get(<number>frame.data.pop()).get().value).equal(144);
+                assert(frame.data[0]).equal(144);
 
             })
 

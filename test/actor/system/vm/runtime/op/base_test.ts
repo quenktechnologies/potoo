@@ -3,7 +3,6 @@ import * as base from '../../../../../../lib/actor/system/vm/runtime/op/base';
 import { assert } from '@quenk/test/lib/assert';
 import { right } from '@quenk/noni/lib/data/either';
 
-import { INFO_TYPE_FUNCTION } from '../../../../../../lib/actor/system/vm/script';
 import { newRuntime } from '../../fixtures/runtime';
 import { newFrame } from '../../fixtures/frame';
 
@@ -73,7 +72,7 @@ describe('base', () => {
 
     })
 
-    describe('pushstr', function() {
+    describe('lds', function() {
 
         it('should call Frame#pushString', () => {
 
@@ -81,7 +80,7 @@ describe('base', () => {
 
             let r = newRuntime();
 
-            base.pushstr(r, f, 1);
+            base.lds(r, f, 1);
 
             assert(f.mock.getCalledList()).equate(['pushString']);
 
@@ -91,7 +90,7 @@ describe('base', () => {
 
     describe('ldn', function() {
 
-        it('should call Frame#pushSymbol', () => {
+        it('should call Frame#pushName', () => {
 
             let f = newFrame();
 
@@ -99,7 +98,7 @@ describe('base', () => {
 
             base.ldn(r, f, 1);
 
-            assert(f.mock.getCalledList()).equate(['pushSymbol']);
+            assert(f.mock.getCalledList()).equate(['pushName']);
 
         })
 
@@ -216,7 +215,7 @@ describe('base', () => {
 
     describe('addui32', function() {
 
-        it('should add the top two stack memebers', () => {
+        it('should add the top two stack members', () => {
 
             let f = newFrame();
 
@@ -273,14 +272,13 @@ describe('base', () => {
             let r = newRuntime();
 
             let finfo = {
-                infoType: INFO_TYPE_FUNCTION,
                 type: 0,
                 builtin: false,
                 name: 'main',
                 foreign: true,
                 argc: 1,
                 code: [],
-                exec: (str: string) => `${str} main`
+                exec: (_: any, str: string) => `${str} main`
             };
 
             f.mock.setReturnValue('popValue', 'hai');

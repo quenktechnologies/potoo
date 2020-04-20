@@ -13,7 +13,11 @@ import {
     FLAG_ROUTER,
     FLAG_BUFFERED
 } from '../../../../lib/actor/flags';
-import { ACTION_IGNORE, ACTION_RESTART, ACTION_RAISE } from '../../../../lib/actor/template';
+import {
+    ACTION_IGNORE,
+    ACTION_RESTART,
+    ACTION_RAISE
+} from '../../../../lib/actor/template';
 import { just, nothing } from '@quenk/noni/lib/data/maybe';
 
 const add2Five = new PScript('add2Five', [[], []], [], [
@@ -34,7 +38,7 @@ describe('vm', () => {
 
                 let actor = newInstance();
 
-                let rtime = newRuntime('test', newContext({ actor }));
+                let rtime = newRuntime(newContext({ actor }));
 
                 vm.state.runtimes['test'] = rtime;
 
@@ -50,7 +54,7 @@ describe('vm', () => {
 
                 let actor = newInstance();
 
-                let rtime = newRuntime('test', newContext({ actor }));
+                let rtime = newRuntime(newContext({ actor }));
 
                 vm.state.runtimes['test'] = rtime;
 
@@ -68,7 +72,7 @@ describe('vm', () => {
 
                 let actor = newInstance();
 
-                let rtime = newRuntime('test', newContext({ actor }));
+                let rtime = newRuntime(newContext({ actor }));
 
                 let turn = 0;
 
@@ -178,8 +182,6 @@ describe('vm', () => {
             it('should add to groups', () => {
 
                 let vm = new PVM(newSystem());
-
-                let act = newInstance();
 
                 vm.allocate('', { id: 'self', create: newInstance, group: 'foo' });
 
@@ -355,13 +357,10 @@ describe('vm', () => {
                 let vm = new PVM(newSystem());
                 let caught = false;
 
-                let act1 = newInstance();
                 let r1 = newRuntime();
 
-                let act2 = newInstance();
                 let r2 = newRuntime();
 
-                let act3 = newInstance();
                 let r3 = newRuntime();
 
                 r3.context.template.trap = () => ACTION_RAISE;

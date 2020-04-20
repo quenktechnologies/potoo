@@ -2,18 +2,22 @@ import { assert } from '@quenk/test/lib/assert';
 
 import {
     DATA_TYPE_STRING,
-    StackFrame,
-    DATA_TYPE_HEAP,
+    StackFrame
 } from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
 import {
     newContext
 } from '../../fixtures/context';
-import { Heap, HeapEntry } from '../../../../../../lib/actor/system/vm/runtime/heap';
+import { Heap } from '../../../../../../lib/actor/system/vm/runtime/heap';
 import { PScript } from '../../../../../../lib/actor/system/vm/script';
 import { Constants } from '../../../../../../src/actor/system/vm/script';
-import { Info, PVMValueInfo } from '../../../../../../lib/actor/system/vm/script/info';
-import { TYPE_STRING, TYPE_OBJECT } from '../../../../../../src/actor/system/vm/script/info';
-import { DATA_TYPE_INFO, DATA_TYPE_HEAP_STRING } from '../../../../../../src/actor/system/vm/runtime/stack/frame';
+import {
+    Info,
+    stringType
+} from '../../../../../../lib/actor/system/vm/script/info';
+import {
+    DATA_TYPE_INFO
+} from '../../../../../../src/actor/system/vm/runtime/stack/frame';
+import { newHeapObject } from '../heap/fixtures/object';
 
 const newF = (c: Constants = [[], []], i: Info[] = []) =>
     new StackFrame('main', new PScript('test', c, i), newContext(), new Heap());
@@ -99,52 +103,19 @@ describe('frame', () => {
 
         })
 
-        describe('resolve', () => {
+        describe('popString', () => {
 
             it('should resolve strings from the constants pool', () => {
 
                 let f = newF([[], ['hello', 'world']]);
 
-                let eres = f.resolve(DATA_TYPE_STRING | 1);
+                f.push(DATA_TYPE_STRING | 1);
+
+                let eres = f.popString()
 
                 assert(eres.isRight()).true();
 
                 assert(eres.takeRight()).equal('world');
-
-            });
-
-            it('should resolve strings from the constants pool', () => {
-
-                let foo = new PVMValueInfo('foo', TYPE_STRING, false, []);
-                let bar = new PVMValueInfo('bar', TYPE_STRING, false, []);
-
-                let f = newF([[], []], [foo, bar]);
-
-                let eres = f.resolve(DATA_TYPE_INFO | 1);
-
-                assert(eres.isRight()).true();
-
-                assert(eres.takeRight()).equal(bar);
-
-            });
-
-            it('should resolve heap objects', () => {
-
-                let heap = new Heap();
-
-                let f = new StackFrame('main', new PScript('test'),
-                    newContext(), heap);
-
-                let foo = { a: 1 };
-                let bar = { b: 2 };
-
-                heap.add(new HeapEntry(TYPE_OBJECT, true, foo));
-                heap.add(new HeapEntry(TYPE_OBJECT, true, bar));
-
-                let eres = f.resolve(DATA_TYPE_HEAP | 1);
-
-                assert(eres.isRight()).true();
-                assert(eres.takeRight()).equal(bar);
 
             });
 
@@ -156,12 +127,63 @@ describe('frame', () => {
                     newContext(), heap);
 
                 heap.addString('foo');
-                heap.addString('bar');
 
-                let eres = f.resolve(DATA_TYPE_HEAP_STRING | 1);
+                let r = heap.addString('bar');
+
+                f.push(r);
+
+                let eres = f.popString();
 
                 assert(eres.isRight()).true();
                 assert(eres.takeRight()).equal('bar');
+
+            });
+
+        })
+
+        describe('popName', () => {
+
+            it('should resolve named constants', () => {
+
+                let foo = { name: 'foo', type: stringType, descriptor: 0 }
+                let bar = { name: 'bar', type: stringType, descriptor: 0 }
+
+                let f = newF([[], []], [foo, bar]);
+
+                f.push(DATA_TYPE_INFO | 1);
+
+                let eres = f.popName();
+
+                assert(eres.isRight()).true();
+
+                assert(eres.takeRight()).equal(bar);
+
+            });
+
+        })
+
+        describe('popObject', () => {
+
+            it('should resolve heap objects', () => {
+
+                let heap = new Heap();
+
+                let f = new StackFrame('main', new PScript('test'),
+                    newContext(), heap);
+
+                let foo = newHeapObject();
+                let bar = newHeapObject();
+
+                heap.addObject(foo);
+
+                let r = heap.addObject(bar);
+
+                f.push(r);
+
+                let eres = f.popObject();
+
+                assert(eres.isRight()).true();
+                assert(eres.takeRight()).equal(bar);
 
             });
 

@@ -7,9 +7,10 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Runtime } from '../../../../../lib/actor/system/vm/runtime';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { Message } from '../../../../../lib/actor/message';
-import { PVM_Value, Script } from '../../../../../lib/actor/system/vm/script';
+import { Script } from '../../../../../lib/actor/system/vm/script';
 import { FunInfo } from '../../../../../lib/actor/system/vm/script/info';
 import { Heap } from '../../../../../lib/actor/system/vm/runtime/heap';
+import { PTValue } from '../../../../../lib/actor/system/vm/type';
 import { Address } from '../../../../../lib/actor/address';
 import { FPVM } from './vm';
 import { newContext } from './context';
@@ -47,7 +48,7 @@ export class RuntimeImpl implements Runtime {
 
     }
 
-    invokeForeign(p: Frame, f: FunInfo, args: PVM_Value[]) {
+    invokeForeign(p: Frame, f: FunInfo, args: PTValue[]) {
 
         this.mock.invoke('invokeForeign', [p, f, args], undefined);
 
@@ -71,7 +72,7 @@ export class RuntimeImpl implements Runtime {
 
     }
 
-    exec(s: Script): Maybe<PVM_Value> {
+    exec(s: Script): Maybe<PTValue> {
 
         return this.mock.invoke('exec', [s], nothing());
 

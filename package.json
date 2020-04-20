@@ -8,7 +8,7 @@
     "lib"
   ],
   "scripts": {
-    "test": "./node_modules/.bin/mocha --opts mocha.opts $(find test -name *.ts)"
+    "test": "./node_modules/.bin/mocha --opts mocha.opts $(find test -name *_test.ts)"
   },
   "devDependencies": {
     "@quenk/test": "^2.2.1",

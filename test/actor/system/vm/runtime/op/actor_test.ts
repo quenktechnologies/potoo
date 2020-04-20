@@ -3,7 +3,6 @@ import * as actor from '../../../../../../lib/actor/system/vm/runtime/op/actor';
 import { assert } from '@quenk/test/lib/assert';
 import { right, left } from '@quenk/noni/lib/data/either';
 
-import { INFO_TYPE_FUNCTION } from '../../../../../../lib/actor/system/vm/script';
 import {
     DATA_TYPE_HEAP_STRING
 } from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
@@ -11,6 +10,7 @@ import { newRuntime } from '../../fixtures/runtime';
 import { newFrame } from '../../fixtures/frame';
 import { newInstance } from '../../fixtures/instance';
 import { Message } from '../../../../../../lib/actor/message';
+import { newHeapObject } from '../heap/fixtures/object';
 
 describe('actor', () => {
 
@@ -21,11 +21,15 @@ describe('actor', () => {
             let f = newFrame();
             let r = newRuntime();
 
-            let tmp = { id: 'n95', create: newInstance() };
+            let tmp = { id: 'n95', create: newInstance() }
+
+            let ho = newHeapObject();
+
+            ho.mock.setReturnValue('promote', tmp);
 
             f.mock.setReturnValue('popString', right('self'));
 
-            f.mock.setReturnValue('popTemplate', right(tmp));
+            f.mock.setReturnValue('popObject', right(ho));
 
             r.vm.mock.setReturnValue('allocate', right('self'));
 
@@ -140,7 +144,7 @@ describe('actor', () => {
             let f = newFrame();
             let r = newRuntime();
 
-            r.context.behaviour.push(() => true);
+            r.context.behaviour.push(() => 1);
 
             actor.recvcount(r, f, 0);
 
@@ -192,7 +196,7 @@ describe('actor', () => {
 
             f.mock.setReturnValue('popValue', right('hi'));
 
-            r.context.behaviour.push(m => { buf.push(m); return true });
+            r.context.behaviour.push((_: any, m: any) => { buf.push(m); return 1 });
 
             actor.read(r, f, 0);
 
