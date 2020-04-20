@@ -5,17 +5,13 @@ import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
 import { fromNullable, Maybe } from '@quenk/noni/lib/data/maybe';
 
+import { Script } from '../../script';
 import { Context } from '../context';
-import {
-    Script,
-    PVM_Value,
-    PVM_Template,
-    PVM_Object,
-    PVM_Function,
-} from '../../script';
-import { Instruction, OperandU8, OperandU16, Operand } from '../';
+import { HeapObject } from '../heap/object';
 import { Heap } from '../heap';
-import { ConstructorInfo, INFO_TYPE_CONSTRUCTOR } from '../../script/info';
+import { Instruction, Operand } from '../';
+import { PTValue, BYTE_TYPE, TYPE_FUN } from '../../type';
+import { FunInfo, Info } from '../../script/info';
 
 export const DATA_RANGE_TYPE_HIGH = 0xf0000000;
 export const DATA_RANGE_TYPE_LOW = 0x1000000;
@@ -35,11 +31,15 @@ export const DATA_MAX_SAFE_UINT32 = 0x7fffffff;
 //They are not meant to be used to check the actual type of the underlying value.
 export const DATA_TYPE_STRING = DATA_RANGE_TYPE_STEP * 3;
 export const DATA_TYPE_INFO = DATA_RANGE_TYPE_STEP * 4;
-export const DATA_TYPE_HEAP = DATA_RANGE_TYPE_STEP * 6;
+export const DATA_TYPE_HEAP_OBJECT = DATA_RANGE_TYPE_STEP * 6;
 export const DATA_TYPE_HEAP_STRING = DATA_RANGE_TYPE_STEP * 7
 export const DATA_TYPE_LOCAL = DATA_RANGE_TYPE_STEP * 8;
 export const DATA_TYPE_MAILBOX = DATA_RANGE_TYPE_STEP * 9;
 export const DATA_TYPE_SELF = DATA_RANGE_TYPE_STEP * 10;
+
+export const BYTE_CONSTANT_NUM = 0x10000;
+export const BYTE_CONSTANT_STR = 0x20000;
+export const BYTE_CONSTANT_INFO = 0x30000;
 
 /**
  * Data is the type of values that can appear on a Frame's data stack.
@@ -68,42 +68,42 @@ export interface Frame {
     /**
      * name of the routine this frame belongs too.
      */
-    name: string;
+    name: string
 
     /**
      * script the routine is defined in.
      */
-    script: Script;
+    script: Script
 
     /**
      * context of the actor that is executing this frame.
      */
-    context: Context;
+    context: Context
 
     /**
      * heap of the current Runtime
      */
-    heap: Heap;
+    heap: Heap
 
     /**
      * code the frame executes as part of the routine.
      */
-    code: Instruction[];
+    code: Instruction[]
 
     /**
      * data stack or operand stack.
      */
-    data: Data[];
+    data: Data[]
 
     /**
      * locals contains variables local to the routine.
      */
-    locals: Data[];
+    locals: Data[]
 
     /**
      * ip is a pointer to the code instruction currently being executed.
      */
-    ip: number;
+    ip: number
 
     /**
      * push an operand onto the data stack.
@@ -112,55 +112,49 @@ export interface Frame {
      * results during computation. Care should be taken when using this method
      * directly to ensure the desired value is actual on the stack.
      */
-    push(d: Data): Frame;
+    push(d: Data): Frame
 
     /**
      * pushUInt8 pushes an unsigned 8bit integer onto the data stack.
      */
-    pushUInt8(value: OperandU8): Frame;
+    pushUInt8(value: Operand): Frame
 
     /**
      * pushUInt16 pushes an unsigned 16bit integer onto the data stack.
      */
-    pushUInt16(value: OperandU16): Frame;
+    pushUInt16(value: Operand): Frame
 
     /**
      * pushUInt32 pushes an unsigned 32bit integer onto the data stack.
      */
-    pushUInt32(value: Operand): Frame;
+    pushUInt32(value: Operand): Frame
 
     /**
      * pushString from the constant pool onto the data stack.
      */
-    pushString(idx: Operand): Frame;
+    pushString(idx: Operand): Frame
 
     /**
-     * pushSymbol pushes a symbol from the info table at idx onto the stack.
+     * pushName pushes a named constant from the info section onto the stack.
      */
-    pushSymbol(idx: OperandU16): Frame;
+    pushName(idx: Operand): Frame
 
     /**
      * pushMessage from the mailbox onto the stack.
      */
-    pushMessage(): Frame;
+    pushMessage(): Frame
 
     /**
      * pushSelf pushes the address of the executing actor on to the stack.
      */
-    pushSelf(): Frame;
+    pushSelf(): Frame
 
     /**
      * peek at the top of the data stack.
      *
      * An offset can be specified to peek further down the stack.
      */
-    peek(n?: number): Maybe<Data>;
-
-    /**
-     * peekConstructor peeks and resolves the constructor for the object 
-     * reference at the top of the stack.
-     */
-    peekConstructor(): Either<Err, ConstructorInfo>;
+    peek(n?: number): Maybe<Data>
 
     /**
      * resolve a value from its reference.
@@ -168,44 +162,44 @@ export interface Frame {
      * An error will be produced if the value cannot be resolved.
      * Do not use this method to retreive uint8,uint16 or uint32.
      */
-    resolve(data: Data): Either<Err, PVM_Value>;
+    resolve(data: Data): Either<Err, PTValue>
 
     /**
      * pop the top most value from the data stack.
      *
      * If the stack is empty the value 0 is returned.
      */
-    pop(): Data;
+    pop(): Data
 
     /**
      * popValue pops and attempts to resolve the top most value of the data stack.
      */
-    popValue(): Either<Err, PVM_Value>;
+    popValue(): Either<Err, PTValue>
 
     /**
      * popString from the top of the data stack.
      */
-    popString(): Either<Err, string>;
+    popString(): Either<Err, string>
+
+    /**
+     * popName pops a named object from the top of the data stack.
+     */
+    popName(): Either<Err, Info>
 
     /**
      * popFunction from the top of the data stack.
      */
-    popFunction(): Either<Err, PVM_Function>;
+    popFunction(): Either<Err, FunInfo>
 
     /**
-     * popObject from the top of the data stack.
+     * popObject provides the entry for an object in the heap.
      */
-    popObject(): Either<Err, PVM_Object>;
-
-    /**
-     * popTemplate from the top of the data stack.
-     */
-    popTemplate(): Either<Err, PVM_Template>;
+    popObject(): Either<Err, HeapObject>
 
     /**
      * duplicate the top of the stack.
      */
-    duplicate(): Frame;
+    duplicate(): Frame
 
 }
 
@@ -231,13 +225,13 @@ export class StackFrame implements Frame {
 
     }
 
-    pushUInt8(value: OperandU8): Frame {
+    pushUInt8(value: Operand): Frame {
 
         return this.push((value >>> 0) & DATA_MASK_VALUE8);
 
     }
 
-    pushUInt16(value: OperandU16): Frame {
+    pushUInt16(value: Operand): Frame {
 
         return this.push((value >>> 0) & DATA_MASK_VALUE16);
 
@@ -255,7 +249,7 @@ export class StackFrame implements Frame {
 
     }
 
-    pushSymbol(idx: OperandU16): Frame {
+    pushName(idx: Operand): Frame {
 
         return this.push(idx | DATA_TYPE_INFO);
 
@@ -279,61 +273,15 @@ export class StackFrame implements Frame {
 
     }
 
-    peekConstructor(): Either<Err, ConstructorInfo> {
+    resolve(data: Data): Either<Err, PTValue> {
 
-        let mword = this.peek();
-
-        if (mword.isNothing()) return left(new error.NullPointerErr(0));
-
-        let word = DATA_MASK_VALUE24 & mword.get();
-
-        let info = this.script.info[DATA_MASK_VALUE24 & word];
-
-        if ((info == null) || (info.infoType !== INFO_TYPE_CONSTRUCTOR))
-            return left(new error.NullPointerErr(word));
-
-        return right(<ConstructorInfo>info);
-
-    }
-
-    resolve(data: Data): Either<Err, PVM_Value> {
-
-        let { script, context } = this;
+        let { context } = this;
 
         let typ = data & DATA_MASK_TYPE;
 
         let value = data & DATA_MASK_VALUE24;
 
         switch (typ) {
-
-            case DATA_TYPE_STRING:
-
-                let mstr = fromNullable(
-                    script.constants[indexes.CONSTANTS_INDEX_STRING][value]);
-
-                return mstr.isJust() ?
-                    right(mstr.get()) :
-                    left(new error.MissingSymbolErr(value));
-
-            case DATA_TYPE_INFO:
-
-                let info = this.script.info[value];
-
-                if (info == null)
-                    return left(new error.MissingSymbolErr(value));
-
-                return right(info);
-
-            case DATA_TYPE_HEAP:
-
-                let mO = this.heap.get(value);
-
-                if (mO.isNothing()) return left(new error.NullPointerErr(data));
-
-                return right(mO.get().value);
-
-            case DATA_TYPE_HEAP_STRING:
-                return right(this.heap.getString(value));
 
             //TODO: This is probably not needed.
             case DATA_TYPE_LOCAL:
@@ -350,10 +298,10 @@ export class StackFrame implements Frame {
                 if (context.mailbox.length === 0) return nullErr(data);
 
                 //messages are always accessed sequentially FIFO
-                return right<Err, PVM_Value>(context.mailbox.shift());
+                return right<Err, PTValue>(context.mailbox.shift());
 
             case DATA_TYPE_SELF:
-                return right<Err, PVM_Value>(context.address);
+                return right<Err, PTValue>(context.address);
 
             //TODO: This sometimes results in us treating 0 as a legitimate
             //value whereas it should be an error. However, 0 is a valid value
@@ -372,7 +320,7 @@ export class StackFrame implements Frame {
 
     }
 
-    popValue(): Either<Err, PVM_Value> {
+    popValue(): Either<Err, PTValue> {
 
         return (this.data.length === 0) ?
             left(new error.StackEmptyErr()) :
@@ -382,25 +330,88 @@ export class StackFrame implements Frame {
 
     popString(): Either<Err, string> {
 
-        return <Either<Err, string>>this.popValue();
+        let data = this.pop();
+        let typ = data & DATA_MASK_TYPE;
+        let idx = data & DATA_MASK_VALUE24;
+
+        if (typ === DATA_TYPE_STRING) {
+
+            let s = this.script.constants[indexes.CONSTANTS_INDEX_STRING][idx];
+
+            if (s == null) return missingSymbol(data);
+
+            return right(s);
+
+        } else if (typ === DATA_TYPE_HEAP_STRING) {
+
+            return right(this.heap.getString(idx));
+
+        } else {
+
+            return wrongType(DATA_TYPE_STRING, typ);
+
+        }
 
     }
 
-    popFunction(): Either<Err, PVM_Function> {
+    popName(): Either<Err, Info> {
 
-        return <Either<Err, PVM_Function>>this.popValue();
+        let data = this.pop();
+        let typ = data & DATA_MASK_TYPE;
+        let idx = data & DATA_MASK_VALUE24;
+
+        if (typ === DATA_TYPE_INFO) {
+
+            let info = this.script.info[idx];
+
+            if (info == null)
+                return nullErr(data);
+
+            return right(info);
+
+        } else {
+
+            return wrongType(DATA_TYPE_INFO, data);
+
+        }
 
     }
 
-    popObject(): Either<Err, PVM_Object> {
+    popFunction(): Either<Err, FunInfo> {
 
-        return <Either<Err, PVM_Object>>this.popValue();
+        return <Either<Err, FunInfo>>this
+            .popName()
+            .chain(nfo => {
+
+                if ((nfo.descriptor & BYTE_TYPE) !== TYPE_FUN)
+                    return notAFunction(nfo.name);
+
+                return right(nfo);
+
+            });
 
     }
 
-    popTemplate(): Either<Err, PVM_Template> {
+    popObject(): Either<Err, HeapObject> {
 
-        return <Either<Err, PVM_Template>>this.popValue();
+        let data = this.pop();
+        let typ = data & DATA_MASK_TYPE;
+        let idx = data & DATA_MASK_VALUE24;
+
+        if (typ === DATA_TYPE_HEAP_OBJECT) {
+
+            let mho = this.heap.getObject(idx);
+
+            if (mho.isNothing())
+                return nullErr(data);
+
+            return right(mho.get());
+
+        } else {
+
+            return wrongType(DATA_TYPE_HEAP_OBJECT, typ);
+
+        }
 
     }
 
@@ -417,5 +428,14 @@ export class StackFrame implements Frame {
 
 }
 
-const nullErr = (data: Data): Either<Err, PVM_Value> =>
+const nullErr = <T>(data: Data): Either<Err, T> =>
     left(new error.NullPointerErr(data));
+
+const wrongType = <T>(expect: number, got: number): Either<Err, T> =>
+    left(new error.UnexpectedDataType(expect, got));
+
+const notAFunction = <T>(name: string): Either<Err, T> =>
+    left(new error.InvalidFunctionErr(name));
+
+const missingSymbol = <T>(data: Data): Either<Err, T> =>
+    left(new error.MissingSymbolErr(data));

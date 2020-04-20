@@ -2,54 +2,59 @@ import { nothing, Maybe } from '@quenk/noni/lib/data/maybe';
 import { Mock } from '@quenk/test/lib/mock';
 
 import {
-    HeapEntry,
-    HeapReference,
-    HeapValue
-} from "../../../../../lib/actor/system/vm/runtime/heap";
+    HeapObject
+} from '../../../../../lib/actor/system/vm/runtime/heap/object';
 import {
-    DATA_TYPE_HEAP
-} from '../../../../../lib/actor/system/vm/runtime/stack/frame';
+    Heap,
+    HeapAddress
+} from '../../../../../lib/actor/system/vm/runtime/heap';
 import {
     DATA_TYPE_HEAP_STRING
 } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
-import { StringReference } from '../../../../../lib/actor/system/vm/runtime/heap';
+import { PTValue } from '../../../../../lib/actor/system/vm/type';
 
-export class HeapImpl {
+export class HeapImpl implements Heap {
 
     constructor(
-        public pool: HeapEntry[] = [],
+        public objects: HeapObject[] = [],
         public strings: string[] = []) { }
 
     mock = new Mock();
 
-    add(h: HeapEntry): HeapReference {
+    addObject(h: HeapObject): HeapAddress {
 
-        return this.mock.invoke<HeapReference>('add', [h], DATA_TYPE_HEAP | 0);
+        return this.mock.invoke<HeapAddress>('addObject', [h], 0);
 
     }
 
-    addString(value: string): HeapReference {
+    addString(value: string): HeapAddress {
 
-        return this.mock.invoke<HeapReference>('addString', [value],
+        return this.mock.invoke<HeapAddress>('addString', [value],
             DATA_TYPE_HEAP_STRING | 0);
 
     }
 
-    get(r: HeapReference): Maybe<HeapEntry> {
+    getObject(r: HeapAddress): Maybe<HeapObject> {
 
-        return this.mock.invoke('get', [r], nothing());
+        return this.mock.invoke('getObject', [r], nothing());
 
     }
 
-    getString(r: StringReference): string {
+    getString(r: HeapAddress): string {
 
         return this.mock.invoke('getString', [r], '');
 
     }
 
-    ref(v: HeapValue): Maybe<HeapReference> {
+    getAddress(v: PTValue): HeapAddress {
 
-        return this.mock.invoke('ref', [v], nothing());
+        return this.mock.invoke('getAddress', [v], 0);
+
+    }
+
+    exists(o: HeapObject): boolean {
+
+        return this.mock.invoke('exists', [o], false);
 
     }
 

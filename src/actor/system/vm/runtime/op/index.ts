@@ -12,7 +12,7 @@ import {
     DATA_TYPE_STRING,
     DATA_TYPE_LOCAL
 } from '../stack/frame';
-import { PVM_Value } from '../../script';
+import { PTValue } from '../../type';
 import { Runtime, Operand } from '../';
 
 export const OP_CODE_RANGE_LOW = 0x1000000;
@@ -24,7 +24,7 @@ export const NOP = OP_CODE_RANGE_STEP;
 export const PUSHUI8 = OP_CODE_RANGE_STEP * 2;
 export const PUSHUI16 = OP_CODE_RANGE_STEP * 3;
 export const PUSHUI32 = OP_CODE_RANGE_STEP * 4;
-export const PUSHSTR = OP_CODE_RANGE_STEP * 5;
+export const LDS = OP_CODE_RANGE_STEP * 5;
 export const LDN = OP_CODE_RANGE_STEP * 6;
 export const DUP = OP_CODE_RANGE_STEP * 15;
 export const STORE = OP_CODE_RANGE_STEP * 16;
@@ -141,14 +141,14 @@ export const opcodes: OpcodeInfos = {
 
     },
 
-    [PUSHSTR]: {
+    [LDS]: {
 
-        name: 'pushstr',
+        name: 'lds',
 
-        handler: base.pushstr,
+        handler: base.lds,
 
         log: (_: Runtime, f: Frame, oper: Operand) =>
-            ['pushstr', oper, eToLog(f.resolve(DATA_TYPE_STRING | oper))]
+            ['lds', oper, eToLog(f.resolve(DATA_TYPE_STRING | oper))]
 
     },
 
@@ -387,7 +387,7 @@ export const opcodes: OpcodeInfos = {
 
 };
 
-const eToLog = (e: Either<Err, PVM_Value>) => e.isLeft() ?
+const eToLog = (e: Either<Err, PTValue>) => e.isLeft() ?
     e.takeLeft().message : e.takeRight();
 
 /**
