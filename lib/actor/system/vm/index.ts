@@ -328,7 +328,7 @@ export class PVM<S extends System> implements Platform, Actor {
             mRouter :
             this.getRuntime(to).map(r => r.context)
 
-        //routers revceive enveloped messages.
+        //routers receive enveloped messages.
         let actualMessage = mRouter.isJust() ?
             new Envelope(to, from, msg) : msg;
 

@@ -4,10 +4,12 @@ import { Flags } from '../../../flags';
 import { Address } from '../../../address';
 import { Instance } from '../../../';
 import { Template } from '../template';
+import { PTBoolean } from '../type';
+import { Runtime } from './';
 /**
  * Receiver
  */
-export declare type Receiver = (m: Message) => boolean;
+export declare type Receiver = (r: Runtime, m: Message) => PTBoolean;
 /**
  * ErrorHandler processes errors that come up during an actor execution
  * or raised by a child.

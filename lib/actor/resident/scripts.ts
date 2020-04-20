@@ -1,25 +1,24 @@
 import * as op from '../system/vm/runtime/op';
 
 import {
-    ForeignFunInfo,
-    TYPE_TEMPLATE,
-    TYPE_OBJECT,
-    TYPE_STRING,
-    TYPE_VOID
+    NewForeignFunInfo,
+    objectType
 } from '../system/vm/script/info';
+import { ESObject } from '../system/vm/runtime/heap/object/es';
 import { Script, Constants } from '../system/vm/script';
+import { Runtime } from '../system/vm/runtime';
 import { Template } from '../template';
 import { System } from '../system';
 import { Address } from '../address';
 import { Message } from '../message';
+import { isObject } from '@quenk/noni/lib/data/type';
 
 /**
  * Spawn spawns a single child actor from a template.
  */
 export class Spawn<S extends System> implements Script {
 
-    constructor(
-        public template: Template<S>) { }
+    constructor(public template: Template<S>) { }
 
     name = '<spawn>';
 
@@ -29,12 +28,11 @@ export class Spawn<S extends System> implements Script {
 
     info = [
 
-        new ForeignFunInfo(
+        new NewForeignFunInfo(
             'getTemp',
             0,
-            TYPE_TEMPLATE,
-            false,
-            () => this.template)
+            (r: Runtime) => r.heap.addObject(
+                new ESObject(r.heap, objectType, this.template)))
 
     ];
 
@@ -85,20 +83,17 @@ export class Tell implements Script {
 
     info = [
 
-        new ForeignFunInfo(
+        new NewForeignFunInfo(
             'getAddress',
             0,
-            TYPE_OBJECT,
-            false,
             () => this.to),
 
-        new ForeignFunInfo(
+        new NewForeignFunInfo(
             'getMessage',
             0,
-            TYPE_OBJECT,
-            false,
-            () => this.msg)
-
+            (r: Runtime) => isObject(this.msg) ?
+                r.heap.addObject(new ESObject(r.heap, objectType, this.msg)) :
+                this.msg)
     ];
 
     code = [
@@ -126,12 +121,10 @@ export class Receive implements Script {
 
     info = [
 
-        new ForeignFunInfo(
+        new NewForeignFunInfo(
             'receiver',
             0,
-            TYPE_VOID,
-            false,
-            this.f),
+            (_: Runtime, m: Message) => Number(this.f(m)))
 
     ];
 
@@ -183,11 +176,9 @@ export class Raise implements Script {
 
     info = [
 
-        new ForeignFunInfo(
+        new NewForeignFunInfo(
             'getMessage',
             0,
-            TYPE_STRING,
-            false,
             () => this.msg)
 
     ];
@@ -216,11 +207,9 @@ export class Kill implements Script {
 
     info = [
 
-        new ForeignFunInfo(
+        new NewForeignFunInfo(
             'getAddress',
             0,
-            TYPE_STRING,
-            false,
             () => this.addr)
 
     ];

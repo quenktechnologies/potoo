@@ -3,7 +3,7 @@ import * as error from '../error';
 import { make } from '@quenk/noni/lib/data/array';
 
 import { Frame, DATA_MAX_SAFE_UINT32 } from '../stack/frame';
-import { Runtime, Operand, OperandU16 } from '../';
+import { Runtime, Operand } from '../';
 
 /**
  * nop does nothing.
@@ -51,27 +51,25 @@ export const pushui32 = (_: Runtime, f: Frame, args: Operand) => {
 }
 
 /**
- * pushstr pushes a string onto the stack.
+ * lds loads a string from the constant pool onto the stack.
  *
  * Stack:
  *  -> <string>
  */
-export const pushstr = (_: Runtime, f: Frame, args: Operand) => {
+export const lds = (_: Runtime, f: Frame, idx: Operand) => {
 
-    f.pushString(args);
+    f.pushString(idx);
 
 }
 
 /**
- * ldn loads a named symbol from the info section to on to the stack.
- *
- * Stack:
+ * ldn loads an info object from the compiled script.
  *
  * -> <value>
  */
-export const ldn = (_: Runtime, f: Frame, idx: OperandU16) => {
+export const ldn = (_: Runtime, f: Frame, idx: Operand) => {
 
-    f.pushSymbol(idx);
+    f.pushName(idx);
 
 }
 

@@ -1,4 +1,5 @@
 import { Address } from '../../../address';
+import { TypeInfo } from '../script/info';
 /**
  * Error
  */
@@ -56,7 +57,10 @@ export declare class NullPointerErr extends Error {
     data: number;
     constructor(data: number);
 }
-export declare class TypeErr extends Error {
+/**
+ * UnexpectedDataType
+ */
+export declare class UnexpectedDataType extends Error {
     expected: number;
     got: number;
     constructor(expected: number, got: number);
@@ -114,4 +118,33 @@ export declare class IntegerOverflowErr extends Error {
  */
 export declare class StackEmptyErr extends Error {
     constructor();
+}
+/**
+ * InvalidPropertyIndex
+ */
+export declare class InvalidPropertyIndex extends Error {
+    cons: TypeInfo;
+    idx: number;
+    constructor(cons: TypeInfo, idx: number);
+}
+/**
+ * MissingInfoErr
+ */
+export declare class MissingInfoErr extends Error {
+    idx: number;
+    constructor(idx: number);
+}
+/**
+ * InvalidConstructorErr
+ */
+export declare class InvalidConstructorErr extends Error {
+    name: string;
+    constructor(name: string);
+}
+/**
+ * InvalidFunctionErr
+ */
+export declare class InvalidFunctionErr extends Error {
+    name: string;
+    constructor(name: string);
 }

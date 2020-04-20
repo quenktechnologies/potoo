@@ -1,11 +1,13 @@
 import { Either } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
+import { Script } from '../../script';
 import { Context } from '../context';
-import { Script, PVM_Value, PVM_Template, PVM_Object, PVM_Function } from '../../script';
-import { Instruction, OperandU8, OperandU16, Operand } from '../';
+import { HeapObject } from '../heap/object';
 import { Heap } from '../heap';
-import { ConstructorInfo } from '../../script/info';
+import { Instruction, Operand } from '../';
+import { PTValue } from '../../type';
+import { FunInfo, Info } from '../../script/info';
 export declare const DATA_RANGE_TYPE_HIGH = 4026531840;
 export declare const DATA_RANGE_TYPE_LOW = 16777216;
 export declare const DATA_RANGE_TYPE_STEP = 16777216;
@@ -18,11 +20,14 @@ export declare const DATA_MAX_SIZE = 4294967295;
 export declare const DATA_MAX_SAFE_UINT32 = 2147483647;
 export declare const DATA_TYPE_STRING: number;
 export declare const DATA_TYPE_INFO: number;
-export declare const DATA_TYPE_HEAP: number;
+export declare const DATA_TYPE_HEAP_OBJECT: number;
 export declare const DATA_TYPE_HEAP_STRING: number;
 export declare const DATA_TYPE_LOCAL: number;
 export declare const DATA_TYPE_MAILBOX: number;
 export declare const DATA_TYPE_SELF: number;
+export declare const BYTE_CONSTANT_NUM = 65536;
+export declare const BYTE_CONSTANT_STR = 131072;
+export declare const BYTE_CONSTANT_INFO = 196608;
 /**
  * Data is the type of values that can appear on a Frame's data stack.
  *
@@ -88,11 +93,11 @@ export interface Frame {
     /**
      * pushUInt8 pushes an unsigned 8bit integer onto the data stack.
      */
-    pushUInt8(value: OperandU8): Frame;
+    pushUInt8(value: Operand): Frame;
     /**
      * pushUInt16 pushes an unsigned 16bit integer onto the data stack.
      */
-    pushUInt16(value: OperandU16): Frame;
+    pushUInt16(value: Operand): Frame;
     /**
      * pushUInt32 pushes an unsigned 32bit integer onto the data stack.
      */
@@ -102,9 +107,9 @@ export interface Frame {
      */
     pushString(idx: Operand): Frame;
     /**
-     * pushSymbol pushes a symbol from the info table at idx onto the stack.
+     * pushName pushes a named constant from the info section onto the stack.
      */
-    pushSymbol(idx: OperandU16): Frame;
+    pushName(idx: Operand): Frame;
     /**
      * pushMessage from the mailbox onto the stack.
      */
@@ -120,17 +125,12 @@ export interface Frame {
      */
     peek(n?: number): Maybe<Data>;
     /**
-     * peekConstructor peeks and resolves the constructor for the object
-     * reference at the top of the stack.
-     */
-    peekConstructor(): Either<Err, ConstructorInfo>;
-    /**
      * resolve a value from its reference.
      *
      * An error will be produced if the value cannot be resolved.
      * Do not use this method to retreive uint8,uint16 or uint32.
      */
-    resolve(data: Data): Either<Err, PVM_Value>;
+    resolve(data: Data): Either<Err, PTValue>;
     /**
      * pop the top most value from the data stack.
      *
@@ -140,23 +140,23 @@ export interface Frame {
     /**
      * popValue pops and attempts to resolve the top most value of the data stack.
      */
-    popValue(): Either<Err, PVM_Value>;
+    popValue(): Either<Err, PTValue>;
     /**
      * popString from the top of the data stack.
      */
     popString(): Either<Err, string>;
     /**
+     * popName pops a named object from the top of the data stack.
+     */
+    popName(): Either<Err, Info>;
+    /**
      * popFunction from the top of the data stack.
      */
-    popFunction(): Either<Err, PVM_Function>;
+    popFunction(): Either<Err, FunInfo>;
     /**
-     * popObject from the top of the data stack.
+     * popObject provides the entry for an object in the heap.
      */
-    popObject(): Either<Err, PVM_Object>;
-    /**
-     * popTemplate from the top of the data stack.
-     */
-    popTemplate(): Either<Err, PVM_Template>;
+    popObject(): Either<Err, HeapObject>;
     /**
      * duplicate the top of the stack.
      */
@@ -176,21 +176,20 @@ export declare class StackFrame implements Frame {
     ip: number;
     constructor(name: string, script: Script, context: Context, heap: Heap, code?: Instruction[], data?: Data[], locals?: Data[], ip?: number);
     push(d: Data): Frame;
-    pushUInt8(value: OperandU8): Frame;
-    pushUInt16(value: OperandU16): Frame;
+    pushUInt8(value: Operand): Frame;
+    pushUInt16(value: Operand): Frame;
     pushUInt32(value: Operand): Frame;
     pushString(idx: Operand): Frame;
-    pushSymbol(idx: OperandU16): Frame;
+    pushName(idx: Operand): Frame;
     pushMessage(): Frame;
     pushSelf(): Frame;
     peek(n?: number): Maybe<Data>;
-    peekConstructor(): Either<Err, ConstructorInfo>;
-    resolve(data: Data): Either<Err, PVM_Value>;
+    resolve(data: Data): Either<Err, PTValue>;
     pop(): Data;
-    popValue(): Either<Err, PVM_Value>;
+    popValue(): Either<Err, PTValue>;
     popString(): Either<Err, string>;
-    popFunction(): Either<Err, PVM_Function>;
-    popObject(): Either<Err, PVM_Object>;
-    popTemplate(): Either<Err, PVM_Template>;
+    popName(): Either<Err, Info>;
+    popFunction(): Either<Err, FunInfo>;
+    popObject(): Either<Err, HeapObject>;
     duplicate(): Frame;
 }

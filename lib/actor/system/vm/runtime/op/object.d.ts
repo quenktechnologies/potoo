@@ -3,12 +3,10 @@ import { Runtime } from '../';
 /**
  * getprop retrieves a property from an object.
  *
- * If the property is not already on the stack it will be entered there.
- *
  * Stack:
  *  <objectref> -> <value>
  */
-export declare const getprop: (r: Runtime, f: Frame, idx: number) => number | void | Frame;
+export declare const getprop: (r: Runtime, f: Frame, idx: number) => void;
 /**
  * arlength pushes the length of an array on the top of the stack onto
  * the stack.

@@ -1,84 +1,65 @@
+import * as types from '../type';
+
 import { Instruction } from '../runtime';
-import { PVM_Value } from './';
-
-export const INFO_TYPE_FUNCTION = 'f';
-export const INFO_TYPE_VALUE = 'v';
-export const INFO_TYPE_CONSTRUCTOR = 'c';
-
-export const TYPE_VOID = 0;
-export const TYPE_UINT8 = 1;
-export const TYPE_UINT16 = 2;
-export const TYPE_UINT32 = 3;
-export const TYPE_STRING = 10;
-export const TYPE_ARRAY = 20;
-export const TYPE_OBJECT = 21;
-export const TYPE_TEMPLATE = 32;
+import { ForeignFun, TypeDescriptor } from '../type';
 
 /**
- * Info objects provide information about named symbols appearing in the
- * scripts source.
- *
- * These are used by various opcodes.
+ * Info objects provide important information about named identifiers appearing
+ * in the compiled source.
  */
-export type Info
-    = FunInfo
-    | ValueInfo
-    ;
-
-/**
- * BaseInfo
- */
-export interface BaseInfo {
+export interface Info {
 
     /**
-     *infoType indicates the type of *Info object.
+     * type is the TypeInfo object of the indentifier.
      */
-    infoType: string,
+    type: TypeInfo,
 
     /**
-     * type indicates the type of the symbol (or return type for functions).
-     *
-     * This is an index into into the pool of symbols or a builtin type number
-     * if the builtin value is true.
-     */
-    type: number,
-
-    /**
-     * builtin indicates whether the type is a builtin primitive or 
-     * originates from a user defined constructor.
-     */
-    builtin: boolean,
-
-    /**
-     * name of the symbol as it appears in source text.
+     * name of the identifier as it appears in source text.
      */
     name: string,
 
     /**
-     * foreign indicates whether the implementation is foreign (native).
+     * descriptor
      */
-    foreign: boolean
+    descriptor: TypeDescriptor
 
 }
 
 /**
- * ValueInfo stores information about variables at the top level script scope.
+ * TypeInfo holds type information about a named identifier.
+ *
+ * In effect, it describes the constructor of a symbol and is itself a symbol.
  */
-export interface ValueInfo extends BaseInfo {
+export interface TypeInfo extends Info {
 
     /**
-     * value (foreign only).
-     *
-     * This is the value of the global.
+     * properties is an array of property info objects that describe the 
+     * properties of objects created with this constructor.
      */
-    value?: PVM_Value
+    properties: PropInfo[]
 
 }
 
 /**
- * FunInfo maintains information about compiled functions in a script.
+ * ArrayTypeInfo is a TypeInfo for array types.
+ *
+ * This structure exists because arrays can be recursive and may need to
+ * retain nested type information on their elements.
  */
-export interface FunInfo extends BaseInfo {
+export interface ArrayTypeInfo extends TypeInfo {
+
+    /**
+     * elements indicates the type of the array's elements.
+     */
+    elements: TypeInfo
+
+}
+
+/**
+ * FunInfo maintains information about compiled functions.
+ */
+export interface FunInfo extends Info {
 
     /**
      * argc is the argument count of the function.
@@ -86,37 +67,28 @@ export interface FunInfo extends BaseInfo {
     argc: number,
 
     /**
-     * type indicates the return type of the function.
-     *
-     * This is either a number indicating one of the primitive/builtin types
-     * or a pointer into the cons section of the script.
-     *
-     * TODO: Review the feasibility of this pointer.
-     */
-    type: number,
-
-    /**
-     * code section of the function.
+     * code section.
      */
     code: Instruction[],
 
     /**
-     * exec (foreign only).
+     * foreign indicates whether the function is implemented using a JS
+     * function.
+     * If so, the exec property must be provided.
      */
-    exec?: Function
+    foreign: boolean
 
 }
 
 /**
- * ConstructorInfo holds information about constructor types.
+ * ForeignFunInfo maintains information about foreigin functions.
  */
-export interface ConstructorInfo extends FunInfo {
+export interface ForeignFunInfo extends FunInfo {
 
     /**
-     * properties is an array of property info objects that describe the 
-     * properties of objects created with this constructor.
+     * exec (foreign only).
      */
-    properties: PropInfo[]
+    exec: ForeignFun
 
 }
 
@@ -131,41 +103,184 @@ export interface PropInfo {
     name: string,
 
     /**
-     * has the same meaning as in FunInfo.
+     * type information about the property.
      */
-    type: number
+    type: TypeInfo
 
 }
 
 /**
- * PVMValueInfo
+ * VoidInfo
  */
-export class PVMValueInfo implements ValueInfo {
+export class VoidInfo implements Info {
+
+    constructor(public name: string) { }
+
+    type = voidType;
+
+    descriptor = types.TYPE_VOID;
+
+}
+
+/**
+ * NewUInt8Info
+ */
+export class NewUInt8Info implements Info {
+
+    constructor(public name: string) { }
+
+    type = uint8Type;
+
+    descriptor = types.TYPE_UINT8;
+
+}
+
+/**
+ * NewUInt16Info
+ */
+export class NewUInt16Info implements Info {
+
+    constructor(public name: string) { }
+
+    type = uint16Type;
+
+    descriptor = types.TYPE_UINT16;
+
+}
+
+/**
+ * NewUInt32Info
+ */
+export class NewUInt32Info implements Info {
+
+    constructor(public name: string) { }
+
+    type = uint32Type;
+
+    descriptor = types.TYPE_UINT32;
+
+}
+
+/**
+ * NewInt8Info
+ */
+export class NewInt8Info implements Info {
+
+    constructor(public name: string) { }
+
+    type = int8Type;
+
+    descriptor = types.TYPE_INT8;
+
+}
+
+/**
+ * NewInt16Info
+ */
+export class NewInt16Info implements Info {
+
+    constructor(public name: string) { }
+
+    type = int16Type;
+
+    descriptor = types.TYPE_INT16;
+
+}
+
+/**
+ * NewInt32Info
+ */
+export class Int32Info implements Info {
+
+    constructor(public name: string) { }
+
+    type = int32Type;
+
+    descriptor = types.TYPE_INT32;
+
+}
+
+/**
+ * NewBooleanInfo
+ */
+export class NewBooleanInfo implements Info {
+
+    constructor(public name: string) { }
+
+    type = booleanType;
+
+    descriptor = types.TYPE_BOOLEAN;
+
+}
+
+/**
+ * NewStringInfo
+ */
+export class NewStringInfo implements Info {
+
+    constructor(public name: string) { }
+
+    type = stringType;
+
+    descriptor = types.TYPE_STRING;
+
+}
+
+/**
+ * NewObjectInfo
+ */
+export class NewObjectInfo implements Info {
+
+    constructor(public name: string) { }
+
+    type = objectType;
+
+    descriptor = types.TYPE_OBJECT;
+
+}
+
+/**
+ * NewArrayInfo
+ */
+export class NewArrayInfo implements Info {
+
+    constructor(public name: string, public type: ArrayTypeInfo) { }
+
+    descriptor = types.TYPE_ARRAY;
+
+}
+
+/**
+ * NewFunInfo
+ */
+export class NewFunInfo implements FunInfo {
 
     constructor(
         public name: string,
-        public type: number,
-        public builtin: boolean,
+        public argc: number,
         public code: Instruction[]) { }
 
-    infoType = INFO_TYPE_VALUE;
+    type = funType;
+
+    descriptor = types.TYPE_FUN;
 
     foreign = false;
 
 }
 
 /**
- * ForeignValueInfo
+ * NewForeignFunInfo
  */
-export class ForeignValueInfo implements ValueInfo {
+export class NewForeignFunInfo implements FunInfo {
 
     constructor(
         public name: string,
-        public type: number,
-        public builtin: boolean,
-        public value: PVM_Value) { }
+        public argc: number,
+        public exec: ForeignFun) { }
 
-    infoType = INFO_TYPE_VALUE;
+    type = funType;
+
+    descriptor = types.TYPE_FUN;
 
     foreign = true;
 
@@ -174,89 +289,108 @@ export class ForeignValueInfo implements ValueInfo {
 }
 
 /**
- * PVMFunInfo
+ * NewTypeInfo
  */
-export class PVMFunInfo implements FunInfo {
+export class NewTypeInfo implements TypeInfo {
 
     constructor(
         public name: string,
         public argc: number,
-        public type: number,
-        public builtin: boolean,
-        public code: Instruction[]) { }
-
-    infoType = INFO_TYPE_FUNCTION;
-
-    foreign = false;
-
-}
-
-/**
- * ForeignFunInfo
- */
-export class ForeignFunInfo implements FunInfo {
-
-    constructor(
-        public name: string,
-        public argc: number,
-        public type: number,
-        public builtin: boolean,
-        public exec: Function) { }
-
-    infoType = INFO_TYPE_FUNCTION;
-
-    foreign = true;
-
-    code = [];
-
-}
-
-/**
- * PVMConsInfo
- */
-export class PVMConsInfo implements ConstructorInfo {
-
-    constructor(
-        public name: string,
-        public argc: number,
-        public type: number,
-        public builtin: boolean,
-        public properties: PropInfo[]) { }
-
-    infoType = INFO_TYPE_CONSTRUCTOR;
-
-    foreign = false;
-
-    code = [];
-
-}
-
-/**
- * ForeignConsInfo
- */
-export class ForeignConsInfo implements ConstructorInfo {
-
-    constructor(
-        public name: string,
-        public argc: number,
-        public type: number,
-        public builtin: boolean,
         public properties: PropInfo[],
-        public exec: Function) { }
+        public descriptor = types.TYPE_OBJECT) { }
 
-    infoType = INFO_TYPE_CONSTRUCTOR;
-
-    foreign = true;
+    type = funType;
 
     code = [];
 
 }
 
 /**
- * PVMPropInfo
+ * NewArrayTypeInfo
  */
-export class PVMPropInfo implements PropInfo {
+export class NewArrayTypeInfo implements TypeInfo {
 
-    constructor(public name: string, public type: number) { }
+    constructor(
+        public name: string,
+        public elements: TypeInfo) { }
+
+    type = funType;
+
+    argc = 0;
+
+    properties = [];
+
+    code = [];
+
+    descriptor = types.TYPE_ARRAY;
 
 }
+
+/**
+ * NewPropInfo
+ */
+export class NewPropInfo implements PropInfo {
+
+    constructor(public name: string, public type: TypeInfo) { }
+
+}
+
+/**
+ * voidType constructor.
+ */
+export const voidType = new NewTypeInfo('void', 0, [], types.TYPE_VOID);
+
+/**
+ * int8Type constructor.
+ */
+export const int8Type = new NewTypeInfo('int8', 1, [], types.TYPE_INT8);
+
+/**
+ * int16Type constructor.
+ */
+export const int16Type = new NewTypeInfo('int16', 1, [], types.TYPE_INT16);
+
+/**
+ * int32type constructor.
+ */
+export const int32Type = new NewTypeInfo('int32', 1, [], types.TYPE_INT32);
+
+/**
+ * uint8Type constructor.
+ */
+export const uint8Type = new NewTypeInfo('uint8', 1, [], types.TYPE_UINT8);
+
+/**
+ * uint16Type constructor.
+ */
+export const uint16Type = new NewTypeInfo('uint16', 1, [], types.TYPE_UINT16);
+
+/**
+ * uint32type constructor.
+ */
+export const uint32Type = new NewTypeInfo('uint32', 1, [], types.TYPE_UINT32);
+
+/**
+ * booleanType constructor.
+ */
+export const booleanType = new NewTypeInfo('boolean', 1, [], types.TYPE_BOOLEAN);
+
+/**
+ * stringType constructor.
+ */
+export const stringType = new NewTypeInfo('string', 1, [], types.TYPE_STRING);
+
+/**
+ * arrayType constructor.
+ */
+export const arrayType = new NewTypeInfo('array', 0, [], types.TYPE_ARRAY);
+
+/**
+ * objectCons
+ */
+export const objectType = new NewTypeInfo('object', 0, [], types.TYPE_OBJECT);
+
+/**
+ * funType
+ */
+export const funType = new NewTypeInfo('function', 0, [], types.TYPE_FUN);

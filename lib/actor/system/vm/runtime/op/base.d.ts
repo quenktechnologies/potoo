@@ -30,16 +30,14 @@ export declare const pushui16: (_: Runtime, f: Frame, args: number) => void;
  */
 export declare const pushui32: (_: Runtime, f: Frame, args: number) => void;
 /**
- * pushstr pushes a string onto the stack.
+ * lds loads a string from the constant pool onto the stack.
  *
  * Stack:
  *  -> <string>
  */
-export declare const pushstr: (_: Runtime, f: Frame, args: number) => void;
+export declare const lds: (_: Runtime, f: Frame, idx: number) => void;
 /**
- * ldn loads a named symbol from the info section to on to the stack.
- *
- * Stack:
+ * ldn loads an info object from the compiled script.
  *
  * -> <value>
  */

@@ -1,98 +1,74 @@
 import { Instruction } from '../runtime';
-import { PVM_Value } from './';
-export declare const INFO_TYPE_FUNCTION = "f";
-export declare const INFO_TYPE_VALUE = "v";
-export declare const INFO_TYPE_CONSTRUCTOR = "c";
-export declare const TYPE_VOID = 0;
-export declare const TYPE_UINT8 = 1;
-export declare const TYPE_UINT16 = 2;
-export declare const TYPE_UINT32 = 3;
-export declare const TYPE_STRING = 10;
-export declare const TYPE_ARRAY = 20;
-export declare const TYPE_OBJECT = 21;
-export declare const TYPE_TEMPLATE = 32;
+import { ForeignFun, TypeDescriptor } from '../type';
 /**
- * Info objects provide information about named symbols appearing in the
- * scripts source.
- *
- * These are used by various opcodes.
+ * Info objects provide important information about named identifiers appearing
+ * in the compiled source.
  */
-export declare type Info = FunInfo | ValueInfo;
-/**
- * BaseInfo
- */
-export interface BaseInfo {
+export interface Info {
     /**
-     *infoType indicates the type of *Info object.
+     * type is the TypeInfo object of the indentifier.
      */
-    infoType: string;
+    type: TypeInfo;
     /**
-     * type indicates the type of the symbol (or return type for functions).
-     *
-     * This is an index into into the pool of symbols or a builtin type number
-     * if the builtin value is true.
-     */
-    type: number;
-    /**
-     * builtin indicates whether the type is a builtin primitive or
-     * originates from a user defined constructor.
-     */
-    builtin: boolean;
-    /**
-     * name of the symbol as it appears in source text.
+     * name of the identifier as it appears in source text.
      */
     name: string;
     /**
-     * foreign indicates whether the implementation is foreign (native).
+     * descriptor
      */
-    foreign: boolean;
+    descriptor: TypeDescriptor;
 }
 /**
- * ValueInfo stores information about variables at the top level script scope.
+ * TypeInfo holds type information about a named identifier.
+ *
+ * In effect, it describes the constructor of a symbol and is itself a symbol.
  */
-export interface ValueInfo extends BaseInfo {
-    /**
-     * value (foreign only).
-     *
-     * This is the value of the global.
-     */
-    value?: PVM_Value;
-}
-/**
- * FunInfo maintains information about compiled functions in a script.
- */
-export interface FunInfo extends BaseInfo {
-    /**
-     * argc is the argument count of the function.
-     */
-    argc: number;
-    /**
-     * type indicates the return type of the function.
-     *
-     * This is either a number indicating one of the primitive/builtin types
-     * or a pointer into the cons section of the script.
-     *
-     * TODO: Review the feasibility of this pointer.
-     */
-    type: number;
-    /**
-     * code section of the function.
-     */
-    code: Instruction[];
-    /**
-     * exec (foreign only).
-     */
-    exec?: Function;
-}
-/**
- * ConstructorInfo holds information about constructor types.
- */
-export interface ConstructorInfo extends FunInfo {
+export interface TypeInfo extends Info {
     /**
      * properties is an array of property info objects that describe the
      * properties of objects created with this constructor.
      */
     properties: PropInfo[];
+}
+/**
+ * ArrayTypeInfo is a TypeInfo for array types.
+ *
+ * This structure exists because arrays can be recursive and may need to
+ * retain nested type information on their elements.
+ */
+export interface ArrayTypeInfo extends TypeInfo {
+    /**
+     * elements indicates the type of the array's elements.
+     */
+    elements: TypeInfo;
+}
+/**
+ * FunInfo maintains information about compiled functions.
+ */
+export interface FunInfo extends Info {
+    /**
+     * argc is the argument count of the function.
+     */
+    argc: number;
+    /**
+     * code section.
+     */
+    code: Instruction[];
+    /**
+     * foreign indicates whether the function is implemented using a JS
+     * function.
+     * If so, the exec property must be provided.
+     */
+    foreign: boolean;
+}
+/**
+ * ForeignFunInfo maintains information about foreigin functions.
+ */
+export interface ForeignFunInfo extends FunInfo {
+    /**
+     * exec (foreign only).
+     */
+    exec: ForeignFun;
 }
 /**
  * PropInfo holds information about a property on an object.
@@ -103,96 +79,212 @@ export interface PropInfo {
      */
     name: string;
     /**
-     * has the same meaning as in FunInfo.
+     * type information about the property.
      */
-    type: number;
+    type: TypeInfo;
 }
 /**
- * PVMValueInfo
+ * VoidInfo
  */
-export declare class PVMValueInfo implements ValueInfo {
+export declare class VoidInfo implements Info {
     name: string;
-    type: number;
-    builtin: boolean;
+    constructor(name: string);
+    type: NewTypeInfo;
+    descriptor: number;
+}
+/**
+ * NewUInt8Info
+ */
+export declare class NewUInt8Info implements Info {
+    name: string;
+    constructor(name: string);
+    type: NewTypeInfo;
+    descriptor: number;
+}
+/**
+ * NewUInt16Info
+ */
+export declare class NewUInt16Info implements Info {
+    name: string;
+    constructor(name: string);
+    type: NewTypeInfo;
+    descriptor: number;
+}
+/**
+ * NewUInt32Info
+ */
+export declare class NewUInt32Info implements Info {
+    name: string;
+    constructor(name: string);
+    type: NewTypeInfo;
+    descriptor: number;
+}
+/**
+ * NewInt8Info
+ */
+export declare class NewInt8Info implements Info {
+    name: string;
+    constructor(name: string);
+    type: NewTypeInfo;
+    descriptor: number;
+}
+/**
+ * NewInt16Info
+ */
+export declare class NewInt16Info implements Info {
+    name: string;
+    constructor(name: string);
+    type: NewTypeInfo;
+    descriptor: number;
+}
+/**
+ * NewInt32Info
+ */
+export declare class Int32Info implements Info {
+    name: string;
+    constructor(name: string);
+    type: NewTypeInfo;
+    descriptor: number;
+}
+/**
+ * NewBooleanInfo
+ */
+export declare class NewBooleanInfo implements Info {
+    name: string;
+    constructor(name: string);
+    type: NewTypeInfo;
+    descriptor: number;
+}
+/**
+ * NewStringInfo
+ */
+export declare class NewStringInfo implements Info {
+    name: string;
+    constructor(name: string);
+    type: NewTypeInfo;
+    descriptor: number;
+}
+/**
+ * NewObjectInfo
+ */
+export declare class NewObjectInfo implements Info {
+    name: string;
+    constructor(name: string);
+    type: NewTypeInfo;
+    descriptor: number;
+}
+/**
+ * NewArrayInfo
+ */
+export declare class NewArrayInfo implements Info {
+    name: string;
+    type: ArrayTypeInfo;
+    constructor(name: string, type: ArrayTypeInfo);
+    descriptor: number;
+}
+/**
+ * NewFunInfo
+ */
+export declare class NewFunInfo implements FunInfo {
+    name: string;
+    argc: number;
     code: Instruction[];
-    constructor(name: string, type: number, builtin: boolean, code: Instruction[]);
-    infoType: string;
+    constructor(name: string, argc: number, code: Instruction[]);
+    type: NewTypeInfo;
+    descriptor: number;
     foreign: boolean;
 }
 /**
- * ForeignValueInfo
+ * NewForeignFunInfo
  */
-export declare class ForeignValueInfo implements ValueInfo {
+export declare class NewForeignFunInfo implements FunInfo {
     name: string;
-    type: number;
-    builtin: boolean;
-    value: PVM_Value;
-    constructor(name: string, type: number, builtin: boolean, value: PVM_Value);
-    infoType: string;
+    argc: number;
+    exec: ForeignFun;
+    constructor(name: string, argc: number, exec: ForeignFun);
+    type: NewTypeInfo;
+    descriptor: number;
     foreign: boolean;
     code: never[];
 }
 /**
- * PVMFunInfo
+ * NewTypeInfo
  */
-export declare class PVMFunInfo implements FunInfo {
+export declare class NewTypeInfo implements TypeInfo {
     name: string;
     argc: number;
-    type: number;
-    builtin: boolean;
-    code: Instruction[];
-    constructor(name: string, argc: number, type: number, builtin: boolean, code: Instruction[]);
-    infoType: string;
-    foreign: boolean;
-}
-/**
- * ForeignFunInfo
- */
-export declare class ForeignFunInfo implements FunInfo {
-    name: string;
-    argc: number;
-    type: number;
-    builtin: boolean;
-    exec: Function;
-    constructor(name: string, argc: number, type: number, builtin: boolean, exec: Function);
-    infoType: string;
-    foreign: boolean;
-    code: never[];
-}
-/**
- * PVMConsInfo
- */
-export declare class PVMConsInfo implements ConstructorInfo {
-    name: string;
-    argc: number;
-    type: number;
-    builtin: boolean;
     properties: PropInfo[];
-    constructor(name: string, argc: number, type: number, builtin: boolean, properties: PropInfo[]);
-    infoType: string;
-    foreign: boolean;
+    descriptor: number;
+    constructor(name: string, argc: number, properties: PropInfo[], descriptor?: number);
+    type: NewTypeInfo;
     code: never[];
 }
 /**
- * ForeignConsInfo
+ * NewArrayTypeInfo
  */
-export declare class ForeignConsInfo implements ConstructorInfo {
+export declare class NewArrayTypeInfo implements TypeInfo {
     name: string;
+    elements: TypeInfo;
+    constructor(name: string, elements: TypeInfo);
+    type: NewTypeInfo;
     argc: number;
-    type: number;
-    builtin: boolean;
-    properties: PropInfo[];
-    exec: Function;
-    constructor(name: string, argc: number, type: number, builtin: boolean, properties: PropInfo[], exec: Function);
-    infoType: string;
-    foreign: boolean;
+    properties: never[];
     code: never[];
+    descriptor: number;
 }
 /**
- * PVMPropInfo
+ * NewPropInfo
  */
-export declare class PVMPropInfo implements PropInfo {
+export declare class NewPropInfo implements PropInfo {
     name: string;
-    type: number;
-    constructor(name: string, type: number);
+    type: TypeInfo;
+    constructor(name: string, type: TypeInfo);
 }
+/**
+ * voidType constructor.
+ */
+export declare const voidType: NewTypeInfo;
+/**
+ * int8Type constructor.
+ */
+export declare const int8Type: NewTypeInfo;
+/**
+ * int16Type constructor.
+ */
+export declare const int16Type: NewTypeInfo;
+/**
+ * int32type constructor.
+ */
+export declare const int32Type: NewTypeInfo;
+/**
+ * uint8Type constructor.
+ */
+export declare const uint8Type: NewTypeInfo;
+/**
+ * uint16Type constructor.
+ */
+export declare const uint16Type: NewTypeInfo;
+/**
+ * uint32type constructor.
+ */
+export declare const uint32Type: NewTypeInfo;
+/**
+ * booleanType constructor.
+ */
+export declare const booleanType: NewTypeInfo;
+/**
+ * stringType constructor.
+ */
+export declare const stringType: NewTypeInfo;
+/**
+ * arrayType constructor.
+ */
+export declare const arrayType: NewTypeInfo;
+/**
+ * objectCons
+ */
+export declare const objectType: NewTypeInfo;
+/**
+ * funType
+ */
+export declare const funType: NewTypeInfo;

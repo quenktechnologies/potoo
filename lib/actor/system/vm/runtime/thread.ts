@@ -8,18 +8,19 @@ import { Either, right, left } from '@quenk/noni/lib/data/either';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 
 import { isGroup, Address, isChild } from '../../../address';
-import { FunInfo } from '../script/info';
-import { PVM_Value, Script } from '../script';
+import { FunInfo, ForeignFunInfo } from '../script/info';
+import { Script } from '../script';
 import { Platform } from '../';
 import { Frame, StackFrame, Data } from './stack/frame';
 import { handlers } from './op';
 import { Context } from './context';
-import { Heap, HeapEntry } from './heap';
+import { Heap } from './heap';
 import {
     Runtime,
     OPCODE_MASK,
     OPERAND_MASK
 } from './';
+import { PTValue } from '../type';
 
 /**
  * Thread is the Runtime implementation for exactly one actor.
@@ -54,16 +55,13 @@ export class Thread implements Runtime {
 
     }
 
-    invokeForeign(p: Frame, f: FunInfo, args: PVM_Value[]) {
+    invokeForeign(p: Frame, f: ForeignFunInfo, args: PTValue[]) {
 
-        //TODO: 
-        // 1) Note the type of the heap entry is the function type.
-        //    We should add some plumbing for strings, numbers etc.
-        // 2) Support async functions.   
-        p.push(this.heap.add(new HeapEntry(
-            f.type,
-            f.builtin,
-            <object>(<Function>f.exec).apply(null, args))));
+        //TODO: Support async functions.   
+
+        let val = f.exec.apply(null, [this, ...args]);
+
+        p.push(this.heap.getAddress(val));
 
     }
 
@@ -123,7 +121,7 @@ export class Thread implements Runtime {
 
     }
 
-    exec(s: Script): Maybe<PVM_Value> {
+    exec(s: Script): Maybe<PTValue> {
 
         this.fstack.push(new StackFrame('main', s, this.context, this.heap,
             s.code.slice()));
@@ -138,9 +136,9 @@ export class Thread implements Runtime {
 
     }
 
-    run(): Maybe<PVM_Value> {
+    run(): Maybe<PTValue> {
 
-        let ret: Maybe<PVM_Value> = nothing();
+        let ret: Maybe<PTValue> = nothing();
 
         while (!empty(this.fstack)) {
 

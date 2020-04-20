@@ -2,7 +2,9 @@ import * as error from '../error';
 import * as events from '../../event';
 
 import { isImmutable } from '../../../../flags';
+import { Template } from '../../template';
 import { Frame } from '../stack/frame';
+import { ForeignFunInfo } from '../../script/info';
 import { Receiver } from '../context';
 import { Runtime, Operand } from '../';
 
@@ -19,13 +21,15 @@ export const alloc = (r: Runtime, f: Frame, _: Operand) => {
 
     let eParent = f.popString();
 
-    let eTemp = f.popTemplate();
+    let eTemp = f.popObject();
 
     if (eParent.isLeft()) return r.raise(eParent.takeLeft());
 
     if (eTemp.isLeft()) return r.raise(eTemp.takeLeft());
 
-    let eresult = r.vm.allocate(eParent.takeRight(), eTemp.takeRight());
+    let temp = <Template>eTemp.takeRight().promote();
+
+    let eresult = r.vm.allocate(eParent.takeRight(), temp);
 
     if (eresult.isLeft()) {
 
@@ -106,9 +110,9 @@ export const recv = (r: Runtime, f: Frame, _: Operand) => {
 
     if (einfo.isLeft()) return r.raise(einfo.takeLeft());
 
-    let info = einfo.takeRight();
+    let info = <ForeignFunInfo>einfo.takeRight();
 
-    if (!info.foreign)
+    if (info.exec == null)
         r.raise(new Error('recv: Only foriegn functions allowed!'));
 
     r.context.behaviour.push(<Receiver>info.exec);
@@ -177,7 +181,7 @@ export const read = (r: Runtime, f: Frame, __: Operand) => {
     if (func == null)
         return r.raise(new error.NoReceiveErr(r.context.address));
 
-    if (func(msg)) {
+    if (func(r, msg)) {
 
         r.vm.trigger(r.context.address, events.EVENT_MESSAGE_READ, msg);
 

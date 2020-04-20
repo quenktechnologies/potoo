@@ -1,4 +1,4 @@
-import { ForeignFunInfo } from '../system/vm/script/info';
+import { NewForeignFunInfo } from '../system/vm/script/info';
 import { Script, Constants } from '../system/vm/script';
 import { Template } from '../template';
 import { System } from '../system';
@@ -13,7 +13,7 @@ export declare class Spawn<S extends System> implements Script {
     name: string;
     constants: Constants;
     immediate: boolean;
-    info: ForeignFunInfo[];
+    info: NewForeignFunInfo[];
     code: number[];
 }
 /**
@@ -35,7 +35,7 @@ export declare class Tell implements Script {
     constructor(to: Address, msg: Message);
     constants: Constants;
     name: string;
-    info: ForeignFunInfo[];
+    info: NewForeignFunInfo[];
     code: number[];
 }
 /**
@@ -46,7 +46,7 @@ export declare class Receive implements Script {
     constructor(f: (m: Message) => boolean);
     constants: Constants;
     name: string;
-    info: ForeignFunInfo[];
+    info: NewForeignFunInfo[];
     code: number[];
 }
 /**
@@ -67,7 +67,7 @@ export declare class Raise implements Script {
     constructor(msg: string);
     name: string;
     constants: Constants;
-    info: ForeignFunInfo[];
+    info: NewForeignFunInfo[];
     code: number[];
 }
 /**
@@ -79,6 +79,6 @@ export declare class Kill implements Script {
     constructor(addr: string);
     name: string;
     constants: Constants;
-    info: ForeignFunInfo[];
+    info: NewForeignFunInfo[];
     code: number[];
 }

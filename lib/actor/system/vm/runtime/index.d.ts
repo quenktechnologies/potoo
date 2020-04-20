@@ -5,7 +5,8 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Address } from '../../../address';
 import { FunInfo } from '../script/info';
 import { Frame } from './stack/frame';
-import { PVM_Value, Script } from '../script';
+import { Script } from '../script';
+import { PTValue } from '../type';
 import { Platform } from '../';
 import { Heap } from './heap';
 import { Context } from './context';
@@ -16,19 +17,7 @@ export declare type Opcode = number;
 /**
  * Operand
  */
-export declare type Operand = OperandU8 | OperandU16;
-/**
- * OperandU8
- */
-export declare type OperandU8 = number;
-/**
- * State type for the runtime.
- */
-export declare type State = number;
-/**
- * OperandU16
- */
-export declare type OperandU16 = number;
+export declare type Operand = number;
 /**
  * Instruction
  */
@@ -65,7 +54,7 @@ export interface Runtime {
      *
      * The frame specified is the parent frame that will receive it's result.
      */
-    invokeForeign(c: Frame, f: FunInfo, args: PVM_Value[]): void;
+    invokeForeign(c: Frame, f: FunInfo, args: PTValue[]): void;
     /**
      * invokeVM invokes a VM function.
      *
@@ -102,5 +91,5 @@ export interface Runtime {
     /**
      * exec the Script passed to the Runtime.
      */
-    exec(s: Script): Maybe<PVM_Value>;
+    exec(s: Script): Maybe<PTValue>;
 }

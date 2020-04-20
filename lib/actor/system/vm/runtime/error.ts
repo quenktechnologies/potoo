@@ -1,4 +1,5 @@
 import { Address, ADDRESS_RESTRICTED } from '../../../address';
+import { TypeInfo } from '../script/info';
 import { DATA_MAX_SAFE_UINT32 } from './stack/frame';
 
 /**
@@ -102,7 +103,10 @@ export class NullPointerErr extends Error {
 
 }
 
-export class TypeErr extends Error {
+/**
+ * UnexpectedDataType
+ */
+export class UnexpectedDataType extends Error {
 
     constructor(public expected: number, public got: number) {
 
@@ -214,5 +218,57 @@ export class StackEmptyErr extends Error {
 
     }
 
+
+}
+
+/**
+ * InvalidPropertyIndex
+ */
+export class InvalidPropertyIndex extends Error {
+
+    constructor(public cons: TypeInfo, public idx: number) {
+
+        super(`Constructor: ${cons.name}, index: ${idx}`);
+
+    }
+
+}
+
+/**
+ * MissingInfoErr
+ */
+export class MissingInfoErr extends Error {
+
+    constructor(public idx: number) {
+
+        super(`No info object index: ${idx}!`);
+
+    }
+
+}
+
+/**
+ * InvalidConstructorErr
+ */
+export class InvalidConstructorErr extends Error {
+
+    constructor(public name: string) {
+
+        super(`Named object "${name}" cannot be used as a constructor!`);
+
+    }
+
+}
+
+/**
+ * InvalidFunctionErr
+ */
+export class InvalidFunctionErr extends Error {
+
+    constructor(public name: string) {
+
+        super(`Named object "${name}" cannot be used as a function!`);
+
+    }
 
 }

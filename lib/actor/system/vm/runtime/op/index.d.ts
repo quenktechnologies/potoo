@@ -9,7 +9,7 @@ export declare const NOP = 16777216;
 export declare const PUSHUI8: number;
 export declare const PUSHUI16: number;
 export declare const PUSHUI32: number;
-export declare const PUSHSTR: number;
+export declare const LDS: number;
 export declare const LDN: number;
 export declare const DUP: number;
 export declare const STORE: number;

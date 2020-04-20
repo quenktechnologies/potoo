@@ -1,49 +1,31 @@
-import { fromNullable } from '@quenk/noni/lib/data/maybe';
-
-import { Frame, DATA_MASK_VALUE24 } from '../stack/frame';
+import { Frame, } from '../stack/frame';
 import { Runtime, Operand } from '../';
-import { HeapEntry, HeapObject } from '../heap';
-import { isNumber } from '@quenk/noni/lib/data/type';
 
 /**
  * getprop retrieves a property from an object.
- *
- * If the property is not already on the stack it will be entered there.
  *
  * Stack:
  *  <objectref> -> <value>
  */
 export const getprop = (r: Runtime, f: Frame, idx: Operand) => {
 
-    let econs = f.peekConstructor();
+    let eobj = f.popObject();
 
-    if (econs.isLeft()) return r.raise(econs.takeLeft());
+    if (eobj.isLeft())
+        return r.raise(eobj.takeLeft());
 
-    let cons = econs.takeRight();
+    let obj = eobj.takeRight();
 
-    let mprop = fromNullable(cons.properties[DATA_MASK_VALUE24 & idx]);
+    let mval = obj.get(idx);
 
-    if (mprop.isNothing()) {
+    if (mval.isJust()) {
 
-        //TODO: note this is essentially creating a null/undefined reference on 
-        // the data stack.
-        f.push(0);
+        f.push(r.heap.getAddress(mval.get()));
 
     } else {
 
-        let eobj = f.popObject();
-
-        if (eobj.isLeft()) return r.raise(eobj.takeLeft());
-
-        let obj = <HeapObject>eobj.takeRight();
-
-        let value = obj[mprop.get().name];
-
-        let mref = f.heap.ref(value);
-
-        return mref.isJust() ?
-            mref.get() :
-            f.push(f.heap.add(new HeapEntry(cons.type, cons.builtin, value)));
+        //TODO: This is a null reference!
+        f.push(0);
 
     }
 
@@ -67,7 +49,7 @@ export const arlength = (r: Runtime, f: Frame, _: Operand) => {
 
     let obj = eobj.takeRight();
 
-    f.push(Array.isArray(obj) ? obj.length : 0);
+    f.push(obj.getCount());
 
 }
 
@@ -88,21 +70,15 @@ export const arelm = (r: Runtime, f: Frame, _: Operand) => {
 
     let arr = earr.takeRight();
 
-    if (!Array.isArray(arr)) {
+    let melm = arr.get(f.pop());
 
-        f.push(0);
+    if (melm.isJust()) {
+
+        f.push(r.heap.getAddress(melm.get()));
 
     } else {
 
-        let value = arr[f.pop()];
-
-        let mref = f.heap.ref(value);
-
-        f.push(isNumber(value) ?
-            value :
-            mref.isJust() ?
-                mref.get() :
-                f.heap.add(value));
+        f.push(0);
 
     }
 

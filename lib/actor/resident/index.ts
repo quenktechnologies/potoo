@@ -19,6 +19,7 @@ import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_TEMPORARY } from '../flags';
 import { Actor, Instance } from '../';
 import { Case } from './case';
 import { Api } from './api';
+import { PTBoolean } from '../system/vm/type';
 
 /**
  * Reference to an actor address.
@@ -135,7 +136,8 @@ export abstract class Immutable<T, S extends System>
 
         c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
 
-        c.behaviour.push(m => this.receive.some(c => c.match(m)));
+        c.behaviour.push(m =>
+            <PTBoolean>Number(this.receive.some(c => c.match(m))));
 
         return c;
 
@@ -163,7 +165,8 @@ export abstract class Temp<T, S extends System>
 
         c.flags = c.flags | FLAG_TEMPORARY | FLAG_BUFFERED;
 
-        c.behaviour.push(m => this.receive.some(c => c.match(m)));
+        c.behaviour.push(m =>
+            <PTBoolean>Number(this.receive.some(c => c.match(m))));
 
         return c;
 
