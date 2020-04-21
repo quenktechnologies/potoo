@@ -21,9 +21,9 @@ export const alloc = (r: Runtime, f: Frame, _: Operand) => {
 
     let eParent = f.popString();
 
-    let eTemp = f.popObject();
-
     if (eParent.isLeft()) return r.raise(eParent.takeLeft());
+
+    let eTemp = f.popObject();
 
     if (eTemp.isLeft()) return r.raise(eTemp.takeLeft());
 
@@ -45,6 +45,7 @@ export const alloc = (r: Runtime, f: Frame, _: Operand) => {
 
 /**
  * self puts the address of the current actor on to the stack.
+ * TODO: make self an automatic variable
  */
 export const self = (_: Runtime, f: Frame, __: Operand) => {
 

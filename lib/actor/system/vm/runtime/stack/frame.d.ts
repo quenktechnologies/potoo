@@ -1,5 +1,6 @@
 import { Either } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Type } from '@quenk/noni/lib/data/type';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Script } from '../../script';
 import { Context } from '../context';
@@ -140,7 +141,7 @@ export interface Frame {
     /**
      * popValue pops and attempts to resolve the top most value of the data stack.
      */
-    popValue(): Either<Err, PTValue>;
+    popValue(): Either<Err, Type>;
     /**
      * popString from the top of the data stack.
      */
@@ -184,7 +185,7 @@ export declare class StackFrame implements Frame {
     pushMessage(): Frame;
     pushSelf(): Frame;
     peek(n?: number): Maybe<Data>;
-    resolve(data: Data): Either<Err, PTValue>;
+    resolve(data: Data): Either<Err, Type>;
     pop(): Data;
     popValue(): Either<Err, PTValue>;
     popString(): Either<Err, string>;

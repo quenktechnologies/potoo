@@ -12,6 +12,7 @@ import { Runtime } from '../';
 export declare const alloc: (r: Runtime, f: Frame, _: number) => void;
 /**
  * self puts the address of the current actor on to the stack.
+ * TODO: make self an automatic variable
  */
 export declare const self: (_: Runtime, f: Frame, __: number) => void;
 /**
