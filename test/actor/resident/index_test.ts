@@ -1,7 +1,17 @@
 import { assert } from '@quenk/test/lib/assert';
 
 import { system } from './fixtures/system';
-import { Killer, Killable, Victim, Exiter, Group, Raiser, ShouldWork, MutableSelfTalk, MutableCrossTalk, ImmutableSelfTalk, ImmutableCrossTalk } from './fixtures/actors';
+import {
+    Killer,
+    Exiter,
+    Group,
+    Raiser,
+    ShouldWork,
+    MutableSelfTalk,
+    MutableCrossTalk,
+    ImmutableSelfTalk,
+    ImmutableCrossTalk
+} from './fixtures/actors';
 import { ACTION_STOP } from '../../../lib/actor/template';
 
 describe('resident', () => {

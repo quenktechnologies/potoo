@@ -1,3 +1,4 @@
+import { tick } from '@quenk/noni/lib/control/timer';
 import { assert } from '@quenk/test/lib/assert';
 
 import { Context } from '../../../../lib/actor/system/vm/runtime/context';
@@ -30,7 +31,8 @@ export class Killer extends AbstractResident<TestSystem> {
     run() {
 
         this.spawn({ id: 'targets', create: s => new Killable(s) });
-        this.done(this);
+
+        tick(() => this.done(this));
 
     }
 

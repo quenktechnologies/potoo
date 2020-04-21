@@ -3,6 +3,7 @@ import * as error from '../error';
 
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Type } from '@quenk/noni/lib/data/type';
 import { fromNullable, Maybe } from '@quenk/noni/lib/data/maybe';
 
 import { Script } from '../../script';
@@ -174,7 +175,7 @@ export interface Frame {
     /**
      * popValue pops and attempts to resolve the top most value of the data stack.
      */
-    popValue(): Either<Err, PTValue>
+    popValue(): Either<Err, Type>
 
     /**
      * popString from the top of the data stack.
@@ -273,7 +274,7 @@ export class StackFrame implements Frame {
 
     }
 
-    resolve(data: Data): Either<Err, PTValue> {
+    resolve(data: Data): Either<Err, Type> {
 
         let { context } = this;
 
@@ -282,6 +283,19 @@ export class StackFrame implements Frame {
         let value = data & DATA_MASK_VALUE24;
 
         switch (typ) {
+
+            case DATA_TYPE_STRING:
+            case DATA_TYPE_HEAP_STRING:
+                this.push(data);
+                return this.popString();
+
+            case DATA_TYPE_HEAP_OBJECT:
+                this.push(data);
+                return this.popObject();
+
+            case DATA_TYPE_INFO:
+                this.push(data);
+                return this.popName();
 
             //TODO: This is probably not needed.
             case DATA_TYPE_LOCAL:
@@ -345,6 +359,10 @@ export class StackFrame implements Frame {
         } else if (typ === DATA_TYPE_HEAP_STRING) {
 
             return right(this.heap.getString(idx));
+
+        } else if (typ === DATA_TYPE_SELF) {
+
+            return right(this.context.address);
 
         } else {
 

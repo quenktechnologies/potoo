@@ -136,7 +136,7 @@ export abstract class Immutable<T, S extends System>
 
         c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
 
-        c.behaviour.push(m =>
+        c.behaviour.push((_, m) =>
             <PTBoolean>Number(this.receive.some(c => c.match(m))));
 
         return c;
