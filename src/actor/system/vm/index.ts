@@ -9,7 +9,7 @@ import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { empty, dedupe, contains, partition } from '@quenk/noni/lib/data/array';
 import { Record, reduce, map, rmerge } from '@quenk/noni/lib/data/record';
 import { remove as arremove } from '@quenk/noni/lib/data/array';
-import { Type } from '@quenk/noni/lib/data/type';
+import { Type, isObject } from '@quenk/noni/lib/data/type';
 
 import { spawn } from '../../resident';
 import {
@@ -54,6 +54,7 @@ import {
     LOG_LEVEL_ERROR
 } from './log';
 import { getLevel } from './event';
+import { PTValue } from './type';
 
 type Slot = [Address, Script, Runtime];
 
@@ -85,7 +86,7 @@ export interface Platform {
      * The result is true if the actor was found or false
      * if the actor is not in the system.
      */
-    sendMessage(to: Address, from: Address, msg: Message): boolean
+    sendMessage(to: Address, from: Address, msg: PTValue): boolean
 
     /**
      * getRuntime from the system given its address.
@@ -320,13 +321,22 @@ export class PVM<S extends System> implements Platform, Actor {
 
     }
 
-    sendMessage(to: Address, from: Address, msg: Message): boolean {
+    sendMessage(to: Address, from: Address, m: PTValue): boolean {
 
         let mRouter = this.getRouter(to);
 
         let mctx = mRouter.isJust() ?
             mRouter :
             this.getRuntime(to).map(r => r.context)
+
+        //TODO: We dont want to pass HeapObjects to actors?
+        //Its annoying for ES actors but may be necessary for vm actors.
+        //There are various things that could be done here. If we make all 
+        //PTValues an interface then we could just promote. Alternatively we
+        //could introduce a Foreign PTValue to represent foriegn values.
+        //Much more thought is needed but for now we don't want HeapObjects
+        //passed to ES actors.
+        let msg = isObject(m) ? m.promote() : m;
 
         //routers receive enveloped messages.
         let actualMessage = mRouter.isJust() ?

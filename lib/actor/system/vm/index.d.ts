@@ -16,6 +16,7 @@ import { Runtime, Operand } from './runtime';
 import { Conf } from './conf';
 import { Frame } from './runtime/stack/frame';
 import { Opcode } from './runtime/op';
+import { PTValue } from './type';
 declare type Slot = [Address, Script, Runtime];
 /**
  * Platform is the interface for a virtual machine.
@@ -42,7 +43,7 @@ export interface Platform {
      * The result is true if the actor was found or false
      * if the actor is not in the system.
      */
-    sendMessage(to: Address, from: Address, msg: Message): boolean;
+    sendMessage(to: Address, from: Address, msg: PTValue): boolean;
     /**
      * getRuntime from the system given its address.
      */
@@ -136,7 +137,7 @@ export declare class PVM<S extends System> implements Platform, Actor {
     allocate(parent: Address, t: Template<System>): Either<Err, Address>;
     runActor(target: Address): Either<Err, void>;
     runTask(addr: Address, ft: Future<void>): void;
-    sendMessage(to: Address, from: Address, msg: Message): boolean;
+    sendMessage(to: Address, from: Address, m: PTValue): boolean;
     getRuntime(addr: Address): Maybe<Runtime>;
     getRouter(addr: Address): Maybe<Context>;
     getGroup(name: string): Maybe<Address[]>;
