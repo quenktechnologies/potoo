@@ -102,9 +102,9 @@ export interface Frame {
     locals: Data[]
 
     /**
-     * ip is a pointer to the code instruction currently being executed.
+     * getPosition of the internal instruction pointer.
      */
-    ip: number
+    getPosition(): number
 
     /**
      * push an operand onto the data stack.
@@ -202,6 +202,22 @@ export interface Frame {
      */
     duplicate(): Frame
 
+    /**
+     * advance the internal instruction pointer by 1 place.
+     */
+    advance(): Frame
+
+    /**
+     * seek advances the instruction pointer to the specified location.
+     */
+    seek(loc: number): Frame
+
+    /**
+     * isFinished returns true if the instruction pointer for the frame has 
+     * reached the end of the code section.
+     */
+    isFinished(): boolean
+
 }
 
 /**
@@ -218,6 +234,12 @@ export class StackFrame implements Frame {
         public data: Data[] = [],
         public locals: Data[] = [],
         public ip = 0) { }
+
+    getPosition(): number {
+
+        return this.ip;
+
+    }
 
     push(d: Data): Frame {
 
@@ -441,6 +463,28 @@ export class StackFrame implements Frame {
         this.data.push(top);
 
         return this;
+
+    }
+
+    advance(): Frame {
+
+        this.ip = this.ip + 1;
+
+        return this;
+
+    }
+
+    seek(loc: number): Frame {
+
+        this.ip = loc;
+
+        return this;
+
+    }
+
+    isFinished(): boolean {
+
+        return this.ip >= this.code.length;
 
     }
 

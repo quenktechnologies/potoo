@@ -202,6 +202,21 @@ describe('frame', () => {
 
         });
 
+        describe('seek', () => {
+
+            it('should change the ip', () => {
+
+                let f = new StackFrame('main', new PScript('test'),
+                    newContext(), new Heap());
+
+                f.seek(12);
+
+                assert(f.ip).equal(12);
+
+            });
+
+        });
+
     })
 
 })

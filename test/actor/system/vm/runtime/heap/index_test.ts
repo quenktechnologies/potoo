@@ -2,6 +2,9 @@ import { assert } from '@quenk/test/lib/assert';
 
 import { Heap } from '../../../../../../lib/actor/system/vm/runtime/heap';
 import { newHeapObject } from './fixtures/object';
+import {
+    DATA_TYPE_HEAP_OBJECT
+} from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
 
 describe('heap', () => {
 
@@ -98,9 +101,9 @@ describe('heap', () => {
 
                 let obj = newHeapObject();
 
-                obj.mock.setReturnValue('toAddress', 1);
+                heap.objects[1] = obj;
 
-                assert(heap.getAddress(obj)).equal(1);
+                assert(heap.getAddress(obj)).equal(DATA_TYPE_HEAP_OBJECT | 1);
 
             });
 
@@ -111,6 +114,18 @@ describe('heap', () => {
                 let n = 22;
 
                 assert(heap.getAddress(n)).equal(n);
+
+            });
+
+            it('should not rely on HeapObject#toAddress', () => {
+
+                let heap = new Heap();
+
+                let obj = newHeapObject();
+
+                heap.getAddress(obj);
+
+                assert(obj.mock.wasCalled('toAddress')).false();
 
             });
 

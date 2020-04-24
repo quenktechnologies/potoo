@@ -28,6 +28,12 @@ export class FrameImpl implements Frame {
 
     mock = new Mock();
 
+    getPosition(): number {
+
+        return this.mock.invoke<number>('getPosition', [], 0);
+
+    }
+
     push(d: number): Frame {
 
         return this.mock.invoke<Frame>('push', [d], this);
@@ -131,6 +137,24 @@ export class FrameImpl implements Frame {
     duplicate(): Frame {
 
         return <Frame>this.mock.invoke('duplicate', [], this);
+
+    }
+
+    advance(): Frame {
+
+        return <Frame>this.mock.invoke('advance', [], this);
+
+    }
+
+    seek(loc: number): Frame {
+
+        return <Frame>this.mock.invoke('seek', [loc], this);
+
+    }
+
+    isFinished(): boolean {
+
+        return <boolean>this.mock.invoke('advance', [], true);
 
     }
 

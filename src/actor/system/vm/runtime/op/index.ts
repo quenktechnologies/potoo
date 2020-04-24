@@ -1,5 +1,6 @@
 import * as base from './base';
 import * as actor from './actor';
+import * as obj from './object';
 
 import { Record, map } from '@quenk/noni/lib/data/record';
 import { Either } from '@quenk/noni/lib/data/either';
@@ -48,6 +49,9 @@ export const MAILDQ = OP_CODE_RANGE_STEP * 98;
 export const SELF = OP_CODE_RANGE_STEP * 99;
 export const READ = OP_CODE_RANGE_STEP * 100;
 export const STOP = OP_CODE_RANGE_STEP * 101;
+export const GETPROP = OP_CODE_RANGE_STEP * 110;
+export const ARLENGTH = OP_CODE_RANGE_STEP * 111;
+export const ARELM = OP_CODE_RANGE_STEP * 112;
 
 /**
  * Opcode
@@ -382,6 +386,36 @@ export const opcodes: OpcodeInfos = {
         handler: actor.stop,
 
         log: (_: Runtime, __: Frame, ___: Operand) => ['stop']
+
+    },
+
+    [GETPROP]: {
+
+        name: 'getprop',
+
+        handler: obj.getprop,
+
+        log: (_: Runtime, __: Frame, oper: Operand) => ['getprop', oper]
+
+    },
+
+    [ARELM]: {
+
+        name: 'arelm',
+
+        handler: obj.arelm,
+
+        log: (_: Runtime, __: Frame, oper: Operand) => ['arelm', oper]
+
+    },
+
+    [ARLENGTH]: {
+
+        name: 'arlength',
+
+        handler: obj.arlength,
+
+        log: (_: Runtime, __: Frame, ___: Operand) => ['arlength']
 
     }
 

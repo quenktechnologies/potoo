@@ -151,6 +151,37 @@ export class Raiser extends AbstractResident<TestSystem> {
 
 }
 
+export class Spawner extends AbstractResident<TestSystem> {
+
+    constructor(
+        public s: TestSystem,
+        public done: () => void) {
+
+        super(s);
+
+    }
+
+    init(c: Context): Context {
+
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        return c;
+
+    }
+
+    select<T>(_: Case<T>[]): Spawner {
+
+        return this;
+
+    }
+
+    run() {
+
+        this.done();
+
+    }
+
+}
+
 export class ShouldWork extends Mutable<TestSystem> {
 
     constructor(
