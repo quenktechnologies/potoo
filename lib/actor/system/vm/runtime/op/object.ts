@@ -63,7 +63,7 @@ export const arlength = (r: Runtime, f: Frame, _: Operand) => {
  * <arrayref>,<index> -> <element>
  */
 export const arelm = (r: Runtime, f: Frame, _: Operand) => {
-
+    console.error('----> ', f.data, f.locals);
     let earr = f.popObject();
 
     if (earr.isLeft()) return r.raise(earr.takeLeft());

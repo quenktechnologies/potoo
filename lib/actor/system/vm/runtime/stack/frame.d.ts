@@ -80,9 +80,9 @@ export interface Frame {
      */
     locals: Data[];
     /**
-     * ip is a pointer to the code instruction currently being executed.
+     * getPosition of the internal instruction pointer.
      */
-    ip: number;
+    getPosition(): number;
     /**
      * push an operand onto the data stack.
      *
@@ -162,6 +162,19 @@ export interface Frame {
      * duplicate the top of the stack.
      */
     duplicate(): Frame;
+    /**
+     * advance the internal instruction pointer by 1 place.
+     */
+    advance(): Frame;
+    /**
+     * seek advances the instruction pointer to the specified location.
+     */
+    seek(loc: number): Frame;
+    /**
+     * isFinished returns true if the instruction pointer for the frame has
+     * reached the end of the code section.
+     */
+    isFinished(): boolean;
 }
 /**
  * StackFrame (Frame implementation).
@@ -176,6 +189,7 @@ export declare class StackFrame implements Frame {
     locals: Data[];
     ip: number;
     constructor(name: string, script: Script, context: Context, heap: Heap, code?: Instruction[], data?: Data[], locals?: Data[], ip?: number);
+    getPosition(): number;
     push(d: Data): Frame;
     pushUInt8(value: Operand): Frame;
     pushUInt16(value: Operand): Frame;
@@ -193,4 +207,7 @@ export declare class StackFrame implements Frame {
     popFunction(): Either<Err, FunInfo>;
     popObject(): Either<Err, HeapObject>;
     duplicate(): Frame;
+    advance(): Frame;
+    seek(loc: number): Frame;
+    isFinished(): boolean;
 }

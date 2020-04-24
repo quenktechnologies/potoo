@@ -19,9 +19,9 @@ export const nop = (_: Runtime, __: Frame, ___: Operand) => { }
  * Stack:
  * -> <uint8>
  */
-export const pushui8 = (_: Runtime, f: Frame, args: Operand) => {
+export const pushui8 = (_: Runtime, f: Frame, oper: Operand) => {
 
-    f.pushUInt8(args);
+    f.pushUInt8(oper);
 
 }
 
@@ -31,9 +31,9 @@ export const pushui8 = (_: Runtime, f: Frame, args: Operand) => {
  * Stack:
  *  -> <uint16>
  */
-export const pushui16 = (_: Runtime, f: Frame, args: Operand) => {
+export const pushui16 = (_: Runtime, f: Frame, oper: Operand) => {
 
-    f.pushUInt16(args);
+    f.pushUInt16(oper);
 
 }
 
@@ -44,9 +44,9 @@ export const pushui16 = (_: Runtime, f: Frame, args: Operand) => {
  * Stack:
  *  -> <uint32>
  */
-export const pushui32 = (_: Runtime, f: Frame, args: Operand) => {
+export const pushui32 = (_: Runtime, f: Frame, oper: Operand) => {
 
-    f.pushUInt32(args);
+    f.pushUInt32(oper);
 
 }
 
@@ -213,9 +213,9 @@ export const raise = (r: Runtime, f: Frame, _: Operand) => {
  * Stack:
  *  ->
  */
-export const jmp = (_: Runtime, f: Frame, args: Operand) => {
+export const jmp = (_: Runtime, f: Frame, oper: Operand) => {
 
-    f.ip = args;
+    f.seek(oper);
 
 }
 
@@ -227,12 +227,12 @@ export const jmp = (_: Runtime, f: Frame, args: Operand) => {
  *
  * <uint32> -> 
  */
-export const ifzjmp = (_: Runtime, f: Frame, args: Operand) => {
+export const ifzjmp = (_: Runtime, f: Frame, oper: Operand) => {
 
     let eValue = f.popValue();
 
     if ((eValue.isLeft()) || (eValue.takeRight() === 0))
-        f.ip = args;
+        f.seek(oper);
 
 }
 
@@ -243,12 +243,12 @@ export const ifzjmp = (_: Runtime, f: Frame, args: Operand) => {
  * Stack:
  * <uint32> ->
  */
-export const ifnzjmp = (_: Runtime, f: Frame, args: Operand) => {
+export const ifnzjmp = (_: Runtime, f: Frame, oper: Operand) => {
 
     let eValue = f.popValue();
 
     if ((eValue.isRight()) && (eValue.takeRight() !== 0))
-        f.ip = args;
+        f.seek(oper);
 
 }
 
@@ -258,7 +258,7 @@ export const ifnzjmp = (_: Runtime, f: Frame, args: Operand) => {
  * Stack:
  * <any><any> ->
  */
-export const ifeqjmp = (r: Runtime, f: Frame, args: Operand) => {
+export const ifeqjmp = (r: Runtime, f: Frame, oper: Operand) => {
 
     let eLhs = f.popValue();
     let eRhs = f.popValue();
@@ -268,7 +268,7 @@ export const ifeqjmp = (r: Runtime, f: Frame, args: Operand) => {
     else if (eRhs.isLeft())
         r.raise(eRhs.takeLeft());
     else if (eLhs.takeRight() === eRhs.takeRight())
-        f.ip = args;
+        f.seek(oper);
 
 }
 
@@ -278,7 +278,7 @@ export const ifeqjmp = (r: Runtime, f: Frame, args: Operand) => {
  * Stack:
  * <any><any> ->
  */
-export const ifneqjmp = (r: Runtime, f: Frame, args: Operand) => {
+export const ifneqjmp = (r: Runtime, f: Frame, oper: Operand) => {
 
     let eLhs = f.popValue();
     let eRhs = f.popValue();
@@ -288,6 +288,6 @@ export const ifneqjmp = (r: Runtime, f: Frame, args: Operand) => {
     else if (eRhs.isLeft())
         r.raise(eRhs.takeLeft());
     else if (eLhs.takeRight() !== eRhs.takeRight())
-        f.ip = args;
+        f.seek(oper);
 
 }

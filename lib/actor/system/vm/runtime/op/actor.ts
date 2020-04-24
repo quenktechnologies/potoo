@@ -19,15 +19,15 @@ import { Runtime, Operand } from '../';
  */
 export const alloc = (r: Runtime, f: Frame, _: Operand) => {
 
-    let eParent = f.popString();
-
-    if (eParent.isLeft()) return r.raise(eParent.takeLeft());
-
     let eTemp = f.popObject();
 
     if (eTemp.isLeft()) return r.raise(eTemp.takeLeft());
 
     let temp = <Template>eTemp.takeRight().promote();
+
+    let eParent = f.popString();
+
+    if (eParent.isLeft()) return r.raise(eParent.takeLeft());
 
     let eresult = r.vm.allocate(eParent.takeRight(), temp);
 

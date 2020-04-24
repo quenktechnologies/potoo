@@ -33,6 +33,9 @@ export declare const MAILDQ: number;
 export declare const SELF: number;
 export declare const READ: number;
 export declare const STOP: number;
+export declare const GETPROP: number;
+export declare const ARLENGTH: number;
+export declare const ARELM: number;
 /**
  * Opcode
  */

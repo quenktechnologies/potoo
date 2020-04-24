@@ -46,7 +46,7 @@ export class Thread implements Runtime {
         let frm = new StackFrame(f.name, p.script, this.context,
             this.heap, f.code.slice());
 
-        for (let i = 0; i <= f.argc; i++)
+        for (let i = 0; i < f.argc; i++)
             frm.push(p.pop());
 
         this.fstack.push(frm);
@@ -148,12 +148,13 @@ export class Thread implements Runtime {
             if (!empty(this.rstack))
                 frame.data.push(<Data>this.rstack.pop());
 
-            while (frame.ip < frame.code.length) {
+            while (!frame.isFinished()) {
 
                 //execute frame instructions
                 //TODO: Push return values unto next fstack
 
-                let next = (frame.code[frame.ip] >>> 0);
+                let pos = frame.getPosition();
+                let next = (frame.code[pos] >>> 0);
                 let opcode = next & OPCODE_MASK;
                 let operand = next & OPERAND_MASK;
 
@@ -162,7 +163,8 @@ export class Thread implements Runtime {
                 // TODO: Error if the opcode is invalid, out of range etc.
                 handlers[opcode](this, frame, operand);
 
-                frame.ip = frame.ip + 1;
+                if (pos === frame.getPosition())
+                    frame.advance();
 
                 //pause execution to allow another frame to compute.
                 if (sp !== this.sp) break;

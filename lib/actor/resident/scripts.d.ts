@@ -1,4 +1,4 @@
-import { NewForeignFunInfo } from '../system/vm/script/info';
+import { NewForeignFunInfo, NewFunInfo, NewTypeInfo } from '../system/vm/script/info';
 import { Script, Constants } from '../system/vm/script';
 import { Template } from '../template';
 import { System } from '../system';
@@ -13,7 +13,7 @@ export declare class Spawn<S extends System> implements Script {
     name: string;
     constants: Constants;
     immediate: boolean;
-    info: NewForeignFunInfo[];
+    info: (NewTypeInfo | NewForeignFunInfo | NewFunInfo)[];
     code: number[];
 }
 /**

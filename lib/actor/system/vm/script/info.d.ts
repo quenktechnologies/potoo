@@ -222,7 +222,7 @@ export declare class NewTypeInfo implements TypeInfo {
 /**
  * NewArrayTypeInfo
  */
-export declare class NewArrayTypeInfo implements TypeInfo {
+export declare class NewArrayTypeInfo implements ArrayTypeInfo {
     name: string;
     elements: TypeInfo;
     constructor(name: string, elements: TypeInfo);

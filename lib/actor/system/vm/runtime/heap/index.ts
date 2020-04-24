@@ -83,9 +83,6 @@ export class Heap {
      * For objects that are not on the heap a null reference is returned.
      * Strings are automatically added while numbers and booleans simply return
      * themselves.
-     *
-     * TODO: In the future it may be more appropriate to represent ALL PTValues
-     * as objects with their own toAddress() style method.
      */
     getAddress(v: PTValue): HeapAddress {
 
@@ -95,7 +92,9 @@ export class Heap {
 
         } else if (isObject(v)) {
 
-            return v.toAddress();
+            let idx = this.objects.indexOf(v);
+
+            return idx !== -1 ? DATA_TYPE_HEAP_OBJECT | idx : 0;
 
         } else if (isNumber(v)) {
 

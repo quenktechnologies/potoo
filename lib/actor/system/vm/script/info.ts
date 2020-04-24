@@ -308,7 +308,7 @@ export class NewTypeInfo implements TypeInfo {
 /**
  * NewArrayTypeInfo
  */
-export class NewArrayTypeInfo implements TypeInfo {
+export class NewArrayTypeInfo implements ArrayTypeInfo {
 
     constructor(
         public name: string,

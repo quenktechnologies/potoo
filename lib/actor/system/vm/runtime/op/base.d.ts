@@ -13,14 +13,14 @@ export declare const nop: (_: Runtime, __: Frame, ___: number) => void;
  * Stack:
  * -> <uint8>
  */
-export declare const pushui8: (_: Runtime, f: Frame, args: number) => void;
+export declare const pushui8: (_: Runtime, f: Frame, oper: number) => void;
 /**
  * pushui16 pushes an unsigned 16bit integer onto the stack.
  *
  * Stack:
  *  -> <uint16>
  */
-export declare const pushui16: (_: Runtime, f: Frame, args: number) => void;
+export declare const pushui16: (_: Runtime, f: Frame, oper: number) => void;
 /**
  * pushui32 pushes an unsigned 32bit integer onto the stack.
  *
@@ -28,7 +28,7 @@ export declare const pushui16: (_: Runtime, f: Frame, args: number) => void;
  * Stack:
  *  -> <uint32>
  */
-export declare const pushui32: (_: Runtime, f: Frame, args: number) => void;
+export declare const pushui32: (_: Runtime, f: Frame, oper: number) => void;
 /**
  * lds loads a string from the constant pool onto the stack.
  *
@@ -107,7 +107,7 @@ export declare const raise: (r: Runtime, f: Frame, _: number) => void;
  * Stack:
  *  ->
  */
-export declare const jmp: (_: Runtime, f: Frame, args: number) => void;
+export declare const jmp: (_: Runtime, f: Frame, oper: number) => void;
 /**
  * ifzjmp jumps to the instruction at the specified address if the top
  * of the stack is === 0.
@@ -116,7 +116,7 @@ export declare const jmp: (_: Runtime, f: Frame, args: number) => void;
  *
  * <uint32> ->
  */
-export declare const ifzjmp: (_: Runtime, f: Frame, args: number) => void;
+export declare const ifzjmp: (_: Runtime, f: Frame, oper: number) => void;
 /**
  * ifnzjmp jumps to the instruction at the specified address if the top
  * of the stack is !== 0.
@@ -124,18 +124,18 @@ export declare const ifzjmp: (_: Runtime, f: Frame, args: number) => void;
  * Stack:
  * <uint32> ->
  */
-export declare const ifnzjmp: (_: Runtime, f: Frame, args: number) => void;
+export declare const ifnzjmp: (_: Runtime, f: Frame, oper: number) => void;
 /**
  * ifeqjmp jumps to the instruction at the specified address if the top
  * two elements of the stack are strictly equal to each other.
  * Stack:
  * <any><any> ->
  */
-export declare const ifeqjmp: (r: Runtime, f: Frame, args: number) => void;
+export declare const ifeqjmp: (r: Runtime, f: Frame, oper: number) => void;
 /**
  * ifneqjmp jumps to the instruction at the specified address if the top
  * two elements of the stack are not strictly equal to each other.
  * Stack:
  * <any><any> ->
  */
-export declare const ifneqjmp: (r: Runtime, f: Frame, args: number) => void;
+export declare const ifneqjmp: (r: Runtime, f: Frame, oper: number) => void;
