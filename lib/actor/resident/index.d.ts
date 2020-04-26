@@ -4,7 +4,7 @@ import { System } from '../system';
 import { Address, AddressMap } from '../address';
 import { Message } from '../message';
 import { Templates, Spawnable } from '../template';
-import { Actor, Instance } from '../';
+import { Actor, Instance, Eff } from '../';
 import { Case } from './case';
 import { Api } from './api';
 /**
@@ -34,7 +34,7 @@ export declare abstract class AbstractResident<S extends System> implements Resi
     raise(e: Err): AbstractResident<S>;
     kill(addr: Address): AbstractResident<S>;
     exit(): void;
-    start(addr: Address): void;
+    start(addr: Address): Eff;
     stop(): void;
 }
 /**
@@ -81,4 +81,5 @@ export declare const ref: <S extends System>(res: Resident<S>, addr: string) => 
 /**
  * spawn an actor using the Spawn script.
  */
-export declare const spawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>, parent: string) => string;
+export declare const spawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>) => string;
+export declare const xspawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>, parent: string) => string;

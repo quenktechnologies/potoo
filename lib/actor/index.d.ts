@@ -1,4 +1,5 @@
 import { Either } from '@quenk/noni/lib/data/either';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Context } from './system/vm/runtime/context';
 import { Message } from './message';
 import { Address } from './address';
@@ -10,6 +11,11 @@ import { Address } from './address';
  * was processed or rejected.
  */
 export declare type Behaviour = (m: Message) => Either<Message, void>;
+/**
+ * Eff is used in various places to represent the potentially sync or async
+ * side-effect of an actor operation.
+ */
+export declare type Eff = void | Future<void>;
 /**
  * Instance of an actor that resides within the system.
  *
@@ -26,9 +32,11 @@ export interface Instance {
     /**
      * start the Instance.
      *
+     * If a Future is returned, the actor will block its thread until it is
+     * complete.
      * The address provided is the address of the newly spawned instance.
      */
-    start(addr: Address): void;
+    start(addr: Address): Eff;
     /**
      * notify is called by the system to indicate new messages
      * have been placed in the actor's mailbox.

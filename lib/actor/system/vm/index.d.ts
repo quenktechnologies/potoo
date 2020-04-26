@@ -32,11 +32,11 @@ export interface Platform {
      */
     allocate(self: Address, t: template.Template<System>): Either<Err, Address>;
     /**
-     * runActor triggers the run code/method for an actor in the system.
+     * runActor schedules the start code/method for an actor in the system.
      *
-     * It is an error if the actor does not exist.
+     * The start() method is called asynchronously.
      */
-    runActor(target: Address): Either<Err, void>;
+    runActor(target: Address): void;
     /**
      * sendMessage to an actor in the system.
      *
@@ -135,7 +135,7 @@ export declare class PVM<S extends System> implements Platform, Actor {
     notify(): void;
     stop(): void;
     allocate(parent: Address, t: Template<System>): Either<Err, Address>;
-    runActor(target: Address): Either<Err, void>;
+    runActor(target: Address): void;
     runTask(addr: Address, ft: Future<void>): void;
     sendMessage(to: Address, from: Address, m: PTValue): boolean;
     getRuntime(addr: Address): Maybe<Runtime>;
@@ -157,6 +157,7 @@ export declare class PVM<S extends System> implements Platform, Actor {
      * This actor will be a direct child of the root.
      */
     spawn(t: Template<S>): Address;
+    execNow(i: Instance, s: Script): Maybe<PTValue>;
     exec(i: Instance, s: Script): void;
 }
 export {};

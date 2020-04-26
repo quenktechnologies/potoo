@@ -1,11 +1,13 @@
 import { match } from '@quenk/noni/lib/control/match';
 import { isString, Any } from '@quenk/noni/lib/data/type';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { rmerge } from '@quenk/noni/lib/data/record';
 import { parse } from '@quenk/noni/lib/data/json';
 
 import { Tell } from '../resident/scripts';
 import { RAISE, SEND } from '../system/vm/runtime/op';
 import { EVENT_SEND_FAILED } from '../system/vm/event';
+import { PTValue } from '../system/vm/type';
 import { Script } from '../system/vm/script';
 import { Conf } from '../system/vm/conf';
 import { PVM } from '../system/vm';
@@ -44,6 +46,12 @@ class Sys {
     exec(i: Instance, s: Script) {
 
         this.vm.exec(i, s);
+
+    }
+
+    execNow(i: Instance, s: Script): Maybe<PTValue> {
+
+        return this.vm.execNow(i, s);
 
     }
 
