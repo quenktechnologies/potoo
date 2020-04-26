@@ -1,6 +1,8 @@
 import * as op from '../../../../lib/actor/system/vm/runtime/op';
 
 import { assert } from '@quenk/test/lib/assert';
+import { just, nothing } from '@quenk/noni/lib/data/maybe';
+import { tick } from '@quenk/noni/lib/control/timer';
 
 import { PScript } from '../../../../lib/actor/system/vm/script';
 import { PVM } from '../../../../lib/actor/system/vm';
@@ -18,7 +20,6 @@ import {
     ACTION_RESTART,
     ACTION_RAISE
 } from '../../../../lib/actor/template';
-import { just, nothing } from '@quenk/noni/lib/data/maybe';
 
 const add2Five = new PScript('add2Five', [[], []], [], [
     op.PUSHUI8 | 0x5,
@@ -193,9 +194,9 @@ describe('vm', () => {
 
         });
 
-        describe('run', () => {
+        describe('runActor', () => {
 
-            it('should invoke an actors run method', () => {
+            it('should invoke an actors start method', done => {
 
                 let vm = new PVM(newSystem());
 
@@ -205,9 +206,14 @@ describe('vm', () => {
 
                 assert(vm.allocate('', tmpl).isRight()).true();
 
-                assert(vm.runActor('self').isRight()).true();
+                vm.runActor('self');
 
-                assert(act.mock.wasCalled('start')).true();
+                tick(() => {
+
+                    assert(act.mock.wasCalled('start')).true();
+                    done();
+
+                });
 
             });
 
@@ -328,7 +334,7 @@ describe('vm', () => {
 
             });
 
-            it('should restart actors', () => {
+            it('should restart actors', done => {
 
                 let vm = new PVM(newSystem());
                 let act = newInstance();
@@ -347,8 +353,13 @@ describe('vm', () => {
                 vm.state.runtimes['self'] = r;
                 vm.raise('self', new Error('err'));
 
-                assert(called).true();
-                assert(act.mock.wasCalled('start')).true();
+                tick(() => {
+
+                    assert(called).true();
+                    assert(act.mock.wasCalled('start')).true();
+                    done();
+
+                });
 
             });
 

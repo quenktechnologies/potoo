@@ -74,11 +74,11 @@ export interface Platform {
     allocate(self: Address, t: template.Template<System>): Either<Err, Address>
 
     /**
-     * runActor triggers the run code/method for an actor in the system.
+     * runActor schedules the start code/method for an actor in the system.
      *
-     * It is an error if the actor does not exist.
+     * The start() method is called asynchronously.
      */
-    runActor(target: Address): Either<Err, void>
+    runActor(target: Address): void
 
     /**
      * sendMessage to an actor in the system.
@@ -274,22 +274,29 @@ export class PVM<S extends System> implements Platform, Actor {
 
     }
 
-    runActor(target: Address): Either<Err, void> {
-
-        //TODO: async support
+    runActor(target: Address): void {
 
         let mrtime = this.getRuntime(target);
 
+        let done = () =>
+            this.trigger(rtime.context.address, events.EVENT_ACTOR_STARTED);
+
         if (mrtime.isNothing())
-            return left(new errors.UnknownAddressErr(target));
+            return this.raise(target, new errors.UnknownAddressErr(target));
 
         let rtime = mrtime.get();
 
-        rtime.context.actor.start(target);
+        let ft = rtime.context.actor.start(target);
 
-        this.trigger(rtime.context.address, events.EVENT_ACTOR_STARTED);
+        if (ft != null) {
 
-        return right(undefined);
+            this.runTask(target, ft.map(done));
+
+        } else {
+
+            done();
+
+        }
 
     }
 
@@ -333,7 +340,7 @@ export class PVM<S extends System> implements Platform, Actor {
         //Its annoying for ES actors but may be necessary for vm actors.
         //There are various things that could be done here. If we make all 
         //PTValues an interface then we could just promote. Alternatively we
-        //could introduce a Foreign PTValue to represent foriegn values.
+        //could introduce a Foreign PTValue to represent foreign values.
         //Much more thought is needed but for now we don't want HeapObjects
         //passed to ES actors.
         let msg = isObject(m) ? m.promote() : m;
@@ -478,7 +485,7 @@ export class PVM<S extends System> implements Platform, Actor {
 
                     let eRes = this
                         .allocate(getParent(next), rtime.context.template)
-                        .chain(a => this.runActor(a));
+                        .map(a => this.runActor(a));
 
                     if (eRes.isLeft())
                         throw new Error(eRes.takeLeft().message);
@@ -583,7 +590,27 @@ export class PVM<S extends System> implements Platform, Actor {
      */
     spawn(t: Template<S>): Address {
 
-        return spawn(this.system, this, t, ADDRESS_SYSTEM);
+        return spawn(this.system, this, t);
+
+    }
+
+    execNow(i: Instance, s: Script): Maybe<PTValue> {
+
+        let mslot = getSlot(this.state, i);
+
+        if (mslot.isNothing()) {
+
+            this.trigger(ADDRESS_SYSTEM, events.EVENT_EXEC_INSTANCE_STALE);
+
+            return nothing();
+
+        } else {
+
+            let [, rtime] = mslot.get();
+
+            return new Thread(this, rtime.heap, rtime.context).exec(s);
+
+        }
 
     }
 

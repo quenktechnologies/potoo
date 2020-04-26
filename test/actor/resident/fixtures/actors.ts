@@ -1,4 +1,4 @@
-import { tick } from '@quenk/noni/lib/control/timer';
+import { fromCallback, Future } from '@quenk/noni/lib/control/monad/future';
 import { assert } from '@quenk/test/lib/assert';
 
 import { Context } from '../../../../lib/actor/system/vm/runtime/context';
@@ -32,7 +32,39 @@ export class Killer extends AbstractResident<TestSystem> {
 
         this.spawn({ id: 'targets', create: s => new Killable(s) });
 
-        tick(() => this.done(this));
+        this.done(this);
+
+    }
+
+}
+
+export class DelayOnRun extends AbstractResident<TestSystem> {
+
+    constructor(
+        public s: TestSystem,
+        public done: () => void) { super(s); }
+
+    init(c: Context): Context {
+
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        return c;
+
+    }
+
+    select<T>(_: Case<T>[]): DelayOnRun {
+
+        return this;
+
+    }
+
+    run(): Future<void> {
+
+        return fromCallback(cb => setTimeout(() => {
+
+            this.done();
+            cb(null);
+
+        }, 200));
 
     }
 
@@ -108,7 +140,7 @@ export class Exiter extends AbstractResident<TestSystem> {
 
     }
 
-    select<T>(_: Case<T>[]): Killer {
+    select<T>(_: Case<T>[]): Exiter {
 
         return this;
 
@@ -116,13 +148,13 @@ export class Exiter extends AbstractResident<TestSystem> {
 
     run() {
 
-        this.done();
-
         setTimeout(() => {
 
             this.exit();
 
         }, 200);
+
+        this.done();
 
     }
 

@@ -16,7 +16,7 @@ import {
 import { Message } from '../message';
 import { Template, Templates, Spawnable, normalize } from '../template';
 import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_TEMPORARY } from '../flags';
-import { Actor, Instance } from '../';
+import { Actor, Instance, Eff } from '../';
 import { Case } from './case';
 import { Api } from './api';
 import { PTBoolean } from '../system/vm/type';
@@ -63,7 +63,7 @@ export abstract class AbstractResident<S extends System>
 
     spawn(t: Spawnable<S>): Address {
 
-        return spawn(this.system, this, t, this.self());
+        return spawn(this.system, this, t);
 
     }
 
@@ -101,11 +101,11 @@ export abstract class AbstractResident<S extends System>
 
     }
 
-    start(addr: Address): void {
+    start(addr: Address): Eff {
 
         this.self = () => addr;
 
-        this.run();
+        return this.run();
 
     }
 
@@ -216,6 +216,18 @@ export const ref = <S extends System>
  * spawn an actor using the Spawn script.
  */
 export const spawn = <S extends System>
+    (sys: S, i: Instance, t: Spawnable<S>): Address => {
+
+    let tmpl = normalize(isObject(t) ? <Template<S>>t : { create: t });
+
+    return <string>sys
+        .execNow(i, new scripts.Spawn<S>(tmpl))
+        .map(() => ADDRESS_DISCARD)
+        .get();
+
+}
+
+export const xspawn = <S extends System>
     (sys: S, i: Instance, t: Spawnable<S>, parent: Address): Address => {
 
     let tmpl = normalize(isObject(t) ? <Template<S>>t : { create: t });

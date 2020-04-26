@@ -65,10 +65,7 @@ export const run = (r: Runtime, f: Frame, _: Operand) => {
 
     if (eTarget.isLeft()) return r.raise(eTarget.takeLeft());
 
-    let eResult = r.vm.runActor(eTarget.takeRight());
-
-    if (eResult.isLeft())
-        r.raise(eResult.takeLeft());
+    r.vm.runActor(eTarget.takeRight());
 
 }
 

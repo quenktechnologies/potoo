@@ -11,7 +11,8 @@ import {
     MutableSelfTalk,
     MutableCrossTalk,
     ImmutableSelfTalk,
-    ImmutableCrossTalk
+    ImmutableCrossTalk,
+    DelayOnRun
 } from './fixtures/actors';
 import { ACTION_STOP } from '../../../lib/actor/template';
 
@@ -21,7 +22,7 @@ describe('resident', () => {
 
         describe('spawn', () => {
 
-            xit('should work', done => {
+            it('should work', done => {
 
                 let s = system();
 
@@ -132,11 +133,30 @@ describe('resident', () => {
 
         });
 
+        it('should start actors that produce a future', done => {
+
+            let s = system();
+
+            s.spawn({
+
+                id: 'a',
+                create: sys => new DelayOnRun(sys, () => {
+
+                    assert(true).true();
+
+                    done();
+
+                })
+
+            });
+
+        });
+
     });
 
     describe('kill', () => {
 
-        xit('should kill children', done => {
+        it('should kill children', done => {
 
             let s = system();
 
@@ -162,7 +182,7 @@ describe('resident', () => {
             }, 200);
         })
 
-        xit('should kill grand children', done => {
+        it('should kill grand children', done => {
 
             let s = system()
                 .spawn({
@@ -191,7 +211,7 @@ describe('resident', () => {
 
     describe('exit', () => {
 
-        xit('should work', done => {
+        it('should work', done => {
 
             let s = system()
                 .spawn({
@@ -219,7 +239,7 @@ describe('resident', () => {
 
     describe('group', () => {
 
-        xit('should assign actors to a group', done => {
+        it('should assign actors to a group', done => {
 
             let s = system()
                 .spawn({
@@ -242,7 +262,7 @@ describe('resident', () => {
 
     describe('raise', () => {
 
-        xit('should trigger exception handling', done => {
+        it('should trigger exception handling', done => {
 
             let ok = false;
 
@@ -281,7 +301,7 @@ describe('resident', () => {
 
         describe('#select', () => {
 
-            xit('should work', done => {
+            it('should work', done => {
 
                 system()
                     .spawn({
@@ -291,7 +311,7 @@ describe('resident', () => {
 
             })
 
-            xit('should be able to talk to itself', done => {
+            it('should be able to talk to itself', done => {
 
                 system()
                     .spawn({
@@ -303,7 +323,7 @@ describe('resident', () => {
 
         })
 
-        xit('should be able to cross talk', done => {
+        it('should be able to cross talk', done => {
 
             system()
                 .spawn({
@@ -321,7 +341,7 @@ describe('resident', () => {
 
     describe('Immutable', () => {
 
-        xit('should be able to talk to itself', done => {
+        it('should be able to talk to itself', done => {
 
             system()
                 .spawn({
@@ -331,7 +351,7 @@ describe('resident', () => {
 
         });
 
-        xit('should be able to cross talk', done => {
+        it('should be able to cross talk', done => {
 
             system()
                 .spawn({
