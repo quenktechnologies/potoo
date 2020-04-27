@@ -139,7 +139,7 @@ export declare class PVM<S extends System> implements Platform, Actor {
     accept(_: Message): void;
     start(): void;
     notify(): void;
-    stop(): void;
+    stop(): Future<void>;
     allocate(parent: Address, t: Template<System>): Either<Err, Address>;
     runActor(target: Address): Future<void>;
     runTask(addr: Address, ft: Future<void>): void;

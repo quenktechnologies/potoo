@@ -9,7 +9,8 @@ import {
     Record,
     reduce,
     contains,
-    partition
+    partition,
+    exclude
 } from '@quenk/noni/lib/data/record';
 import { startsWith } from '@quenk/noni/lib/data/string';
 
@@ -107,7 +108,7 @@ export const getAddress =
 export const getChildren =
     (s: State, addr: Address): Runtimes =>
         (addr === ADDRESS_SYSTEM) ?
-            s.runtimes :
+            exclude(s.runtimes, ADDRESS_SYSTEM) :
             <Runtimes>partition(s.runtimes, (_, key) =>
                 (startsWith(key, addr) && key !== addr))[0];
 
