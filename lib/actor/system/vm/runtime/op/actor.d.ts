@@ -18,6 +18,7 @@ export declare const self: (_: Runtime, f: Frame, __: number) => void;
 /**
  * run triggers the run code for an actor.
  *
+ * TODO: Candidate for syscall.
  * Stack:
  * <address> ->
  */

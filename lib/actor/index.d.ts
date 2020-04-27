@@ -19,7 +19,7 @@ export declare type Eff = void | Future<void>;
 /**
  * Instance of an actor that resides within the system.
  *
- * The interface is implemetned by actors to react to the lifecycle the
+ * The interface is implemented by actors to react to the lifecycle the
  * system takes them through.
  */
 export interface Instance {
@@ -45,7 +45,7 @@ export interface Instance {
     /**
      * stop the Instance.
      */
-    stop(): void;
+    stop(): Eff;
 }
 /**
  * Actor common interface.

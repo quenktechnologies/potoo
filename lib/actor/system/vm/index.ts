@@ -3,11 +3,16 @@ import * as errors from './runtime/error';
 import * as events from './event';
 
 import { Err } from '@quenk/noni/lib/control/error';
-import { Future, pure } from '@quenk/noni/lib/control/monad/future';
+import { Future, pure, raise, batch } from '@quenk/noni/lib/control/monad/future';
 import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
 import { Either, left, right } from '@quenk/noni/lib/data/either';
-import { empty, dedupe, contains, partition } from '@quenk/noni/lib/data/array';
-import { Record, reduce, map, rmerge } from '@quenk/noni/lib/data/record';
+import {
+    empty,
+    dedupe,
+    contains, partition,
+    distribute
+} from '@quenk/noni/lib/data/array';
+import { Record, reduce, map, rmerge, mapTo } from '@quenk/noni/lib/data/record';
 import { remove as arremove } from '@quenk/noni/lib/data/array';
 import { Type, isObject } from '@quenk/noni/lib/data/type';
 
@@ -18,7 +23,8 @@ import {
     isRestricted,
     make,
     getParent,
-    ADDRESS_SYSTEM
+    ADDRESS_SYSTEM,
+    isChild
 } from '../../address';
 import { normalize, Template } from '../../template';
 import { isRouter, isBuffered } from '../../flags';
@@ -56,7 +62,12 @@ import {
 import { getLevel } from './event';
 import { PTValue } from './type';
 
-type Slot = [Address, Script, Runtime];
+/**
+ * Slot
+ */
+export type Slot = [Address, Script, Runtime];
+
+export const MAX_WORK_LOAD = 25;
 
 /**
  * Platform is the interface for a virtual machine.
@@ -74,11 +85,11 @@ export interface Platform {
     allocate(self: Address, t: template.Template<System>): Either<Err, Address>
 
     /**
-     * runActor schedules the start code/method for an actor in the system.
+     * runActor provides a Future that when fork()'d will execute the 
+     * start code/method for the target actor.
      *
-     * The start() method is called asynchronously.
      */
-    runActor(target: Address): void
+    runActor(target: Address): Future<void>
 
     /**
      * sendMessage to an actor in the system.
@@ -136,8 +147,10 @@ export interface Platform {
 
     /**
      * kill terminates the actor at the specified address.
+     *
+     * The actor must be a child of parent to succeed.
      */
-    kill(addr: Address): void
+    kill(parent: Address, target: Address): Future<void>
 
     /**
      * raise does the error handling on behalf of Runtimes.
@@ -274,29 +287,20 @@ export class PVM<S extends System> implements Platform, Actor {
 
     }
 
-    runActor(target: Address): void {
+    runActor(target: Address): Future<void> {
 
         let mrtime = this.getRuntime(target);
 
-        let done = () =>
-            this.trigger(rtime.context.address, events.EVENT_ACTOR_STARTED);
-
         if (mrtime.isNothing())
-            return this.raise(target, new errors.UnknownAddressErr(target));
+            return raise(new errors.UnknownAddressErr(target));
 
         let rtime = mrtime.get();
 
         let ft = rtime.context.actor.start(target);
 
-        if (ft != null) {
+        this.trigger(rtime.context.address, events.EVENT_ACTOR_STARTED);
 
-            this.runTask(target, ft.map(done));
-
-        } else {
-
-            done();
-
-        }
+        return ((ft != null) ? ft : pure(<void>undefined));
 
     }
 
@@ -315,14 +319,17 @@ export class PVM<S extends System> implements Platform, Actor {
 
                     this.raise(addr, e);
 
-                    return pure(<void>undefined);
-
                 },
                 () => {
 
                     this.blocked = arremove(this.blocked, addr);
 
-                    return pure(<void>undefined);
+                    //TODO: This is done to keep any waiting scripts going after
+                    //the task completes. The side-effect of this needs to be
+                    //observed a bit more but scripts of blocked actors other
+                    //than addr should not be affected. In future it may suffice
+                    //to run only scripts for addr.
+                    this.run();
 
                 });
 
@@ -471,7 +478,6 @@ export class PVM<S extends System> implements Platform, Actor {
             let trap = rtime.context.template.trap ||
                 (() => template.ACTION_RAISE);
 
-            //TODO: async support
             switch (trap(err)) {
 
                 case template.ACTION_IGNORE:
@@ -479,22 +485,24 @@ export class PVM<S extends System> implements Platform, Actor {
 
                 case template.ACTION_RESTART:
 
-                    //TODO: This may unintentionally trigger exit code in
-                    // Actor#stop while in an error state.
-                    this.kill(next);
+                    this.runTask(next,
+                        this
+                            .kill(next, next)
+                            .chain(() => {
 
-                    let eRes = this
-                        .allocate(getParent(next), rtime.context.template)
-                        .map(a => this.runActor(a));
+                                let eRes = this.allocate(getParent(next),
+                                    rtime.context.template);
 
-                    if (eRes.isLeft())
-                        throw new Error(eRes.takeLeft().message);
+                                return eRes.isLeft() ?
+                                    raise(new Error(eRes.takeLeft().message)) :
+                                    this.runActor(eRes.takeRight());
+
+                            }));
 
                     break loop;
 
                 case template.ACTION_STOP:
-                    //TODO: See previous note.
-                    this.kill(next);
+                    this.runTask(next, this.kill(next, next));
                     break loop;
 
                 default:
@@ -558,28 +566,51 @@ export class PVM<S extends System> implements Platform, Actor {
 
     }
 
-    kill(addr: Address) {
+    kill(parent: Address, target: Address): Future<void> {
 
-        let addrs = isGroup(addr) ?
-            this.getGroup(addr).orJust(() => []).get() : [addr];
+        let addrs = isGroup(target) ?
+            this.getGroup(target).orJust(() => []).get() : [target];
 
-        addrs.every(a => {
+        return scheduleFutures(addrs.map((addr): Future<void> => {
 
-            //TODO: async support
+            if ((!isChild(parent, target)) && (target !== parent))
+                return raise(new Error(`IllegalStopErr: Actor ${parent} ` +
+                    `cannot kill non-child ${addr}!`));
 
-            let mrun = this.getRuntime(a);
+            let mrun = this.getRuntime(addr);
 
-            if (mrun.isJust()) {
+            if (mrun.isNothing()) return pure(<void>undefined);
 
-                let rtime = mrun.get();
+            let run = mrun.get();
 
-                rtime.terminate();
+            let mchilds = this.getChildren(target);
 
-                this.trigger(rtime.context.address, events.EVENT_ACTOR_STOPPED);
+            let childs = mchilds.isJust() ? mchilds.get() : {};
 
-            }
+            let cwork = mapTo(map(childs, (r, k) =>
+                r
+                    .die()
+                    .chain(() => {
 
-        });
+                        this.remove(k);
+                        return pure(<void>undefined);
+
+                    })), f => f);
+
+            return scheduleFutures(cwork)
+                .chain(() => run.die())
+                .chain(() => {
+
+                    this.trigger(run.context.address,
+                        events.EVENT_ACTOR_STOPPED);
+
+                    this.remove(addr);
+
+                    return pure(<void>undefined);
+
+                });
+
+        }));
 
     }
 
@@ -628,59 +659,67 @@ export class PVM<S extends System> implements Platform, Actor {
 
             this.runQ.push([addr, s, rtime]);
 
-            if (this.running === true) return;
+            this.run();
 
-            this.running = true;
-
-            run:
-            while (this.running) {
-
-                while (!empty(this.runQ)) {
-
-                    let next = <Slot>this.runQ.shift();
-
-                    let [addr, script, rtime] = next;
-
-                    let mctime = this.getRuntime(addr);
-
-                    //is the runtime still here?
-                    if (mctime.isNothing()) {
-
-                        this.trigger(addr, events.EVENT_EXEC_ACTOR_GONE);
-
-                        //is it the same instance?
-                    } else if (mctime.get() !== rtime) {
-
-                        this.trigger(addr, events.EVENT_EXEC_ACTOR_CHANGED);
-
-                        // is the runtime awaiting an async task?
-                    } else if (contains(this.blocked, addr)) {
-
-                        this.waitQ.push(next);
-
-                    } else {
-
-                        rtime.exec(script);
-
-                    }
-
-                }
-
-                let [unblocked] = partition(this.waitQ, s =>
-                    !contains(this.blocked, s[0]));
-
-                if (unblocked.length > 0) {
-
-                    this.runQ = this.runQ.concat(unblocked);
-                    continue run;
-
-                }
-
-                this.running = false;
-
-            }
         }
 
+    }
+
+    run() {
+
+        if (this.running === true) return;
+
+        this.running = true;
+
+        doRun:
+        while (this.running) {
+
+            while (!empty(this.runQ)) {
+
+                let next = <Slot>this.runQ.shift();
+
+                let [addr, script, rtime] = next;
+
+                let mctime = this.getRuntime(addr);
+
+                //is the runtime still here?
+                if (mctime.isNothing()) {
+
+                    this.trigger(addr, events.EVENT_EXEC_ACTOR_GONE);
+
+                    //is it the same instance?
+                } else if (mctime.get() !== rtime) {
+
+                    this.trigger(addr, events.EVENT_EXEC_ACTOR_CHANGED);
+
+                    // is the runtime awaiting an async task?
+                } else if (contains(this.blocked, addr)) {
+
+                    this.waitQ.push(next);
+
+                } else {
+
+                    rtime.exec(script);
+
+                }
+
+            }
+
+            let [unblocked, blocked] = partition(this.waitQ, s =>
+                !contains(this.blocked, s[0]));
+
+            this.waitQ = blocked;
+
+            if (unblocked.length > 0) {
+
+                this.runQ = this.runQ.concat(unblocked);
+                continue doRun;
+
+            }
+
+            this.running = false;
+
+        }
     }
 
 }
@@ -688,3 +727,7 @@ export class PVM<S extends System> implements Platform, Actor {
 const getSlot = (s: State, actor: Instance): Maybe<[Address, Runtime]> =>
     reduce(s.runtimes, nothing(), (p: Maybe<[Address, Runtime]>, c, k) =>
         c.context.actor === actor ? fromNullable([k, c]) : p);
+
+const scheduleFutures = (work: Future<void>[]): Future<void> =>
+    batch(distribute(work, MAX_WORK_LOAD))
+        .chain(() => pure(<void>undefined));

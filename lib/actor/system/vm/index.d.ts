@@ -17,7 +17,11 @@ import { Conf } from './conf';
 import { Frame } from './runtime/stack/frame';
 import { Opcode } from './runtime/op';
 import { PTValue } from './type';
-declare type Slot = [Address, Script, Runtime];
+/**
+ * Slot
+ */
+export declare type Slot = [Address, Script, Runtime];
+export declare const MAX_WORK_LOAD = 25;
 /**
  * Platform is the interface for a virtual machine.
  *
@@ -32,11 +36,11 @@ export interface Platform {
      */
     allocate(self: Address, t: template.Template<System>): Either<Err, Address>;
     /**
-     * runActor schedules the start code/method for an actor in the system.
+     * runActor provides a Future that when fork()'d will execute the
+     * start code/method for the target actor.
      *
-     * The start() method is called asynchronously.
      */
-    runActor(target: Address): void;
+    runActor(target: Address): Future<void>;
     /**
      * sendMessage to an actor in the system.
      *
@@ -83,8 +87,10 @@ export interface Platform {
     removeRoute(target: Address): Platform;
     /**
      * kill terminates the actor at the specified address.
+     *
+     * The actor must be a child of parent to succeed.
      */
-    kill(addr: Address): void;
+    kill(parent: Address, target: Address): Future<void>;
     /**
      * raise does the error handling on behalf of Runtimes.
      */
@@ -135,7 +141,7 @@ export declare class PVM<S extends System> implements Platform, Actor {
     notify(): void;
     stop(): void;
     allocate(parent: Address, t: Template<System>): Either<Err, Address>;
-    runActor(target: Address): void;
+    runActor(target: Address): Future<void>;
     runTask(addr: Address, ft: Future<void>): void;
     sendMessage(to: Address, from: Address, m: PTValue): boolean;
     getRuntime(addr: Address): Maybe<Runtime>;
@@ -150,7 +156,7 @@ export declare class PVM<S extends System> implements Platform, Actor {
     raise(addr: Address, err: Err): void;
     trigger(addr: Address, evt: string, ...args: Type[]): void;
     logOp(r: Runtime, f: Frame, op: Opcode, oper: Operand): void;
-    kill(addr: Address): void;
+    kill(parent: Address, target: Address): Future<void>;
     /**
      * spawn an actor.
      *
@@ -159,5 +165,5 @@ export declare class PVM<S extends System> implements Platform, Actor {
     spawn(t: Template<S>): Address;
     execNow(i: Instance, s: Script): Maybe<PTValue>;
     exec(i: Instance, s: Script): void;
+    run(): void;
 }
-export {};

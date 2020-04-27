@@ -1,6 +1,5 @@
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Either } from '@quenk/noni/lib/data/either';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Address } from '../../../address';
 import { FunInfo, ForeignFunInfo } from '../script/info';
@@ -25,8 +24,8 @@ export declare class Thread implements Runtime {
     raise(e: Err): void;
     invokeVM(p: Frame, f: FunInfo): void;
     invokeForeign(p: Frame, f: ForeignFunInfo, args: PTValue[]): void;
-    terminate(): void;
-    kill(target: Address): Either<Err, void>;
+    die(): Future<void>;
+    kill(target: Address): void;
     exec(s: Script): Maybe<PTValue>;
     runTask(ft: Future<void>): void;
     run(): Maybe<PTValue>;

@@ -1,6 +1,5 @@
 import { Err } from '@quenk/noni/lib/control/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Either } from '@quenk/noni/lib/data/either';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Address } from '../../../address';
 import { FunInfo } from '../script/info';
@@ -67,18 +66,13 @@ export interface Runtime {
      */
     raise(e: Err): void;
     /**
-     * terminate the Runtime.
-     *
-     * All child runtimes will be terminiated first.
+     * die terminates the Runtime.
      */
-    terminate(): void;
+    die(): Future<void>;
     /**
-     * kill attempts to terminate the Runtime for another actor.
-     *
-     * This operation fails if the actor is not in the current actor's
-     * tree.
+     * kill sends a request to terminate the Runtime at the specified address.
      */
-    kill(target: Address): Either<Err, void>;
+    kill(target: Address): void;
     /**
      * runTask allows an async operation to be carried out by the Runtime.
      *
