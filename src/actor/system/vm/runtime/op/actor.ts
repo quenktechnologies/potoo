@@ -56,6 +56,7 @@ export const self = (_: Runtime, f: Frame, __: Operand) => {
 /**
  * run triggers the run code for an actor.
  * 
+ * TODO: Candidate for syscall.
  * Stack:
  * <address> -> 
  */
@@ -65,7 +66,9 @@ export const run = (r: Runtime, f: Frame, _: Operand) => {
 
     if (eTarget.isLeft()) return r.raise(eTarget.takeLeft());
 
-    r.vm.runActor(eTarget.takeRight());
+    let target = eTarget.takeRight();
+
+    r.vm.runTask(target, r.vm.runActor(target));
 
 }
 
@@ -211,9 +214,6 @@ export const stop = (r: Runtime, f: Frame, _: Operand) => {
     if (eaddr.isLeft())
         return r.raise(eaddr.takeLeft());
 
-    let eresult = r.kill(eaddr.takeRight());
-
-    if (eresult.isLeft())
-        r.raise(eresult.takeLeft());
+    r.kill(eaddr.takeRight());
 
 }

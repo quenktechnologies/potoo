@@ -2,7 +2,7 @@ import { Mock } from '@quenk/test/lib/mock';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Either, right } from '@quenk/noni/lib/data/either';
-import { Future } from '@quenk/noni/lib/control/monad/future';
+import { Future, pure } from '@quenk/noni/lib/control/monad/future';
 
 import { System } from '../../../../../lib/actor/system';
 import { Template } from '../../../../../lib/actor/template';
@@ -112,9 +112,9 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    kill(addr: Address) {
+    kill(parent: Address, target: Address): Future<void> {
 
-        return this.mock.invoke('kill', [addr], undefined);
+        return this.mock.invoke('kill', [parent, target], pure(<void>undefined));
 
     }
 

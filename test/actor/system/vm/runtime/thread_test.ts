@@ -2,6 +2,7 @@ import * as op from '../../../../../lib/actor/system/vm/runtime/op';
 
 import { assert } from '@quenk/test/lib/assert';
 import { just } from '@quenk/noni/lib/data/maybe';
+import { toPromise, attempt } from '@quenk/noni/lib/control/monad/future';
 
 import { NewForeignFunInfo } from '../../../../../lib/actor/system/vm/script/info';
 import { StackFrame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
@@ -11,6 +12,7 @@ import { PScript } from '../../../../../lib/actor/system/vm/script';
 import { newPlatform } from '../fixtures/vm';
 import { newContext } from '../fixtures/context';
 import { newRuntime } from '../fixtures/runtime';
+import { newInstance } from '../fixtures/instance';
 
 let foreignFunc = new NewForeignFunInfo('func', 0,
     (r: Thread, n: number) => n * n);
@@ -77,103 +79,51 @@ describe('runtime', () => {
 
         describe('kill', () => {
 
-            it('should kill the intended target', () => {
+            it('schedule a task', () => {
 
                 let vm = newPlatform();
-
-                let ctx = newContext();
 
                 let p = new Thread(
                     vm,
                     new Heap(),
-                    ctx,
+                    newContext(),
                     [], []);
 
-                ctx.address = 'self';
+                p.kill('self/0');
 
-                vm.state.runtimes['self/0'] = newRuntime();
-
-                assert(p.kill('self/0').isRight()).true();
-
-                assert(vm.mock.getCalledArgs('kill')).equate(['self/0']);
+                assert(vm.mock.wasCalled('runTask')).true();
 
             });
 
-            it('should kill a group', () => {
+            describe('die', () => {
 
-                let vm = newPlatform();
-                let ctx = newContext();
-                let self0 = newRuntime();
-                let self1 = newRuntime();
-                let self2 = newRuntime();
+                it('should top the actor', () => {
 
-                let p = new Thread(
-                    vm,
-                    new Heap(),
-                    ctx,
-                    [], []);
+                    let vm = newPlatform();
 
-                ctx.address = 'self';
+                    let ctx = newContext();
 
-                vm.state.runtimes['self/0'] = self0;
-                vm.state.runtimes['self/1'] = self1;
-                vm.state.runtimes['self/2'] = self2;
+                    let act = newInstance();
 
-                vm.state.groups['us'] = ['self/0', 'self/1', 'self/2'];
+                    ctx.actor = act;
 
-                vm.mock.setReturnValue('getGroup', just(vm.state.groups['us']));
+                    let p = new Thread(
+                        vm,
+                        new Heap(),
+                        ctx,
+                        [], []);
 
-                assert(p.kill('$us').isRight()).true();
+                    return toPromise(
 
-                assert(vm.mock.wasCalledNTimes('kill', 3)).true();
+                        p
+                            .die()
+                            .chain(() => attempt(() => {
 
-            });
+                                assert(act.mock.wasCalled('stop')).true();
 
-            it('should refuse non-child', () => {
+                            })));
 
-                let vm = newPlatform();
-
-                let ctx = newContext();
-
-                let p = new Thread(
-                    vm,
-                    new Heap(),
-                    ctx,
-                    [], []);
-
-                ctx.address = 'self';
-
-                vm.state.runtimes['them/0'] = newRuntime();
-
-                assert(p.kill('them/0').isLeft()).true();
-
-                assert(vm.mock.wasCalled('kill')).false();
-
-            });
-
-            it('should reject a group with non-child', () => {
-
-                let vm = newPlatform();
-                let ctx = newContext();
-                let self0 = newRuntime();
-                let self1 = newRuntime();
-                let self2 = newRuntime();
-
-                let p = new Thread(
-                    vm,
-                    new Heap(),
-                    ctx,
-                    [], []);
-
-                ctx.address = 'self';
-
-                vm.state.runtimes['self/0'] = self0;
-                vm.state.runtimes['them/1'] = self1;
-                vm.state.runtimes['self/2'] = self2;
-
-                vm.state.groups['us'] = ['self/0', 'them/1', 'self/2'];
-
-                assert(p.kill('$us').isLeft()).false();
+                });
 
             });
 

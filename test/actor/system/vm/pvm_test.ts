@@ -3,6 +3,7 @@ import * as op from '../../../../lib/actor/system/vm/runtime/op';
 import { assert } from '@quenk/test/lib/assert';
 import { just, nothing } from '@quenk/noni/lib/data/maybe';
 import { tick } from '@quenk/noni/lib/control/timer';
+import { raise, pure, toPromise, attempt } from '@quenk/noni/lib/control/monad/future';
 
 import { PScript } from '../../../../lib/actor/system/vm/script';
 import { PVM } from '../../../../lib/actor/system/vm';
@@ -394,6 +395,126 @@ describe('vm', () => {
                 }
 
                 assert(caught).true();
+
+            });
+
+        });
+
+        describe('kill', () => {
+
+            it('should kill the intended target', () => {
+
+                let vm = new PVM(newSystem());
+
+                let r0 = newRuntime();
+                let r1 = newRuntime();
+
+                vm.state.runtimes['self/0'] = r0;
+                vm.state.runtimes['self/1'] = r1;
+
+                return toPromise(
+                    vm
+                        .kill('self', 'self/0')
+                        .chain(() => attempt(() => {
+
+                            assert(r0.mock.wasCalled('die')).true();
+                            assert(r1.mock.wasCalled('die')).false();
+
+                        })));
+
+            });
+
+            it('should kill a group', () => {
+
+                let vm = new PVM(newSystem());
+
+                let self0 = newRuntime(newContext({ address: 'self/0' }));
+                let self1 = newRuntime(newContext({ address: 'self/1' }));
+                let self2 = newRuntime(newContext({ address: 'self/2' }));
+
+                vm.state.runtimes['self/0'] = self0;
+                vm.state.runtimes['self/1'] = self1;
+                vm.state.runtimes['self/2'] = self2;
+
+                vm.state.groups['us'] = ['self/0', 'self/1', 'self/2'];
+
+                return toPromise(
+                    vm
+                        .kill('$', '$us')
+                        .chain(() => attempt(() => {
+
+                            assert(vm.state.runtimes['self/0']).undefined();
+                            assert(vm.state.runtimes['self/1']).undefined();
+                            assert(vm.state.runtimes['self/2']).undefined();
+
+                            assert(self0.mock.wasCalled('die')).true();
+                            assert(self1.mock.wasCalled('die')).true();
+                            assert(self2.mock.wasCalled('die')).true();
+
+                        })));
+
+            });
+
+            it('should refuse non-child', () => {
+
+                let vm = new PVM(newSystem());
+
+                let ok = false;
+
+                vm.state.runtimes['them/0'] = newRuntime();
+
+                return toPromise(
+                    vm
+                        .kill('that', 'them/0')
+                        .catch(e => attempt(() => {
+
+                            ok = true;
+                            assert(e.message.startsWith('IllegalStopErr'));
+
+                        }))
+                        .finally(() =>
+                            attempt(() => {
+
+                                assert(ok).true();
+
+                            })));
+
+            });
+
+            it('should reject a group with non-child', () => {
+
+                let vm = new PVM(newSystem());
+
+                let ok = false;
+
+                let self0 = newRuntime();
+                let self1 = newRuntime();
+                let self2 = newRuntime();
+
+                vm.state.runtimes['self/0'] = self0;
+                vm.state.runtimes['them/1'] = self1;
+                vm.state.runtimes['self/2'] = self2;
+
+                vm.state.groups['us'] = ['self/0', 'them/1', 'self/2'];
+
+                return toPromise(
+                    vm
+                        .kill('self', '$us')
+                        .catch(e => {
+
+                            if (e.message.startsWith('IllegalStopErr')) {
+
+                                ok = true;
+                                return pure(undefined);
+
+                            } else {
+
+                                return raise(e);
+
+                            }
+
+                        })
+                        .finally(() => attempt(() => { assert(ok).true() })))
 
             });
 

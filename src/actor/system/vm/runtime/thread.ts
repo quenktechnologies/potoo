@@ -1,13 +1,9 @@
-import * as errors from './error';
-
 import { Err } from '@quenk/noni/lib/control/error';
 import { empty, tail } from '@quenk/noni/lib/data/array';
-import { map } from '@quenk/noni/lib/data/record';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
-import { Either, right, left } from '@quenk/noni/lib/data/either';
-import { Future } from '@quenk/noni/lib/control/monad/future';
+import { Future, pure } from '@quenk/noni/lib/control/monad/future';
 
-import { isGroup, Address, isChild } from '../../../address';
+import { Address } from '../../../address';
 import { FunInfo, ForeignFunInfo } from '../script/info';
 import { Script } from '../script';
 import { Platform } from '../';
@@ -65,59 +61,30 @@ export class Thread implements Runtime {
 
     }
 
-    terminate() {
+    die(): Future<void> {
 
-        let current = this.context.address;
+        return <Future<void>>pure(undefined)
+            .chain(() => {
 
-        let maybeChilds = this.vm.getChildren(current);
+                let ret = this.context.actor.stop();
 
-        if (maybeChilds.isJust()) {
+                return (ret != null) ? ret : pure(<void>undefined);
 
-            let childs = maybeChilds.get();
+            })
+            .chain(() => {
 
-            map(childs, (c, k) => {
-
-                //TODO: async support
-                c.context.actor.stop();
-
-                this.vm.remove(k);
+                //TODO: should be removed when heap is shared.
+                this.heap.release();
+                return pure(<void>undefined);
 
             });
 
-        }
-
-        this.heap.release();
-
-        this.vm.remove(current);
-
-        //TODO: async support
-        this.context.actor.stop();
-
     }
 
-    kill(target: Address): Either<Err, void> {
+    kill(target: Address): void {
 
-        let self = this.context.address;
-
-        let addrs = isGroup(target) ?
-            this.vm.getGroup(target).orJust(() => []).get() : [target];
-
-        let ret: Either<Err, void> = addrs.reduce((p, c) => {
-
-            if (p.isLeft()) return p;
-
-            if ((!isChild(self, c)) && (c !== self))
-                return left(new errors.IllegalStopErr(target, c));
-
-            this.vm.kill(c);
-
-            return p;
-
-        }, <Either<Err, void>>right(undefined));
-
-        this.terminate();
-
-        return ret;
+        this.vm.runTask(this.context.address,
+            this.vm.kill(this.context.address, target));
 
     }
 

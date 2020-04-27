@@ -10,11 +10,18 @@ export class SystemImpl implements System {
 
     mock = new Mock();
 
-    exec(i: Instance, s: Script): Maybe<PTValue> {
+    execNow(i: Instance, s: Script): Maybe<PTValue> {
 
-        return this.mock.invoke('exec', [i, s], nothing());
+        return this.mock.invoke('execNow', [i, s], nothing());
 
     }
+
+    exec(i: Instance, s: Script) {
+
+        this.mock.invoke('exec', [i, s], undefined);
+
+    }
+
 
 }
 

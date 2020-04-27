@@ -2,7 +2,7 @@ import { Mock } from '@quenk/test/lib/mock';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Err } from '@quenk/noni/lib/control/error';
 import { right, Either } from '@quenk/noni/lib/data/either';
-import { Future } from '@quenk/noni/lib/control/monad/future';
+import { Future, pure } from '@quenk/noni/lib/control/monad/future';
 
 import { Runtime } from '../../../../../lib/actor/system/vm/runtime';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
@@ -54,9 +54,9 @@ export class RuntimeImpl implements Runtime {
 
     }
 
-    terminate() {
+    die(): Future<void> {
 
-        this.mock.invoke('terminate', [], undefined);
+        return this.mock.invoke('die', [], pure(<void>undefined));
 
     }
 
