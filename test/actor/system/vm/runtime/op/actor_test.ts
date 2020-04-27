@@ -73,7 +73,7 @@ describe('actor', () => {
 
             actor.run(r, f, 0);
 
-            assert(r.vm.mock.getCalledList()).equate(['runActor']);
+            assert(r.vm.mock.getCalledList()).equate(['runActor', 'runTask']);
 
         });
 

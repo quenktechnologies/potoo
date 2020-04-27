@@ -34,9 +34,9 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    runActor(addr: Address): Either<Err, void> {
+    runActor(addr: Address): Future<void> {
 
-        return this.mock.invoke('runActor', [addr], right(undefined));
+        return this.mock.invoke('runActor', [addr], pure(<void>undefined));
 
     }
 

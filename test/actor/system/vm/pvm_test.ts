@@ -354,13 +354,13 @@ describe('vm', () => {
                 vm.state.runtimes['self'] = r;
                 vm.raise('self', new Error('err'));
 
-                tick(() => {
+                setTimeout(() => {
 
                     assert(called).true();
                     assert(act.mock.wasCalled('start')).true();
                     done();
 
-                });
+                }, 100);
 
             });
 
@@ -518,6 +518,45 @@ describe('vm', () => {
 
             });
 
+        });
+
+        describe('stop', () => {
+
+            it('should stop all actors', () => {
+
+                let vm = new PVM(newSystem());
+
+                let ok = false;
+
+                let self0 = newRuntime();
+                let self1 = newRuntime();
+                let self2 = newRuntime();
+
+                vm.state.runtimes['self/0'] = self0;
+                vm.state.runtimes['them/1'] = self1;
+                vm.state.runtimes['self/2'] = self2;
+
+                return toPromise(
+                    vm
+                        .stop()
+                        .chain(() => {
+
+                            ok = true;
+
+                            return attempt(() => {
+
+                                assert(self0.mock.wasCalled('die')).true();
+                                assert(self1.mock.wasCalled('die')).true();
+                                assert(self2.mock.wasCalled('die')).true();
+
+                                assert(vm.state.runtimes['self/0']).undefined();
+                                assert(vm.state.runtimes['self/1']).undefined();
+                                assert(vm.state.runtimes['self/2']).undefined();
+
+                            });
+
+                        }));
+            });
         });
 
     });

@@ -8,10 +8,13 @@ import {
 } from '../../../../lib/actor/system/vm/state';
 import { newRuntime } from './fixtures/runtime';
 import { newContext } from './fixtures/context';
+import { ADDRESS_SYSTEM } from '../../../../lib/actor/address';
 
 const state: State = {
 
     runtimes: {
+
+        '$': newRuntime(newContext({ address: '0' })),
 
         '/': newRuntime(newContext({ address: '1' })),
 
@@ -83,6 +86,14 @@ describe('state', () => {
 
             assert(childs['nil'])
                 .equal(undefined);
+
+        });
+
+        it(`should not treat ${ADDRESS_SYSTEM} as a child of itself`, () => {
+
+            let childs = getChildren(state, ADDRESS_SYSTEM);
+
+            assert(childs[ADDRESS_SYSTEM]).undefined();
 
         });
 

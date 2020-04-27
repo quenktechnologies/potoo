@@ -242,9 +242,9 @@ export class PVM<S extends System> implements Platform, Actor {
 
     }
 
-    stop() {
+    stop(): Future<void> {
 
-        //TODO: Provide a way to stop all actors.
+        return this.kill(ADDRESS_SYSTEM, ADDRESS_SYSTEM);
 
     }
 
@@ -598,7 +598,13 @@ export class PVM<S extends System> implements Platform, Actor {
                     })), f => f);
 
             return scheduleFutures(cwork)
-                .chain(() => run.die())
+                .chain(() => {
+
+                    return addr === ADDRESS_SYSTEM ?
+                        pure(<void>undefined) :
+                        run.die();
+
+                })
                 .chain(() => {
 
                     this.trigger(run.context.address,
