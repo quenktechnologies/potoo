@@ -2,7 +2,7 @@
 Potoo
 =====
 
-Framework for building actor systems in ECMAScript.
+Message passing virtual machine.
 
 # Installation
 

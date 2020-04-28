@@ -1,7 +1,7 @@
 {
   "name": "@quenk/potoo",
   "version": "2.6.0",
-  "description": "Actor library for client and server side projects",
+  "description": "Message passing virtual machine.",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
   "files": [
@@ -11,13 +11,13 @@
     "test": "./node_modules/.bin/mocha --opts mocha.opts $(find test -name *_test.ts)"
   },
   "devDependencies": {
-    "@quenk/test": "^2.2.1",
+    "@quenk/test": "^2.2.3",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^13.11.0",
+    "@types/node": "^13.13.4",
     "@types/uuid": "^7.0.2",
-    "mocha": "^7.1.1",
-    "ts-node": "^8.8.1",
-    "typedoc": "^0.17.3",
+    "mocha": "^7.1.2",
+    "ts-node": "^8.9.1",
+    "typedoc": "^0.17.6",
     "typescript": "^3.8.3"
   },
   "author": "Quenk Technologies Limited",
