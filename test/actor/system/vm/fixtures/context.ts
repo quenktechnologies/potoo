@@ -11,7 +11,7 @@ export const newContext = (o: Partial<Context> = {}): Context => merge({
 
     actor: new InstanceImpl(),
 
-    behaviour: [],
+    receivers: [],
 
     flags: { immutable: true, buffered: true },
 

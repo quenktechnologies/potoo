@@ -1,5 +1,5 @@
 import { assert } from '@quenk/test/lib/assert';
-import {  Case, Default } from '../../../src/actor/resident/case';
+import { Case, Default } from '../../../src/actor/resident/case';
 
 class Flag { constructor(public value: boolean) { } }
 
@@ -15,7 +15,7 @@ describe('case', () => {
 
         it('assert be extendable', () => {
 
-            assert(new ChildCase().match(new Flag(true))).be.true();
+            assert(new ChildCase().test(new Flag(true))).be.true();
 
         });
 
@@ -29,8 +29,7 @@ describe('case', () => {
             let f = (n: number) => { x = n }
             let c = new Case(12, f);
 
-            assert(c.match(12)).equal(true);
-            assert(x).equal(12);
+            assert(c.test(12)).equal(true);
 
         });
 
@@ -44,10 +43,9 @@ describe('case', () => {
             let f = (_: any) => { x++ }
             let c = new Default(f);
 
-            assert(c.match(1)).equal(true);
-            assert(c.match('12')).equal(true);
-            assert(c.match({})).equal(true);
-            assert(x).equal(3);
+            assert(c.test(1)).equal(true);
+            assert(c.test('12')).equal(true);
+            assert(c.test({})).equal(true);
 
         });
 

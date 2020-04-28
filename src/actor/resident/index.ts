@@ -1,17 +1,17 @@
 import * as scripts from './scripts';
+import * as events from '../system/vm/event';
 
 import { Err } from '@quenk/noni/lib/control/error';
 import { map, merge } from '@quenk/noni/lib/data/record';
 import { isObject } from '@quenk/noni/lib/data/type';
 
 import { Context } from '../system/vm/runtime/context';
+import { NewForeignFunInfo } from '../system/vm/script/info';
 import { System } from '../system';
 import {
     ADDRESS_DISCARD,
     Address,
-    AddressMap,
-    isRestricted,
-    make
+    AddressMap
 } from '../address';
 import { Message } from '../message';
 import { Template, Templates, Spawnable, normalize } from '../template';
@@ -19,7 +19,6 @@ import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_TEMPORARY } from '../flags';
 import { Actor, Instance, Eff } from '../';
 import { Case } from './case';
 import { Api } from './api';
-import { PTBoolean } from '../system/vm/type';
 
 /**
  * Reference to an actor address.
@@ -136,8 +135,7 @@ export abstract class Immutable<T, S extends System>
 
         c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
 
-        c.behaviour.push((_, m) =>
-            <PTBoolean>Number(this.receive.some(c => c.match(m))));
+        c.receivers.push(receiveFun(this.receive));
 
         return c;
 
@@ -165,8 +163,7 @@ export abstract class Temp<T, S extends System>
 
         c.flags = c.flags | FLAG_TEMPORARY | FLAG_BUFFERED;
 
-        c.behaviour.push(m =>
-            <PTBoolean>Number(this.receive.some(c => c.match(m))));
+        c.receivers.push(receiveFun(this.receive));
 
         return c;
 
@@ -195,8 +192,7 @@ export abstract class Mutable<S extends System>
      */
     select<M>(cases: Case<M>[]): Mutable<S> {
 
-        this.system.exec(this, new scripts.Receive((m: Message) =>
-            cases.some(c => c.match(m))));
+        this.system.exec(this, new scripts.Receive(receiveFun(cases)));
 
         return this;
 
@@ -227,15 +223,34 @@ export const spawn = <S extends System>
 
 }
 
-export const xspawn = <S extends System>
-    (sys: S, i: Instance, t: Spawnable<S>, parent: Address): Address => {
+const receiveFun = (cases: Case<Message>[]) =>
+    new NewForeignFunInfo('receive', 1, (r, m) => {
 
-    let tmpl = normalize(isObject(t) ? <Template<S>>t : { create: t });
+        if (cases.some(c => {
 
-    sys.exec(i, new scripts.Spawn<S>(tmpl));
+            let ok = c.test(m);
 
-    return isRestricted(<string>tmpl.id) ?
-        ADDRESS_DISCARD :
-        make(parent, <string>tmpl.id)
+            if (ok) {
 
-}
+                let ft = c.apply(m);
+
+                if (ft != null)
+                    r.runTask(ft);
+
+            }
+
+            return ok;
+
+        })) {
+
+            r.vm.trigger(r.context.address, events.EVENT_MESSAGE_READ, m);
+
+        } else {
+
+            r.vm.trigger(r.context.address, events.EVENT_MESSAGE_DROPPED, m);
+
+        }
+
+        return 0;
+
+    });

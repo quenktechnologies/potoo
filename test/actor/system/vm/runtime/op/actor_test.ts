@@ -11,6 +11,7 @@ import { newFrame } from '../../fixtures/frame';
 import { newInstance } from '../../fixtures/instance';
 import { Message } from '../../../../../../lib/actor/message';
 import { newHeapObject } from '../heap/fixtures/object';
+import { NewForeignFunInfo } from '../../../../../../lib/actor/system/vm/script/info';
 
 describe('actor', () => {
 
@@ -131,7 +132,7 @@ describe('actor', () => {
 
             actor.recv(r, f, 0);
 
-            assert(r.context.behaviour).equate([info.exec]);
+            assert(r.context.receivers).equate([info]);
 
         });
 
@@ -144,7 +145,7 @@ describe('actor', () => {
             let f = newFrame();
             let r = newRuntime();
 
-            r.context.behaviour.push(() => 1);
+            r.context.receivers.push(new NewForeignFunInfo('foo', 0, () => 1));
 
             actor.recvcount(r, f, 0);
 
@@ -190,19 +191,20 @@ describe('actor', () => {
 
         it('should consume the TOS', () => {
 
-            let buf = <Message[]>[];
             let f = newFrame();
             let r = newRuntime();
 
+            let func = new NewForeignFunInfo('foo', 1,
+                (_: any, __: any) => 0)
+
             f.mock.setReturnValue('popValue', right('hi'));
 
-            r.context.behaviour.push((_: any, m: any) => { buf.push(m); return 1 });
+            r.context.receivers.push(func);
 
             actor.read(r, f, 0);
 
-            assert(buf).equate(['hi']);
-
-            assert(f.mock.getCalledArgs('push')).equate([1]);
+            assert(r.mock.getCalledArgs('invokeForeign'))
+                .equate([f, func, ['hi']]);
 
         });
 

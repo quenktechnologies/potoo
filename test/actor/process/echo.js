@@ -8,7 +8,7 @@ function Echo (s) {
     this.receive = [
 
         new Case({client:String, message:String},
-            p => this.tell(p.client, p.message))
+            p => { this.tell(p.client, p.message) })
 
     ];
 

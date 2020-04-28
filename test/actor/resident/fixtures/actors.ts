@@ -230,9 +230,9 @@ export class ShouldWork extends Mutable<TestSystem> {
 
         let cases: Case<string>[] = [
 
-            new Case('one', () => (bucket.push(1), this.select(cases))),
-            new Case('two', () => (bucket.push(2), this.select(cases))),
-            new Case('three', () => (bucket.push(3), this.select(cases))),
+            new Case('one', () => { (bucket.push(1), this.select(cases)) }),
+            new Case('two', () => { (bucket.push(2), this.select(cases)) }),
+            new Case('three', () => { (bucket.push(3), this.select(cases)) }),
             new Case('done', () => {
                 assert(bucket.join(',')).equate('1,2,3'); this.done();
             })
@@ -307,7 +307,7 @@ export class ImmutableSelfTalk extends Immutable<string, TestSystem> {
 
     receive = [
 
-        new Case('ping', () => this.tell(this.self(), 'pong')),
+        new Case('ping', () => { this.tell(this.self(), 'pong'); }),
 
         new Case('pong', () => {
 
@@ -345,7 +345,7 @@ export class ImmutableCrossTalk extends Immutable<string, TestSystem> {
 
     receive = [
 
-        new Case('syn', () => this.tell(this.partner, 'ack')),
+        new Case('syn', () => { this.tell(this.partner, 'ack'); }),
 
         new Case('ack', () => {
 
@@ -376,7 +376,7 @@ export class MutableCrossTalk extends Mutable<TestSystem> {
 
         this.select([
 
-            new Case('syn', () => this.tell(this.partner, 'ack')),
+            new Case('syn', () => { this.tell(this.partner, 'ack'); }),
 
             new Case('ack', () => {
 

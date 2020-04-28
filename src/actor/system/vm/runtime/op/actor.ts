@@ -1,11 +1,8 @@
 import * as error from '../error';
-import * as events from '../../event';
 
 import { isImmutable } from '../../../../flags';
 import { Template } from '../../template';
 import { Frame } from '../stack/frame';
-import { ForeignFunInfo } from '../../script/info';
-import { Receiver } from '../context';
 import { Runtime, Operand } from '../';
 
 /**
@@ -111,12 +108,7 @@ export const recv = (r: Runtime, f: Frame, _: Operand) => {
 
     if (einfo.isLeft()) return r.raise(einfo.takeLeft());
 
-    let info = <ForeignFunInfo>einfo.takeRight();
-
-    if (info.exec == null)
-        r.raise(new Error('recv: Only foriegn functions allowed!'));
-
-    r.context.behaviour.push(<Receiver>info.exec);
+    r.context.receivers.push(einfo.takeRight());
 
     if (r.context.mailbox.length > 0)
         r.context.actor.notify();
@@ -131,7 +123,7 @@ export const recv = (r: Runtime, f: Frame, _: Operand) => {
  */
 export const recvcount = (r: Runtime, f: Frame, _: Operand) => {
 
-    f.push(r.context.behaviour.length);
+    f.push(r.context.receivers.length);
 
 }
 
@@ -169,30 +161,26 @@ export const maildq = (_: Runtime, f: Frame, __: Operand) => {
  */
 export const read = (r: Runtime, f: Frame, __: Operand) => {
 
-    let emsg = f.popValue();
-
-    if (emsg.isLeft())
-        return r.raise(emsg.takeLeft());
-
-    let msg = emsg.takeRight();
-
     let func = isImmutable(r.context.flags) ?
-        r.context.behaviour[0] : r.context.behaviour.shift();
+        r.context.receivers[0] : r.context.receivers.shift();
 
     if (func == null)
         return r.raise(new error.NoReceiveErr(r.context.address));
 
-    if (func(r, msg)) {
+    if (func.foreign === true) {
 
-        r.vm.trigger(r.context.address, events.EVENT_MESSAGE_READ, msg);
+        let emsg = f.popValue();
 
-        f.push(1);
+        if (emsg.isLeft())
+            return r.raise(emsg.takeLeft());
+
+        let msg = emsg.takeRight();
+
+        r.invokeForeign(f, func, [msg]);
 
     } else {
 
-        r.vm.trigger(r.context.address, events.EVENT_MESSAGE_DROPPED, msg);
-
-        f.push(0);
+        r.invokeVM(f, func);
 
     }
 

@@ -364,6 +364,7 @@ describe('resident', () => {
                 });
 
         });
+
     })
 
 })

@@ -1,6 +1,7 @@
 import * as op from '../system/vm/runtime/op';
 
 import {
+    ForeignFunInfo,
     NewForeignFunInfo,
     objectType,
     NewFunInfo,
@@ -166,7 +167,7 @@ export class Tell implements Script {
  */
 export class Receive implements Script {
 
-    constructor(public f: (m: Message) => boolean) { }
+    constructor(public f: ForeignFunInfo) { }
 
     constants = <Constants>[[], []];
 
@@ -174,10 +175,7 @@ export class Receive implements Script {
 
     info = [
 
-        new NewForeignFunInfo(
-            'receiver',
-            0,
-            (_: Runtime, m: Message) => Number(this.f(m)))
+        this.f
 
     ];
 
