@@ -82,4 +82,3 @@ export declare const ref: <S extends System>(res: Resident<S>, addr: string) => 
  * spawn an actor using the Spawn script.
  */
 export declare const spawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>) => string;
-export declare const xspawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>, parent: string) => string;

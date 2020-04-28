@@ -10,7 +10,7 @@ import { Context } from '../system/vm/runtime/context';
 import { Envelope } from '../mailbox';
 import { Message } from '../message';
 import { Address, getId } from '../address';
-import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_ROUTER } from '../flags';
+import { FLAG_IMMUTABLE, FLAG_ROUTER } from '../flags';
 import { ADDRESS_DISCARD } from '../address';
 import { Tell, Raise, Kill } from '../resident/scripts';
 import { Actor } from '../';
@@ -25,7 +25,7 @@ const raiseShape = {
 
     dest: String,
 
-    error: { message: String }
+    error: Any
 
 }
 
@@ -107,7 +107,7 @@ export class Process implements Actor {
 
     init(c: Context): Context {
 
-        c.flags = c.flags | FLAG_IMMUTABLE | (~FLAG_BUFFERED) | FLAG_ROUTER;
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_ROUTER;
         return c;
 
     }
@@ -192,5 +192,5 @@ const handleTell = (p: Process) => (m: TellMsg) =>
     p.system.exec(p, new Tell(m.to, m.message));
 
 const handleRaise =
-    (p: Process) => ({ error: { message }, src }: RaiseMsg) =>
-        p.system.exec(p, new Raise(`Error message from ${src}: ${message}`));
+    (p: Process) => ({ error, src }: RaiseMsg) =>
+        p.system.exec(p, new Raise(`[${src}]: ${error}`));

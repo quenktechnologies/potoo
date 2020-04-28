@@ -4,14 +4,8 @@ import { Message } from '../../../message';
 import { Flags } from '../../../flags';
 import { Address } from '../../../address';
 import { Instance } from '../../../';
+import { FunInfo } from '../script/info';
 import { Template } from '../template';
-import { PTBoolean } from '../type';
-import { Runtime } from './';
-
-/**
- * Receiver
- */
-export type Receiver = (r: Runtime, m: Message) => PTBoolean;
 
 /**
  * ErrorHandler processes errors that come up during an actor execution
@@ -54,9 +48,9 @@ export interface Context {
     actor: Instance,
 
     /**
-     * behaviour stack for the actor.
+     * receivers stack for the actor.
      */
-    behaviour: Receiver[],
+    receivers: FunInfo[],
 
     /**
      * flags currently enabled for the actor.
@@ -86,7 +80,7 @@ export const newContext =
 
             actor,
 
-            behaviour: [],
+            receivers: [],
 
             flags: 0,
 

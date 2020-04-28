@@ -91,14 +91,20 @@ const main = () => {
 
     let sys = new Sys();
 
-    process.on('uncaughtException', e => (<Function>process.send)({
+    process.on('uncaughtException', e => {
 
-        code: RAISE,
-        error: e.stack,
-        src: address,
-        dest: address
+        (<Function>process.send)({
 
-    }));
+            code: RAISE,
+            error: e.stack,
+            src: address,
+            dest: address
+
+        })
+
+        process.exit(-1);
+
+    });
 
     sys.vm.spawn({
 

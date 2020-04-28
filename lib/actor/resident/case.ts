@@ -3,13 +3,14 @@ import { Constructor } from '@quenk/noni/lib/data/type/constructor';
 import { Pattern } from '@quenk/noni/lib/data/type';
 
 import { Message } from '../message';
+import { Eff } from '../';
 
 export { Pattern }
 
 /**
  * Handler function type for Cases.
  */
-export type Handler<T> = (t: T) => void;
+export type Handler<T> = (t: T) => Eff;
 
 /**
  * Case is provided for situations where it is better to extend 
@@ -28,22 +29,20 @@ export class Case<T> {
     constructor(public pattern: Pattern<T>, public handler: Handler<T>) { }
 
     /**
-     * match a message against a pattern.
-     *
-     * A successful match results in a side effect.
+     * test whether the supplied message satisfies the Case test.
      */
-    match(m: Message): boolean {
+    test(m: Message): boolean {
 
-        if (test(m, this.pattern)) {
+        return test(m, this.pattern);
 
-            this.handler(m);
-            return true;
+    }
 
-        } else {
+    /**
+     * apply the handler to the message.
+     */
+    apply(m: Message): Eff {
 
-            return false;
-
-        }
+        return this.handler(m);
 
     }
 
@@ -60,10 +59,15 @@ export class Default<T> extends Case<T> {
 
     }
 
-    match(m: Message): boolean {
+    test(_: Message): boolean {
 
-        this.handler(m);
         return true;
+
+    }
+
+    apply(m: Message): Eff {
+
+        return this.handler(m);
 
     }
 

@@ -1,4 +1,4 @@
-import { NewForeignFunInfo, NewFunInfo, NewTypeInfo } from '../system/vm/script/info';
+import { ForeignFunInfo, NewForeignFunInfo, NewFunInfo, NewTypeInfo } from '../system/vm/script/info';
 import { Script, Constants } from '../system/vm/script';
 import { Template } from '../template';
 import { System } from '../system';
@@ -42,11 +42,11 @@ export declare class Tell implements Script {
  * Receive schedules a receiver for the actor.
  */
 export declare class Receive implements Script {
-    f: (m: Message) => boolean;
-    constructor(f: (m: Message) => boolean);
+    f: ForeignFunInfo;
+    constructor(f: ForeignFunInfo);
     constants: Constants;
     name: string;
-    info: NewForeignFunInfo[];
+    info: ForeignFunInfo[];
     code: number[];
 }
 /**
