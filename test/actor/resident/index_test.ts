@@ -12,7 +12,9 @@ import {
     MutableCrossTalk,
     ImmutableSelfTalk,
     ImmutableCrossTalk,
-    DelayOnRun
+    DelayOnRun,
+    AsyncReceiverMutable,
+    AsyncReceiverImmutable
 } from './fixtures/actors';
 import { ACTION_STOP } from '../../../lib/actor/template';
 
@@ -337,6 +339,19 @@ describe('resident', () => {
 
         });
 
+        it('should support async receivers', done => {
+
+            let s = system();
+
+            s.spawn({
+
+                id: 'async',
+                create: sys => new AsyncReceiverMutable(sys, done)
+
+            });
+
+        });
+
     })
 
     describe('Immutable', () => {
@@ -362,6 +377,19 @@ describe('resident', () => {
                     id: 'b',
                     create: s => new ImmutableCrossTalk(s, 'a', done)
                 });
+
+        });
+
+        it('should support async receivers', done => {
+
+            let s = system();
+
+            s.spawn({
+
+                id: 'async',
+                create: sys => new AsyncReceiverImmutable(sys, done)
+
+            });
 
         });
 

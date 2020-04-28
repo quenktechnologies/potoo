@@ -1,11 +1,17 @@
-import { fromCallback, Future } from '@quenk/noni/lib/control/monad/future';
+import {
+    fromCallback,
+    Future,
+    delay
+} from '@quenk/noni/lib/control/monad/future';
 import { assert } from '@quenk/test/lib/assert';
 
 import { Context } from '../../../../lib/actor/system/vm/runtime/context';
 import { Case } from '../../../../lib/actor/resident/case';
 import { FLAG_IMMUTABLE, FLAG_BUFFERED } from '../../../../lib/actor/flags';
 import {
-    AbstractResident, Mutable, Immutable,
+    AbstractResident,
+    Mutable,
+    Immutable
 } from '../../../../lib/actor/resident';
 import { TestSystem } from './system';
 
@@ -365,6 +371,33 @@ export class ImmutableCrossTalk extends Immutable<string, TestSystem> {
 
 }
 
+export class AsyncReceiverImmutable extends Immutable<string, TestSystem> {
+
+    constructor(
+        public s: TestSystem,
+        public done: () => void) { super(s); }
+
+    receive = [
+
+        new Case('start', () =>
+            delay(() => this.tell(this.self(), 'stop'), 100)),
+
+        new Case('stop', () => {
+
+            this.done();
+
+        })
+
+    ];
+
+    run() {
+
+        this.tell(this.self(), 'start');
+
+    }
+
+}
+
 export class MutableCrossTalk extends Mutable<TestSystem> {
 
     constructor(
@@ -389,6 +422,30 @@ export class MutableCrossTalk extends Mutable<TestSystem> {
 
         if (this.done)
             this.tell(this.partner, 'syn');
+
+    }
+
+}
+
+export class AsyncReceiverMutable extends Mutable<TestSystem> {
+
+    constructor(
+        public s: TestSystem,
+        public done: () => void) { super(s); }
+
+    run() {
+
+        this.select([
+            new Case('start', () => {
+
+                this.select([new Case('stop', () => { this.done(); })]);
+
+                return delay(() => this.tell(this.self(), 'stop'), 100);
+
+            })
+        ]);
+
+        this.tell(this.self(), 'start');
 
     }
 
