@@ -3,7 +3,12 @@ import * as op from '../../../../lib/actor/system/vm/runtime/op';
 import { assert } from '@quenk/test/lib/assert';
 import { just, nothing } from '@quenk/noni/lib/data/maybe';
 import { tick } from '@quenk/noni/lib/control/timer';
-import { raise, pure, toPromise, attempt } from '@quenk/noni/lib/control/monad/future';
+import {
+    raise,
+    pure,
+    toPromise,
+    attempt
+} from '@quenk/noni/lib/control/monad/future';
 
 import { PScript } from '../../../../lib/actor/system/vm/script';
 import { PVM } from '../../../../lib/actor/system/vm';
@@ -21,6 +26,7 @@ import {
     ACTION_RESTART,
     ACTION_RAISE
 } from '../../../../lib/actor/template';
+import { ADDRESS_SYSTEM } from '../../../../lib/actor/address';
 
 const add2Five = new PScript('add2Five', [[], []], [], [
     op.PUSHUI8 | 0x5,
@@ -515,6 +521,25 @@ describe('vm', () => {
 
                         })
                         .finally(() => attempt(() => { assert(ok).true() })))
+
+            });
+
+            it('should not remove the system from state', () => {
+
+                let vm = new PVM(newSystem());
+
+                vm.state.runtimes['self'] = newRuntime();
+
+                return toPromise(
+                    vm
+                        .kill(ADDRESS_SYSTEM, ADDRESS_SYSTEM)
+                        .chain(() => attempt(() => {
+
+                            assert(vm.state.runtimes['self']).undefined();
+                            assert(vm.state.runtimes[ADDRESS_SYSTEM])
+                                .not.undefined();
+
+                        })));
 
             });
 

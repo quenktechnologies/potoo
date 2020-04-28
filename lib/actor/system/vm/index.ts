@@ -610,7 +610,8 @@ export class PVM<S extends System> implements Platform, Actor {
                     this.trigger(run.context.address,
                         events.EVENT_ACTOR_STOPPED);
 
-                    this.remove(addr);
+                    if (addr !== ADDRESS_SYSTEM)
+                        this.remove(addr);
 
                     return pure(<void>undefined);
 
