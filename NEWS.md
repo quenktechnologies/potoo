@@ -1,3 +1,18 @@
+# 2020-04-29
+
+## Tell Can Be Immediate.
+
+One of the things to look out for in the 3 branch is the change in the 
+behaviour of the `AbstractResident#tell` method. Previously, this was 
+guaranteed to occur in "the next tick", meaning you could send a message to
+an actor before you actually spawn it.
+
+This may have been desirable in some situations but one of the ultimate goals
+of potoo is to minimize overhead in message delivery as much as possible.
+With this in mind, messages are delivered instantly to actors (or their mailbox)
+as soon as you send them. Processing of those messages however are subject
+to system load (notify() scripts may be queued) or the implementation of the
+`accept()` method.
 
 # 2020-04-25
 
