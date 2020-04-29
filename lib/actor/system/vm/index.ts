@@ -181,9 +181,9 @@ export class PVM<S extends System> implements Platform, Actor {
 
     constructor(public system: S, public conf: Conf = defaults()) { }
 
-    static create<S extends System>(s: S, conf: Partial<Conf>): PVM<S> {
+    static create<S extends System>(s: S, conf: object): PVM<S> {
 
-        return new PVM(s, <Conf>rmerge(<Record<Type>>defaults(), conf));
+        return new PVM(s, <Conf>rmerge(<Record<Type>>defaults(), <any>conf));
 
     }
 

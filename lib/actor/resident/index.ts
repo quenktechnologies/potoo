@@ -218,7 +218,7 @@ export const spawn = <S extends System>
 
     return <string>sys
         .execNow(i, new scripts.Spawn<S>(tmpl))
-        .map(() => ADDRESS_DISCARD)
+        .orJust(() => ADDRESS_DISCARD)
         .get();
 
 }
@@ -234,8 +234,7 @@ const receiveFun = (cases: Case<Message>[]) =>
 
                 let ft = c.apply(m);
 
-                if (ft != null)
-                    r.runTask(ft);
+                if (ft != null) r.runTask(ft);
 
             }
 

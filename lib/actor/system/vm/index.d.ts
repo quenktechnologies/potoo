@@ -115,7 +115,7 @@ export declare class PVM<S extends System> implements Platform, Actor {
     system: S;
     conf: Conf;
     constructor(system: S, conf?: Conf);
-    static create<S extends System>(s: S, conf: Partial<Conf>): PVM<S>;
+    static create<S extends System>(s: S, conf: object): PVM<S>;
     /**
      * state contains information about all the actors in the system, routers
      * and groups.
