@@ -220,6 +220,41 @@ export class Spawner extends AbstractResident<TestSystem> {
 
 }
 
+export class AssertSpawnReturnsAddress extends AbstractResident<TestSystem> {
+
+    constructor(public s: TestSystem, public addr: string) {
+
+        super(s);
+
+    }
+
+    init(c: Context): Context {
+
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        return c;
+
+    }
+
+    select<T>(_: Case<T>[]): AssertSpawnReturnsAddress {
+
+        return this;
+
+    }
+
+    run() {
+
+        assert(this.spawn({
+
+            id: 'child',
+
+            create: s => new Spawner(s, () => { })
+
+        })).equate(`${this.addr}/child`);
+
+    }
+
+}
+
 export class ShouldWork extends Mutable<TestSystem> {
 
     constructor(

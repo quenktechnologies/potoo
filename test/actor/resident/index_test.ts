@@ -14,7 +14,8 @@ import {
     ImmutableCrossTalk,
     DelayOnRun,
     AsyncReceiverMutable,
-    AsyncReceiverImmutable
+    AsyncReceiverImmutable,
+    AssertSpawnReturnsAddress
 } from './fixtures/actors';
 import { ACTION_STOP } from '../../../lib/actor/template';
 
@@ -39,6 +40,19 @@ describe('resident', () => {
                         done();
 
                     })
+
+                });
+
+            });
+
+            it('should return the address', () => {
+
+                let s = system();
+
+                s.spawn({
+
+                    id: 'spawner',
+                    create: sys => new AssertSpawnReturnsAddress(sys, 'spawner')
 
                 });
 
@@ -154,149 +168,149 @@ describe('resident', () => {
 
         });
 
-    });
+        describe('kill', () => {
 
-    describe('kill', () => {
+            it('should kill children', done => {
 
-        it('should kill children', done => {
+                let s = system();
 
-            let s = system();
-
-            s.spawn({
-
-                id: 'a',
-                create: sys => new Killer(sys, k => {
-
-                    assert(s.vm.state.runtimes['a/targets'])
-                        .not.equal(undefined);
-
-                    setTimeout(() => k.kill('a/targets'), 100);
-
-                })
-
-            });
-
-            setTimeout(() => {
-
-                assert(s.vm.state.runtimes['a/targets']).equal(undefined);
-                done();
-
-            }, 200);
-        })
-
-        it('should kill grand children', done => {
-
-            let s = system()
-                .spawn({
+                s.spawn({
 
                     id: 'a',
                     create: sys => new Killer(sys, k => {
 
-                        setTimeout(() =>
-                            assert(s.vm.state.runtimes['a/targets/a'])
-                                .not.equal(undefined), 200);
+                        assert(s.vm.state.runtimes['a/targets'])
+                            .not.equal(undefined);
 
-                        setTimeout(() => k.kill('a/targets/a'), 300);
-
-                    })
-                })
-
-            setTimeout(() => {
-
-                assert(s.vm.state.runtimes['a/targets/a']).equal(undefined);
-                done();
-
-            }, 400);
-        })
-
-    })
-
-    describe('exit', () => {
-
-        it('should work', done => {
-
-            let s = system()
-                .spawn({
-
-                    id: 'a',
-                    create: sys => new Exiter(sys, () => {
-
-                        setTimeout(() =>
-                            assert(s.vm.state.runtimes['a'])
-                                .not.equal(undefined), 100);
-
-                        setTimeout(() => {
-
-                            assert(s.vm.state.runtimes['a'])
-                                .equal(undefined);
-
-                            done();
-
-                        }, 300);
+                        setTimeout(() => k.kill('a/targets'), 100);
 
                     })
-                })
-        })
-    })
-
-    describe('group', () => {
-
-        it('should assign actors to a group', done => {
-
-            let s = system()
-                .spawn({
-
-                    id: 'a',
-                    create: sys => new Group(sys)
-                })
-
-            setTimeout(() => {
-
-                assert(s.vm.state.groups['test'])
-                    .equate(['a/b', 'a/c', 'a/d']);
-
-                done();
-
-            }, 200)
-        })
-
-    })
-
-    describe('raise', () => {
-
-        it('should trigger exception handling', done => {
-
-            let ok = false;
-
-            let s = system()
-                .spawn({
-
-                    id: 'raiser',
-
-                    trap: e => {
-
-                        assert(e.message).equal('risen');
-
-                        ok = true;
-
-                        return ACTION_STOP;
-
-                    },
-
-                    create: s => new Raiser(s)
 
                 });
 
-            setTimeout(() => {
+                setTimeout(() => {
 
-                assert(ok).true();
+                    assert(s.vm.state.runtimes['a/targets']).equal(undefined);
+                    done();
 
-                assert(s.vm.state.runtimes['raiser']).undefined();
+                }, 200);
+            })
 
-                done();
+            it('should kill grand children', done => {
 
-            }, 200);
+                let s = system()
+                    .spawn({
+
+                        id: 'a',
+                        create: sys => new Killer(sys, k => {
+
+                            setTimeout(() =>
+                                assert(s.vm.state.runtimes['a/targets/a'])
+                                    .not.equal(undefined), 200);
+
+                            setTimeout(() => k.kill('a/targets/a'), 300);
+
+                        })
+                    })
+
+                setTimeout(() => {
+
+                    assert(s.vm.state.runtimes['a/targets/a']).equal(undefined);
+                    done();
+
+                }, 400);
+            })
+
         })
+
+        describe('exit', () => {
+
+            it('should work', done => {
+
+                let s = system()
+                    .spawn({
+
+                        id: 'a',
+                        create: sys => new Exiter(sys, () => {
+
+                            setTimeout(() =>
+                                assert(s.vm.state.runtimes['a'])
+                                    .not.equal(undefined), 100);
+
+                            setTimeout(() => {
+
+                                assert(s.vm.state.runtimes['a'])
+                                    .equal(undefined);
+
+                                done();
+
+                            }, 300);
+
+                        })
+                    })
+            })
+        })
+
+        describe('group', () => {
+
+            it('should assign actors to a group', done => {
+
+                let s = system()
+                    .spawn({
+
+                        id: 'a',
+                        create: sys => new Group(sys)
+                    })
+
+                setTimeout(() => {
+
+                    assert(s.vm.state.groups['test'])
+                        .equate(['a/b', 'a/c', 'a/d']);
+
+                    done();
+
+                }, 200)
+            })
+
+        })
+
+        describe('raise', () => {
+
+            it('should trigger exception handling', done => {
+
+                let ok = false;
+
+                let s = system()
+                    .spawn({
+
+                        id: 'raiser',
+
+                        trap: e => {
+
+                            assert(e.message).equal('risen');
+
+                            ok = true;
+
+                            return ACTION_STOP;
+
+                        },
+
+                        create: s => new Raiser(s)
+
+                    });
+
+                setTimeout(() => {
+
+                    assert(ok).true();
+
+                    assert(s.vm.state.runtimes['raiser']).undefined();
+
+                    done();
+
+                }, 200);
+            })
+        })
+
     })
 
     describe('Mutable', () => {

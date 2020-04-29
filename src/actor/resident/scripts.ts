@@ -71,22 +71,21 @@ export class Spawn<S extends System> implements Script {
             op.STORE | 5,     //17: Create a counter variable $5.
             op.LOAD | 4,      //18: Load child count back on to the stack.
             op.LOAD | 5,      //19: Load the counter back on to the stack.
-            op.CEQ,           //18: Is the counter the same as the child count?
-            op.IFNZJMP | 35,  //19: If true jump to the end of the routine.
-            op.PUSHUI32 | 0,  //20: Push the uint 0 on to the stack.
-            op.LOAD | 5,      //21: Put the counter back on the stack.
-            op.LOAD | 3,      //22: Put the child array back on to the stack.
-            op.ARELM,         //23: Put the child template @ $4 on the stack.
-            op.LOAD | 2,      //24: Put the parent address on to the stack.
-            op.LDN | 2,       //25: Load the "spawn" function on to the stack.
-            op.CALL,          //26: Call the "spawn" function.
-            op.LOAD | 5,      //27: Load the counter back on to the stack.
-            op.PUSHUI32 | 1,  //28: Put the uint 1 on to the stack.
-            op.ADDUI32,       //29: Increment.
-            op.STORE | 5,     //30: Update the counter.
-            op.JMP | 18,      //31: Continue from line 18.
-            op.NOP            //32: END.
-
+            op.CEQ,           //20: Is the counter the same as the child count?
+            op.IFNZJMP | 34,  //21: If true jump to the end of the routine.
+            op.PUSHUI32 | 0,  //22: Push the uint 0 on to the stack.
+            op.LOAD | 5,      //23: Put the counter back on the stack.
+            op.LOAD | 3,      //24: Put the child array back on to the stack.
+            op.ARELM,         //25: Put the child template @ $4 on the stack.
+            op.LOAD | 2,      //26: Put the parent address on to the stack.
+            op.LDN | 2,       //27: Load the "spawn" function on to the stack.
+            op.CALL,          //28: Call the "spawn" function.
+            op.LOAD | 5,      //29: Load the counter back on to the stack.
+            op.PUSHUI32 | 1,  //30: Put the uint 1 on to the stack.
+            op.ADDUI32,       //31: Increment.
+            op.STORE | 5,     //32: Update the counter.
+            op.JMP | 18,      //33: Continue from line 18.
+            op.LOAD | 2       //34: Load the address of the first spawned.
         ])
 
     ];

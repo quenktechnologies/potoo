@@ -5,7 +5,7 @@ import {
     just,
     nothing
 } from '@quenk/noni/lib/data/maybe';
-import { Record, merge, count } from '@quenk/noni/lib/data/record';
+import { Record, count } from '@quenk/noni/lib/data/record';
 import { isObject, Type } from '@quenk/noni/lib/data/type';
 
 import { TypeInfo, ArrayTypeInfo } from '../../../script/info';
@@ -56,7 +56,7 @@ export class ESObject implements HeapObject {
 
     promote() {
 
-        return merge({}, this.value);
+        return this.value;
 
     }
 
