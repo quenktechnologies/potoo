@@ -11,7 +11,7 @@
     "test": "./node_modules/.bin/mocha --opts mocha.opts $(find test -name *.ts)"
   },
   "devDependencies": {
-    "@quenk/test": "^2.1.1",
+    "@quenk/test": "^2.2.4",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.29",
     "@types/uuid": "^7.0.0",
@@ -24,6 +24,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@quenk/noni": "^1.38.1",
+    "deep-equals": "0.0.2",
     "uuid": "^7.0.1"
   }
 }

@@ -1,5 +1,5 @@
 import * as config from '../configuration';
-import { Data } from '@quenk/test/lib/mock';
+import { Mock } from '@quenk/test/lib/mock';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Address } from '../../address';
 import { Instance } from '../../';
@@ -16,7 +16,7 @@ import { AbstractSystem } from './';
 export declare abstract class TestAbstractSystem extends AbstractSystem {
     configuration: config.Configuration;
     constructor(configuration?: config.Configuration);
-    MOCK: Data;
+    MOCK: Mock;
     exec(i: Instance, s: Script): Maybe<Value>;
     ident(i: Instance): Address;
     init(c: Context): Context;

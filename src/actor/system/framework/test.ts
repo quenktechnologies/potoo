@@ -1,5 +1,5 @@
 import * as config from '../configuration';
-import { Data } from '@quenk/test/lib/mock';
+import { Mock } from '@quenk/test/lib/mock';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Address } from '../../address';
 import { Instance } from '../../';
@@ -22,42 +22,42 @@ export abstract class TestAbstractSystem extends AbstractSystem {
 
     }
 
-    MOCK = new Data();
+    MOCK = new Mock();
 
     exec(i: Instance, s: Script): Maybe<Value> {
 
-        this.MOCK.record('exec', [i, s], this);
+        this.MOCK.invoke('exec', [i, s], this);
         return super.exec(i, <Script>s);
 
     }
 
     ident(i: Instance): Address {
 
-        return this.MOCK.record('ident', [i], super.ident(i));
+        return this.MOCK.invoke('ident', [i], super.ident(i));
 
     }
 
     init(c: Context): Context {
 
-        return this.MOCK.record('init', [c], super.init(c));
+        return this.MOCK.invoke('init', [c], super.init(c));
 
     }
 
     accept(m: Message): void {
 
-        return this.MOCK.record('accept', [m], super.accept(m));
+        return this.MOCK.invoke('accept', [m], <undefined>super.accept(m));
 
     }
 
     stop(): void {
 
-        return this.MOCK.record('stop', [], super.stop());
+        return this.MOCK.invoke('stop', [], <undefined>super.stop());
 
     }
 
     run(): void {
 
-        return this.MOCK.record('run', [], super.run());
+        return this.MOCK.invoke('run', [], <undefined>super.run());
 
     }
 
