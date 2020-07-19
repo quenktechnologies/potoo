@@ -300,7 +300,7 @@ export class PVM<S extends System> implements Platform, Actor {
 
         this.trigger(rtime.context.address, events.EVENT_ACTOR_STARTED);
 
-        return ((ft != null) ? ft : pure(<void>undefined));
+        return ((ft != null) ? <Future<void>>ft : pure(<void>undefined));
 
     }
 
