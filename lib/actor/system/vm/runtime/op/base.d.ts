@@ -1,26 +1,26 @@
 import { Frame } from '../stack/frame';
-import { Runtime } from '../';
+import { Runtime, Operand } from '../';
 /**
  * nop does nothing.
  *
  * Stack:
  *  ->
  */
-export declare const nop: (_: Runtime, __: Frame, ___: number) => void;
+export declare const nop: (_: Runtime, __: Frame, ___: Operand) => void;
 /**
  * pushui8 pushes an unsigned 8bit integer onto the stack.
  *
  * Stack:
  * -> <uint8>
  */
-export declare const pushui8: (_: Runtime, f: Frame, oper: number) => void;
+export declare const pushui8: (_: Runtime, f: Frame, oper: Operand) => void;
 /**
  * pushui16 pushes an unsigned 16bit integer onto the stack.
  *
  * Stack:
  *  -> <uint16>
  */
-export declare const pushui16: (_: Runtime, f: Frame, oper: number) => void;
+export declare const pushui16: (_: Runtime, f: Frame, oper: Operand) => void;
 /**
  * pushui32 pushes an unsigned 32bit integer onto the stack.
  *
@@ -28,27 +28,27 @@ export declare const pushui16: (_: Runtime, f: Frame, oper: number) => void;
  * Stack:
  *  -> <uint32>
  */
-export declare const pushui32: (_: Runtime, f: Frame, oper: number) => void;
+export declare const pushui32: (_: Runtime, f: Frame, oper: Operand) => void;
 /**
  * lds loads a string from the constant pool onto the stack.
  *
  * Stack:
  *  -> <string>
  */
-export declare const lds: (_: Runtime, f: Frame, idx: number) => void;
+export declare const lds: (_: Runtime, f: Frame, idx: Operand) => void;
 /**
  * ldn loads an info object from the compiled script.
  *
  * -> <value>
  */
-export declare const ldn: (_: Runtime, f: Frame, idx: number) => void;
+export declare const ldn: (_: Runtime, f: Frame, idx: Operand) => void;
 /**
  * dup duplicates the value on top of the data stack.
  *
  * Stack:
  * <any> -> <any>,<any>
  */
-export declare const dup: (_: Runtime, f: Frame, __: number) => void;
+export declare const dup: (_: Runtime, f: Frame, __: Operand) => void;
 /**
  * store the value at the top of the data stack in the variable indicated
  * by idx.
@@ -56,7 +56,7 @@ export declare const dup: (_: Runtime, f: Frame, __: number) => void;
  * Stack:
  * <any> ->
  */
-export declare const store: (_: Runtime, f: Frame, idx: number) => void;
+export declare const store: (_: Runtime, f: Frame, idx: Operand) => void;
 /**
  * load the value stored at idx in the variables array onto the top of the
  * stack.
@@ -66,7 +66,7 @@ export declare const store: (_: Runtime, f: Frame, idx: number) => void;
  * Stack:
  *  -> <any>
  */
-export declare const load: (_: Runtime, f: Frame, idx: number) => void;
+export declare const load: (_: Runtime, f: Frame, idx: Operand) => void;
 /**
  * ceq compares two values for equality.
  *
@@ -76,7 +76,7 @@ export declare const load: (_: Runtime, f: Frame, idx: number) => void;
  *
  * <val1>,<val2> -> <unint32>
  */
-export declare const ceq: (r: Runtime, f: Frame, __: number) => void;
+export declare const ceq: (r: Runtime, f: Frame, __: Operand) => void;
 /**
  * addui32 treats the top two operands on the data stack as uint32s and adds
  * them.
@@ -84,7 +84,7 @@ export declare const ceq: (r: Runtime, f: Frame, __: number) => void;
  * The result is a 32 bit value. If the result is more than MAX_SAFE_INTEGER an
  * IntergerOverflowErr will be raised.
  */
-export declare const addui32: (r: Runtime, f: Frame, _: number) => void;
+export declare const addui32: (r: Runtime, f: Frame, _: Operand) => void;
 /**
  * call a function placing its result on the heap.
  *
@@ -92,7 +92,7 @@ export declare const addui32: (r: Runtime, f: Frame, _: number) => void;
  *
  * <arg>...? -> <result>
  */
-export declare const call: (r: Runtime, f: Frame, _: number) => void;
+export declare const call: (r: Runtime, f: Frame, _: Operand) => void;
 /**
  * raise an exception.
  *
@@ -100,14 +100,14 @@ export declare const call: (r: Runtime, f: Frame, _: number) => void;
  *
  * <message> ->
  */
-export declare const raise: (r: Runtime, f: Frame, _: number) => void;
+export declare const raise: (r: Runtime, f: Frame, _: Operand) => void;
 /**
  * jmp jumps to the instruction at the specified address.
  *
  * Stack:
  *  ->
  */
-export declare const jmp: (_: Runtime, f: Frame, oper: number) => void;
+export declare const jmp: (_: Runtime, f: Frame, oper: Operand) => void;
 /**
  * ifzjmp jumps to the instruction at the specified address if the top
  * of the stack is === 0.
@@ -116,7 +116,7 @@ export declare const jmp: (_: Runtime, f: Frame, oper: number) => void;
  *
  * <uint32> ->
  */
-export declare const ifzjmp: (_: Runtime, f: Frame, oper: number) => void;
+export declare const ifzjmp: (_: Runtime, f: Frame, oper: Operand) => void;
 /**
  * ifnzjmp jumps to the instruction at the specified address if the top
  * of the stack is !== 0.
@@ -124,18 +124,18 @@ export declare const ifzjmp: (_: Runtime, f: Frame, oper: number) => void;
  * Stack:
  * <uint32> ->
  */
-export declare const ifnzjmp: (_: Runtime, f: Frame, oper: number) => void;
+export declare const ifnzjmp: (_: Runtime, f: Frame, oper: Operand) => void;
 /**
  * ifeqjmp jumps to the instruction at the specified address if the top
  * two elements of the stack are strictly equal to each other.
  * Stack:
  * <any><any> ->
  */
-export declare const ifeqjmp: (r: Runtime, f: Frame, oper: number) => void;
+export declare const ifeqjmp: (r: Runtime, f: Frame, oper: Operand) => void;
 /**
  * ifneqjmp jumps to the instruction at the specified address if the top
  * two elements of the stack are not strictly equal to each other.
  * Stack:
  * <any><any> ->
  */
-export declare const ifneqjmp: (r: Runtime, f: Frame, oper: number) => void;
+export declare const ifneqjmp: (r: Runtime, f: Frame, oper: Operand) => void;

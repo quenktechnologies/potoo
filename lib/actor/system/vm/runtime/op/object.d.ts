@@ -1,12 +1,12 @@
 import { Frame } from '../stack/frame';
-import { Runtime } from '../';
+import { Runtime, Operand } from '../';
 /**
  * getprop retrieves a property from an object.
  *
  * Stack:
  *  <objectref> -> <value>
  */
-export declare const getprop: (r: Runtime, f: Frame, idx: number) => void;
+export declare const getprop: (r: Runtime, f: Frame, idx: Operand) => void;
 /**
  * arlength pushes the length of an array on the top of the stack onto
  * the stack.
@@ -17,7 +17,7 @@ export declare const getprop: (r: Runtime, f: Frame, idx: number) => void;
  * Stack:
  * <arrayref> -> <uint32>
  */
-export declare const arlength: (r: Runtime, f: Frame, _: number) => void;
+export declare const arlength: (r: Runtime, f: Frame, _: Operand) => void;
 /**
  * arelm provides the array element at the specified index.
  *
@@ -27,4 +27,4 @@ export declare const arlength: (r: Runtime, f: Frame, _: number) => void;
  *
  * <arrayref>,<index> -> <element>
  */
-export declare const arelm: (r: Runtime, f: Frame, _: number) => void;
+export declare const arelm: (r: Runtime, f: Frame, _: Operand) => void;

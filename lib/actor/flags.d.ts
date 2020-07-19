@@ -10,12 +10,12 @@ export declare type Flags = number;
 /**
  * isImmutable flag test.
  */
-export declare const isImmutable: (f: number) => boolean;
+export declare const isImmutable: (f: Flags) => boolean;
 /**
  * isBuffered flag test.
  */
-export declare const isBuffered: (f: number) => boolean;
+export declare const isBuffered: (f: Flags) => boolean;
 /**
  * isRouter flag test.
  */
-export declare const isRouter: (f: number) => boolean;
+export declare const isRouter: (f: Flags) => boolean;

@@ -56,4 +56,4 @@ export interface Context {
 /**
  * newContext
  */
-export declare const newContext: (actor: Instance, address: string, template: Template) => Context;
+export declare const newContext: (actor: Instance, address: Address, template: Template) => Context;

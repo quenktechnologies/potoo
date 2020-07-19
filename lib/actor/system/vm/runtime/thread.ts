@@ -68,7 +68,9 @@ export class Thread implements Runtime {
 
                 let ret = this.context.actor.stop();
 
-                return (ret != null) ? ret : pure(<void>undefined);
+                return (ret != null) ? 
+                <Future<void>>ret : 
+                pure(<void>undefined);
 
             })
             .chain(() => {

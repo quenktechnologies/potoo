@@ -22,7 +22,7 @@ export interface Resident<S extends System> extends Api<S>, Actor {
 export declare abstract class AbstractResident<S extends System> implements Resident<S> {
     system: S;
     constructor(system: S);
-    self: () => string;
+    self: () => Address;
     abstract init(c: Context): Context;
     abstract select<T>(_: Case<T>[]): AbstractResident<S>;
     abstract run(): void;
@@ -77,8 +77,8 @@ export declare abstract class Mutable<S extends System> extends AbstractResident
 /**
  * ref produces a function for sending messages to an actor address.
  */
-export declare const ref: <S extends System>(res: Resident<S>, addr: string) => Reference;
+export declare const ref: <S extends System>(res: Resident<S>, addr: Address) => Reference;
 /**
  * spawn an actor using the Spawn script.
  */
-export declare const spawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>) => string;
+export declare const spawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>) => Address;

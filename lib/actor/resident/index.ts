@@ -1,9 +1,10 @@
 import * as scripts from './scripts';
 import * as events from '../system/vm/event';
 
-import { Err } from '@quenk/noni/lib/control/error';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 import { map, merge } from '@quenk/noni/lib/data/record';
 import { isObject } from '@quenk/noni/lib/data/type';
+import { Err } from '@quenk/noni/lib/control/error';
 
 import { Context } from '../system/vm/runtime/context';
 import { NewForeignFunInfo } from '../system/vm/script/info';
@@ -234,7 +235,7 @@ const receiveFun = (cases: Case<Message>[]) =>
 
                 let ft = c.apply(m);
 
-                if (ft != null) r.runTask(ft);
+                if (ft != null) r.runTask(<Future<void>>ft);
 
             }
 

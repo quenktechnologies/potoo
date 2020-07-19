@@ -84,10 +84,10 @@ export declare const handlers: OpcodeHandlers;
 /**
  * toName converts an opcode to it's mnemonic.
  */
-export declare const toName: (op: number) => string;
+export declare const toName: (op: Opcode) => string;
 /**
  * toLog provides a log line for an op.
  *
  * If the op is invalid an empty line is produced.
  */
-export declare const toLog: (op: number, r: Runtime, f: Frame, oper: number) => any[];
+export declare const toLog: (op: Opcode, r: Runtime, f: Frame, oper: Operand) => any[];

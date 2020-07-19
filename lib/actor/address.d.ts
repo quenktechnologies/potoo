@@ -23,23 +23,23 @@ export declare const isRestricted: (id: string) => boolean;
 /**
  * make a child address given its id and parent address.
  */
-export declare const make: (parent: string, id: string) => string;
+export declare const make: (parent: Address, id: string) => Address;
 /**
  * getParent computes the parent of an Address.
  */
-export declare const getParent: (addr: string) => string;
+export declare const getParent: (addr: Address) => Address;
 /**
  * getId provides the id part of an actor address.
  */
-export declare const getId: (addr: string) => string;
+export declare const getId: (addr: Address) => string;
 /**
  * isChild tests whether an address is a child of the parent address.
  */
-export declare const isChild: (parent: string, child: string) => boolean;
+export declare const isChild: (parent: Address, child: Address) => boolean;
 /**
  * isGroup determines if an address is a group reference.
  */
-export declare const isGroup: (addr: string) => boolean;
+export declare const isGroup: (addr: Address) => boolean;
 /**
  * randomID generates a random id suitable for use by child actors.
  */

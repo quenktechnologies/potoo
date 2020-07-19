@@ -77,4 +77,4 @@ export declare type ForeignFun = (r: Runtime, ...args: PTValue[]) => PTValue;
  *
  * The highest byte of the 32bit descriptor indicates its type.
  */
-export declare const getType: (d: number) => number;
+export declare const getType: (d: TypeDescriptor) => number;
