@@ -8,7 +8,7 @@ import {
 import {
     Record,
     reduce,
-    contains,
+    hasKey,
     partition,
     exclude
 } from '@quenk/noni/lib/data/record';
@@ -63,7 +63,7 @@ export interface State {
  * exists tests whether an address exists in the State.
  */
 export const exists =
-    (s: State, addr: Address): boolean => contains(s.runtimes, addr);
+    (s: State, addr: Address): boolean => hasKey(s.runtimes, addr);
 
 /**
  * get a Runtime from the State using an address.
