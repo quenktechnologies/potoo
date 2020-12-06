@@ -127,7 +127,7 @@ const main = () => {
 
 }
 
-const filterTell = (vm: PVM<Sys>) =>
+const filterTell = (vm: PVM) =>
     ({ to, message }: { to: string, from: string, message: Message }) =>
         vm.exec(vm, new Tell(to, message));
 

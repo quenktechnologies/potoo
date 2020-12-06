@@ -111,11 +111,11 @@ export interface Platform {
 /**
  * PVM is the Potoo Virtual Machine.
  */
-export declare class PVM<S extends System> implements Platform, Actor {
-    system: S;
+export declare class PVM implements Platform, Actor {
+    system: System;
     conf: Conf;
-    constructor(system: S, conf?: Conf);
-    static create<S extends System>(s: S, conf: object): PVM<S>;
+    constructor(system: System, conf?: Conf);
+    static create<S extends System>(s: S, conf: object): PVM;
     /**
      * state contains information about all the actors in the system, routers
      * and groups.
@@ -148,11 +148,11 @@ export declare class PVM<S extends System> implements Platform, Actor {
     getRouter(addr: Address): Maybe<Context>;
     getGroup(name: string): Maybe<Address[]>;
     getChildren(addr: Address): Maybe<Runtimes>;
-    putRuntime(addr: Address, r: Runtime): PVM<S>;
-    putMember(group: string, addr: Address): PVM<S>;
-    putRoute(target: Address, router: Address): PVM<S>;
-    remove(addr: Address): PVM<S>;
-    removeRoute(target: Address): PVM<S>;
+    putRuntime(addr: Address, r: Runtime): PVM;
+    putMember(group: string, addr: Address): PVM;
+    putRoute(target: Address, router: Address): PVM;
+    remove(addr: Address): PVM;
+    removeRoute(target: Address): PVM;
     raise(addr: Address, err: Err): void;
     trigger(addr: Address, evt: string, ...args: Type[]): void;
     logOp(r: Runtime, f: Frame, op: Opcode, oper: Operand): void;
@@ -162,7 +162,7 @@ export declare class PVM<S extends System> implements Platform, Actor {
      *
      * This actor will be a direct child of the root.
      */
-    spawn(t: Template<S>): Address;
+    spawn(t: Template<System>): Address;
     execNow(i: Instance, s: Script): Maybe<PTValue>;
     exec(i: Instance, s: Script): void;
     run(): void;

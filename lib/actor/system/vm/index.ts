@@ -177,11 +177,11 @@ export interface Platform {
 /**
  * PVM is the Potoo Virtual Machine.
  */
-export class PVM<S extends System> implements Platform, Actor {
+export class PVM implements Platform, Actor {
 
-    constructor(public system: S, public conf: Conf = defaults()) { }
+    constructor(public system: System, public conf: Conf = defaults()) { }
 
-    static create<S extends System>(s: S, conf: object): PVM<S> {
+    static create<S extends System>(s: S, conf: object): PVM {
 
         return new PVM(s, <Conf>rmerge(<Record<Type>>defaults(), <any>conf));
 
@@ -408,28 +408,28 @@ export class PVM<S extends System> implements Platform, Actor {
 
     }
 
-    putRuntime(addr: Address, r: Runtime): PVM<S> {
+    putRuntime(addr: Address, r: Runtime): PVM {
 
         this.state = put(this.state, addr, r);
         return this;
 
     }
 
-    putMember(group: string, addr: Address): PVM<S> {
+    putMember(group: string, addr: Address): PVM {
 
         putMember(this.state, group, addr);
         return this;
 
     }
 
-    putRoute(target: Address, router: Address): PVM<S> {
+    putRoute(target: Address, router: Address): PVM {
 
         putRoute(this.state, target, router);
         return this;
 
     }
 
-    remove(addr: Address): PVM<S> {
+    remove(addr: Address): PVM {
 
         this.state = remove(this.state, addr);
 
@@ -444,7 +444,7 @@ export class PVM<S extends System> implements Platform, Actor {
 
     }
 
-    removeRoute(target: Address): PVM<S> {
+    removeRoute(target: Address): PVM {
 
         removeRoute(this.state, target);
         return this;
@@ -626,7 +626,7 @@ export class PVM<S extends System> implements Platform, Actor {
      *
      * This actor will be a direct child of the root.
      */
-    spawn(t: Template<S>): Address {
+    spawn(t: Template<System>): Address {
 
         return spawn(this.system, this, t);
 
