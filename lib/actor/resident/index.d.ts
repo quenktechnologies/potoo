@@ -14,12 +14,12 @@ export declare type Reference = (m: Message) => void;
 /**
  * Resident is an actor that exists in the current runtime.
  */
-export interface Resident<S extends System> extends Api<S>, Actor {
+export interface Resident extends Api, Actor {
 }
 /**
  * AbstractResident implementation.
  */
-export declare abstract class AbstractResident<S extends System> implements Resident<S> {
+export declare abstract class AbstractResident<S extends System> implements Resident {
     system: S;
     constructor(system: S);
     self: () => Address;
@@ -28,8 +28,8 @@ export declare abstract class AbstractResident<S extends System> implements Resi
     abstract run(): void;
     notify(): void;
     accept(_: Message): void;
-    spawn(t: Spawnable<S>): Address;
-    spawnGroup(group: string | string[], tmpls: Templates<S>): AddressMap;
+    spawn(t: Spawnable): Address;
+    spawnGroup(group: string | string[], tmpls: Templates): AddressMap;
     tell<M>(ref: Address, m: M): AbstractResident<S>;
     raise(e: Err): AbstractResident<S>;
     kill(addr: Address): AbstractResident<S>;
@@ -77,8 +77,8 @@ export declare abstract class Mutable<S extends System> extends AbstractResident
 /**
  * ref produces a function for sending messages to an actor address.
  */
-export declare const ref: <S extends System>(res: Resident<S>, addr: Address) => Reference;
+export declare const ref: (res: Resident, addr: Address) => Reference;
 /**
  * spawn an actor using the Spawn script.
  */
-export declare const spawn: <S extends System>(sys: S, i: Instance, t: Spawnable<S>) => Address;
+export declare const spawn: <S extends System>(sys: S, i: Instance, t: Spawnable) => Address;

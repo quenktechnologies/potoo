@@ -34,7 +34,7 @@ export interface Platform {
      *
      * It is an error if a Runtime has already been allocated for the actor.
      */
-    allocate(self: Address, t: template.Template<System>): Either<Err, Address>;
+    allocate(self: Address, t: template.Template): Either<Err, Address>;
     /**
      * runActor provides a Future that when fork()'d will execute the
      * start code/method for the target actor.
@@ -140,7 +140,7 @@ export declare class PVM implements Platform, Actor {
     start(): void;
     notify(): void;
     stop(): Future<void>;
-    allocate(parent: Address, t: Template<System>): Either<Err, Address>;
+    allocate(parent: Address, t: Template): Either<Err, Address>;
     runActor(target: Address): Future<void>;
     runTask(addr: Address, ft: Future<void>): void;
     sendMessage(to: Address, from: Address, m: PTValue): boolean;
@@ -162,7 +162,7 @@ export declare class PVM implements Platform, Actor {
      *
      * This actor will be a direct child of the root.
      */
-    spawn(t: Template<System>): Address;
+    spawn(t: Template): Address;
     execNow(i: Instance, s: Script): Maybe<PTValue>;
     exec(i: Instance, s: Script): void;
     run(): void;

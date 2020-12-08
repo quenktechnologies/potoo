@@ -11,6 +11,7 @@ import { PTValue } from '../system/vm/type';
 import { Script } from '../system/vm/script';
 import { Conf } from '../system/vm/conf';
 import { PVM } from '../system/vm';
+import { System } from '../system';
 import { Message } from '../message';
 import { Address } from '../address';
 import { Instance } from '../';
@@ -110,7 +111,7 @@ const main = () => {
 
         id,
 
-        create: s => {
+        create: (s:System) => {
 
             //TODO: Handle invalid messages?
             process.on('message', (m: Message) =>

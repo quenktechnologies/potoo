@@ -1,5 +1,7 @@
 import * as op from '../system/vm/runtime/op';
 
+import { isObject } from '@quenk/noni/lib/data/type';
+
 import {
     ForeignFunInfo,
     NewForeignFunInfo,
@@ -12,10 +14,8 @@ import { ESObject } from '../system/vm/runtime/heap/object/es';
 import { Script, Constants } from '../system/vm/script';
 import { Runtime } from '../system/vm/runtime';
 import { Template } from '../template';
-import { System } from '../system';
 import { Address } from '../address';
 import { Message } from '../message';
-import { isObject } from '@quenk/noni/lib/data/type';
 
 //XXX: The following is declared here because we need the children section to
 //be recursive. In the future we may support lazily getting properties by 
@@ -29,9 +29,9 @@ templateType.properties[0] = { name: 'children', type: childrenInfo };
 /**
  * Spawn spawns a single child actor from a template.
  */
-export class Spawn<S extends System> implements Script {
+export class Spawn implements Script {
 
-    constructor(public template: Template<S>) { }
+    constructor(public template: Template) { }
 
     name = '<spawn>';
 

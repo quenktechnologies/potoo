@@ -1,15 +1,14 @@
 import { ForeignFunInfo, NewForeignFunInfo, NewFunInfo, NewTypeInfo } from '../system/vm/script/info';
 import { Script, Constants } from '../system/vm/script';
 import { Template } from '../template';
-import { System } from '../system';
 import { Address } from '../address';
 import { Message } from '../message';
 /**
  * Spawn spawns a single child actor from a template.
  */
-export declare class Spawn<S extends System> implements Script {
-    template: Template<S>;
-    constructor(template: Template<S>);
+export declare class Spawn implements Script {
+    template: Template;
+    constructor(template: Template);
     name: string;
     constants: Constants;
     immediate: boolean;

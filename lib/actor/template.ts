@@ -27,8 +27,7 @@ export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * Cons is applied to produce an instance of an actor.
  */
-export type Cons<S extends System> =
-    (s: S, t: Template<S>, ...args: Type[]) => Actor;
+export type Cons= (s: System, t: Template, ...args: Type[]) => Actor;
 
 /**
  * DelayMilliseconds type.
@@ -44,14 +43,14 @@ export type TrapFunc = (e: Err) => TrapAction;
 /**
  * Spawnable is anything that can be spawned by an actor.
  */
-export type Spawnable<S extends System> = Template<S> | Cons<S>;
+export type Spawnable = Template | Cons;
 
 /**
  * Templates
  */
-export interface Templates<S extends System> {
+export interface Templates {
 
-    [key: string]: Spawnable<S>
+    [key: string]: Spawnable
 
 }
 
@@ -64,7 +63,7 @@ export interface Templates<S extends System> {
  * The are the minimum amount of information required to create
  * a new actor instance.
  */
-export interface Template<S extends System> {
+export interface Template {
 
     /**
      * id of the actor used when constructing its address.
@@ -80,7 +79,7 @@ export interface Template<S extends System> {
     /**
      * create function.
      */
-    create: Cons<S>;
+    create: Cons;
 
     /**
      * args are passed to the create function when creating a new instance.
@@ -110,14 +109,14 @@ export interface Template<S extends System> {
     /**
      * children is list of child actors that will automatically be spawned.
      */
-    children?: Templates<S> | Template<S>[]
+    children?: Templates | Template[]
 
 }
 
 /**
  * normalize a Template so that its is easier to work with.
  */
-export const normalize = <S extends System>(t: Template<S>) => merge(t, {
+export const normalize = (t: Template) => merge(t, {
 
     id: t.id ? t.id : randomID(),
 

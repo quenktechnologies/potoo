@@ -2,9 +2,9 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Message } from '../../../message';
 import { Flags } from '../../../flags';
 import { Address } from '../../../address';
+import { Template } from '../../../template';
 import { Instance } from '../../../';
 import { FunInfo } from '../script/info';
-import { Template } from '../template';
 /**
  * ErrorHandler processes errors that come up during an actor execution
  * or raised by a child.

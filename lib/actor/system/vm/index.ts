@@ -31,6 +31,7 @@ import { isRouter, isBuffered } from '../../flags';
 import { Message, Envelope } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
+
 import {
     State,
     get,
@@ -82,7 +83,7 @@ export interface Platform {
      *
      * It is an error if a Runtime has already been allocated for the actor.
      */
-    allocate(self: Address, t: template.Template<System>): Either<Err, Address>
+    allocate(self: Address, t: template.Template): Either<Err, Address>
 
     /**
      * runActor provides a Future that when fork()'d will execute the 
@@ -248,7 +249,7 @@ export class PVM implements Platform, Actor {
 
     }
 
-    allocate(parent: Address, t: Template<System>): Either<Err, Address> {
+    allocate(parent: Address, t: Template): Either<Err, Address> {
 
         let temp = normalize(t);
 
@@ -626,7 +627,7 @@ export class PVM implements Platform, Actor {
      *
      * This actor will be a direct child of the root.
      */
-    spawn(t: Template<System>): Address {
+    spawn(t: Template): Address {
 
         return spawn(this.system, this, t);
 

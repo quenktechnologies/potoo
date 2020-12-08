@@ -21,7 +21,7 @@ export declare type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * Cons is applied to produce an instance of an actor.
  */
-export declare type Cons<S extends System> = (s: S, t: Template<S>, ...args: Type[]) => Actor;
+export declare type Cons = (s: System, t: Template, ...args: Type[]) => Actor;
 /**
  * DelayMilliseconds type.
  */
@@ -34,12 +34,12 @@ export declare type TrapFunc = (e: Err) => TrapAction;
 /**
  * Spawnable is anything that can be spawned by an actor.
  */
-export declare type Spawnable<S extends System> = Template<S> | Cons<S>;
+export declare type Spawnable = Template | Cons;
 /**
  * Templates
  */
-export interface Templates<S extends System> {
-    [key: string]: Spawnable<S>;
+export interface Templates {
+    [key: string]: Spawnable;
 }
 /**
  * Template of an actor.
@@ -50,7 +50,7 @@ export interface Templates<S extends System> {
  * The are the minimum amount of information required to create
  * a new actor instance.
  */
-export interface Template<S extends System> {
+export interface Template {
     /**
      * id of the actor used when constructing its address.
      * If none is supplied, the system will generate one.
@@ -63,7 +63,7 @@ export interface Template<S extends System> {
     /**
      * create function.
      */
-    create: Cons<S>;
+    create: Cons;
     /**
      * args are passed to the create function when creating a new instance.
      *
@@ -88,16 +88,16 @@ export interface Template<S extends System> {
     /**
      * children is list of child actors that will automatically be spawned.
      */
-    children?: Templates<S> | Template<S>[];
+    children?: Templates | Template[];
 }
 /**
  * normalize a Template so that its is easier to work with.
  */
-export declare const normalize: <S extends System>(t: Template<S>) => Template<S> & {
+export declare const normalize: (t: Template) => Template & {
     id: string;
-    children: Template<S>[] | ((Template<S> & {
+    children: Template[] | ((Template & {
         id: string;
-    }) | (Cons<S> & {
+    }) | (Cons & {
         id: string;
     }))[] | undefined;
 };

@@ -1,7 +1,7 @@
 import * as error from '../error';
 
 import { isImmutable } from '../../../../flags';
-import { Template } from '../../template';
+import { Template } from '../../../../template';
 import { Frame } from '../stack/frame';
 import { Runtime, Operand } from '../';
 
