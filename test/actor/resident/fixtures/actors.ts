@@ -15,7 +15,7 @@ import {
 } from '../../../../lib/actor/resident';
 import { TestSystem } from './system';
 
-export class Killer extends AbstractResident<TestSystem> {
+export class Killer extends AbstractResident {
 
     constructor(
         public s: TestSystem,
@@ -44,7 +44,7 @@ export class Killer extends AbstractResident<TestSystem> {
 
 }
 
-export class DelayOnRun extends AbstractResident<TestSystem> {
+export class DelayOnRun extends AbstractResident {
 
     constructor(
         public s: TestSystem,
@@ -76,7 +76,7 @@ export class DelayOnRun extends AbstractResident<TestSystem> {
 
 }
 
-export class Killable extends Mutable<TestSystem> {
+export class Killable extends Mutable {
 
     receive = [];
 
@@ -94,7 +94,7 @@ export class Killable extends Mutable<TestSystem> {
 
 }
 
-export class Victim extends Immutable<void, TestSystem> {
+export class Victim extends Immutable<void> {
 
     receive = []
 
@@ -102,7 +102,7 @@ export class Victim extends Immutable<void, TestSystem> {
 
 }
 
-export class Group extends AbstractResident<TestSystem> {
+export class Group extends AbstractResident {
 
     init(c: Context): Context {
 
@@ -133,7 +133,7 @@ export class Group extends AbstractResident<TestSystem> {
 
 }
 
-export class Exiter extends AbstractResident<TestSystem> {
+export class Exiter extends AbstractResident {
 
     constructor(
         public s: TestSystem,
@@ -166,7 +166,7 @@ export class Exiter extends AbstractResident<TestSystem> {
 
 }
 
-export class Raiser extends AbstractResident<TestSystem> {
+export class Raiser extends AbstractResident {
 
     init(c: Context): Context {
 
@@ -189,7 +189,7 @@ export class Raiser extends AbstractResident<TestSystem> {
 
 }
 
-export class Spawner extends AbstractResident<TestSystem> {
+export class Spawner extends AbstractResident {
 
     constructor(
         public s: TestSystem,
@@ -220,7 +220,7 @@ export class Spawner extends AbstractResident<TestSystem> {
 
 }
 
-export class AssertSpawnReturnsAddress extends AbstractResident<TestSystem> {
+export class AssertSpawnReturnsAddress extends AbstractResident {
 
     constructor(public s: TestSystem, public addr: string) {
 
@@ -255,7 +255,7 @@ export class AssertSpawnReturnsAddress extends AbstractResident<TestSystem> {
 
 }
 
-export class ShouldWork extends Mutable<TestSystem> {
+export class ShouldWork extends Mutable {
 
     constructor(
         public s: TestSystem,
@@ -291,7 +291,7 @@ export class ShouldWork extends Mutable<TestSystem> {
 
 }
 
-export class MutableSelfTalk extends Mutable<TestSystem> {
+export class MutableSelfTalk extends Mutable {
 
     constructor(
         public s: TestSystem,
@@ -338,7 +338,7 @@ export class MutableSelfTalk extends Mutable<TestSystem> {
 
 }
 
-export class ImmutableSelfTalk extends Immutable<string, TestSystem> {
+export class ImmutableSelfTalk extends Immutable<string> {
 
     constructor(
         public s: TestSystem,
@@ -377,7 +377,7 @@ export class ImmutableSelfTalk extends Immutable<string, TestSystem> {
 
 }
 
-export class ImmutableCrossTalk extends Immutable<string, TestSystem> {
+export class ImmutableCrossTalk extends Immutable<string> {
 
     constructor(
         public s: TestSystem,
@@ -406,7 +406,7 @@ export class ImmutableCrossTalk extends Immutable<string, TestSystem> {
 
 }
 
-export class AsyncReceiverImmutable extends Immutable<string, TestSystem> {
+export class AsyncReceiverImmutable extends Immutable<string> {
 
     constructor(
         public s: TestSystem,
@@ -433,7 +433,7 @@ export class AsyncReceiverImmutable extends Immutable<string, TestSystem> {
 
 }
 
-export class MutableCrossTalk extends Mutable<TestSystem> {
+export class MutableCrossTalk extends Mutable {
 
     constructor(
         public s: TestSystem,
@@ -462,7 +462,7 @@ export class MutableCrossTalk extends Mutable<TestSystem> {
 
 }
 
-export class AsyncReceiverMutable extends Mutable<TestSystem> {
+export class AsyncReceiverMutable extends Mutable {
 
     constructor(
         public s: TestSystem,

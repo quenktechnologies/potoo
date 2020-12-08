@@ -19,20 +19,20 @@ export interface Resident extends Api, Actor {
 /**
  * AbstractResident implementation.
  */
-export declare abstract class AbstractResident<S extends System> implements Resident {
-    system: S;
-    constructor(system: S);
+export declare abstract class AbstractResident implements Resident {
+    system: System;
+    constructor(system: System);
     self: () => Address;
     abstract init(c: Context): Context;
-    abstract select<T>(_: Case<T>[]): AbstractResident<S>;
+    abstract select<T>(_: Case<T>[]): AbstractResident;
     abstract run(): void;
     notify(): void;
     accept(_: Message): void;
     spawn(t: Spawnable): Address;
     spawnGroup(group: string | string[], tmpls: Templates): AddressMap;
-    tell<M>(ref: Address, m: M): AbstractResident<S>;
-    raise(e: Err): AbstractResident<S>;
-    kill(addr: Address): AbstractResident<S>;
+    tell<M>(ref: Address, m: M): AbstractResident;
+    raise(e: Err): AbstractResident;
+    kill(addr: Address): AbstractResident;
     exit(): void;
     start(addr: Address): Eff;
     stop(): void;
@@ -44,7 +44,7 @@ export declare abstract class AbstractResident<S extends System> implements Resi
  * Once the receive property is provided, all messages will be
  * filtered by it.
  */
-export declare abstract class Immutable<T, S extends System> extends AbstractResident<S> {
+export declare abstract class Immutable<T> extends AbstractResident {
     /**
      * receive is a static list of Case classes
      * that the actor will always use to process messages.
@@ -54,25 +54,25 @@ export declare abstract class Immutable<T, S extends System> extends AbstractRes
     /**
      * select noop.
      */
-    select<M>(_: Case<M>[]): Immutable<T, S>;
+    select<M>(_: Case<M>[]): Immutable<T>;
 }
 /**
  * Temp automatically removes itself from the system after a succesfull match
  * of any of its cases.
  */
-export declare abstract class Temp<T, S extends System> extends Immutable<T, S> {
+export declare abstract class Temp<T> extends Immutable<T> {
     init(c: Context): Context;
 }
 /**
  * Mutable actors can change their behaviour after message processing.
  */
-export declare abstract class Mutable<S extends System> extends AbstractResident<S> {
+export declare abstract class Mutable extends AbstractResident {
     receive: Case<void>[];
     init(c: Context): Context;
     /**
      * select allows for selectively receiving messages based on Case classes.
      */
-    select<M>(cases: Case<M>[]): Mutable<S>;
+    select<M>(cases: Case<M>[]): Mutable;
 }
 /**
  * ref produces a function for sending messages to an actor address.

@@ -5,7 +5,7 @@ import { Mutable } from '../../../lib/actor/resident';
 import { Process } from '../../../lib/actor/process';
 import { TestSystem, system } from '../resident/fixtures/system';
 
-class Sender extends Mutable<TestSystem> {
+class Sender extends Mutable {
 
     constructor(
         public system: TestSystem,

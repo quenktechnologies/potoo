@@ -38,17 +38,17 @@ export interface Resident
 /**
  * AbstractResident implementation.
  */
-export abstract class AbstractResident<S extends System>
+export abstract class AbstractResident
     implements
     Resident {
 
-    constructor(public system: S) { }
+    constructor(public system: System) { }
 
     self = (): Address => ADDRESS_DISCARD;
 
     abstract init(c: Context): Context;
 
-    abstract select<T>(_: Case<T>[]): AbstractResident<S>;
+    abstract select<T>(_: Case<T>[]): AbstractResident;
 
     abstract run(): void;
 
@@ -75,21 +75,21 @@ export abstract class AbstractResident<S extends System>
 
     }
 
-    tell<M>(ref: Address, m: M): AbstractResident<S> {
+    tell<M>(ref: Address, m: M): AbstractResident {
 
         this.system.exec(this, new scripts.Tell(ref, m));
         return this;
 
     }
 
-    raise(e: Err): AbstractResident<S> {
+    raise(e: Err): AbstractResident {
 
         this.system.exec(this, new scripts.Raise(e.message));
         return this;
 
     }
 
-    kill(addr: Address): AbstractResident<S> {
+    kill(addr: Address): AbstractResident {
 
         this.system.exec(this, new scripts.Kill(addr));
         return this;
@@ -124,8 +124,7 @@ export abstract class AbstractResident<S extends System>
  * Once the receive property is provided, all messages will be
  * filtered by it.
  */
-export abstract class Immutable<T, S extends System>
-    extends AbstractResident<S> {
+export abstract class Immutable<T> extends AbstractResident {
 
     /**
      * receive is a static list of Case classes 
@@ -146,7 +145,7 @@ export abstract class Immutable<T, S extends System>
     /**
      * select noop.
      */
-    select<M>(_: Case<M>[]): Immutable<T, S> {
+    select<M>(_: Case<M>[]): Immutable<T> {
 
         return this;
 
@@ -158,8 +157,7 @@ export abstract class Immutable<T, S extends System>
  * Temp automatically removes itself from the system after a succesfull match
  * of any of its cases.
  */
-export abstract class Temp<T, S extends System>
-    extends Immutable<T, S> {
+export abstract class Temp<T> extends Immutable<T> {
 
     init(c: Context): Context {
 
@@ -176,8 +174,7 @@ export abstract class Temp<T, S extends System>
 /**
  * Mutable actors can change their behaviour after message processing.
  */
-export abstract class Mutable<S extends System>
-    extends AbstractResident<S> {
+export abstract class Mutable extends AbstractResident {
 
     receive: Case<void>[] = [];
 
@@ -192,7 +189,7 @@ export abstract class Mutable<S extends System>
     /**
      * select allows for selectively receiving messages based on Case classes.
      */
-    select<M>(cases: Case<M>[]): Mutable<S> {
+    select<M>(cases: Case<M>[]): Mutable {
 
         this.system.exec(this, new scripts.Receive(receiveFun(cases)));
 
