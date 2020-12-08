@@ -1,6 +1,6 @@
 import { assert } from '@quenk/test/lib/assert';
 
-import { system } from './fixtures/system';
+import { system, TestSystem } from './fixtures/system';
 import {
     Spawner,
     Killer,
@@ -32,7 +32,7 @@ describe('resident', () => {
                 s.spawn({
 
                     id: 'spawner',
-                    create: sys => new Spawner(sys, () => {
+                    create: sys => new Spawner(<TestSystem>sys, () => {
 
                         assert(s.vm.state.runtimes['spawner'])
                             .not.equal(undefined);
@@ -52,7 +52,8 @@ describe('resident', () => {
                 s.spawn({
 
                     id: 'spawner',
-                    create: sys => new AssertSpawnReturnsAddress(sys, 'spawner')
+                    create: sys =>
+                        new AssertSpawnReturnsAddress(<TestSystem>sys, 'spawner')
 
                 });
 
@@ -66,7 +67,7 @@ describe('resident', () => {
 
                     id: 'a',
 
-                    create: sys => new Spawner(sys, () => { }),
+                    create: sys => new Spawner(<TestSystem>sys, () => { }),
 
                     children: [
 
@@ -74,7 +75,8 @@ describe('resident', () => {
 
                             id: 'aa',
 
-                            create: sys => new Spawner(sys, () => { })
+                            create: sys =>
+                                new Spawner(<TestSystem>sys, () => { })
 
                         },
 
@@ -82,7 +84,8 @@ describe('resident', () => {
 
                             id: 'ab',
 
-                            create: sys => new Spawner(sys, () => { }),
+                            create: sys =>
+                                new Spawner(<TestSystem>sys, () => { }),
 
                             children: [
 
@@ -90,7 +93,8 @@ describe('resident', () => {
 
                                     id: 'aba',
 
-                                    create: sys => new Spawner(sys, () => { })
+                                    create: sys =>
+                                        new Spawner(<TestSystem>sys, () => { })
 
                                 }
 
@@ -102,7 +106,7 @@ describe('resident', () => {
 
                             id: 'ac',
 
-                            create: sys => new Spawner(sys, () => { }),
+                            create: sys => new Spawner(<TestSystem>sys, () => { }),
 
                             children: [
 
@@ -110,21 +114,21 @@ describe('resident', () => {
 
                                     id: 'aca',
 
-                                    create: sys => new Spawner(sys, () => { })
+                                    create: sys => new Spawner(<TestSystem>sys, () => { })
 
                                 },
                                 {
 
                                     id: 'acb',
 
-                                    create: sys => new Spawner(sys, () => { })
+                                    create: sys => new Spawner(<TestSystem>sys, () => { })
 
                                 },
                                 {
 
                                     id: 'acc',
 
-                                    create: sys => new Spawner(sys, () => { })
+                                    create: sys => new Spawner(<TestSystem>sys, () => { })
 
                                 }
 
@@ -156,7 +160,7 @@ describe('resident', () => {
             s.spawn({
 
                 id: 'a',
-                create: sys => new DelayOnRun(sys, () => {
+                create: sys => new DelayOnRun(<TestSystem>sys, () => {
 
                     assert(true).true();
 
@@ -177,7 +181,7 @@ describe('resident', () => {
                 s.spawn({
 
                     id: 'a',
-                    create: sys => new Killer(sys, k => {
+                    create: sys => new Killer(<TestSystem>sys, k => {
 
                         assert(s.vm.state.runtimes['a/targets'])
                             .not.equal(undefined);
@@ -202,7 +206,7 @@ describe('resident', () => {
                     .spawn({
 
                         id: 'a',
-                        create: sys => new Killer(sys, k => {
+                        create: sys => new Killer(<TestSystem>sys, k => {
 
                             setTimeout(() =>
                                 assert(s.vm.state.runtimes['a/targets/a'])
@@ -231,7 +235,7 @@ describe('resident', () => {
                     .spawn({
 
                         id: 'a',
-                        create: sys => new Exiter(sys, () => {
+                        create: sys => new Exiter(<TestSystem>sys, () => {
 
                             setTimeout(() =>
                                 assert(s.vm.state.runtimes['a'])
@@ -259,7 +263,7 @@ describe('resident', () => {
                     .spawn({
 
                         id: 'a',
-                        create: sys => new Group(sys)
+                        create: sys => new Group(<TestSystem>sys)
                     })
 
                 setTimeout(() => {
@@ -295,7 +299,7 @@ describe('resident', () => {
 
                         },
 
-                        create: s => new Raiser(s)
+                        create: s => new Raiser(<TestSystem>s)
 
                     });
 
@@ -322,7 +326,7 @@ describe('resident', () => {
                 system()
                     .spawn({
                         id: 'selector',
-                        create: s => new ShouldWork(s, done)
+                        create: s => new ShouldWork(<TestSystem>s, done)
                     });
 
             })
@@ -332,7 +336,7 @@ describe('resident', () => {
                 system()
                     .spawn({
                         id: 'MutableSelfTalk',
-                        create: s => new MutableSelfTalk(s, done)
+                        create: s => new MutableSelfTalk(<TestSystem>s, done)
                     });
 
             });
@@ -344,11 +348,11 @@ describe('resident', () => {
             system()
                 .spawn({
                     id: 'a',
-                    create: s => new MutableCrossTalk(s, 'b')
+                    create: s => new MutableCrossTalk(<TestSystem>s, 'b')
                 })
                 .spawn({
                     id: 'b',
-                    create: s => new MutableCrossTalk(s, 'a', done)
+                    create: s => new MutableCrossTalk(<TestSystem>s, 'a', done)
                 });
 
         });
@@ -360,7 +364,7 @@ describe('resident', () => {
             s.spawn({
 
                 id: 'async',
-                create: sys => new AsyncReceiverMutable(sys, done)
+                create: sys => new AsyncReceiverMutable(<TestSystem>sys, done)
 
             });
 
@@ -375,7 +379,7 @@ describe('resident', () => {
             system()
                 .spawn({
                     id: 'selector',
-                    create: s => new ImmutableSelfTalk(s, done)
+                    create: s => new ImmutableSelfTalk(<TestSystem>s, done)
                 });
 
         });
@@ -385,11 +389,11 @@ describe('resident', () => {
             system()
                 .spawn({
                     id: 'a',
-                    create: s => new ImmutableCrossTalk(s, 'b')
+                    create: s => new ImmutableCrossTalk(<TestSystem>s, 'b')
                 })
                 .spawn({
                     id: 'b',
-                    create: s => new ImmutableCrossTalk(s, 'a', done)
+                    create: s => new ImmutableCrossTalk(<TestSystem>s, 'a', done)
                 });
 
         });
@@ -401,7 +405,7 @@ describe('resident', () => {
             s.spawn({
 
                 id: 'async',
-                create: sys => new AsyncReceiverImmutable(sys, done)
+                create: sys => new AsyncReceiverImmutable(<TestSystem>sys, done)
 
             });
 

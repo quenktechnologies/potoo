@@ -36,7 +36,7 @@ export class Killer extends AbstractResident<TestSystem> {
 
     run() {
 
-        this.spawn({ id: 'targets', create: s => new Killable(s) });
+        this.spawn({ id: 'targets', create: s => new Killable(<TestSystem>s) });
 
         this.done(this);
 
@@ -88,7 +88,7 @@ export class Killable extends Mutable<TestSystem> {
 
     run() {
 
-        this.spawn({ id: 'a', create: s => new Victim(s) });
+        this.spawn({ id: 'a', create: s => new Victim(<TestSystem>s) });
 
     }
 
@@ -121,11 +121,11 @@ export class Group extends AbstractResident<TestSystem> {
 
         this.spawnGroup('test', {
 
-            b: { id: 'b', create: s => new Killable(s) },
+            b: { id: 'b', create: s => new Killable(<TestSystem>s) },
 
-            c: { id: 'c', create: s => new Killable(s) },
+            c: { id: 'c', create: s => new Killable(<TestSystem>s) },
 
-            d: { id: 'd', create: s => new Killable(s) }
+            d: { id: 'd', create: s => new Killable(<TestSystem>s) }
 
         });
 
@@ -247,7 +247,7 @@ export class AssertSpawnReturnsAddress extends AbstractResident<TestSystem> {
 
             id: 'child',
 
-            create: s => new Spawner(s, () => { })
+            create: s => new Spawner(<TestSystem>s, () => { })
 
         })).equate(`${this.addr}/child`);
 

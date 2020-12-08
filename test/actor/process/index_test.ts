@@ -47,7 +47,8 @@ describe('process', () => {
             s.spawn({
 
                 id: 'sender',
-                create: s => new Sender(s, () => s.vm.stop().fork(done, done))
+                create: s => new Sender(<TestSystem>s,
+                    () => (<TestSystem>s).vm.stop().fork(done, done))
 
             });
 

@@ -329,7 +329,7 @@ describe('base', () => {
 
             base.jmp(r, f, 6);
 
-            assert(f.mock.getCalledWith('seek', [6])).true();
+            assert(f.mock.wasCalledWith('seek', [6])).true();
 
         });
 
@@ -347,7 +347,7 @@ describe('base', () => {
 
             base.ifzjmp(r, f, 12);
 
-            assert(f.mock.getCalledWith('seek', [12])).true();
+            assert(f.mock.wasCalledWith('seek', [12])).true();
 
         });
 
@@ -393,7 +393,7 @@ describe('base', () => {
 
             base.ifnzjmp(r, f, 12);
 
-            assert(f.mock.getCalledWith('seek', [12])).true();
+            assert(f.mock.wasCalledWith('seek', [12])).true();
 
         })
 
@@ -411,7 +411,7 @@ describe('base', () => {
 
             base.ifeqjmp(r, f, 12);
 
-            assert(f.mock.getCalledWith('seek', [12])).true();
+            assert(f.mock.wasCalledWith('seek', [12])).true();
 
         });
 
@@ -445,7 +445,7 @@ describe('base', () => {
 
             base.ifneqjmp(r, f, 12);
 
-            assert(f.mock.getCalledWith('seek', [12])).true();
+            assert(f.mock.wasCalledWith('seek', [12])).true();
 
         });
 

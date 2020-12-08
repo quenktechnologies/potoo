@@ -31,7 +31,7 @@ export class TestSystem {
 
     }
 
-    spawn(t: Template<TestSystem>): TestSystem {
+    spawn(t: Template): TestSystem {
 
         this.vm.spawn(t);
 

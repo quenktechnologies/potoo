@@ -18,6 +18,7 @@ import { Message } from '../message';
 import { Template, Templates, Spawnable, normalize } from '../template';
 import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_TEMPORARY } from '../flags';
 import { Actor, Instance, Eff } from '../';
+
 import { Case } from './case';
 import { Api } from './api';
 
@@ -29,9 +30,9 @@ export type Reference = (m: Message) => void;
 /**
  * Resident is an actor that exists in the current runtime.
  */
-export interface Resident<S extends System>
+export interface Resident
     extends
-    Api<S>,
+    Api,
     Actor { }
 
 /**
@@ -39,7 +40,7 @@ export interface Resident<S extends System>
  */
 export abstract class AbstractResident<S extends System>
     implements
-    Resident<S> {
+    Resident {
 
     constructor(public system: S) { }
 
@@ -61,15 +62,15 @@ export abstract class AbstractResident<S extends System>
 
     }
 
-    spawn(t: Spawnable<S>): Address {
+    spawn(t: Spawnable): Address {
 
         return spawn(this.system, this, t);
 
     }
 
-    spawnGroup(group: string | string[], tmpls: Templates<S>): AddressMap {
+    spawnGroup(group: string | string[], tmpls: Templates): AddressMap {
 
-        return map(tmpls, (t: Spawnable<S>) => this.spawn(isObject(t) ?
+        return map(tmpls, (t: Spawnable) => this.spawn(isObject(t) ?
             merge(t, { group: group }) : { group, create: t }));
 
     }
@@ -204,21 +205,21 @@ export abstract class Mutable<S extends System>
 /**
  * ref produces a function for sending messages to an actor address.
  */
-export const ref = <S extends System>
-    (res: Resident<S>, addr: Address): Reference =>
-    (m: Message) =>
-        res.tell(addr, m);
+export const ref =
+    (res: Resident, addr: Address): Reference =>
+        (m: Message) =>
+            res.tell(addr, m);
 
 /**
  * spawn an actor using the Spawn script.
  */
 export const spawn = <S extends System>
-    (sys: S, i: Instance, t: Spawnable<S>): Address => {
+    (sys: S, i: Instance, t: Spawnable): Address => {
 
-    let tmpl = normalize(isObject(t) ? <Template<S>>t : { create: t });
+    let tmpl = normalize(isObject(t) ? <Template>t : { create: t });
 
     return <string>sys
-        .execNow(i, new scripts.Spawn<S>(tmpl))
+        .execNow(i, new scripts.Spawn(tmpl))
         .orJust(() => ADDRESS_DISCARD)
         .get();
 

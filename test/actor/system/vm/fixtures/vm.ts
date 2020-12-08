@@ -28,7 +28,7 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    allocate(addr: Address, t: Template<System>): Either<Err, Address> {
+    allocate(addr: Address, t: Template): Either<Err, Address> {
 
         return this.mock.invoke('allocate', [addr, t], right('?'));
 
