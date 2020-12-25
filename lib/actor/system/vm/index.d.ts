@@ -163,6 +163,12 @@ export declare class PVM implements Platform, Actor {
      * This actor will be a direct child of the root.
      */
     spawn(t: Template): Address;
+    /**
+     * tell allows the vm to send a message to another actor via opcodes.
+     *
+     * If you want to immediately deliver a message, use [[sendMessage]] instead.
+     */
+    tell<M>(ref: Address, m: M): PVM;
     execNow(i: Instance, s: Script): Maybe<PTValue>;
     exec(i: Instance, s: Script): void;
     run(): void;

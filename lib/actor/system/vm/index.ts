@@ -1,4 +1,5 @@
 import * as template from '../../template';
+import * as scripts from '../../resident/scripts';
 import * as errors from './runtime/error';
 import * as events from './event';
 
@@ -630,6 +631,18 @@ export class PVM implements Platform, Actor {
     spawn(t: Template): Address {
 
         return spawn(this.system, this, t);
+
+    }
+
+    /**
+     * tell allows the vm to send a message to another actor via opcodes.
+     *
+     * If you want to immediately deliver a message, use [[sendMessage]] instead.
+     */
+    tell<M>(ref: Address, m: M): PVM {
+
+        this.system.exec(this, new scripts.Tell(ref, m));
+        return this;
 
     }
 
