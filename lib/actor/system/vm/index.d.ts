@@ -136,7 +136,7 @@ export declare class PVM implements Platform, Actor {
     blocked: Address[];
     running: boolean;
     init(c: Context): Context;
-    accept(_: Message): void;
+    accept(m: Message): import("../..").Eff;
     start(): void;
     notify(): void;
     stop(): Future<void>;

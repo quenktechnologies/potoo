@@ -1,3 +1,6 @@
+import { Message } from '../../message';
+import { Eff } from '../..';
+
 import { LOG_LEVEL_ERROR, Logger } from './log';
 import { Handlers } from './event';
 
@@ -14,7 +17,12 @@ export interface Conf {
 
     },
 
-    on: Handlers
+    on: Handlers,
+
+    /**
+     * accept handles messages sent to the root actor, ie the system.
+     */
+    accept: (m:Message) => Eff
 
 }
 
@@ -31,6 +39,8 @@ export const defaults = (): Conf => ({
 
     },
 
-    on: {}
+    on: {},
+
+  accept: ()=>{}
 
 });

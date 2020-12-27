@@ -1,3 +1,5 @@
+import { Message } from '../../message';
+import { Eff } from '../..';
 import { Logger } from './log';
 import { Handlers } from './event';
 /**
@@ -9,6 +11,10 @@ export interface Conf {
         logger: Logger;
     };
     on: Handlers;
+    /**
+     * accept handles messages sent to the root actor, ie the system.
+     */
+    accept: (m: Message) => Eff;
 }
 /**
  * defaults Conf settings.
