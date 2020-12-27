@@ -232,7 +232,9 @@ export class PVM implements Platform, Actor {
 
     }
 
-    accept(_: Message) {
+    accept(m: Message) {
+
+        return this.conf.accept(m);
 
     }
 
