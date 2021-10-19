@@ -3,18 +3,20 @@ import { Address, AddressMap } from '../address';
 import { Spawnable, Templates } from '../template';
 import { Case } from './case';
 /**
+ * Spawner is an object that can spawn a new actor.
+ */
+export interface Spawner {
+    /**
+     * spawn an actor from a template.
+     */
+    spawn(t: Spawnable): Address;
+}
+/**
  * Api describes the api for implementing an actor independant
  * of the system level methods.
  */
-export interface Api {
-    /**
-     * self retrieves the path of this actor from the system.
-     */
+export interface Api extends Spawner {
     self(): string;
-    /**
-     * spawn a new child actor.
-     */
-    spawn(t: Spawnable): Address;
     /**
      * spawnGroup spawns a map of actors assigning each to the specified
      * group(s).
