@@ -25,7 +25,6 @@ export declare abstract class AbstractResident implements Resident {
     self: () => Address;
     abstract init(c: Context): Context;
     abstract select<T>(_: Case<T>[]): AbstractResident;
-    abstract run(): void;
     notify(): void;
     accept(_: Message): void;
     spawn(t: Spawnable): Address;
@@ -35,6 +34,7 @@ export declare abstract class AbstractResident implements Resident {
     kill(addr: Address): AbstractResident;
     exit(): void;
     start(addr: Address): Eff;
+    run(): void;
     stop(): void;
 }
 /**

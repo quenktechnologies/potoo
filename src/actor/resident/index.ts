@@ -50,7 +50,6 @@ export abstract class AbstractResident
 
     abstract select<T>(_: Case<T>[]): AbstractResident;
 
-    abstract run(): void;
 
     notify() {
 
@@ -110,10 +109,9 @@ export abstract class AbstractResident
 
     }
 
-    stop(): void {
+    run(): void {}
 
-
-    }
+    stop(): void {    }
 
 }
 
