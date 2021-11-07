@@ -45,16 +45,16 @@ export declare abstract class AbstractResident implements Resident {
  * filtered by it.
  */
 export declare abstract class Immutable<T> extends AbstractResident {
-    /**
-     * receive is a static list of Case classes
-     * that the actor will always use to process messages.
-     */
-    abstract receive: Case<T>[];
     init(c: Context): Context;
     /**
      * select noop.
      */
     select<M>(_: Case<M>[]): Immutable<T>;
+    /**
+     * receive provides a static list of Case classes that the actor will
+     * always use to process messages.
+     */
+    receive(): Case<T>[];
 }
 /**
  * Temp automatically removes itself from the system after a succesfull match

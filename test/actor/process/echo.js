@@ -5,7 +5,7 @@ function Echo (s) {
 
     this.system = s;
 
-    this.receive = [
+    receive = ()=> [
 
         new Case({client:String, message:String},
             p => { this.tell(p.client, p.message) })

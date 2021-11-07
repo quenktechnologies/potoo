@@ -6,7 +6,11 @@ import { Message } from '../../lib/actor/message';
 
 class RootTeller extends Temp<void> {
 
-    receive = [];
+    receive() {
+
+      return  [];
+
+    }
 
     run() {
 

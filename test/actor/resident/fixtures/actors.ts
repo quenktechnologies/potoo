@@ -78,8 +78,6 @@ export class DelayOnRun extends AbstractResident {
 
 export class Killable extends Mutable {
 
-    receive = [];
-
     select<T>(_: Case<T>[]): Killable {
 
         return this;
@@ -95,8 +93,6 @@ export class Killable extends Mutable {
 }
 
 export class Victim extends Immutable<void> {
-
-    receive = []
 
     run() { }
 
@@ -346,28 +342,32 @@ export class ImmutableSelfTalk extends Immutable<string> {
 
     count = 0;
 
-    receive = [
+    receive() {
 
-        new Case('ping', () => { this.tell(this.self(), 'pong'); }),
+        return [
 
-        new Case('pong', () => {
+            new Case('ping', () => { this.tell(this.self(), 'pong'); }),
 
-            if (this.count === 3) {
+            new Case('pong', () => {
 
-                this.tell(this.self(), 'end');
+                if (this.count === 3) {
 
-            } else {
+                    this.tell(this.self(), 'end');
 
-                this.tell(this.self(), 'ping');
-                this.count = this.count + 1;
+                } else {
 
-            }
+                    this.tell(this.self(), 'ping');
+                    this.count = this.count + 1;
 
-        }),
+                }
 
-        new Case('end', () => { assert(this.count).equal(3); this.done(); })
+            }),
 
-    ]
+            new Case('end', () => { assert(this.count).equal(3); this.done(); })
+
+        ];
+
+    }
 
     run() {
 
@@ -384,18 +384,22 @@ export class ImmutableCrossTalk extends Immutable<string> {
         public partner: string,
         public done?: () => void) { super(s); }
 
-    receive = [
+    receive() {
 
-        new Case('syn', () => { this.tell(this.partner, 'ack'); }),
+        return [
 
-        new Case('ack', () => {
+            new Case('syn', () => { this.tell(this.partner, 'ack'); }),
 
-            if (this.done)
-                this.done()
+            new Case('ack', () => {
 
-        })
+                if (this.done)
+                    this.done()
 
-    ]
+            })
+
+        ];
+
+    }
 
     run() {
 
@@ -412,18 +416,22 @@ export class AsyncReceiverImmutable extends Immutable<string> {
         public s: TestSystem,
         public done: () => void) { super(s); }
 
-    receive = [
+    receive() {
 
-        new Case('start', () =>
-            delay(() => this.tell(this.self(), 'stop'), 100)),
+        return [
 
-        new Case('stop', () => {
+            new Case('start', () =>
+                delay(() => this.tell(this.self(), 'stop'), 100)),
 
-            this.done();
+            new Case('stop', () => {
 
-        })
+                this.done();
 
-    ];
+            })
+
+        ];
+
+    }
 
     run() {
 

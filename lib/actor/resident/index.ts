@@ -50,7 +50,6 @@ export abstract class AbstractResident
 
     abstract select<T>(_: Case<T>[]): AbstractResident;
 
-
     notify() {
 
         this.system.exec(this, new scripts.Notify());
@@ -109,9 +108,9 @@ export abstract class AbstractResident
 
     }
 
-    run(): void {}
+    run(): void { }
 
-    stop(): void {    }
+    stop(): void { }
 
 }
 
@@ -124,17 +123,11 @@ export abstract class AbstractResident
  */
 export abstract class Immutable<T> extends AbstractResident {
 
-    /**
-     * receive is a static list of Case classes 
-     * that the actor will always use to process messages.
-     */
-    abstract receive: Case<T>[];
-
     init(c: Context): Context {
 
         c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
 
-        c.receivers.push(receiveFun(this.receive));
+        c.receivers.push(receiveFun(this.receive()));
 
         return c;
 
@@ -146,6 +139,17 @@ export abstract class Immutable<T> extends AbstractResident {
     select<M>(_: Case<M>[]): Immutable<T> {
 
         return this;
+
+    }
+
+
+    /**
+     * receive provides a static list of Case classes that the actor will 
+     * always use to process messages.
+     */
+    receive(): Case<T>[] {
+
+        return [];
 
     }
 
@@ -161,7 +165,7 @@ export abstract class Temp<T> extends Immutable<T> {
 
         c.flags = c.flags | FLAG_TEMPORARY | FLAG_BUFFERED;
 
-        c.receivers.push(receiveFun(this.receive));
+        c.receivers.push(receiveFun(this.receive()));
 
         return c;
 
