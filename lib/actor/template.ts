@@ -121,6 +121,7 @@ export const normalize = (t: Template) => merge(t, {
     id: t.id ? t.id : randomID(),
 
     children: isRecord(t.children) ?
-        mapTo(t.children, (c, k) => merge(c, { id: k })) : t.children
+        mapTo(t.children, (c, k) => merge(c, { id: k })) : 
+  t.children ? t.children : []
 
 })

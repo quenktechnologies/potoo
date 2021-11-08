@@ -99,5 +99,5 @@ export declare const normalize: (t: Template) => Template & {
         id: string;
     }) | (Cons & {
         id: string;
-    }))[] | undefined;
+    }))[];
 };
