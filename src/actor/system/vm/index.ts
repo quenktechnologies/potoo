@@ -183,11 +183,10 @@ export class PVM implements Platform, Actor {
 
     constructor(public system: System, public conf: Conf = defaults()) { }
 
-    static create<S extends System>(s: S, conf: object): PVM {
-
-        return new PVM(s, <Conf>rmerge(<Record<Type>>defaults(), <any>conf));
-
-    }
+    /**
+     * heap memory shared between actor Threads.
+     */
+    heap = new Heap();
 
     /**
      * state contains information about all the actors in the system, routers
@@ -197,7 +196,7 @@ export class PVM implements Platform, Actor {
 
         runtimes: {
 
-            $: new Thread(this, new Heap(),
+            $: new Thread(this, this.heap,
                 (newContext(this, '$', { create: () => this })))
 
         },
@@ -207,6 +206,16 @@ export class PVM implements Platform, Actor {
         groups: {}
 
     };
+
+    /**
+     * Create a new PVM instance using the provided System impelmentation and
+     * configuration object.
+     */
+    static create<S extends System>(s: S, conf: object = {}): PVM {
+
+        return new PVM(s, <Conf>rmerge(<Record<Type>>defaults(), <any>conf));
+
+    }
 
     /**
      * runQ is the queue of pending Scripts to be executed.
@@ -268,7 +277,7 @@ export class PVM implements Platform, Actor {
 
         let act = t.create(this.system, t, ...args);
 
-        let thr = new Thread(this, new Heap(),
+        let thr = new Thread(this, this.heap,
             act.init(newContext(act, addr, t)));
 
         this.putRuntime(addr, thr);

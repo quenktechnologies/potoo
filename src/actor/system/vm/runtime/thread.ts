@@ -68,15 +68,13 @@ export class Thread implements Runtime {
 
                 let ret = this.context.actor.stop();
 
-                return (ret != null) ? 
-                <Future<void>>ret : 
-                pure(<void>undefined);
+                return (ret != null) ?
+                    <Future<void>>ret :
+                    pure(<void>undefined);
 
             })
             .chain(() => {
 
-                //TODO: should be removed when heap is shared.
-                this.heap.release();
                 return pure(<void>undefined);
 
             });
@@ -161,7 +159,6 @@ export class Thread implements Runtime {
 
         }
 
-        this.heap.release();
         this.sp = 0;
 
         return ret;

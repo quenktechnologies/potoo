@@ -493,3 +493,43 @@ export class AsyncReceiverMutable extends Mutable {
     }
 
 }
+
+export class Parent extends Immutable<string> {
+
+    constructor(
+        public s: TestSystem,
+        public done: () => void) { super(s); }
+
+    receive() {
+
+        return [new Case('test', () => this.done())];
+
+    }
+
+    run() {
+
+        setTimeout(() => this.spawn(s => new Child(s)), 100);
+
+    }
+
+}
+
+export class Child extends Immutable<string> {
+
+    run() {
+
+        this.spawn({ id: 'grandchild', create: s => new GrandChild(s) });
+
+    }
+
+}
+
+export class GrandChild extends Immutable<string> {
+
+    run() {
+
+        this.tell('parent', 'test');
+
+    }
+
+}

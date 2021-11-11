@@ -15,7 +15,8 @@ import {
     DelayOnRun,
     AsyncReceiverMutable,
     AsyncReceiverImmutable,
-    AssertSpawnReturnsAddress
+    AssertSpawnReturnsAddress,
+    Parent
 } from './fixtures/actors';
 import { ACTION_STOP } from '../../../lib/actor/template';
 
@@ -410,6 +411,14 @@ describe('resident', () => {
             });
 
         });
+
+    it('should allow a child to talk to its parent in the run method', done => {
+
+        let s = system();
+
+        s.spawn({ id: 'parent', create: s => new Parent(<TestSystem>s, done) });
+
+    });
 
     })
 
