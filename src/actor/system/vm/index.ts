@@ -63,6 +63,7 @@ import {
 } from './log';
 import { getLevel } from './event';
 import { PTValue } from './type';
+import { GarbageCollector } from './runtime/gc';
 
 /**
  * Slot
@@ -78,6 +79,16 @@ export const MAX_WORK_LOAD = 25;
  * Some opcode handlers depend on this interface to do their work.
  */
 export interface Platform {
+
+    /**
+     * heap shared between actor runtimes.
+     */
+    heap: Heap
+
+    /**
+     * gc is the garbage collector.
+     */
+    gc: GarbageCollector
 
     /**
      * allocate a new Runtime for an actor.
@@ -189,6 +200,11 @@ export class PVM implements Platform, Actor {
     heap = new Heap();
 
     /**
+     * gc for the heap.
+     */
+    gc = new GarbageCollector(this.heap);
+
+    /**
      * state contains information about all the actors in the system, routers
      * and groups.
      */
@@ -196,8 +212,7 @@ export class PVM implements Platform, Actor {
 
         runtimes: {
 
-            $: new Thread(this, this.heap,
-                (newContext(this, '$', { create: () => this })))
+            $: new Thread(this, (newContext(this, '$', { create: () => this })))
 
         },
 
@@ -277,8 +292,7 @@ export class PVM implements Platform, Actor {
 
         let act = t.create(this.system, t, ...args);
 
-        let thr = new Thread(this, this.heap,
-            act.init(newContext(act, addr, t)));
+        let thr = new Thread(this, act.init(newContext(act, addr, t)));
 
         this.putRuntime(addr, thr);
 
@@ -671,7 +685,7 @@ export class PVM implements Platform, Actor {
 
             let [, rtime] = mslot.get();
 
-            return new Thread(this, rtime.heap, rtime.context).exec(s);
+            return new Thread(this, rtime.context).exec(s);
 
         }
 

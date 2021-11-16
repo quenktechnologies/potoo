@@ -34,7 +34,7 @@ export const alloc = (r: Runtime, f: Frame, _: Operand) => {
 
     } else {
 
-        f.push(f.heap.addString(eresult.takeRight()));
+        f.push(r.vm.heap.addString(eresult.takeRight()));
 
     }
 

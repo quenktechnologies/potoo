@@ -10,7 +10,7 @@ import { Script } from '../../script';
 import { Context } from '../context';
 import { HeapObject } from '../heap/object';
 import { Heap } from '../heap';
-import { Instruction, Operand } from '../';
+import { Instruction, Operand, Runtime } from '../';
 import { PTValue, BYTE_TYPE, TYPE_FUN } from '../../type';
 import { FunInfo, Info } from '../../script/info';
 
@@ -50,8 +50,8 @@ export const BYTE_CONSTANT_INFO = 0x30000;
  * Typically, the highest byte is used to indicate the type of the data
  * in realtion to storage location and the remaining 3 bytes, value.
  *
- * 11111111        111111111111111111111111
- * <type/location> <     value      >
+ * 11111111            11111111 11111111 11111111
+ * <type/location>      <     value      >
  *
  * The actual interpretation of the location and value part are dependant on
  * the type.
@@ -77,14 +77,9 @@ export interface Frame {
     script: Script
 
     /**
-     * context of the actor that is executing this frame.
+     * runtime for the actor.
      */
-    context: Context
-
-    /**
-     * heap of the current Runtime
-     */
-    heap: Heap
+    runtime: Runtime
 
     /**
      * code the frame executes as part of the routine.
@@ -228,8 +223,7 @@ export class StackFrame implements Frame {
     constructor(
         public name: string,
         public script: Script,
-        public context: Context,
-        public heap: Heap,
+        public runtime: Runtime,
         public code: Instruction[] = [],
         public data: Data[] = [],
         public locals: Data[] = [],
@@ -298,7 +292,7 @@ export class StackFrame implements Frame {
 
     resolve(data: Data): Either<Err, Type> {
 
-        let { context } = this;
+        let { context } = this.runtime;
 
         let typ = data & DATA_MASK_TYPE;
 
@@ -380,11 +374,11 @@ export class StackFrame implements Frame {
 
         } else if (typ === DATA_TYPE_HEAP_STRING) {
 
-            return right(this.heap.getString(idx));
+            return right(this.runtime.vm.heap.getString(idx));
 
         } else if (typ === DATA_TYPE_SELF) {
 
-            return right(this.context.address);
+            return right(this.runtime.context.address);
 
         } else {
 
@@ -440,7 +434,7 @@ export class StackFrame implements Frame {
 
         if (typ === DATA_TYPE_HEAP_OBJECT) {
 
-            let mho = this.heap.getObject(idx);
+            let mho = this.runtime.vm.heap.getObject(idx);
 
             if (mho.isNothing())
                 return nullErr(data);

@@ -20,7 +20,7 @@ export const getprop = (r: Runtime, f: Frame, idx: Operand) => {
 
     if (mval.isJust()) {
 
-        f.push(r.heap.getAddress(mval.get()));
+        f.push(r.vm.heap.getAddress(mval.get()));
 
     } else {
 
@@ -74,7 +74,7 @@ export const arelm = (r: Runtime, f: Frame, _: Operand) => {
 
     if (melm.isJust()) {
 
-        f.push(r.heap.getAddress(melm.get()));
+        f.push(r.vm.heap.getAddress(melm.get()));
 
     } else {
 

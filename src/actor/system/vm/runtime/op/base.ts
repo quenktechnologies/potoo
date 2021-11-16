@@ -92,9 +92,11 @@ export const dup = (_: Runtime, f: Frame, __: Operand) => {
  * Stack:
  * <any> -> 
  */
-export const store = (_: Runtime, f: Frame, idx: Operand) => {
+export const store = (r: Runtime, f: Frame, idx: Operand) => {
 
     f.locals[idx] = f.pop();
+
+    r.vm.gc.addRef(f.locals[idx]);
 
 }
 

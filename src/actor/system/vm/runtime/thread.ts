@@ -25,7 +25,6 @@ export class Thread implements Runtime {
 
     constructor(
         public vm: Platform,
-        public heap: Heap,
         public context: Context,
         public fstack: Frame[] = [],
         public rstack: Data[] = [],
@@ -39,8 +38,7 @@ export class Thread implements Runtime {
 
     invokeVM(p: Frame, f: FunInfo) {
 
-        let frm = new StackFrame(f.name, p.script, this.context,
-            this.heap, f.code.slice());
+        let frm = new StackFrame(f.name, p.script, this,  f.code.slice());
 
         for (let i = 0; i < f.argc; i++)
             frm.push(p.pop());
@@ -57,7 +55,7 @@ export class Thread implements Runtime {
 
         let val = f.exec.apply(null, [this, ...args]);
 
-        p.push(this.heap.getAddress(val));
+        p.push(this.runtime.vm.heap.getAddress(val));
 
     }
 
@@ -90,8 +88,7 @@ export class Thread implements Runtime {
 
     exec(s: Script): Maybe<PTValue> {
 
-        this.fstack.push(new StackFrame('main', s, this.context, this.heap,
-            s.code.slice()));
+        this.fstack.push(new StackFrame('main', s, this,            s.code.slice()));
 
         return this.run();
 
@@ -145,8 +142,8 @@ export class Thread implements Runtime {
 
                 this.fstack.pop();
                 this.sp--;
-
                 this.rstack.push(<Data>frame.data.pop());
+                this.vm.gc.frameRemoved(this, <StackFrame>frame);
 
                 if (empty(this.fstack)) {
 
@@ -160,6 +157,8 @@ export class Thread implements Runtime {
         }
 
         this.sp = 0;
+
+        this.vm.gc.reclaim();
 
         return ret;
 

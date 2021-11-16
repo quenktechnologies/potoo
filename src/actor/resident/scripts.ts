@@ -46,8 +46,8 @@ export class Spawn implements Script {
         new NewForeignFunInfo(
             'getTemp',
             0,
-            (r: Runtime) => r.heap.addObject(
-                new ESObject(r.heap, templateType, this.template))),
+            (r: Runtime) => r.vm.heap.addObject(
+                new ESObject(r.vm.heap, templateType, this.template))),
 
         new NewFunInfo('spawn', 2, [
 
@@ -145,7 +145,7 @@ export class Tell implements Script {
             'getMessage',
             0,
             (r: Runtime) => isObject(this.msg) ?
-                r.heap.addObject(new ESObject(r.heap, objectType, this.msg)) :
+                r.vm.heap.addObject(new ESObject(r.vm.heap, objectType, this.msg)) :
                 this.msg)
     ];
 

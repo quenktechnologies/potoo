@@ -8,7 +8,6 @@ import { Frame } from './stack/frame';
 import { Script } from '../script';
 import { PTValue } from '../type';
 import { Platform } from '../';
-import { Heap } from './heap';
 import { Context } from './context';
 
 //TODO: Relocate some of these types.
@@ -55,11 +54,6 @@ export interface Runtime {
      * vm
      */
     vm: Platform,
-
-    /**
-     * heap
-     */
-    heap: Heap,
 
     /**
      * context
