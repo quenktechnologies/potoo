@@ -1,5 +1,5 @@
 import { Err } from '@quenk/noni/lib/control/error';
-import { empty, tail } from '@quenk/noni/lib/data/array';
+import { empty } from '@quenk/noni/lib/data/array';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Future, pure } from '@quenk/noni/lib/control/monad/future';
 
@@ -10,7 +10,6 @@ import { Platform } from '../';
 import { Frame, StackFrame, Data } from './stack/frame';
 import { handlers } from './op';
 import { Context } from './context';
-import { Heap } from './heap';
 import {
     Runtime,
     OPCODE_MASK,
@@ -27,8 +26,13 @@ export class Thread implements Runtime {
         public vm: Platform,
         public context: Context,
         public fstack: Frame[] = [],
-        public rstack: Data[] = [],
         public sp = 0) { }
+
+
+    /**
+     * rp is the return pointer used to pass values between frames.
+     */
+    rp: Data = 0;
 
     raise(e: Err) {
 
@@ -38,7 +42,7 @@ export class Thread implements Runtime {
 
     invokeVM(p: Frame, f: FunInfo) {
 
-        let frm = new StackFrame(f.name, p.script, this,  f.code.slice());
+        let frm = new StackFrame(f.name, p.script, this, f.code.slice());
 
         for (let i = 0; i < f.argc; i++)
             frm.push(p.pop());
@@ -55,7 +59,7 @@ export class Thread implements Runtime {
 
         let val = f.exec.apply(null, [this, ...args]);
 
-        p.push(this.runtime.vm.heap.getAddress(val));
+        p.push(this.vm.heap.getAddress(val));
 
     }
 
@@ -88,7 +92,7 @@ export class Thread implements Runtime {
 
     exec(s: Script): Maybe<PTValue> {
 
-        this.fstack.push(new StackFrame('main', s, this,            s.code.slice()));
+        this.fstack.push(new StackFrame('main', s, this, s.code.slice()));
 
         return this.run();
 
@@ -109,8 +113,13 @@ export class Thread implements Runtime {
             let sp = this.sp;
             let frame = <Frame>this.fstack[sp];
 
-            if (!empty(this.rstack))
-                frame.data.push(<Data>this.rstack.pop());
+            if (this.rp != 0) {
+
+                frame.data.push(this.rp);
+
+                this.rp = 0;
+
+            }
 
             while (!frame.isFinished()) {
 
@@ -137,18 +146,17 @@ export class Thread implements Runtime {
 
             if (sp === this.sp) {
 
-                //frame complete, pop it, advance the sp and push the return
-                //value onto the rstack.
+                //frame complete, pop it, advance the sp and set the rp value.
 
                 this.fstack.pop();
                 this.sp--;
-                this.rstack.push(<Data>frame.data.pop());
-                this.vm.gc.frameRemoved(this, <StackFrame>frame);
+                this.rp = <Data>frame.data.pop() || 0;
+                //this.vm.gc.frameRemoved(this, <StackFrame>frame);
 
                 if (empty(this.fstack)) {
 
-                    //provide the TOS value from the rstack to the caller.
-                    ret = frame.resolve(tail(this.rstack)).toMaybe();
+                    //provide the return pointer value to the caller.
+                    ret = frame.resolve(this.rp).toMaybe();
 
                 }
 
