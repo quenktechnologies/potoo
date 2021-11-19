@@ -19,6 +19,7 @@ import {
     Address,
     getParent as getParentAddress
 } from '../../address';
+import { Message } from '../../message';
 import { Instance } from '../../';
 import { Runtime } from './runtime';
 
@@ -36,6 +37,11 @@ export interface Routers extends Record<Address> { }
  * Groups map.
  */
 export interface Groups extends Record<Address[]> { }
+
+/**
+ * PendingMessages map.
+ */
+export interface PendingMessages extends Record<Message[]> { }
 
 /**
  * State contains Context entries for all actors in the system.
@@ -56,6 +62,12 @@ export interface State {
      * group assignments.
      */
     groups: Groups
+
+    /**
+     * pendingMessages is a Message buffer for actors that have not been fully
+     * initialized yet.'
+     */
+    pendingMessages: PendingMessages
 
 }
 
@@ -204,3 +216,20 @@ export const removeMember =
         return s;
 
     }
+
+/**
+ * createMessageBuffer creates a temporary message buffer for the actor address.
+ */
+export const createMessageBuffer = (s: State, addr: Address): State => {
+    s.pendingMessages[addr] = [];
+    return s;
+}
+
+/**
+ * destroyMessageBuffer removes the message buffer (if any) for the provided
+ * address.
+ */
+export const destroyMessageBuffer = (s: State, addr: Address): State => {
+    delete s.pendingMessages[addr];
+    return s;
+}

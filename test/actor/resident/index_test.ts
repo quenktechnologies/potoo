@@ -412,14 +412,29 @@ describe('resident', () => {
 
         });
 
-    it('should allow a child to talk to its parent in the run method', done => {
+        it('should allow a child to talk to its parent in the run method',
+            done => {
 
-        let s = system();
+                // This is really about a issue #43
 
-        s.spawn({ id: 'parent', create: s => new Parent(<TestSystem>s, done) });
+                let sys = system();
 
-    });
+                sys.spawn({
 
+                    id: 'parent',
+
+                    create: s => new Parent(<TestSystem>s, () => {
+
+                        assert(sys.vm.heap.objects.length).equal(0);
+
+                        assert(sys.vm.heap.strings.length).equal(0);
+
+                        done();
+
+                    })
+
+                });
+
+            });
     })
-
 })

@@ -15,9 +15,9 @@ import {
     AddressMap
 } from '../address';
 import { Message } from '../message';
-import { Template, Templates, Spawnable, normalize } from '../template';
+import { Templates, Spawnable } from '../template';
 import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_TEMPORARY } from '../flags';
-import { Actor, Instance, Eff } from '../';
+import { Actor, Eff } from '../';
 
 import { Case } from './case';
 import { Api } from './api';
@@ -52,7 +52,7 @@ export abstract class AbstractResident
 
     notify() {
 
-        this.system.exec(this, new scripts.Notify());
+        this.system.getPlatform().exec(this, new scripts.Notify());
 
     }
 
@@ -62,7 +62,7 @@ export abstract class AbstractResident
 
     spawn(t: Spawnable): Address {
 
-        return spawn(this.system, this, t);
+        return this.system.getPlatform().spawn(this, t);
 
     }
 
@@ -75,28 +75,28 @@ export abstract class AbstractResident
 
     tell<M>(ref: Address, m: M): AbstractResident {
 
-        this.system.exec(this, new scripts.Tell(ref, m));
+        this.system.getPlatform().exec(this, new scripts.Tell(ref, m));
         return this;
 
     }
 
     raise(e: Err): AbstractResident {
 
-        this.system.exec(this, new scripts.Raise(e.message));
+        this.system.getPlatform().exec(this, new scripts.Raise(e.message));
         return this;
 
     }
 
     kill(addr: Address): AbstractResident {
 
-        this.system.exec(this, new scripts.Kill(addr));
+        this.system.getPlatform().exec(this, new scripts.Kill(addr));
         return this;
 
     }
 
     exit(): void {
 
-        this.system.exec(this, new scripts.Kill(this.self()));
+        this.system.getPlatform().exec(this, new scripts.Kill(this.self()));
 
     }
 
@@ -193,7 +193,8 @@ export abstract class Mutable extends AbstractResident {
      */
     select<M>(cases: Case<M>[]): Mutable {
 
-        this.system.exec(this, new scripts.Receive(receiveFun(cases)));
+        this.system.getPlatform().exec(this,
+            new scripts.Receive(receiveFun(cases)));
 
         return this;
 
@@ -208,21 +209,6 @@ export const ref =
     (res: Resident, addr: Address): Reference =>
         (m: Message) =>
             res.tell(addr, m);
-
-/**
- * spawn an actor using the Spawn script.
- */
-export const spawn = <S extends System>
-    (sys: S, i: Instance, t: Spawnable): Address => {
-
-    let tmpl = normalize(isObject(t) ? <Template>t : { create: t });
-
-    return <string>sys
-        .execNow(i, new scripts.Spawn(tmpl))
-        .orJust(() => ADDRESS_DISCARD)
-        .get();
-
-}
 
 const receiveFun = (cases: Case<Message>[]) =>
     new NewForeignFunInfo('receive', 1, (r, m) => {

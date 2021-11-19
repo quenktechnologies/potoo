@@ -17,7 +17,6 @@ import { Record, reduce, map, rmerge, mapTo } from '@quenk/noni/lib/data/record'
 import { remove as arremove } from '@quenk/noni/lib/data/array';
 import { Type, isObject } from '@quenk/noni/lib/data/type';
 
-import { spawn } from '../../resident';
 import {
     Address,
     isGroup,
@@ -44,7 +43,8 @@ import {
     getGroup,
     getChildren,
     remove,
-    Runtimes
+    Runtimes,
+    getAddress
 } from './state';
 import { Script } from './script';
 import { Context, newContext } from './runtime/context';
@@ -78,7 +78,7 @@ export const MAX_WORK_LOAD = 25;
  * It provides methods for manipulating the state of the actors of the system.
  * Some opcode handlers depend on this interface to do their work.
  */
-export interface Platform {
+export interface Platform extends Actor {
 
     /**
      * heap shared between actor runtimes.
@@ -123,7 +123,7 @@ export interface Platform {
     getRouter(addr: Address): Maybe<Context>
 
     /**
-     * getGroup attemps to retreive all the members of a group.
+     * getGroup attempts to retrieve all the members of a group.
      */
     getGroup(name: string): Maybe<Address[]>
 
@@ -159,6 +159,13 @@ export interface Platform {
     removeRoute(target: Address): Platform
 
     /**
+     * spawn an actor using the given Instance as the parent.
+     *
+     * The Instance is required to verify if it is still part of the system.
+     */
+    spawn(parent: Instance, tmpl: template.Spawnable): Address
+
+    /**
      * kill terminates the actor at the specified address.
      *
      * The actor must be a child of parent to succeed.
@@ -185,12 +192,22 @@ export interface Platform {
      */
     runTask(addr: Address, ft: Future<void>): void
 
+    /**
+     * exec code in the VM on behalf of the provided actor instance.
+     */
+    exec(i: Instance, s: Script): void
+
 }
 
 /**
- * PVM is the Potoo Virtual Machine.
+ * PVM (Potoo Virtual Machine) is a JavaScript implemented virtual machine that
+ * functions as a message delivery system between target actors.
+ *
+ * Actors known to the VM are considered to be part of a system and may or may
+ * not reside on the same process/worker/thread depending on the underlying 
+ * platform and individual actor implementations.
  */
-export class PVM implements Platform, Actor {
+export class PVM implements Platform {
 
     constructor(public system: System, public conf: Conf = defaults()) { }
 
@@ -218,7 +235,9 @@ export class PVM implements Platform, Actor {
 
         routers: {},
 
-        groups: {}
+        groups: {},
+
+        pendingMessages: {}
 
     };
 
@@ -276,23 +295,68 @@ export class PVM implements Platform, Actor {
 
     }
 
-    allocate(parent: Address, t: Template): Either<Err, Address> {
+    spawn(parent: Instance, tmpl: template.Spawnable): Address {
 
-        let temp = normalize(t);
+        let mparentAddr = getAddress(this.state, parent);
 
-        if (isRestricted(temp.id))
-            return left(new errors.InvalidIdErr(temp.id));
+        if (mparentAddr.isNothing()) {
 
-        let addr = make(parent, temp.id);
+            this.raise('$', new errors.UnknownInstanceErr(parent));
+
+            return '?';
+
+        }
+
+        let normalTmpl = normalize(isObject(tmpl) ?
+            <Template>tmpl :
+            { create: tmpl });
+
+        return this._spawn(mparentAddr.get(), normalTmpl);
+
+    }
+
+    _spawn(parent: Address, tmpl: Template): Address {
+
+        let eresult = this.allocate(parent, tmpl);
+
+        if (eresult.isLeft()) {
+
+            this.raise('$', eresult.takeLeft());
+
+            return '?';
+
+        }
+
+        let result = eresult.takeRight();
+
+        this.runTask(result, this.runActor(result));
+
+        if (Array.isArray(tmpl.children)) {
+
+            // TODO: Make this call stack friendly some day.
+            tmpl.children.forEach(tmp => this._spawn(result, tmp));
+
+        }
+
+        return result;
+
+    }
+
+    allocate(parent: Address, tmpl: Template): Either<Err, Address> {
+
+        if (isRestricted(<string>tmpl.id))
+            return left(new errors.InvalidIdErr(<string>tmpl.id));
+
+        let addr = make(parent, <string>tmpl.id);
 
         if (this.getRuntime(addr).isJust())
             return left(new errors.DuplicateAddressErr(addr));
 
-        let args = Array.isArray(t.args) ? t.args : [];
+        let args = Array.isArray(tmpl.args) ? tmpl.args : [];
 
-        let act = t.create(this.system, t, ...args);
+        let act = tmpl.create(this.system, tmpl, ...args);
 
-        let thr = new Thread(this, act.init(newContext(act, addr, t)));
+        let thr = new Thread(this, act.init(newContext(act, addr, tmpl)));
 
         this.putRuntime(addr, thr);
 
@@ -301,10 +365,10 @@ export class PVM implements Platform, Actor {
         if (isRouter(thr.context.flags))
             this.putRoute(addr, addr);
 
-        if (temp.group) {
+        if (tmpl.group) {
 
-            let groups = (typeof temp.group === 'string') ?
-                [temp.group] : temp.group;
+            let groups = (typeof tmpl.group === 'string') ?
+                [tmpl.group] : tmpl.group;
 
             groups.forEach(g => this.putMember(g, addr));
 
@@ -649,45 +713,14 @@ export class PVM implements Platform, Actor {
     }
 
     /**
-     * spawn an actor.
-     *
-     * This actor will be a direct child of the root.
-     */
-    spawn(t: Template): Address {
-
-        return spawn(this.system, this, t);
-
-    }
-
-    /**
      * tell allows the vm to send a message to another actor via opcodes.
      *
      * If you want to immediately deliver a message, use [[sendMessage]] instead.
      */
     tell<M>(ref: Address, m: M): PVM {
 
-        this.system.exec(this, new scripts.Tell(ref, m));
+        this.exec(this, new scripts.Tell(ref, m));
         return this;
-
-    }
-
-    execNow(i: Instance, s: Script): Maybe<PTValue> {
-
-        let mslot = getSlot(this.state, i);
-
-        if (mslot.isNothing()) {
-
-            this.trigger(ADDRESS_SYSTEM, events.EVENT_EXEC_INSTANCE_STALE);
-
-            return nothing();
-
-        } else {
-
-            let [, rtime] = mslot.get();
-
-            return new Thread(this, rtime.context).exec(s);
-
-        }
 
     }
 

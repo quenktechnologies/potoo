@@ -135,7 +135,7 @@ export class Process implements Actor {
 
         let p = fork(resolve(this.script), [], spawnOpts(this));
 
-        p.on('error', e => this.system.exec(this, new Raise(e.message)));
+        p.on('error', e => this.system.getPlatform().raise(this.self(), e));
 
         //TODO: What should we do with invalid messages?
         p.on('message', (m: Message) =>
@@ -149,7 +149,7 @@ export class Process implements Actor {
 
             this.process = nullHandle;
 
-            this.system.exec(this, new Kill(this.self()));
+            this.system.getPlatform().exec(this, new Kill(this.self()));
 
         });
 
@@ -189,8 +189,8 @@ const spawnOpts = (p: Process) => ({
 });
 
 const handleTell = (p: Process) => (m: TellMsg) =>
-    p.system.exec(p, new Tell(m.to, m.message));
+    p.system.getPlatform().exec(p, new Tell(m.to, m.message));
 
 const handleRaise =
     (p: Process) => ({ error, src }: RaiseMsg) =>
-        p.system.exec(p, new Raise(`[${src}]: ${error}`));
+        p.system.getPlatform().exec(p, new Raise(`[${src}]: ${error}`));
