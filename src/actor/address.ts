@@ -1,5 +1,3 @@
-import * as uuid from 'uuid';
-
 import { tail } from '@quenk/noni/lib/data/array';
 import { startsWith } from '@quenk/noni/lib/data/string';
 
@@ -105,8 +103,3 @@ export const isChild = (parent: Address, child: Address): boolean =>
  */
 export const isGroup = (addr: Address): boolean =>
     ((addr[0] === '$') && (addr !== '$'))
-
-/**
- * randomID generates a random id suitable for use by child actors.
- */
-export const randomID = () => uuid.v4().split('-').join('');

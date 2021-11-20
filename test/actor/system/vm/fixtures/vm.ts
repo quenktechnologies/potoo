@@ -5,7 +5,7 @@ import { Either, right } from '@quenk/noni/lib/data/either';
 import { Future, pure } from '@quenk/noni/lib/control/monad/future';
 
 import { System } from '../../../../../lib/actor/system';
-import { Template } from '../../../../../lib/actor/template';
+import { Spawnable, Template } from '../../../../../lib/actor/template';
 import { State, Runtimes } from '../../../../../lib/actor/system/vm/state';
 import { Address } from '../../../../../lib/actor/address';
 import { Context } from '../../../../../lib/actor/system/vm/runtime/context';
@@ -13,14 +13,32 @@ import { Platform } from '../../../../../lib/actor/system/vm';
 import { Runtime, Operand, Opcode } from '../../../../../lib/actor/system/vm/runtime';
 import { Message } from '../../../../../lib/actor/message';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
+import { Instance } from '../../../../../lib/actor';
+import { HeapImpl } from './heap';
+import { GarbageCollector } from '../../../../../lib/actor/system/vm/runtime/gc';
+import { Script } from '../../../../../lib/actor/system/vm/script';
 
 export class FPVM<S extends System> implements Platform {
 
-    state: State = { runtimes: {}, routers: {}, groups: {} };
+    mock = new Mock();
+
+    state: State = {
+
+        runtimes: {},
+
+        routers: {},
+
+        groups: {},
+
+        pendingMessages: {}
+
+    };
+
+    heap = new HeapImpl();
+
+    gc = new GarbageCollector(this.heap);
 
     configuration = {};
-
-    mock = new Mock();
 
     ident(): string {
 
@@ -73,6 +91,12 @@ export class FPVM<S extends System> implements Platform {
     getChildren(addr: Address): Maybe<Runtimes> {
 
         return this.mock.invoke('getChildren', [addr], nothing());
+
+    }
+
+    spawn(inst: Instance, spec: Spawnable): Address {
+
+        return this.mock.invoke('spawn', [inst, spec], '?');
 
     }
 
@@ -133,6 +157,42 @@ export class FPVM<S extends System> implements Platform {
     runTask(addr: Address, ft: Future<void>) {
 
         return this.mock.invoke('runTask', [addr, ft], undefined);
+
+    }
+
+    init(c: Context): Context {
+
+        return this.mock.invoke('init', [c], c);
+
+    }
+
+    accept(m: Message) {
+
+        return this.mock.invoke('accept', [m], undefined);
+
+    }
+
+    start() {
+
+        return this.mock.invoke('start', [], undefined);
+
+    }
+
+    notify() {
+
+        return this.mock.invoke('notify', [], undefined);
+
+    }
+
+    stop() {
+
+        return this.mock.invoke('stop', [], undefined);
+
+    }
+
+    exec(i: Instance, s: Script): void {
+
+        return this.mock.invoke('runTask', [i, s], undefined);
 
     }
 

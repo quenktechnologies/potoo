@@ -6,6 +6,7 @@ import * as events from './event';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future, pure, raise, batch } from '@quenk/noni/lib/control/monad/future';
 import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
+import { isFunction } from '@quenk/noni/lib/data/type';
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import {
     empty,
@@ -13,7 +14,15 @@ import {
     contains, partition,
     distribute
 } from '@quenk/noni/lib/data/array';
-import { Record, reduce, map, rmerge, mapTo } from '@quenk/noni/lib/data/record';
+import {
+    Record,
+    reduce,
+    map,
+    merge,
+    rmerge,
+    mapTo,
+    isRecord
+} from '@quenk/noni/lib/data/record';
 import { remove as arremove } from '@quenk/noni/lib/data/array';
 import { Type, isObject } from '@quenk/noni/lib/data/type';
 
@@ -26,7 +35,7 @@ import {
     ADDRESS_SYSTEM,
     isChild
 } from '../../address';
-import { normalize, Template } from '../../template';
+import { Template } from '../../template';
 import { isRouter, isBuffered } from '../../flags';
 import { Message, Envelope } from '../../message';
 import { Instance, Actor } from '../../';
@@ -69,6 +78,8 @@ import { GarbageCollector } from './runtime/gc';
  * Slot
  */
 export type Slot = [Address, Script, Runtime];
+
+const ID_RANDOM = `#?POTOORAND?#${Date.now()}`;
 
 export const MAX_WORK_LOAD = 25;
 
@@ -211,6 +222,8 @@ export class PVM implements Platform {
 
     constructor(public system: System, public conf: Conf = defaults()) { }
 
+    _actorIdCounter = -1;
+
     /**
      * heap memory shared between actor Threads.
      */
@@ -229,7 +242,8 @@ export class PVM implements Platform {
 
         runtimes: {
 
-            $: new Thread(this, (newContext(this, '$', { create: () => this })))
+            $: new Thread(this, newContext(this._actorIdCounter++, this,
+                '$', { create: () => this }))
 
         },
 
@@ -242,7 +256,7 @@ export class PVM implements Platform {
     };
 
     /**
-     * Create a new PVM instance using the provided System impelmentation and
+     * Create a new PVM instance using the provided System implementation and
      * configuration object.
      */
     static create<S extends System>(s: S, conf: object = {}): PVM {
@@ -281,13 +295,9 @@ export class PVM implements Platform {
 
     }
 
-    start() {
+    start() { }
 
-    }
-
-    notify() {
-
-    }
+    notify() { }
 
     stop(): Future<void> {
 
@@ -307,11 +317,7 @@ export class PVM implements Platform {
 
         }
 
-        let normalTmpl = normalize(isObject(tmpl) ?
-            <Template>tmpl :
-            { create: tmpl });
-
-        return this._spawn(mparentAddr.get(), normalTmpl);
+        return this._spawn(mparentAddr.get(), normalize(tmpl));
 
     }
 
@@ -344,6 +350,12 @@ export class PVM implements Platform {
 
     allocate(parent: Address, tmpl: Template): Either<Err, Address> {
 
+        if (tmpl.id === ID_RANDOM) {
+            let rtime = get(this.state, parent).get();
+            let prefix = rtime.context.actor.constructor.name.toLowerCase();
+            tmpl.id = `actor::${this._actorIdCounter + 1}~${prefix}`;
+        }
+
         if (isRestricted(<string>tmpl.id))
             return left(new errors.InvalidIdErr(<string>tmpl.id));
 
@@ -356,7 +368,8 @@ export class PVM implements Platform {
 
         let act = tmpl.create(this.system, tmpl, ...args);
 
-        let thr = new Thread(this, act.init(newContext(act, addr, tmpl)));
+        let thr = new Thread(this,
+            act.init(newContext(this._actorIdCounter++, act, addr, tmpl)));
 
         this.putRuntime(addr, thr);
 
@@ -810,3 +823,21 @@ const getSlot = (s: State, actor: Instance): Maybe<[Address, Runtime]> =>
 const scheduleFutures = (work: Future<void>[]): Future<void> =>
     batch(distribute(work, MAX_WORK_LOAD))
         .chain(() => pure(<void>undefined));
+
+const normalize = (spawnable: template.Spawnable) => {
+
+    let tmpl = <Partial<Template>>(isFunction(spawnable) ?
+        { create: spawnable } :
+        spawnable);
+
+    tmpl.id = tmpl.id ? tmpl.id : ID_RANDOM
+
+    return <Template>merge(tmpl, {
+
+        children: isRecord(tmpl.children) ?
+            mapTo(tmpl.children, (c, k) => merge(c, { id: k })) :
+            tmpl.children ? tmpl.children : []
+
+    })
+
+}

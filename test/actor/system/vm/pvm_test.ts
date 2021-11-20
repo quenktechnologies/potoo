@@ -27,6 +27,7 @@ import {
     ACTION_RAISE
 } from '../../../../lib/actor/template';
 import { ADDRESS_SYSTEM } from '../../../../lib/actor/address';
+import { Immutable } from '../../../../lib/actor/resident';
 
 const add2Five = new PScript('add2Five', [[], []], [], [
     op.PUSHUI8 | 0x5,
@@ -582,6 +583,40 @@ describe('vm', () => {
 
                         }));
             });
+        });
+
+        describe('spawn', () => {
+
+            it('should assign random ids', done => {
+
+                let vm = new PVM(newSystem());
+
+                let name = 'actor::1~pvm';
+
+                let onRun = () => {
+
+                    assert(vm.state.runtimes[name]).not.undefined();
+
+                    done();
+
+                }
+
+                class ChildActor extends Immutable<void> {
+
+                    run() {
+
+                        onRun();
+
+                    }
+
+                }
+
+                assert(vm.state.runtimes[name]).undefined();
+
+                vm.spawn(vm, s => new ChildActor(s));
+
+            });
+
         });
 
     });
