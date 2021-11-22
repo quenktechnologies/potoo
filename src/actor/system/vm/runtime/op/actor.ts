@@ -3,34 +3,35 @@ import * as error from '../error';
 import { isImmutable } from '../../../../flags';
 import { Template } from '../../../../template';
 import { Frame } from '../stack/frame';
-import { Runtime, Operand } from '../';
+import { Operand } from '../';
+import { Thread } from '../thread';
 
 /**
- * alloc a Runtime for a new actor.
+ * alloc a Thread for a new actor.
  *
- * The Runtime is stored in the vm's state table. If the generated address
+ * The Thread is stored in the vm's state table. If the generated address
  * already exists or is invalid an error will be raised.
  *
  * Stack:
  * <template>,<address> -> <address>
  */
-export const alloc = (r: Runtime, f: Frame, _: Operand) => {
+export const alloc = (r: Thread, f: Frame, _: Operand) => {
 
     let eTemp = f.popObject();
 
-    if (eTemp.isLeft()) return r.raise(eTemp.takeLeft());
+    if (eTemp.isLeft()) return r.vm.raise(r.context.actor, eTemp.takeLeft());
 
     let temp = <Template>eTemp.takeRight().promote();
 
     let eParent = f.popString();
 
-    if (eParent.isLeft()) return r.raise(eParent.takeLeft());
+    if (eParent.isLeft()) return r.vm.raise(r.context.actor, eParent.takeLeft());
 
     let eresult = r.vm.allocate(eParent.takeRight(), temp);
 
     if (eresult.isLeft()) {
 
-        r.raise(eresult.takeLeft());
+        r.vm.raise(r.context.actor, eresult.takeLeft());
 
     } else {
 
@@ -44,7 +45,7 @@ export const alloc = (r: Runtime, f: Frame, _: Operand) => {
  * self puts the address of the current actor on to the stack.
  * TODO: make self an automatic variable
  */
-export const self = (_: Runtime, f: Frame, __: Operand) => {
+export const self = (_: Thread, f: Frame, __: Operand) => {
 
     f.pushSelf();
 
@@ -57,11 +58,11 @@ export const self = (_: Runtime, f: Frame, __: Operand) => {
  * Stack:
  * <address> -> 
  */
-export const run = (r: Runtime, f: Frame, _: Operand) => {
+export const run = (r: Thread, f: Frame, _: Operand) => {
 
     let eTarget = f.popString();
 
-    if (eTarget.isLeft()) return r.raise(eTarget.takeLeft());
+    if (eTarget.isLeft()) return r.vm.raise(r.context.actor, eTarget.takeLeft());
 
     let target = eTarget.takeRight();
 
@@ -75,15 +76,15 @@ export const run = (r: Runtime, f: Frame, _: Operand) => {
  * Stack:
  * <message>,<address> -> <uint8>
  */
-export const send = (r: Runtime, f: Frame, _: Operand) => {
+export const send = (r: Thread, f: Frame, _: Operand) => {
 
     let eMsg = f.popValue();
 
-    if (eMsg.isLeft()) return r.raise(eMsg.takeLeft());
+    if (eMsg.isLeft()) return r.vm.raise(r.context.actor, eMsg.takeLeft());
 
     let eAddr = f.popString();
 
-    if (eAddr.isLeft()) return r.raise(eAddr.takeLeft());
+    if (eAddr.isLeft()) return r.vm.raise(r.context.actor, eAddr.takeLeft());
 
     if (r.vm.sendMessage(eAddr.takeRight(), r.context.address, eMsg.takeRight()))
         f.pushUInt8(1);
@@ -102,11 +103,11 @@ export const send = (r: Runtime, f: Frame, _: Operand) => {
  * Stack:
  * <function> -> 
  */
-export const recv = (r: Runtime, f: Frame, _: Operand) => {
+export const recv = (r: Thread, f: Frame, _: Operand) => {
 
     let einfo = f.popFunction();
 
-    if (einfo.isLeft()) return r.raise(einfo.takeLeft());
+    if (einfo.isLeft()) return r.vm.raise(r.context.actor, einfo.takeLeft());
 
     r.context.receivers.push(einfo.takeRight());
 
@@ -121,7 +122,7 @@ export const recv = (r: Runtime, f: Frame, _: Operand) => {
  * Stack:
  *  -> <uint32>
  */
-export const recvcount = (r: Runtime, f: Frame, _: Operand) => {
+export const recvcount = (r: Thread, f: Frame, _: Operand) => {
 
     f.push(r.context.receivers.length);
 
@@ -134,7 +135,7 @@ export const recvcount = (r: Runtime, f: Frame, _: Operand) => {
  * Stack:
  *  -> <uint32>
  */
-export const mailcount = (r: Runtime, f: Frame, _: Operand) => {
+export const mailcount = (r: Thread, f: Frame, _: Operand) => {
 
     f.push(r.context.mailbox.length);
 
@@ -147,7 +148,7 @@ export const mailcount = (r: Runtime, f: Frame, _: Operand) => {
  *
  *  -> <message>?
  */
-export const maildq = (_: Runtime, f: Frame, __: Operand) => {
+export const maildq = (_: Thread, f: Frame, __: Operand) => {
 
     f.pushMessage();
 
@@ -159,20 +160,20 @@ export const maildq = (_: Runtime, f: Frame, __: Operand) => {
  * A receiver function is applied from the actors pending receiver list.
  * <message> -> <uint32>
  */
-export const read = (r: Runtime, f: Frame, __: Operand) => {
+export const read = (r: Thread, f: Frame, __: Operand) => {
 
     let func = isImmutable(r.context.flags) ?
         r.context.receivers[0] : r.context.receivers.shift();
 
     if (func == null)
-        return r.raise(new error.NoReceiveErr(r.context.address));
+        return r.vm.raise(r.context.actor, new error.NoReceiveErr(r.context.address));
 
     if (func.foreign === true) {
 
         let emsg = f.popValue();
 
         if (emsg.isLeft())
-            return r.raise(emsg.takeLeft());
+            return r.vm.raise(r.context.actor, emsg.takeLeft());
 
         let msg = emsg.takeRight();
 
@@ -195,13 +196,13 @@ export const read = (r: Runtime, f: Frame, __: Operand) => {
  *
  * <address> ->
  */
-export const stop = (r: Runtime, f: Frame, _: Operand) => {
+export const stop = (r: Thread, f: Frame, _: Operand) => {
 
     let eaddr = f.popString();
 
     if (eaddr.isLeft())
-        return r.raise(eaddr.takeLeft());
+        return r.vm.raise(r.context.actor, eaddr.takeLeft());
 
-    r.kill(eaddr.takeRight());
+    r.vm.kill(r.context.actor, eaddr.takeRight());
 
 }

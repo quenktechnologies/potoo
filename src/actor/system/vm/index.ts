@@ -57,7 +57,6 @@ import {
 } from './state';
 import { Script } from './script';
 import { Context, newContext } from './runtime/context';
-import { Thread } from './runtime/thread';
 import { Heap } from './runtime/heap';
 import { Runtime, Operand } from './runtime';
 import { Conf, defaults } from './conf';
@@ -184,9 +183,9 @@ export interface Platform extends Actor {
     kill(parent: Address, target: Address): Future<void>
 
     /**
-     * raise does the error handling on behalf of Runtimes.
+     * raise an exception within the system
      */
-    raise(addr: Address, err: Err): void
+    raise(src: Instance, err: Err): void
 
     /**
      * trigger is used to generate events as the system runs.
@@ -311,7 +310,7 @@ export class PVM implements Platform {
 
         if (mparentAddr.isNothing()) {
 
-            this.raise('$', new errors.UnknownInstanceErr(parent));
+            this.raise(this, new errors.UnknownInstanceErr(parent));
 
             return '?';
 
@@ -327,7 +326,7 @@ export class PVM implements Platform {
 
         if (eresult.isLeft()) {
 
-            this.raise('$', eresult.takeLeft());
+            this.raise(get(this.state, parent), eresult.takeLeft());
 
             return '?';
 
@@ -421,7 +420,7 @@ export class PVM implements Platform {
 
                     this.blocked = arremove(this.blocked, addr);
 
-                    this.raise(addr, e);
+                    this.raise(get(this.state, addr), e);
 
                 },
                 () => {
@@ -555,7 +554,14 @@ export class PVM implements Platform {
 
     }
 
-    raise(addr: Address, err: Err): void {
+    raise(src: Instance, err: Err): void {
+
+        let maddr = getAddress(this.state, src);
+
+        // For now, ignore requests from unknown instances.
+        if(maddr.isNothing()) return;
+
+        let addr = maddr.get();
 
         //TODO: pause the runtime.
         let next = addr;
