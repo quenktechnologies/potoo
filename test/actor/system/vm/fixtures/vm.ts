@@ -6,17 +6,16 @@ import { Future, pure } from '@quenk/noni/lib/control/monad/future';
 
 import { System } from '../../../../../lib/actor/system';
 import { Spawnable, Template } from '../../../../../lib/actor/template';
-import { State, Runtimes } from '../../../../../lib/actor/system/vm/state';
+import { State, Threads } from '../../../../../lib/actor/system/vm/state';
 import { Address } from '../../../../../lib/actor/address';
 import { Context } from '../../../../../lib/actor/system/vm/runtime/context';
 import { Platform } from '../../../../../lib/actor/system/vm';
-import { Runtime, Operand, Opcode } from '../../../../../lib/actor/system/vm/runtime';
+import { Thread, VMThread } from '../../../../../lib/actor/system/vm/thread';
 import { Message } from '../../../../../lib/actor/message';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { Instance } from '../../../../../lib/actor';
 import { HeapImpl } from './heap';
 import { GarbageCollector } from '../../../../../lib/actor/system/vm/runtime/gc';
-import { Script } from '../../../../../lib/actor/system/vm/script';
 
 export class FPVM<S extends System> implements Platform {
 
@@ -24,7 +23,7 @@ export class FPVM<S extends System> implements Platform {
 
     state: State = {
 
-        runtimes: {},
+        threads: {},
 
         routers: {},
 
@@ -64,9 +63,9 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    getRuntime(addr: Address): Maybe<Runtime> {
+    getThread(addr: Address): Maybe<Thread> {
 
-        return this.mock.invoke('getContext', [addr], nothing());
+        return this.mock.invoke('getThread', [addr], nothing());
 
     }
 
@@ -82,13 +81,13 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    putRuntime(addr: Address, ctx: Runtime): FPVM<S> {
+    putThread(addr: Address, ctx: Thread): FPVM<S> {
 
-        return this.mock.invoke('putRuntime', [addr, ctx], this);
+        return this.mock.invoke('putThread', [addr, ctx], this);
 
     }
 
-    getChildren(addr: Address): Maybe<Runtimes> {
+    getChildren(addr: Address): Maybe<Threads> {
 
         return this.mock.invoke('getChildren', [addr], nothing());
 
@@ -130,13 +129,16 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    raise(addr: Address, err: Err): void {
+    raise(parent: Instance, err: Err): void {
 
-        return this.mock.invoke<undefined>('raise', [addr, err], undefined);
+        this.mock.invoke<undefined>('raise', [parent, err], undefined);
+
+        // Do this to avoid hiding vm errors.
+        console.error('FPVM.raise: ', err);
 
     }
 
-    kill(parent: Address, target: Address): Future<void> {
+    kill(parent: Instance, target: Address): Future<void> {
 
         return this.mock.invoke('kill', [parent, target], pure(<void>undefined));
 
@@ -148,7 +150,7 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    logOp(r: Runtime, f: Frame, op: Opcode, oper: Operand) {
+    logOp(r: VMThread, f: Frame, op: number, oper: number) {
 
         return this.mock.invoke('logOp', [r, f, op, oper], undefined);
 
@@ -190,9 +192,9 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    exec(i: Instance, s: Script): void {
+    exec(actor: Instance, funName: string, args?: number[]) {
 
-        return this.mock.invoke('runTask', [i, s], undefined);
+        return this.mock.invoke('exec', [actor, funName, args], undefined);
 
     }
 

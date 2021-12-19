@@ -1,6 +1,6 @@
 import { assert } from '@quenk/test/lib/assert';
 
-import { Heap } from '../../../../../../lib/actor/system/vm/runtime/heap';
+import { VMHeap } from '../../../../../../lib/actor/system/vm/runtime/heap';
 import { newHeapObject } from './fixtures/object';
 import {
     DATA_TYPE_HEAP_OBJECT
@@ -8,13 +8,13 @@ import {
 
 describe('heap', () => {
 
-    describe('Heap', () => {
+    describe('VMHeap', () => {
 
         describe('addObject', () => {
 
             it('should add objects to the pool', () => {
 
-                let heap = new Heap();
+                let heap = new VMHeap();
 
                 let o = newHeapObject();
 
@@ -30,7 +30,7 @@ describe('heap', () => {
 
             it('should add strings to the pool', () => {
 
-                let heap = new Heap();
+                let heap = new VMHeap();
 
                 heap.addString('foo');
 
@@ -40,7 +40,7 @@ describe('heap', () => {
 
             it('should not duplicate', () => {
 
-                let heap = new Heap();
+                let heap = new VMHeap();
 
                 heap.addString('foo');
                 heap.addString('foo');
@@ -57,7 +57,7 @@ describe('heap', () => {
 
                 let o = newHeapObject();
 
-                let heap = new Heap();
+                let heap = new VMHeap();
 
                 let ref = heap.addObject(o);
 
@@ -71,7 +71,7 @@ describe('heap', () => {
 
             it('should retrieve a string from a reference', () => {
 
-                let heap = new Heap();
+                let heap = new VMHeap();
 
                 let ref = heap.addString('foo');
 
@@ -85,7 +85,7 @@ describe('heap', () => {
 
             it('should intern strings automatically', () => {
 
-                let heap = new Heap();
+                let heap = new VMHeap();
 
                 let str = 'ibis';
 
@@ -97,7 +97,7 @@ describe('heap', () => {
 
             it('should provide references for objects', () => {
 
-                let heap = new Heap();
+                let heap = new VMHeap();
 
                 let obj = newHeapObject();
 
@@ -109,7 +109,7 @@ describe('heap', () => {
 
             it('should return numeric values', () => {
 
-                let heap = new Heap();
+                let heap = new VMHeap();
 
                 let n = 22;
 
@@ -119,7 +119,7 @@ describe('heap', () => {
 
             it('should not rely on HeapObject#toAddress', () => {
 
-                let heap = new Heap();
+                let heap = new VMHeap();
 
                 let obj = newHeapObject();
 
@@ -135,7 +135,7 @@ describe('heap', () => {
 
             it('should tell if an object is on the heap', () => {
 
-                let heap = new Heap();
+                let heap = new VMHeap();
 
                 let o = newHeapObject();
 

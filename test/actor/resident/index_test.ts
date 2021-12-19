@@ -35,7 +35,7 @@ describe('resident', () => {
                     id: 'spawner',
                     create: sys => new Spawner(<TestSystem>sys, () => {
 
-                        assert(s.vm.state.runtimes['spawner'])
+                        assert(s.vm.state.threads['spawner'])
                             .not.equal(undefined);
 
                         done();
@@ -141,14 +141,14 @@ describe('resident', () => {
 
                 });
 
-                assert(s.vm.state.runtimes['a']).not.undefined();
-                assert(s.vm.state.runtimes['a/aa']).not.undefined();
-                assert(s.vm.state.runtimes['a/ab']).not.undefined();
-                assert(s.vm.state.runtimes['a/ab/aba']).not.undefined();
-                assert(s.vm.state.runtimes['a/ac']).not.undefined();
-                assert(s.vm.state.runtimes['a/ac/aca']).not.undefined();
-                assert(s.vm.state.runtimes['a/ac/acb']).not.undefined();
-                assert(s.vm.state.runtimes['a/ac/acc']).not.undefined();
+                assert(s.vm.state.threads['a']).not.undefined();
+                assert(s.vm.state.threads['a/aa']).not.undefined();
+                assert(s.vm.state.threads['a/ab']).not.undefined();
+                assert(s.vm.state.threads['a/ab/aba']).not.undefined();
+                assert(s.vm.state.threads['a/ac']).not.undefined();
+                assert(s.vm.state.threads['a/ac/aca']).not.undefined();
+                assert(s.vm.state.threads['a/ac/acb']).not.undefined();
+                assert(s.vm.state.threads['a/ac/acc']).not.undefined();
 
             });
 
@@ -182,12 +182,13 @@ describe('resident', () => {
                 s.spawn({
 
                     id: 'a',
+
                     create: sys => new Killer(<TestSystem>sys, k => {
 
-                        assert(s.vm.state.runtimes['a/targets'])
+                        assert(s.vm.state.threads['a/targets'])
                             .not.equal(undefined);
 
-                        setTimeout(() => k.kill('a/targets'), 100);
+                        setTimeout(() => k.kill('a/targets'), 0);
 
                     })
 
@@ -195,10 +196,11 @@ describe('resident', () => {
 
                 setTimeout(() => {
 
-                    assert(s.vm.state.runtimes['a/targets']).equal(undefined);
+                    assert(s.vm.state.threads['a/targets']).equal(undefined);
+
                     done();
 
-                }, 200);
+                }, 500);
             })
 
             it('should kill grand children', done => {
@@ -210,7 +212,7 @@ describe('resident', () => {
                         create: sys => new Killer(<TestSystem>sys, k => {
 
                             setTimeout(() =>
-                                assert(s.vm.state.runtimes['a/targets/a'])
+                                assert(s.vm.state.threads['a/targets/a'])
                                     .not.equal(undefined), 200);
 
                             setTimeout(() => k.kill('a/targets/a'), 300);
@@ -220,7 +222,7 @@ describe('resident', () => {
 
                 setTimeout(() => {
 
-                    assert(s.vm.state.runtimes['a/targets/a']).equal(undefined);
+                    assert(s.vm.state.threads['a/targets/a']).equal(undefined);
                     done();
 
                 }, 400);
@@ -239,12 +241,12 @@ describe('resident', () => {
                         create: sys => new Exiter(<TestSystem>sys, () => {
 
                             setTimeout(() =>
-                                assert(s.vm.state.runtimes['a'])
+                                assert(s.vm.state.threads['a'])
                                     .not.equal(undefined), 100);
 
                             setTimeout(() => {
 
-                                assert(s.vm.state.runtimes['a'])
+                                assert(s.vm.state.threads['a'])
                                     .equal(undefined);
 
                                 done();
@@ -292,7 +294,7 @@ describe('resident', () => {
 
                         trap: e => {
 
-                            assert(e.message).equal('risen');
+                            assert(e.message).equal('Error: risen');
 
                             ok = true;
 
@@ -308,7 +310,7 @@ describe('resident', () => {
 
                     assert(ok).true();
 
-                    assert(s.vm.state.runtimes['raiser']).undefined();
+                    assert(s.vm.state.threads['raiser']).undefined();
 
                     done();
 
@@ -412,7 +414,7 @@ describe('resident', () => {
 
         });
 
-        it('should allow a child to talk to its parent in the run method',
+        xit('should allow a child to talk to its parent in the run method',
             done => {
 
                 // This is really about a issue #43

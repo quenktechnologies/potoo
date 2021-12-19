@@ -6,35 +6,37 @@ import {
     getChildren,
     getAddress
 } from '../../../../lib/actor/system/vm/state';
-import { newRuntime } from './fixtures/runtime';
+import { newThread } from './fixtures/thread';
 import { newContext } from './fixtures/context';
 import { ADDRESS_SYSTEM } from '../../../../lib/actor/address';
 
 const state: State = {
 
-    runtimes: {
+    threads: {
 
-        '$': newRuntime(newContext({ address: '0' })),
+        '$': newThread(newContext({ address: '0' })),
 
-        '/': newRuntime(newContext({ address: '1' })),
+        '/': newThread(newContext({ address: '1' })),
 
-        '/path': newRuntime(newContext({ address: '2' })),
+        '/path': newThread(newContext({ address: '2' })),
 
-        '/path/to': newRuntime(),
+        '/path/to': newThread(),
 
-        '/path/to/actor': newRuntime(newContext({ address: '4' })),
+        '/path/to/actor': newThread(newContext({ address: '4' })),
 
-        '/path/to/runtime': newRuntime(),
+        '/path/to/runtime': newThread(),
 
-        '/pizza': newRuntime(newContext({ address: '6' })),
+        '/pizza': newThread(newContext({ address: '6' })),
 
-        'nil': newRuntime(newContext({ address: '7' }))
+        'nil': newThread(newContext({ address: '7' }))
 
     },
 
     routers: {},
 
-    groups: {}
+    groups: {},
+
+  pendingMessages: {}
 
 }
 
@@ -45,7 +47,7 @@ describe('state', () => {
         it('should return the correct parent', () => {
 
             assert(getParent(state, '/path/to/runtime').get())
-                .equal(state.runtimes['/path/to']);
+                .equal(state.threads['/path/to']);
 
         });
 
@@ -58,10 +60,10 @@ describe('state', () => {
             let childs = getChildren(state, '/path/to')
 
             assert(childs['/path/to/actor'])
-                .equal(state.runtimes['/path/to/actor']);
+                .equal(state.threads['/path/to/actor']);
 
             assert(childs['/path/to/runtime'])
-                .equal(state.runtimes['/path/to/runtime']);
+                .equal(state.threads['/path/to/runtime']);
 
         });
 
@@ -70,19 +72,19 @@ describe('state', () => {
             let childs = getChildren(state, '/');
 
             assert(childs['/path'])
-                .equate(state.runtimes['/path']);
+                .equate(state.threads['/path']);
 
             assert(childs['/path/to'])
-                .equate(state.runtimes['/path/to']);
+                .equate(state.threads['/path/to']);
 
             assert(childs['/path/to/actor'])
-                .equate(state.runtimes['/path/to/actor']);
+                .equate(state.threads['/path/to/actor']);
 
             assert(childs['/path/to/context'])
-                .equate(state.runtimes['/path/to/context']);
+                .equate(state.threads['/path/to/context']);
 
             assert(childs['/pizza'])
-                .equate(state.runtimes['/pizza']);
+                .equate(state.threads['/pizza']);
 
             assert(childs['nil'])
                 .equal(undefined);
@@ -103,7 +105,7 @@ describe('state', () => {
 
         it('should return the correct address', () => {
 
-            getAddress(state, state.runtimes['/path/to'].context.actor)
+            getAddress(state, state.threads['/path/to'].context.actor)
                 .map(addr => assert(addr).equal('/path/to'))
                 .orJust(() => { throw new Error('failed'); });
 

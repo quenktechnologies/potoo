@@ -3,7 +3,7 @@ import * as base from '../../../../../../lib/actor/system/vm/runtime/op/base';
 import { assert } from '@quenk/test/lib/assert';
 import { right } from '@quenk/noni/lib/data/either';
 
-import { newRuntime } from '../../fixtures/runtime';
+import { newThread } from '../../fixtures/thread';
 import { newFrame } from '../../fixtures/frame';
 
 describe('base', () => {
@@ -14,7 +14,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             base.nop(r, f, 0);
 
@@ -30,7 +30,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             base.pushui8(r, f, 12);
 
@@ -46,7 +46,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             base.pushui16(r, f, 0xffff);
 
@@ -62,7 +62,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             base.pushui32(r, f, 0xffffffff);
 
@@ -78,7 +78,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             base.lds(r, f, 1);
 
@@ -94,7 +94,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             base.ldn(r, f, 1);
 
@@ -110,7 +110,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             base.dup(r, f, 1);
 
@@ -126,7 +126,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('pop', 2);
 
@@ -144,7 +144,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.locals[0] = 1;
 
@@ -170,7 +170,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('popValue', right(12));
 
@@ -192,7 +192,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnCallback('popValue', () =>
                 right(Math.floor(Math.random() * 1000)));
@@ -219,7 +219,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('pop', 12);
 
@@ -241,7 +241,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('pop', 0xffffffff2323);
 
@@ -269,7 +269,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             let finfo = {
                 type: 0,
@@ -307,7 +307,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnCallback('popString', () => right('err'));
 
@@ -325,7 +325,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             base.jmp(r, f, 6);
 
@@ -341,7 +341,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('popValue', right(0));
 
@@ -355,7 +355,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('popValue', right(1));
 
@@ -373,7 +373,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('popValue', right(0));
 
@@ -387,7 +387,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('popValue', right(1));
 
@@ -405,7 +405,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('popValue', right(1));
 
@@ -421,7 +421,7 @@ describe('base', () => {
 
             let f = newFrame();
 
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnCallback('popValue', () => right(items.pop()));
 
@@ -439,7 +439,7 @@ describe('base', () => {
 
             let items = [1, '1'];
             let f = newFrame();
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnCallback('popValue', () => right(items.pop()));
 
@@ -453,7 +453,7 @@ describe('base', () => {
 
 
             let f = newFrame();
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnCallback('popValue', () => right(1));
 

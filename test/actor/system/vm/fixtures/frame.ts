@@ -8,10 +8,11 @@ import {
 } from '../../../../../lib/actor/system/vm/script';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { FunInfo, Info } from '../../../../../lib/actor/system/vm/script/info';
-import { Heap } from '../../../../../lib/actor/system/vm/runtime/heap';
 import { HeapObject } from '../../../../../lib/actor/system/vm/runtime/heap/object';
 import { PTValue } from '../../../../../lib/actor/system/vm/type';
 import { newContext } from './context';
+import { newThread } from './thread';
+import { Type } from '@quenk/noni/lib/data/type';
 
 export class FrameImpl implements Frame {
 
@@ -19,7 +20,7 @@ export class FrameImpl implements Frame {
         public name = 'main',
         public script = new PScript('test'),
         public context = newContext(),
-        public heap = new Heap(),
+        public thread = newThread(),
         public code = [],
         public data = [],
         public rdata = [],
@@ -134,6 +135,12 @@ export class FrameImpl implements Frame {
 
     }
 
+    popForeign(): Either<Err, Type> {
+
+        return this.mock.invoke('popForeign', [], left(new Error('?')));
+
+    }
+
     duplicate(): Frame {
 
         return <Frame>this.mock.invoke('duplicate', [], this);
@@ -164,10 +171,10 @@ export const newFrame = (
     name = 'main',
     script = new PScript('test'),
     context = newContext(),
-    heap = new Heap(),
+    thread = newThread(),
     code = [],
     data = [],
     rdata = [],
     locals = [],
-    ip = 0) => new FrameImpl(name, script, context, heap,
+    ip = 0) => new FrameImpl(name, script, context, thread,
         code, data, rdata, locals, ip)

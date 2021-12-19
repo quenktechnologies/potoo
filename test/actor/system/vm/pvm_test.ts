@@ -1,19 +1,19 @@
 import * as op from '../../../../lib/actor/system/vm/runtime/op';
 
 import { assert } from '@quenk/test/lib/assert';
-import { just, nothing } from '@quenk/noni/lib/data/maybe';
 import { tick } from '@quenk/noni/lib/control/timer';
 import {
     raise,
     pure,
     toPromise,
-    attempt
+    attempt,
+    doFuture
 } from '@quenk/noni/lib/control/monad/future';
 
 import { PScript } from '../../../../lib/actor/system/vm/script';
 import { PVM } from '../../../../lib/actor/system/vm';
 import { newInstance } from './fixtures/instance';
-import { newRuntime } from './fixtures/runtime';
+import { newThread } from './fixtures/thread';
 import { newSystem } from './fixtures/system';
 import { newContext } from './fixtures/context';
 import { Context } from '../../../../lib/actor/system/vm/runtime/context';
@@ -28,12 +28,7 @@ import {
 } from '../../../../lib/actor/template';
 import { ADDRESS_SYSTEM } from '../../../../lib/actor/address';
 import { Immutable } from '../../../../lib/actor/resident';
-
-const add2Five = new PScript('add2Five', [[], []], [], [
-    op.PUSHUI8 | 0x5,
-    op.PUSHUI16 | 0xc000,
-    op.ADDUI32
-]);
+import { UnknownInstanceErr } from '../../../../lib/actor/system/vm/runtime/error';
 
 describe('vm', () => {
 
@@ -41,97 +36,49 @@ describe('vm', () => {
 
         describe('exec', () => {
 
-            it('should execute scripts', () => {
+            it('should call exec on Threads', () => {
 
                 let vm = new PVM(newSystem());
 
                 let actor = newInstance();
 
-                let rtime = newRuntime(newContext({ actor }));
+                let thread = newThread(newContext({ actor }));
 
-                vm.state.runtimes['test'] = rtime;
+                vm.state.threads['test'] = thread;
 
-                vm.exec(actor, add2Five);
+                let args = [0, 0, 0];
 
-                assert(rtime.mock.getCalledList()).equate(['exec']);
+                vm.exec(actor, 'sum', args);
+
+                assert(thread.mock.wasCalledWith('exec', ['sum', args])).true();
 
             });
 
-            it('should not execute scripts from unknown instances', () => {
+            it('should not call exec given an unknown instances', () => {
 
                 let vm = new PVM(newSystem());
 
                 let actor = newInstance();
 
-                let rtime = newRuntime(newContext({ actor }));
+                let thread = newThread(newContext({ actor }));
 
-                vm.state.runtimes['test'] = rtime;
+                vm.state.threads['test'] = thread;
 
-                vm.state.runtimes['test'].context.actor = newInstance();
+                vm.state.threads['test'].context.actor = newInstance();
 
-                vm.exec(actor, add2Five);
+                try {
 
-                assert(rtime.mock.getCalledList().length === 0).true();
+                    vm.exec(actor, 'sum', [0, 0, 0]);
 
-            });
+                } catch (e) {
 
-            it('should queue scripts if running', () => {
+                    let msg = new UnknownInstanceErr(actor).message;
 
-                let vm = new PVM(newSystem());
+                    assert(e.message).equal(msg);
 
-                let actor = newInstance();
+                }
 
-                let rtime = newRuntime(newContext({ actor }));
-
-                let turn = 0;
-
-                let done = false;
-
-                rtime.mock.setReturnCallback('exec', () => {
-
-                    if (turn === 0) {
-
-                        vm.exec(actor, new PScript('<test>'));
-
-                        assert(vm.runQ.length).equal(1);
-
-                        turn = turn + 1;
-
-                        return nothing();
-
-                    } else {
-
-                        done = true;
-
-                        return just(12);
-
-                    }
-
-                });
-
-                vm.state.runtimes['test'] = rtime;
-
-                vm.exec(actor, new PScript('<test2>'));
-
-                assert(done).true();
-
-            });
-
-            it('should no execute blocked actors', () => {
-
-                let vm = new PVM(newSystem());
-                let unblocked = newRuntime();
-                let blocked = newRuntime();
-
-                vm.state.runtimes['unblocked'] = unblocked;
-                vm.state.runtimes['blocked'] = blocked;
-                vm.blocked = ['blocked'];
-
-                vm.exec(blocked.context.actor, new PScript('<test2>'));
-                vm.exec(unblocked.context.actor, new PScript('<test2>'));
-
-                assert(blocked.mock.wasCalled('exec')).false();
-                assert(unblocked.mock.wasCalled('exec')).true();
+                assert(thread.mock.getCalledList().length === 0).true();
 
             });
 
@@ -139,15 +86,15 @@ describe('vm', () => {
 
         describe('allocate', () => {
 
-            it('should create new Runtimes', () => {
+            it('should create new Threads', () => {
 
                 let vm = new PVM(newSystem());
 
-                assert(vm.state.runtimes['self']).undefined();
+                assert(vm.state.threads['self']).undefined();
 
                 vm.allocate('self', { id: '0', create: newInstance });
 
-                assert(vm.state.runtimes['self/0']).not.undefined();
+                assert(vm.state.threads['self/0']).not.undefined();
 
             });
 
@@ -155,7 +102,7 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
 
-                assert(vm.state.runtimes['self']).undefined();
+                assert(vm.state.threads['self']).undefined();
 
                 let er1 = vm.allocate('self', { id: '0', create: newInstance });
 
@@ -233,7 +180,7 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
 
-                let r = newRuntime();
+                let r = newThread();
 
                 let act = newInstance();
 
@@ -241,7 +188,7 @@ describe('vm', () => {
 
                 r.context.flags = 0;
 
-                vm.state.runtimes['to'] = r;
+                vm.state.threads['to'] = r;
 
                 assert(vm.sendMessage('to', 'from', 'msg')).true();
 
@@ -253,7 +200,7 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
 
-                let r = newRuntime();
+                let r = newThread();
 
                 let act = newInstance();
 
@@ -261,11 +208,11 @@ describe('vm', () => {
 
                 r.context.flags = FLAG_BUFFERED;
 
-                vm.state.runtimes['to'] = r;
+                vm.state.threads['to'] = r;
 
                 assert(vm.sendMessage('to', 'from', 'msg')).true();
 
-                assert(vm.state.runtimes['to'].context.mailbox)
+                assert(vm.state.threads['to'].context.mailbox)
                     .equate(['msg']);
 
                 assert(act.mock.wasCalled('notify')).true();
@@ -301,8 +248,10 @@ describe('vm', () => {
             it('should use the template\'s trap function', () => {
 
                 let vm = new PVM(newSystem());
-                let r = newRuntime();
+                let r = newThread();
                 let called = false;
+
+                r.context.actor = newInstance();
 
                 r.context.template.trap = () => {
 
@@ -311,9 +260,9 @@ describe('vm', () => {
 
                 }
 
-                vm.state.runtimes['self'] = r;
+                vm.state.threads['self'] = r;
 
-                vm.raise('self', new Error('err'));
+                vm.raise(r.context.actor, new Error('err'));
 
                 assert(called).true();
 
@@ -322,7 +271,7 @@ describe('vm', () => {
             it('should escalate by default', () => {
 
                 let vm = new PVM(newSystem());
-                let r = newRuntime();
+                let r = newThread();
                 let called = false;
 
                 r.context.template.trap = () => {
@@ -332,11 +281,12 @@ describe('vm', () => {
 
                 }
 
-                vm.state.runtimes['self'] = r;
-                vm.state.runtimes['self/0'] = newRuntime();
-                vm.state.runtimes['self/0'].context.template.trap = undefined;
+                vm.state.threads['self'] = r;
+                vm.state.threads['self/0'] = newThread();
+                vm.state.threads['self/0'].context.template.trap = undefined;
 
-                vm.raise('self/0', new Error('err'));
+                vm.raise(vm.state.threads['self/0'].context.actor,
+                    new Error('err'));
 
                 assert(called).true();
 
@@ -346,7 +296,7 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
                 let act = newInstance();
-                let r = newRuntime();
+                let r = newThread();
                 let called = false;
 
                 r.context.template.create = () => {
@@ -358,8 +308,8 @@ describe('vm', () => {
 
                 r.context.template.trap = () => ACTION_RESTART;
 
-                vm.state.runtimes['self'] = r;
-                vm.raise('self', new Error('err'));
+                vm.state.threads['self'] = r;
+                vm.raise(r.context.actor, new Error('err'));
 
                 setTimeout(() => {
 
@@ -376,23 +326,23 @@ describe('vm', () => {
                 let vm = new PVM(newSystem());
                 let caught = false;
 
-                let r1 = newRuntime();
+                let r1 = newThread();
 
-                let r2 = newRuntime();
+                let r2 = newThread();
 
-                let r3 = newRuntime();
+                let r3 = newThread();
 
                 r3.context.template.trap = () => ACTION_RAISE;
                 r2.context.template.trap = () => ACTION_RAISE;
                 r1.context.template.trap = () => ACTION_RAISE;
 
-                vm.state.runtimes['self'] = r1;
-                vm.state.runtimes['self/2'] = r2;
-                vm.state.runtimes['self/2/3'] = r3;
+                vm.state.threads['self'] = r1;
+                vm.state.threads['self/2'] = r2;
+                vm.state.threads['self/2/3'] = r3;
 
                 try {
 
-                    vm.raise('self/2/3', new Error('err'));
+                    vm.raise(r3.context.actor, new Error('err'));
 
                 } catch (e) {
 
@@ -409,50 +359,57 @@ describe('vm', () => {
 
         describe('kill', () => {
 
-            it('should kill the intended target', () => {
+            it('should kill the intended target', () => doFuture(function*() {
 
                 let vm = new PVM(newSystem());
+                let r0 = newThread();
+                let r1 = newThread();
+                let r2 = newThread();
 
-                let r0 = newRuntime();
-                let r1 = newRuntime();
+                vm.state.threads['self'] = r0;
+                vm.state.threads['self/1'] = r1;
+                vm.state.threads['self/2'] = r2;
 
-                vm.state.runtimes['self/0'] = r0;
-                vm.state.runtimes['self/1'] = r1;
+                yield vm.kill(r0.context.actor, 'self/1');
 
-                return toPromise(
-                    vm
-                        .kill('self', 'self/0')
-                        .chain(() => attempt(() => {
+                yield attempt(() => {
 
-                            assert(r0.mock.wasCalled('die')).true();
-                            assert(r1.mock.wasCalled('die')).false();
+                    assert(vm.state.threads['self']).not.undefined();
+                    assert(vm.state.threads['self/1']).undefined();
+                    assert(vm.state.threads['self/2']).not.undefined();
 
-                        })));
+                    assert(r0.mock.wasCalled('die')).false();
+                    assert(r1.mock.wasCalled('die')).true();
+                    assert(r2.mock.wasCalled('die')).false();
 
-            });
+                });
+
+                return pure(undefined);
+
+            }));
 
             it('should kill a group', () => {
 
                 let vm = new PVM(newSystem());
 
-                let self0 = newRuntime(newContext({ address: 'self/0' }));
-                let self1 = newRuntime(newContext({ address: 'self/1' }));
-                let self2 = newRuntime(newContext({ address: 'self/2' }));
+                let self0 = newThread(newContext({ address: 'self/0' }));
+                let self1 = newThread(newContext({ address: 'self/1' }));
+                let self2 = newThread(newContext({ address: 'self/2' }));
 
-                vm.state.runtimes['self/0'] = self0;
-                vm.state.runtimes['self/1'] = self1;
-                vm.state.runtimes['self/2'] = self2;
+                vm.state.threads['self/0'] = self0;
+                vm.state.threads['self/1'] = self1;
+                vm.state.threads['self/2'] = self2;
 
                 vm.state.groups['us'] = ['self/0', 'self/1', 'self/2'];
 
                 return toPromise(
                     vm
-                        .kill('$', '$us')
+                        .kill(vm, '$us')
                         .chain(() => attempt(() => {
 
-                            assert(vm.state.runtimes['self/0']).undefined();
-                            assert(vm.state.runtimes['self/1']).undefined();
-                            assert(vm.state.runtimes['self/2']).undefined();
+                            assert(vm.state.threads['self/0']).undefined();
+                            assert(vm.state.threads['self/1']).undefined();
+                            assert(vm.state.threads['self/2']).undefined();
 
                             assert(self0.mock.wasCalled('die')).true();
                             assert(self1.mock.wasCalled('die')).true();
@@ -464,54 +421,82 @@ describe('vm', () => {
 
             it('should refuse non-child', () => {
 
+                let thrown = false;
+
+                let escalated = false;
+
                 let vm = new PVM(newSystem());
 
-                let ok = false;
+                vm.state.threads['$'].context.template.trap = () => {
 
-                vm.state.runtimes['them/0'] = newRuntime();
+                    escalated = true;
 
-                return toPromise(
-                    vm
-                        .kill('that', 'them/0')
-                        .catch(e => attempt(() => {
+                    return ACTION_IGNORE;
 
-                            ok = true;
-                            assert(e.message.startsWith('IllegalStopErr'));
+                }
 
-                        }))
-                        .finally(() =>
-                            attempt(() => {
 
-                                assert(ok).true();
+                vm.state.threads['that'] = newThread();
 
-                            })));
+                vm.state.threads['them/0'] = newThread();
+
+                return vm
+                    .kill(vm.state.threads['that'].context.actor, 'them/0')
+                    .catch(e => attempt(() => {
+
+                        thrown = true;
+
+                        assert(e.message.startsWith('IllegalStopErr'));
+
+                    }))
+                    .finally(() =>
+                        attempt(() => {
+
+                            assert(vm.state.threads['them/0']).not.undefined();
+
+                            assert(escalated).true();
+
+                            assert(thrown).true();
+
+                        }));
 
             });
 
             it('should reject a group with non-child', () => {
 
+                let thrown = false;
+                let escalated = false;
+
                 let vm = new PVM(newSystem());
 
-                let ok = false;
+                vm.state.threads['$'].context.template.trap = () => {
 
-                let self0 = newRuntime();
-                let self1 = newRuntime();
-                let self2 = newRuntime();
+                    escalated = true;
 
-                vm.state.runtimes['self/0'] = self0;
-                vm.state.runtimes['them/1'] = self1;
-                vm.state.runtimes['self/2'] = self2;
+                    return ACTION_IGNORE;
+
+                }
+
+                let self = newThread();
+                let self0 = newThread();
+                let self1 = newThread();
+                let self2 = newThread();
+
+                vm.state.threads['self'] = self;
+                vm.state.threads['self/0'] = self0;
+                vm.state.threads['them/1'] = self1;
+                vm.state.threads['self/2'] = self2;
 
                 vm.state.groups['us'] = ['self/0', 'them/1', 'self/2'];
 
                 return toPromise(
                     vm
-                        .kill('self', '$us')
+                        .kill(self.context.actor, '$us')
                         .catch(e => {
 
                             if (e.message.startsWith('IllegalStopErr')) {
 
-                                ok = true;
+                                thrown = true;
                                 return pure(undefined);
 
                             } else {
@@ -521,7 +506,13 @@ describe('vm', () => {
                             }
 
                         })
-                        .finally(() => attempt(() => { assert(ok).true() })))
+                        .finally(() => attempt(() => {
+                        
+                          assert(escalated).true();
+
+                          assert(thrown).true();
+
+                        })))
 
             });
 
@@ -529,15 +520,16 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
 
-                vm.state.runtimes['self'] = newRuntime();
+                vm.state.threads['self'] = newThread();
 
                 return toPromise(
                     vm
-                        .kill(ADDRESS_SYSTEM, ADDRESS_SYSTEM)
+                        .kill(vm, ADDRESS_SYSTEM)
                         .chain(() => attempt(() => {
 
-                            assert(vm.state.runtimes['self']).undefined();
-                            assert(vm.state.runtimes[ADDRESS_SYSTEM])
+                            assert(vm.state.threads['self']).undefined();
+
+                            assert(vm.state.threads[ADDRESS_SYSTEM])
                                 .not.undefined();
 
                         })));
@@ -548,41 +540,36 @@ describe('vm', () => {
 
         describe('stop', () => {
 
-            it('should stop all actors', () => {
+            it('should stop all actors', () => doFuture(function*() {
 
                 let vm = new PVM(newSystem());
-
                 let ok = false;
 
-                let self0 = newRuntime();
-                let self1 = newRuntime();
-                let self2 = newRuntime();
+                let self0 = newThread();
+                let self1 = newThread();
+                let self2 = newThread();
 
-                vm.state.runtimes['self/0'] = self0;
-                vm.state.runtimes['them/1'] = self1;
-                vm.state.runtimes['self/2'] = self2;
+                vm.state.threads['self/0'] = self0;
+                vm.state.threads['them/1'] = self1;
+                vm.state.threads['self/2'] = self2;
 
-                return toPromise(
-                    vm
-                        .stop()
-                        .chain(() => {
+                yield vm.stop();
 
-                            ok = true;
+                yield attempt(() => {
 
-                            return attempt(() => {
+                    assert(self0.mock.wasCalled('die')).true();
+                    assert(self1.mock.wasCalled('die')).true();
+                    assert(self2.mock.wasCalled('die')).true();
 
-                                assert(self0.mock.wasCalled('die')).true();
-                                assert(self1.mock.wasCalled('die')).true();
-                                assert(self2.mock.wasCalled('die')).true();
+                    assert(vm.state.threads['self/0']).undefined();
+                    assert(vm.state.threads['self/1']).undefined();
+                    assert(vm.state.threads['self/2']).undefined();
 
-                                assert(vm.state.runtimes['self/0']).undefined();
-                                assert(vm.state.runtimes['self/1']).undefined();
-                                assert(vm.state.runtimes['self/2']).undefined();
+                });
 
-                            });
+                return pure(undefined);
 
-                        }));
-            });
+            }));
         });
 
         describe('spawn', () => {
@@ -595,7 +582,7 @@ describe('vm', () => {
 
                 let onRun = () => {
 
-                    assert(vm.state.runtimes[name]).not.undefined();
+                    assert(vm.state.threads[name]).not.undefined();
 
                     done();
 
@@ -611,7 +598,7 @@ describe('vm', () => {
 
                 }
 
-                assert(vm.state.runtimes[name]).undefined();
+                assert(vm.state.threads[name]).undefined();
 
                 vm.spawn(vm, s => new ChildActor(s));
 

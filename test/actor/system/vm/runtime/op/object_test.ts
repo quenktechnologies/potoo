@@ -1,6 +1,0 @@
-
-describe('object', () => {
-
-    //TODO
-
-})

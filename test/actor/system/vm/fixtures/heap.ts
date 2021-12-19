@@ -12,6 +12,8 @@ import {
     DATA_TYPE_HEAP_STRING
 } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { PTValue } from '../../../../../lib/actor/system/vm/type';
+import { FunInfo } from '../../../../../lib/actor/system/vm/script/info';
+import { Type } from '@quenk/noni/lib/data/type';
 
 export class HeapImpl implements Heap {
 
@@ -21,16 +23,34 @@ export class HeapImpl implements Heap {
 
     mock = new Mock();
 
+    addString(value: string): HeapAddress {
+
+        return this.mock.invoke<HeapAddress>('addString', [value],
+            DATA_TYPE_HEAP_STRING | 0);
+
+    }
+
     addObject(h: HeapObject): HeapAddress {
 
         return this.mock.invoke<HeapAddress>('addObject', [h], 0);
 
     }
 
-    addString(value: string): HeapAddress {
+    addFun(val: FunInfo): HeapAddress {
 
-        return this.mock.invoke<HeapAddress>('addString', [value],
-            DATA_TYPE_HEAP_STRING | 0);
+        return this.mock.invoke<HeapAddress>('addFun', [val], 0);
+
+    }
+
+    addForeign(val: Type): HeapAddress {
+
+        return this.mock.invoke<HeapAddress>('addForeign', [val], 0);
+
+    }
+
+    getString(r: HeapAddress): string {
+
+        return this.mock.invoke('getString', [r], '');
 
     }
 
@@ -40,9 +60,15 @@ export class HeapImpl implements Heap {
 
     }
 
-    getString(r: HeapAddress): string {
+    getFun(ptr: HeapAddress): Maybe<FunInfo> {
 
-        return this.mock.invoke('getString', [r], '');
+        return this.mock.invoke('getFun', [ptr], nothing());
+
+    }
+
+    getForeign(ptr: HeapAddress): Maybe<Type> {
+
+        return this.mock.invoke('getForeign', [ptr], nothing());
 
     }
 

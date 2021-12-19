@@ -6,12 +6,12 @@ import { right, left } from '@quenk/noni/lib/data/either';
 import {
     DATA_TYPE_HEAP_STRING
 } from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
-import { newRuntime } from '../../fixtures/runtime';
+import { newThread } from '../../fixtures/thread';
 import { newFrame } from '../../fixtures/frame';
 import { newInstance } from '../../fixtures/instance';
-import { Message } from '../../../../../../lib/actor/message';
 import { newHeapObject } from '../heap/fixtures/object';
 import { NewForeignFunInfo } from '../../../../../../lib/actor/system/vm/script/info';
+import { ACTION_IGNORE } from '../../../../../../lib/actor/template';
 
 describe('actor', () => {
 
@@ -20,7 +20,8 @@ describe('actor', () => {
         it('should push the new address at top of stack', () => {
 
             let f = newFrame();
-            let r = newRuntime();
+
+            let r = newThread();
 
             let tmp = { id: 'n95', create: newInstance() }
 
@@ -42,8 +43,6 @@ describe('actor', () => {
                 DATA_TYPE_HEAP_STRING | 0
             ]);
 
-            assert(f.heap.strings).equate(['self']);
-
         })
 
     })
@@ -53,28 +52,11 @@ describe('actor', () => {
         it('should push the current address', () => {
 
             let f = newFrame();
-            let r = newRuntime();
+            let r = newThread();
 
             actor.self(r, f, 0);
 
             assert(f.mock.getCalledList()).equate(['pushSelf']);
-
-        });
-
-    });
-
-    describe('run', () => {
-
-        it('should run the target actor', () => {
-
-            let f = newFrame();
-            let r = newRuntime();
-
-            f.mock.setReturnValue('popString', right('self'));
-
-            actor.run(r, f, 0);
-
-            assert(r.vm.mock.getCalledList()).equate(['runActor', 'runTask']);
 
         });
 
@@ -85,7 +67,7 @@ describe('actor', () => {
         it('should push true when message was sent', () => {
 
             let f = newFrame();
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('popString', right('self'));
             f.mock.setReturnValue('popValue', right('msg'));
@@ -104,7 +86,7 @@ describe('actor', () => {
         it('should push false when message cannot be sent', () => {
 
             let f = newFrame();
-            let r = newRuntime();
+            let r = newThread();
 
             f.mock.setReturnValue('popString', right('self'));
             f.mock.setReturnValue('popValue', right('msg'));
@@ -124,7 +106,7 @@ describe('actor', () => {
         it('should schedule receivers', () => {
 
             let f = newFrame();
-            let r = newRuntime();
+            let r = newThread();
 
             let info = { foreign: true, exec: () => false };
 
@@ -143,7 +125,7 @@ describe('actor', () => {
         it('should push the number of pending receive', () => {
 
             let f = newFrame();
-            let r = newRuntime();
+            let r = newThread();
 
             r.context.receivers.push(new NewForeignFunInfo('foo', 0, () => 1));
 
@@ -160,7 +142,7 @@ describe('actor', () => {
         it('should push the number of pending messages', () => {
 
             let f = newFrame();
-            let r = newRuntime();
+            let r = newThread();
 
             r.context.mailbox = [1, 2, 3];
 
@@ -177,7 +159,7 @@ describe('actor', () => {
         it('should push the most recent message', () => {
 
             let f = newFrame();
-            let r = newRuntime();
+            let r = newThread();
 
             actor.maildq(r, f, 0);
 
@@ -192,7 +174,7 @@ describe('actor', () => {
         it('should consume the TOS', () => {
 
             let f = newFrame();
-            let r = newRuntime();
+            let r = newThread();
 
             let func = new NewForeignFunInfo('foo', 1,
                 (_: any, __: any) => 0)
@@ -215,21 +197,24 @@ describe('actor', () => {
         it('should stop the target', () => {
 
             let f = newFrame();
-            let r = newRuntime();
+
+            let r = newThread();
 
             f.mock.setReturnValue('popString', right('self'));
 
             actor.stop(r, f, 0);
 
-            assert(r.mock.getCalledArgs('kill')).equate(['self']);
+            assert(r.vm.mock.wasCalled('kill')).true();
 
         });
 
         it('should raise if stopping failed', () => {
 
             let f = newFrame();
-            let r = newRuntime();
-            let e = new Error('self')
+
+            let r = newThread();
+
+            let e = new Error('no self');
 
             f.mock.setReturnValue('popString', left(e));
 

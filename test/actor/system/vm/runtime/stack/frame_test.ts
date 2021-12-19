@@ -4,23 +4,21 @@ import {
     DATA_TYPE_STRING,
     StackFrame
 } from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
-import {
-    newContext
-} from '../../fixtures/context';
-import { Heap } from '../../../../../../lib/actor/system/vm/runtime/heap';
+import { VMHeap } from '../../../../../../lib/actor/system/vm/runtime/heap';
 import { PScript } from '../../../../../../lib/actor/system/vm/script';
-import { Constants } from '../../../../../../src/actor/system/vm/script';
+import { Constants } from '../../../../../../lib/actor/system/vm/script';
 import {
     Info,
     stringType
 } from '../../../../../../lib/actor/system/vm/script/info';
 import {
     DATA_TYPE_INFO
-} from '../../../../../../src/actor/system/vm/runtime/stack/frame';
+} from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
+import { newThread } from '../../fixtures/thread';
 import { newHeapObject } from '../heap/fixtures/object';
 
 const newF = (c: Constants = [[], []], i: Info[] = []) =>
-    new StackFrame('main', new PScript('test', c, i), newContext(), new Heap());
+    new StackFrame('main', new PScript('test', c, i), newThread());
 
 describe('frame', () => {
 
@@ -121,10 +119,11 @@ describe('frame', () => {
 
             it('should resolve heap strings', () => {
 
-                let heap = new Heap();
+                let f = new StackFrame('main', new PScript('test'), newThread());
 
-                let f = new StackFrame('main', new PScript('test'),
-                    newContext(), heap);
+                let heap = new VMHeap();
+
+                f.thread.vm.heap = heap;
 
                 heap.addString('foo');
 
@@ -135,6 +134,7 @@ describe('frame', () => {
                 let eres = f.popString();
 
                 assert(eres.isRight()).true();
+
                 assert(eres.takeRight()).equal('bar');
 
             });
@@ -166,12 +166,14 @@ describe('frame', () => {
 
             it('should resolve heap objects', () => {
 
-                let heap = new Heap();
+                let f = new StackFrame('main', new PScript('test'), newThread());
 
-                let f = new StackFrame('main', new PScript('test'),
-                    newContext(), heap);
+                let heap = new VMHeap();
+
+                f.thread.vm.heap = heap;
 
                 let foo = newHeapObject();
+
                 let bar = newHeapObject();
 
                 heap.addObject(foo);
@@ -183,6 +185,7 @@ describe('frame', () => {
                 let eres = f.popObject();
 
                 assert(eres.isRight()).true();
+
                 assert(eres.takeRight()).equal(bar);
 
             });
@@ -193,8 +196,7 @@ describe('frame', () => {
 
             it('should be left if the there is nothing on the stack ', () => {
 
-                let f = new StackFrame('main', new PScript('test'),
-                    newContext(), new Heap());
+                let f = new StackFrame('main', new PScript('test'), newThread());
 
                 assert(f.popValue().isLeft()).true();
 
@@ -206,8 +208,7 @@ describe('frame', () => {
 
             it('should change the ip', () => {
 
-                let f = new StackFrame('main', new PScript('test'),
-                    newContext(), new Heap());
+                let f = new StackFrame('main', new PScript('test'), newThread());
 
                 f.seek(12);
 

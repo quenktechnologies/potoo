@@ -1,6 +1,6 @@
 import { assert } from '@quenk/test/lib/assert';
 
-import { Case } from '../../../src/actor/resident/case';
+import { Case } from '../../../lib/actor/resident/case';
 import { Mutable } from '../../../lib/actor/resident';
 import { Process } from '../../../lib/actor/process';
 import { TestSystem, system } from '../resident/fixtures/system';
@@ -40,6 +40,7 @@ describe('process', () => {
             s.spawn({
 
                 id: 'echo',
+
                 create: s => new Process(`${__dirname}/echo.js`, s)
 
             });
@@ -47,12 +48,11 @@ describe('process', () => {
             s.spawn({
 
                 id: 'sender',
+
                 create: s => new Sender(<TestSystem>s,
                     () => (<TestSystem>s).vm.stop().fork(done, done))
 
             });
-
-            s.stop();
 
         })
 
