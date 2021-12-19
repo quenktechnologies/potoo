@@ -1,5 +1,5 @@
 import { HeapObject } from './runtime/heap/object';
-import { Runtime } from './runtime';
+import { Thread } from './thread';
 
 export const TYPE_STEP = 0x1000000;
 
@@ -101,7 +101,7 @@ export type PTObject = HeapObject;
 /**
  * ForeignFun
  */
-export type ForeignFun = (r: Runtime, ...args: PTValue[]) => PTValue;
+export type ForeignFun = (r: Thread, ...args: PTValue[]) => PTValue;
 
 /**
  * getType from a TypeDescriptor.

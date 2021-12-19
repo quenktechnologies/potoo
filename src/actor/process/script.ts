@@ -3,7 +3,6 @@ import { isString, Any } from '@quenk/noni/lib/data/type';
 import { rmerge } from '@quenk/noni/lib/data/record';
 import { parse } from '@quenk/noni/lib/data/json';
 
-import { Tell } from '../resident/scripts';
 import { RAISE, SEND } from '../system/vm/runtime/op';
 import { EVENT_SEND_FAILED } from '../system/vm/event';
 import { Conf } from '../system/vm/conf';
@@ -87,7 +86,8 @@ const main = () => {
         (<Function>process.send)({
 
             code: RAISE,
-            error: e.stack,
+            message: e.message,
+            stack: e.stack,
             src: address,
             dest: address
 
@@ -119,7 +119,6 @@ const main = () => {
 }
 
 const filterTell = (vm: PVM) =>
-    ({ to, message }: { to: string, from: string, message: Message }) =>
-        vm.exec(vm, new Tell(to, message));
+    ({ to, message }: { to: string, message: Message }) =>        vm.tell(to, message);
 
 main();

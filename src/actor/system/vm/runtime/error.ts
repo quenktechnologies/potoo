@@ -272,3 +272,32 @@ export class InvalidFunctionErr extends Error {
     }
 
 }
+
+/**
+ * UnknownInstanceErr
+ */
+export class UnknownInstanceErr extends Error {
+
+    constructor(public instance: object) {
+
+        super(
+            'The instance provided with constructor ' +
+            (instance ? instance.constructor.name || instance : instance) +
+            '" is not in the system!'
+        );
+    }
+
+}
+
+/**
+ * UnknownFuncErr
+ */
+export class UnknownFunErr extends Error {
+
+    constructor(public name: string) {
+
+        super(`The function '${name}' does not exist and cannot be executed!`);
+
+    }
+
+}

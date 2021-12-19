@@ -1,6 +1,6 @@
 import { Frame, } from '../stack/frame';
 import { Operand } from '../';
-import { Thread } from '../thread';
+import { VMThread } from '../../thread';
 
 /**
  * getprop retrieves a property from an object.
@@ -8,12 +8,12 @@ import { Thread } from '../thread';
  * Stack:
  *  <objectref> -> <value>
  */
-export const getprop = (r: Thread, f: Frame, idx: Operand) => {
+export const getprop = (r: VMThread, f: Frame, idx: Operand) => {
 
     let eobj = f.popObject();
 
     if (eobj.isLeft())
-        return r.vm.raise(r.context.actor, eobj.takeLeft());
+        return r.raise(eobj.takeLeft());
 
     let obj = eobj.takeRight();
 
@@ -42,11 +42,11 @@ export const getprop = (r: Thread, f: Frame, idx: Operand) => {
  * Stack:
  * <arrayref> -> <uint32>
  */
-export const arlength = (r: Thread, f: Frame, _: Operand) => {
+export const arlength = (r: VMThread, f: Frame, _: Operand) => {
 
     let eobj = f.popObject();
 
-    if (eobj.isLeft()) return r.vm.raise(r.context.actor, eobj.takeLeft());
+    if (eobj.isLeft()) return r.raise( eobj.takeLeft());
 
     let obj = eobj.takeRight();
 
@@ -63,11 +63,11 @@ export const arlength = (r: Thread, f: Frame, _: Operand) => {
  *
  * <arrayref>,<index> -> <element>
  */
-export const arelm = (r: Thread, f: Frame, _: Operand) => {
+export const arelm = (r: VMThread, f: Frame, _: Operand) => {
 
     let earr = f.popObject();
 
-    if (earr.isLeft()) return r.vm.raise(r.context.actor, earr.takeLeft());
+    if (earr.isLeft()) return r.raise( earr.takeLeft());
 
     let arr = earr.takeRight();
 

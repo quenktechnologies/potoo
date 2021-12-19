@@ -1,4 +1,3 @@
-import * as scripts from './scripts';
 import * as events from '../system/vm/event';
 
 import { Future } from '@quenk/noni/lib/control/monad/future';
@@ -18,7 +17,6 @@ import { Message } from '../message';
 import { Templates, Spawnable } from '../template';
 import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_TEMPORARY } from '../flags';
 import { Actor, Eff } from '../';
-
 import { Case } from './case';
 import { Api } from './api';
 
@@ -52,13 +50,11 @@ export abstract class AbstractResident
 
     notify() {
 
-        this.system.getPlatform().exec(this, new scripts.Notify());
+        this.system.getPlatform().exec(this, 'notify');
 
     }
 
-    accept(_: Message) {
-
-    }
+    accept(_: Message) { }
 
     spawn(t: Spawnable): Address {
 
@@ -75,28 +71,29 @@ export abstract class AbstractResident
 
     tell<M>(ref: Address, m: M): AbstractResident {
 
-        this.system.getPlatform().exec(this, new scripts.Tell(ref, m));
+        let vm = this.system.getPlatform();
+        this.exec('tell', [vm.heap.addString(ref), vm.heap.addForeign(m)]);
         return this;
 
     }
 
     raise(e: Err): AbstractResident {
 
-        this.system.getPlatform().exec(this, new scripts.Raise(e.message));
+        this.exec('raise', [this.system.getPlatform().heap.addString(e+'')]);
         return this;
 
     }
 
     kill(addr: Address): AbstractResident {
 
-        this.system.getPlatform().exec(this, new scripts.Kill(addr));
+        this.exec('kill', [this.system.getPlatform().heap.addString(addr)]);
         return this;
 
     }
 
     exit(): void {
 
-        this.system.getPlatform().exec(this, new scripts.Kill(this.self()));
+        this.kill(this.self());
 
     }
 
@@ -111,6 +108,16 @@ export abstract class AbstractResident
     run(): void { }
 
     stop(): void { }
+
+    /**
+     * exec calls a VM function by name on behalf of this actor.
+     */
+    exec(fname: string, args: number[]) {
+
+        let vm = this.system.getPlatform();
+        vm.exec(this, fname, args);
+
+    }
 
 }
 
@@ -141,7 +148,6 @@ export abstract class Immutable<T> extends AbstractResident {
         return this;
 
     }
-
 
     /**
      * receive provides a static list of Case classes that the actor will 
@@ -193,9 +199,8 @@ export abstract class Mutable extends AbstractResident {
      */
     select<M>(cases: Case<M>[]): Mutable {
 
-        this.system.getPlatform().exec(this,
-            new scripts.Receive(receiveFun(cases)));
-
+        let vm = this.system.getPlatform();
+        vm.exec(this, 'receive', [vm.heap.addFun(receiveFun(cases))]);
         return this;
 
     }
@@ -221,7 +226,7 @@ const receiveFun = (cases: Case<Message>[]) =>
 
                 let ft = c.apply(m);
 
-                if (ft != null) r.runTask(<Future<void>>ft);
+                if (ft != null) r.wait(<Future<void>>ft);
 
             }
 

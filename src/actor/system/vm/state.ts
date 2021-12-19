@@ -21,12 +21,12 @@ import {
 } from '../../address';
 import { Message } from '../../message';
 import { Instance } from '../../';
-import { Runtime } from './runtime';
+import { Thread } from './thread';
 
 /**
- * Runtimes map.
+ * Threads map.
  */
-export interface Runtimes extends Record<Runtime> { }
+export interface Threads extends Record<Thread> { }
 
 /**
  * Routers map.
@@ -49,9 +49,9 @@ export interface PendingMessages extends Record<Message[]> { }
 export interface State {
 
     /**
-     * runtimes for each actor within the system.
+     * threads for each actor within the system.
      */
-    runtimes: Runtimes,
+    threads: Threads,
 
     /**
      * routers configured for transfers.
@@ -75,21 +75,21 @@ export interface State {
  * exists tests whether an address exists in the State.
  */
 export const exists =
-    (s: State, addr: Address): boolean => hasKey(s.runtimes, addr);
+    (s: State, addr: Address): boolean => hasKey(s.threads, addr);
 
 /**
- * get a Runtime from the State using an address.
+ * get a Thread from the State using an address.
  */
 export const get =
-    (s: State, addr: Address): Maybe<Runtime> => fromNullable(s.runtimes[addr]);
+    (s: State, addr: Address): Maybe<Thread> => fromNullable(s.threads[addr]);
 
 /**
- * put a new Runtime in the State.
+ * put a new Thread in the State.
  */
 export const put =
-    (s: State, addr: Address, r: Runtime): State => {
+    (s: State, addr: Address, r: Thread): State => {
 
-        s.runtimes[addr] = r;
+        s.threads[addr] = r;
         return s;
 
     }
@@ -100,7 +100,7 @@ export const put =
 export const remove =
     (s: State, addr: Address): State => {
 
-        delete s.runtimes[addr];
+        delete s.threads[addr];
 
         return s;
 
@@ -111,25 +111,25 @@ export const remove =
  */
 export const getAddress =
     (s: State, actor: Instance): Maybe<Address> =>
-        reduce(s.runtimes, nothing(), (p: Maybe<Address>, c, k) =>
+        reduce(s.threads, nothing(), (p: Maybe<Address>, c, k) =>
             c.context.actor === actor ? fromString(k) : p);
 
 /**
  * getChildren returns the child contexts for an address.
  */
 export const getChildren =
-    (s: State, addr: Address): Runtimes =>
+    (s: State, addr: Address): Threads =>
         (addr === ADDRESS_SYSTEM) ?
-            exclude(s.runtimes, ADDRESS_SYSTEM) :
-            <Runtimes>partition(s.runtimes, (_, key) =>
+            exclude(s.threads, ADDRESS_SYSTEM) :
+            <Threads>partition(s.threads, (_, key) =>
                 (startsWith(key, addr) && key !== addr))[0];
 
 /**
  * getParent context using an Address.
  */
 export const getParent =
-    (s: State, addr: Address): Maybe<Runtime> =>
-        fromNullable(s.runtimes[getParentAddress(addr)]);
+    (s: State, addr: Address): Maybe<Thread> =>
+        fromNullable(s.threads[getParentAddress(addr)]);
 
 /**
  * getRouter will attempt to provide the 
@@ -139,9 +139,9 @@ export const getParent =
  * address begins with any of the installed router's address.
  */
 export const getRouter =
-    (s: State, addr: Address): Maybe<Runtime> =>
+    (s: State, addr: Address): Maybe<Thread> =>
         reduce(s.routers, nothing(), (p, k) =>
-            startsWith(addr, k) ? fromNullable(s.runtimes[k]) : p);
+            startsWith(addr, k) ? fromNullable(s.threads[k]) : p);
 
 /**
  * putRoute adds a route to the routing table.
