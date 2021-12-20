@@ -60,6 +60,12 @@ export const BYTE_CONSTANT_INFO = 0x30000;
 export type Data = number;
 
 /**
+ * This is a combination of the actor id, call stack and name of the routine
+ * that created the frame.
+ */
+export type FrameName = string;
+
+/**
  * Frame is the context for currently executing op codes.
  *
  * It provides methods for manipulating the stack common to each op code as 
@@ -68,9 +74,9 @@ export type Data = number;
 export interface Frame {
 
     /**
-     * name of the routine this frame belongs too.
+     * name of the Frame used to identity it.
      */
-    name: string
+    name: FrameName
 
     /**
      * script the routine is defined in.
@@ -311,17 +317,17 @@ export class StackFrame implements Frame {
                 this.push(data);
                 return this.popString();
 
-          case DATA_TYPE_HEAP_FUN:
-            this.push(data);
-            return this.popFunction();
+            case DATA_TYPE_HEAP_FUN:
+                this.push(data);
+                return this.popFunction();
 
             case DATA_TYPE_HEAP_OBJECT:
                 this.push(data);
                 return this.popObject();
 
-          case DATA_TYPE_HEAP_FOREIGN:
-            this.push(data);
-            return this.popForeign();
+            case DATA_TYPE_HEAP_FOREIGN:
+                this.push(data);
+                return this.popForeign();
 
             case DATA_TYPE_INFO:
                 this.push(data);

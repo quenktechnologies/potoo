@@ -71,7 +71,7 @@ export class GarbageCollector {
      * have a 0 reference count.
      */
     reclaim() {
-        return
+
         forEach(this.refs, (count, ref) => {
 
             if (count === 0) {

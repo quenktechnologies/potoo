@@ -13,12 +13,56 @@ import { PScript } from '../../../../../../lib/actor/system/vm/script';
 import { newPlatform } from '../../fixtures/vm';
 import { newContext } from '../../fixtures/context';
 import { newInstance } from '../../fixtures/instance';
+import { newFrame } from '../../fixtures/frame';
 import { SharedThread } from '../../../../../../lib/actor/system/vm/thread/shared';
 import { SharedThreadRunner } from '../../../../../../lib/actor/system/vm/thread/shared/runner';
 
 describe('shared', () => {
 
     describe('SharedThread', () => {
+
+        describe('makeFrameName', () => {
+
+            it('should create the first frame\'s name', () => {
+
+                let vm = newPlatform();
+
+                let script = new PScript('test');
+
+                let ctx = newContext();
+
+                ctx.template.id = "testplate";
+
+                ctx.aid = 1;
+
+                let thread = new SharedThread(vm, script,
+                    new SharedThreadRunner(vm), ctx);
+
+                assert(thread.makeFrameName('spin')).equal('testplate@1#spin');
+            });
+
+            it('should use the stack for subsequent frame names', () => {
+
+                let vm = newPlatform();
+
+                let script = new PScript('test');
+
+                let ctx = newContext();
+
+                ctx.template.id = "testplate";
+
+                ctx.aid = 1;
+
+                let thread = new SharedThread(vm, script,
+                    new SharedThreadRunner(vm), ctx);
+
+                thread.fstack.push(newFrame('testplate@1#main'));
+
+                assert(thread.makeFrameName('second'))
+                    .equal('testplate@1#main/second');
+            });
+
+        });
 
         describe('invokeVM', () => {
 

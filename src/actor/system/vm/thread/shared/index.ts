@@ -4,7 +4,7 @@ import * as op from '../../runtime/op';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future, doFuture, pure } from '@quenk/noni/lib/control/monad/future';
 
-import { Frame, StackFrame, Data } from '../../runtime/stack/frame';
+import { Frame, StackFrame, Data, FrameName } from '../../runtime/stack/frame';
 import { Context } from '../../runtime/context';
 import { FunInfo, ForeignFunInfo } from '../../script/info';
 import { Script } from '../../script';
@@ -18,6 +18,7 @@ import {
     THREAD_STATE_ERROR
 } from '../';
 import { ExecutionFrame, SharedThreadRunner } from './runner';
+import { empty, tail } from '@quenk/noni/lib/data/array';
 
 /**
  * SharedThread is used by actors that run in a shared runtime i.e. the single
@@ -42,9 +43,22 @@ export class SharedThread implements VMThread {
 
     state = THREAD_STATE_IDLE;
 
+    /**
+     * makeFrameName produces a suitable name for a Frame given its function 
+     * name.
+     */
+    makeFrameName(funName: string): FrameName {
+
+        return empty(this.fstack) ?
+            `${this.context.template.id}@${this.context.aid}#${funName}` :
+            `${tail(this.fstack).name}/${funName}`;
+
+    }
+
     invokeVM(p: Frame, f: FunInfo) {
 
-        let frm = new StackFrame(f.name, p.script, this, f.code.slice());
+        let frm = new StackFrame(this.makeFrameName(f.name), p.script,
+            this, f.code.slice());
 
         for (let i = 0; i < f.argc; i++)
             frm.push(p.pop());
@@ -144,7 +158,7 @@ export class SharedThread implements VMThread {
             return this.raise(new errors.UnknownFunErr(name));
 
         let frame = new StackFrame(
-            fun.name,
+            this.makeFrameName(fun.name),
             script,
             this,
             fun.foreign ?
