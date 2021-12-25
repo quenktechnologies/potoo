@@ -33,9 +33,11 @@ describe('process', () => {
 
     describe('Process', () => {
 
-        it('should be spawnable', done => {
+        let s = system();
 
-            let s = system();
+        after(() => s.stop())
+
+        it('should be spawnable', done => {
 
             s.spawn({
 

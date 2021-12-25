@@ -93,11 +93,9 @@ export const dup = (_: VMThread, f: Frame, __: Operand) => {
  * Stack:
  * <any> -> 
  */
-export const store = (r: VMThread, f: Frame, idx: Operand) => {
+export const store = (_: VMThread, f: Frame, idx: Operand) => {
 
     f.locals[idx] = f.pop();
-
-    r.vm.gc.addRef(f.locals[idx]);
 
 }
 

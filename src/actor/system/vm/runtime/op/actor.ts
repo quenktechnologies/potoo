@@ -35,7 +35,7 @@ export const alloc = (r: VMThread, f: Frame, _: Operand) => {
 
     } else {
 
-        f.push(r.vm.heap.addString(eresult.takeRight()));
+        f.push(r.vm.heap.addString(f, eresult.takeRight()));
 
     }
 
@@ -88,7 +88,7 @@ export const recv = (r: VMThread, f: Frame, _: Operand) => {
 
     let einfo = f.popFunction();
 
-    if (einfo.isLeft()) return r.raise( einfo.takeLeft());
+    if (einfo.isLeft()) return r.raise(einfo.takeLeft());
 
     r.context.receivers.push(einfo.takeRight());
 

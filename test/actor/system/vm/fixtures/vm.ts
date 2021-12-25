@@ -14,8 +14,7 @@ import { Thread, VMThread } from '../../../../../lib/actor/system/vm/thread';
 import { Message } from '../../../../../lib/actor/message';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { Instance } from '../../../../../lib/actor';
-import { HeapImpl } from './heap';
-import { GarbageCollector } from '../../../../../lib/actor/system/vm/runtime/gc';
+import { HeapLedgerImpl } from './heap/ledger';
 
 export class FPVM<S extends System> implements Platform {
 
@@ -33,9 +32,7 @@ export class FPVM<S extends System> implements Platform {
 
     };
 
-    heap = new HeapImpl();
-
-    gc = new GarbageCollector(this.heap);
+    heap = new HeapLedgerImpl();
 
     configuration = {};
 
@@ -192,7 +189,7 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    exec(actor: Instance, funName: string, args?: number[]) {
+    exec(actor: Instance, funName: string, args?: any[]) {
 
         return this.mock.invoke('exec', [actor, funName, args], undefined);
 

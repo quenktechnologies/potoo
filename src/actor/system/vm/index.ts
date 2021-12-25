@@ -59,10 +59,8 @@ import {
     getAddress
 } from './state';
 import { Script } from './script';
-import { GarbageCollector } from './runtime/gc';
 import { Context, newContext } from './runtime/context';
-import { Heap, VMHeap } from './runtime/heap';
-import { Data, Frame } from './runtime/stack/frame';
+import { Frame } from './runtime/stack/frame';
 import { Opcode, toLog } from './runtime/op';
 import { Operand } from './runtime';
 import { Conf, defaults } from './conf';
@@ -73,8 +71,10 @@ import {
     LOG_LEVEL_WARN,
     LOG_LEVEL_ERROR
 } from './log';
-import { getLevel } from './event';
 import { ResidentActorScript } from '../../resident/scripts';
+import { HeapLedger, DefaultHeapLedger } from './runtime/heap/ledger';
+import { Foreign } from './type';
+import { getLevel } from './event';
 
 /**
  * Slot
@@ -94,14 +94,9 @@ export const MAX_WORK_LOAD = 25;
 export interface Platform extends Actor {
 
     /**
-     * heap shared between actor threads.
+     * heap storage with builtin ownership tracking for all threads.
      */
-    heap: Heap
-
-    /**
-     * gc is the garbage collector.
-     */
-    gc: GarbageCollector
+    heap: HeapLedger
 
     /**
      * allocate a new Thread for an actor.
@@ -197,7 +192,7 @@ export interface Platform extends Actor {
      * exec a function by name with the provided arguments using the actor
      * instance's thread.
      */
-    exec(actor: Instance, funName: string, args?: Data[]): void
+    exec(actor: Instance, funName: string, args?: Foreign[]): void
 
 }
 
@@ -218,12 +213,7 @@ export class PVM implements Platform {
     /**
      * heap memory shared between actor Threads.
      */
-    heap = new VMHeap();
-
-    /**
-     * gc for the heap.
-     */
-    gc = new GarbageCollector(this.heap);
+    heap = new DefaultHeapLedger();
 
     /**
      * threadRunner shared between vm threads.
@@ -656,12 +646,11 @@ export class PVM implements Platform {
                 that.getGroup(target).orJust(() => []).get() : [target];
 
             return runBatch(addrs.map(addr => doFuture<void>(function*() {
-
                 if ((!isChild(parentAddr, target)) && (target !== parentAddr)) {
 
                     let err = new Error(
-                        `IllegalStopErr: Actor ${parentAddr} ` +
-                        `cannot kill non-child ${addr}!`);
+                        `IllegalStopErr: Actor "${parentAddr}" ` +
+                        `cannot kill non-child "${addr}"!`);
 
                     that.raise(parent, err);
 
@@ -712,16 +701,12 @@ export class PVM implements Platform {
      */
     tell<M>(ref: Address, msg: M): PVM {
 
-        this.exec(this, 'tell', [
-            this.heap.addString(ref),
-            this.heap.addForeign(msg)
-        ]);
-
+        this.exec(this, 'tell', [ref, msg]);
         return this;
 
     }
 
-    exec(actor: Instance, funName: string, args: Data[] = []) {
+    exec(actor: Instance, funName: string, args: Foreign[] = []) {
 
         let mAddress = getAddress(this.state, actor);
 

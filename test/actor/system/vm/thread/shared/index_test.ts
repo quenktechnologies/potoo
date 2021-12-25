@@ -77,6 +77,8 @@ describe('shared', () => {
                 let thread = new SharedThread(vm, script,
                     new SharedThreadRunner(vm), newContext());
 
+                vm.heap.mock.setReturnCallback('intern', (_, val) => val);
+
                 thread.exec('main', [12, 12]);
 
                 assert(thread.rp).equal(24);
@@ -105,7 +107,7 @@ describe('shared', () => {
                 let thread = new SharedThread(vm, script,
                     new SharedThreadRunner(vm), newContext());
 
-                vm.heap.mock.setReturnCallback('getAddress', identity);
+                vm.heap.mock.setReturnCallback('intern', (_, val) => val);
 
                 thread.exec('main', [12]);
 

@@ -9,9 +9,8 @@ import {
 import { newThread } from '../../fixtures/thread';
 import { newFrame } from '../../fixtures/frame';
 import { newInstance } from '../../fixtures/instance';
-import { newHeapObject } from '../heap/fixtures/object';
 import { NewForeignFunInfo } from '../../../../../../lib/actor/system/vm/script/info';
-import { ACTION_IGNORE } from '../../../../../../lib/actor/template';
+import { newHeapObject } from '../../type/fixtures/object';
 
 describe('actor', () => {
 

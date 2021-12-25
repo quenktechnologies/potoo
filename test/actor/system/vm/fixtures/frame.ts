@@ -2,17 +2,17 @@ import { Mock } from '@quenk/test/lib/mock';
 import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Either, left } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Type } from '@quenk/noni/lib/data/type';
 
 import {
     PScript,
 } from '../../../../../lib/actor/system/vm/script';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { FunInfo, Info } from '../../../../../lib/actor/system/vm/script/info';
-import { HeapObject } from '../../../../../lib/actor/system/vm/runtime/heap/object';
 import { PTValue } from '../../../../../lib/actor/system/vm/type';
 import { newContext } from './context';
 import { newThread } from './thread';
-import { Type } from '@quenk/noni/lib/data/type';
+import { HeapObject } from '../../../../../lib/actor/system/vm/runtime/heap/ledger';
 
 export class FrameImpl implements Frame {
 
@@ -21,6 +21,7 @@ export class FrameImpl implements Frame {
         public script = new PScript('test'),
         public context = newContext(),
         public thread = newThread(),
+        public parent: Maybe<Frame> = nothing(),
         public code = [],
         public data = [],
         public rdata = [],
@@ -176,5 +177,5 @@ export const newFrame = (
     data = [],
     rdata = [],
     locals = [],
-    ip = 0) => new FrameImpl(name, script, context, thread,
+    ip = 0) => new FrameImpl(name, script, context, thread, nothing(),
         code, data, rdata, locals, ip)

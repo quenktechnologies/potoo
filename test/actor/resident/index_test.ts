@@ -1,5 +1,7 @@
 import { assert } from '@quenk/test/lib/assert';
 
+import { count } from '@quenk/noni/lib/data/record';
+
 import { system, TestSystem } from './fixtures/system';
 import {
     Spawner,
@@ -414,7 +416,7 @@ describe('resident', () => {
 
         });
 
-        xit('should allow a child to talk to its parent in the run method',
+        it('should allow a child to talk to its parent in the run method',
             done => {
 
                 // This is really about a issue #43
@@ -427,9 +429,9 @@ describe('resident', () => {
 
                     create: s => new Parent(<TestSystem>s, () => {
 
-                        assert(sys.vm.heap.objects.length).equal(0);
+                        assert(count(sys.vm.heap.objects)).equal(0);
 
-                        assert(sys.vm.heap.strings.length).equal(0);
+                        assert(count(sys.vm.heap.owners)).equal(0);
 
                         done();
 

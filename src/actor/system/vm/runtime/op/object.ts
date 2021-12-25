@@ -21,7 +21,7 @@ export const getprop = (r: VMThread, f: Frame, idx: Operand) => {
 
     if (mval.isJust()) {
 
-        f.push(r.vm.heap.getAddress(mval.get()));
+        f.push(r.vm.heap.intern(f,mval.get()));
 
     } else {
 
@@ -46,7 +46,7 @@ export const arlength = (r: VMThread, f: Frame, _: Operand) => {
 
     let eobj = f.popObject();
 
-    if (eobj.isLeft()) return r.raise( eobj.takeLeft());
+    if (eobj.isLeft()) return r.raise(eobj.takeLeft());
 
     let obj = eobj.takeRight();
 
@@ -67,7 +67,7 @@ export const arelm = (r: VMThread, f: Frame, _: Operand) => {
 
     let earr = f.popObject();
 
-    if (earr.isLeft()) return r.raise( earr.takeLeft());
+    if (earr.isLeft()) return r.raise(earr.takeLeft());
 
     let arr = earr.takeRight();
 
@@ -75,7 +75,7 @@ export const arelm = (r: VMThread, f: Frame, _: Operand) => {
 
     if (melm.isJust()) {
 
-        f.push(r.vm.heap.getAddress(melm.get()));
+        f.push(r.vm.heap.intern(f,melm.get()));
 
     } else {
 

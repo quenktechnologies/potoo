@@ -110,7 +110,8 @@ export class UnexpectedDataType extends Error {
 
     constructor(public expected: number, public got: number) {
 
-        super(`Expected: ${expected}, Received: ${got}`);
+        super(`Expected: ${expected.toString(16)}, `+
+          `Received: ${got.toString(16)}`);
 
     }
 

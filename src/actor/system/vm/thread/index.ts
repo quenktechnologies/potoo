@@ -5,7 +5,7 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 import { FunInfo } from '../script/info';
 import { Data, Frame } from '../runtime/stack/frame';
 import { Script } from '../script';
-import { PTValue } from '../type';
+import { Foreign, PTValue } from '../type';
 import { Context } from '../runtime/context';
 import { Platform } from '../';
 import { ExecutionFrame } from './shared/runner';
@@ -130,5 +130,5 @@ export interface VMThread extends Thread {
      *
      * The function must be declared in the thread's Script.
      */
-    exec(name: string, args: Data[]): void
+    exec(name: string, args: Foreign[]): void
 }

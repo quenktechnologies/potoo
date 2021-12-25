@@ -4,13 +4,13 @@ import * as error from '../error';
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Type } from '@quenk/noni/lib/data/type';
-import { fromNullable, Maybe } from '@quenk/noni/lib/data/maybe';
+import { Maybe, fromNullable, nothing } from '@quenk/noni/lib/data/maybe';
 
 import { Script } from '../../script';
-import { HeapObject } from '../heap/object';
+import { PTObject } from '../../type';
 import { PTValue, BYTE_TYPE, TYPE_FUN } from '../../type';
 import { FunInfo, Info } from '../../script/info';
-import { Thread } from '../../thread';
+import { VMThread } from '../../thread';
 import { Instruction, Operand } from '../';
 
 export const DATA_RANGE_TYPE_HIGH = 0xf0000000;
@@ -60,8 +60,11 @@ export const BYTE_CONSTANT_INFO = 0x30000;
 export type Data = number;
 
 /**
- * This is a combination of the actor id, call stack and name of the routine
- * that created the frame.
+ * Used to identity frames via a specific format:
+ * <templateid>@<actorid>#<callstack>
+ * 
+ * Where <callstack> is a list of function names in the callstack up to the
+ * Frame's own function separated by '/'.
  */
 export type FrameName = string;
 
@@ -86,7 +89,12 @@ export interface Frame {
     /**
      * thread for the actor.
      */
-    thread: Thread
+    thread: VMThread
+
+    /**
+     * parent Frame that created this Frame (if any).
+     */
+    parent: Maybe<Frame>
 
     /**
      * code the frame executes as part of the routine.
@@ -197,7 +205,7 @@ export interface Frame {
     /**
      * popObject provides the entry for an object in the heap.
      */
-    popObject(): Either<Err, HeapObject>
+    popObject(): Either<Err, PTObject>
 
     /**
      * popForeign provides the entry for a foreign object in the heap.
@@ -235,7 +243,8 @@ export class StackFrame implements Frame {
     constructor(
         public name: string,
         public script: Script,
-        public thread: Thread,
+        public thread: VMThread,
+        public parent: Maybe<Frame> = nothing(),
         public code: Instruction[] = [],
         public data: Data[] = [],
         public locals: Data[] = [],
@@ -394,7 +403,7 @@ export class StackFrame implements Frame {
 
         } else if (typ === DATA_TYPE_HEAP_STRING) {
 
-            return right(this.thread.vm.heap.getString(idx));
+            return right(this.thread.vm.heap.getString(data));
 
         } else if (typ === DATA_TYPE_SELF) {
 
@@ -439,7 +448,7 @@ export class StackFrame implements Frame {
 
         if (typ === DATA_TYPE_HEAP_FUN) {
 
-            let mFun = this.thread.vm.heap.getFun(data);
+            let mFun = this.thread.vm.heap.getObject(data);
 
             return mFun.isJust() ? right(mFun.get()) : nullFunPtr(data);
 
@@ -462,7 +471,7 @@ export class StackFrame implements Frame {
 
     }
 
-    popObject(): Either<Err, HeapObject> {
+    popObject(): Either<Err, PTObject> {
 
         let data = this.pop();
         let typ = data & DATA_MASK_TYPE;
@@ -491,7 +500,7 @@ export class StackFrame implements Frame {
 
         if (typ === DATA_TYPE_HEAP_FOREIGN) {
 
-            let mho = this.thread.vm.heap.getForeign(data);
+            let mho = this.thread.vm.heap.getObject(data);
 
             if (mho.isNothing())
                 return nullErr(data);

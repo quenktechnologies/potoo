@@ -250,7 +250,7 @@ export class NewArrayInfo extends NewInfo {
 /**
  * NewFunInfo
  */
-export class NewFunInfo extends NewInfo  implements FunInfo  {
+export class NewFunInfo extends NewInfo implements FunInfo  {
 
     constructor(
         public name: string,

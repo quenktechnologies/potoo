@@ -7,6 +7,7 @@ import { Err } from '@quenk/noni/lib/control/error';
 
 import { Context } from '../system/vm/runtime/context';
 import { NewForeignFunInfo } from '../system/vm/script/info';
+import { Foreign } from '../system/vm/type';
 import { System } from '../system';
 import {
     ADDRESS_DISCARD,
@@ -71,22 +72,21 @@ export abstract class AbstractResident
 
     tell<M>(ref: Address, m: M): AbstractResident {
 
-        let vm = this.system.getPlatform();
-        this.exec('tell', [vm.heap.addString(ref), vm.heap.addForeign(m)]);
+        this.exec('tell', [ref, m]);
         return this;
 
     }
 
     raise(e: Err): AbstractResident {
 
-        this.exec('raise', [this.system.getPlatform().heap.addString(e+'')]);
+        this.exec('raise', [e + '']);
         return this;
 
     }
 
     kill(addr: Address): AbstractResident {
 
-        this.exec('kill', [this.system.getPlatform().heap.addString(addr)]);
+        this.exec('kill', [addr]);
         return this;
 
     }
@@ -112,7 +112,7 @@ export abstract class AbstractResident
     /**
      * exec calls a VM function by name on behalf of this actor.
      */
-    exec(fname: string, args: number[]) {
+    exec(fname: string, args: Foreign[]) {
 
         let vm = this.system.getPlatform();
         vm.exec(this, fname, args);
@@ -200,7 +200,7 @@ export abstract class Mutable extends AbstractResident {
     select<M>(cases: Case<M>[]): Mutable {
 
         let vm = this.system.getPlatform();
-        vm.exec(this, 'receive', [vm.heap.addFun(receiveFun(cases))]);
+        vm.exec(this, 'receive', [receiveFun(cases)]);
         return this;
 
     }

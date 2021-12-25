@@ -4,7 +4,9 @@ import {
     DATA_TYPE_STRING,
     StackFrame
 } from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
-import { VMHeap } from '../../../../../../lib/actor/system/vm/runtime/heap';
+import {
+    DefaultHeapLedger
+} from '../../../../../../lib/actor/system/vm/runtime/heap/ledger';
 import { PScript } from '../../../../../../lib/actor/system/vm/script';
 import { Constants } from '../../../../../../lib/actor/system/vm/script';
 import {
@@ -15,7 +17,7 @@ import {
     DATA_TYPE_INFO
 } from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { newThread } from '../../fixtures/thread';
-import { newHeapObject } from '../heap/fixtures/object';
+import { newHeapObject } from '../../type/fixtures/object';
 
 const newF = (c: Constants = [[], []], i: Info[] = []) =>
     new StackFrame('main', new PScript('test', c, i), newThread());
@@ -121,13 +123,13 @@ describe('frame', () => {
 
                 let f = new StackFrame('main', new PScript('test'), newThread());
 
-                let heap = new VMHeap();
+                let heap = new DefaultHeapLedger();
 
                 f.thread.vm.heap = heap;
 
-                heap.addString('foo');
+                heap.addString(f, 'foo');
 
-                let r = heap.addString('bar');
+                let r = heap.addString(f, 'bar');
 
                 f.push(r);
 
@@ -168,7 +170,7 @@ describe('frame', () => {
 
                 let f = new StackFrame('main', new PScript('test'), newThread());
 
-                let heap = new VMHeap();
+                let heap = new DefaultHeapLedger();
 
                 f.thread.vm.heap = heap;
 
@@ -176,9 +178,9 @@ describe('frame', () => {
 
                 let bar = newHeapObject();
 
-                heap.addObject(foo);
+                heap.addObject(f, foo);
 
-                let r = heap.addObject(bar);
+                let r = heap.addObject(f, bar);
 
                 f.push(r);
 

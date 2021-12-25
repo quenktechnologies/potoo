@@ -2,15 +2,15 @@ import { Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Mock } from '@quenk/test/lib/mock';
 
 import {
-    HeapObject
-} from '../../../../../../../lib/actor/system/vm/runtime/heap/object';
+    PTObject
+} from '../../../../../../lib/actor/system/vm/type';
 import {
     objectType
-} from '../../../../../../../lib/actor/system/vm/script/info';
-import { PTValue } from '../../../../../../../lib/actor/system/vm/type';
-import { HeapAddress } from '../../../../../../../lib/actor/system/vm/runtime/heap';
+} from '../../../../../../lib/actor/system/vm/script/info';
+import { PTValue } from '../../../../../../lib/actor/system/vm/type';
+import { HeapAddress } from '../../../../../../lib/actor/system/vm/runtime/heap';
 
-export class HeapObjectImpl implements HeapObject {
+export class HeapObjectImpl implements PTObject {
 
     mock = new Mock();
 
