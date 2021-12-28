@@ -120,7 +120,7 @@ export class SharedThread implements VMThread {
 
         let that = this;
 
-      this.state = THREAD_STATE_INVALID;
+        this.state = THREAD_STATE_INVALID;
 
         this.runner.dequeue(this);
 
