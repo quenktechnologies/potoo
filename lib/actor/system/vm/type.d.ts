@@ -1,5 +1,8 @@
-import { HeapObject } from './runtime/heap/object';
-import { Runtime } from './runtime';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
+import { Type } from '@quenk/noni/lib/data/type';
+import { HeapAddress } from './runtime/heap';
+import { TypeInfo } from './script/info';
+import { Thread } from './thread';
 export declare const TYPE_STEP = 16777216;
 export declare const BYTE_TYPE = 4278190080;
 export declare const BYTE_INDEX = 16777215;
@@ -65,13 +68,46 @@ export declare type PTBoolean = 1 | 0;
  */
 export declare type PTString = string;
 /**
- * PTObject
+ * Foreign value opaque to the VM.
  */
-export declare type PTObject = HeapObject;
+export declare type Foreign = Type;
 /**
  * ForeignFun
  */
-export declare type ForeignFun = (r: Runtime, ...args: PTValue[]) => PTValue;
+export declare type ForeignFun = (r: Thread, ...args: PTValue[]) => PTValue;
+/**
+ * PTObject is the interface of objects stored in the object pool.
+ */
+export interface PTObject {
+    /**
+     * cons is the constructor for the object.
+     */
+    cons: TypeInfo;
+    /**
+     * get a property from the object by name.
+     */
+    get(key: number): Maybe<PTValue>;
+    /**
+     * getCount of items in the object.
+     *
+     * This method is intended for arrays.
+     */
+    getCount(): number;
+    /**
+     * set a property on the object by name.
+     */
+    set(key: number, value: PTValue): void;
+    /**
+     * toAddress converts a PTObject into its heap address.
+     *
+     * If the object is not on the heap the address is void.
+     */
+    toAddress(): HeapAddress;
+    /**
+     * promote this PTObject to an opaque ECMAScript object.
+     */
+    promote(): Foreign;
+}
 /**
  * getType from a TypeDescriptor.
  *

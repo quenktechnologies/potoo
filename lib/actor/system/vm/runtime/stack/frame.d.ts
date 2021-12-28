@@ -3,12 +3,11 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Type } from '@quenk/noni/lib/data/type';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Script } from '../../script';
-import { Context } from '../context';
-import { HeapObject } from '../heap/object';
-import { Heap } from '../heap';
-import { Instruction, Operand } from '../';
+import { PTObject } from '../../type';
 import { PTValue } from '../../type';
 import { FunInfo, Info } from '../../script/info';
+import { VMThread } from '../../thread';
+import { Instruction, Operand } from '../';
 export declare const DATA_RANGE_TYPE_HIGH = 4026531840;
 export declare const DATA_RANGE_TYPE_LOW = 16777216;
 export declare const DATA_RANGE_TYPE_STEP = 16777216;
@@ -21,8 +20,10 @@ export declare const DATA_MAX_SIZE = 4294967295;
 export declare const DATA_MAX_SAFE_UINT32 = 2147483647;
 export declare const DATA_TYPE_STRING: number;
 export declare const DATA_TYPE_INFO: number;
-export declare const DATA_TYPE_HEAP_OBJECT: number;
 export declare const DATA_TYPE_HEAP_STRING: number;
+export declare const DATA_TYPE_HEAP_OBJECT: number;
+export declare const DATA_TYPE_HEAP_FOREIGN: number;
+export declare const DATA_TYPE_HEAP_FUN: number;
 export declare const DATA_TYPE_LOCAL: number;
 export declare const DATA_TYPE_MAILBOX: number;
 export declare const DATA_TYPE_SELF: number;
@@ -37,13 +38,21 @@ export declare const BYTE_CONSTANT_INFO = 196608;
  * Typically, the highest byte is used to indicate the type of the data
  * in realtion to storage location and the remaining 3 bytes, value.
  *
- * 11111111        111111111111111111111111
- * <type/location> <     value      >
+ * 11111111            11111111 11111111 11111111
+ * <type/location>      <     value      >
  *
  * The actual interpretation of the location and value part are dependant on
  * the type.
  */
 export declare type Data = number;
+/**
+ * Used to identity frames via a specific format:
+ * <templateid>@<actorid>#<callstack>
+ *
+ * Where <callstack> is a list of function names in the callstack up to the
+ * Frame's own function separated by '/'.
+ */
+export declare type FrameName = string;
 /**
  * Frame is the context for currently executing op codes.
  *
@@ -52,21 +61,21 @@ export declare type Data = number;
  */
 export interface Frame {
     /**
-     * name of the routine this frame belongs too.
+     * name of the Frame used to identity it.
      */
-    name: string;
+    name: FrameName;
     /**
      * script the routine is defined in.
      */
     script: Script;
     /**
-     * context of the actor that is executing this frame.
+     * thread for the actor.
      */
-    context: Context;
+    thread: VMThread;
     /**
-     * heap of the current Runtime
+     * parent Frame that created this Frame (if any).
      */
-    heap: Heap;
+    parent: Maybe<Frame>;
     /**
      * code the frame executes as part of the routine.
      */
@@ -157,7 +166,11 @@ export interface Frame {
     /**
      * popObject provides the entry for an object in the heap.
      */
-    popObject(): Either<Err, HeapObject>;
+    popObject(): Either<Err, PTObject>;
+    /**
+     * popForeign provides the entry for a foreign object in the heap.
+     */
+    popForeign(): Either<Err, Type>;
     /**
      * duplicate the top of the stack.
      */
@@ -182,13 +195,13 @@ export interface Frame {
 export declare class StackFrame implements Frame {
     name: string;
     script: Script;
-    context: Context;
-    heap: Heap;
+    thread: VMThread;
+    parent: Maybe<Frame>;
     code: Instruction[];
     data: Data[];
     locals: Data[];
     ip: number;
-    constructor(name: string, script: Script, context: Context, heap: Heap, code?: Instruction[], data?: Data[], locals?: Data[], ip?: number);
+    constructor(name: string, script: Script, thread: VMThread, parent?: Maybe<Frame>, code?: Instruction[], data?: Data[], locals?: Data[], ip?: number);
     getPosition(): number;
     push(d: Data): Frame;
     pushUInt8(value: Operand): Frame;
@@ -205,7 +218,8 @@ export declare class StackFrame implements Frame {
     popString(): Either<Err, string>;
     popName(): Either<Err, Info>;
     popFunction(): Either<Err, FunInfo>;
-    popObject(): Either<Err, HeapObject>;
+    popObject(): Either<Err, PTObject>;
+    popForeign(): Either<Err, Type>;
     duplicate(): Frame;
     advance(): Frame;
     seek(loc: number): Frame;

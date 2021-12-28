@@ -8,6 +8,11 @@ import { Instance } from '../../../';
 import { FunInfo } from '../script/info';
 
 /**
+ * SystemId is the type of the identifier the system assigns to each actor.
+ */
+export type SystemId = number;
+
+/**
  * ErrorHandler processes errors that come up during an actor execution
  * or raised by a child.
  */
@@ -34,6 +39,11 @@ export interface Contexts {
  * Context stores all the information a system needs about a spawned actor.
  */
 export interface Context {
+
+    /**
+     * aid is the identifier the system assigns to the actor.
+     */
+    aid: SystemId,
 
     /**
      * mailbox for the actor.
@@ -73,8 +83,10 @@ export interface Context {
  * newContext 
  */
 export const newContext =
-    (actor: Instance, address: Address, template: Template)
+    (aid: SystemId, actor: Instance, address: Address, template: Template)
         : Context => ({
+
+            aid,
 
             mailbox: [],
 

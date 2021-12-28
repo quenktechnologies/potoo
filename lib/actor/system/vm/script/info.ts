@@ -110,11 +110,22 @@ export interface PropInfo {
 }
 
 /**
- * VoidInfo
+ * NewInfo
  */
-export class VoidInfo implements Info {
+export abstract class NewInfo implements Info {
 
     constructor(public name: string) { }
+
+    abstract type: TypeInfo;
+
+    abstract descriptor: number;
+
+}
+
+/**
+ * VoidInfo
+ */
+export class VoidInfo extends NewInfo {
 
     type = voidType;
 
@@ -125,9 +136,7 @@ export class VoidInfo implements Info {
 /**
  * NewUInt8Info
  */
-export class NewUInt8Info implements Info {
-
-    constructor(public name: string) { }
+export class NewUInt8Info extends NewInfo {
 
     type = uint8Type;
 
@@ -138,9 +147,7 @@ export class NewUInt8Info implements Info {
 /**
  * NewUInt16Info
  */
-export class NewUInt16Info implements Info {
-
-    constructor(public name: string) { }
+export class NewUInt16Info extends NewInfo {
 
     type = uint16Type;
 
@@ -151,9 +158,7 @@ export class NewUInt16Info implements Info {
 /**
  * NewUInt32Info
  */
-export class NewUInt32Info implements Info {
-
-    constructor(public name: string) { }
+export class NewUInt32Info extends NewInfo {
 
     type = uint32Type;
 
@@ -164,9 +169,7 @@ export class NewUInt32Info implements Info {
 /**
  * NewInt8Info
  */
-export class NewInt8Info implements Info {
-
-    constructor(public name: string) { }
+export class NewInt8Info extends NewInfo {
 
     type = int8Type;
 
@@ -177,9 +180,7 @@ export class NewInt8Info implements Info {
 /**
  * NewInt16Info
  */
-export class NewInt16Info implements Info {
-
-    constructor(public name: string) { }
+export class NewInt16Info extends NewInfo {
 
     type = int16Type;
 
@@ -190,9 +191,7 @@ export class NewInt16Info implements Info {
 /**
  * NewInt32Info
  */
-export class Int32Info implements Info {
-
-    constructor(public name: string) { }
+export class NewInt32Info extends NewInfo {
 
     type = int32Type;
 
@@ -203,9 +202,7 @@ export class Int32Info implements Info {
 /**
  * NewBooleanInfo
  */
-export class NewBooleanInfo implements Info {
-
-    constructor(public name: string) { }
+export class NewBooleanInfo extends NewInfo {
 
     type = booleanType;
 
@@ -216,9 +213,7 @@ export class NewBooleanInfo implements Info {
 /**
  * NewStringInfo
  */
-export class NewStringInfo implements Info {
-
-    constructor(public name: string) { }
+export class NewStringInfo extends NewInfo {
 
     type = stringType;
 
@@ -229,9 +224,7 @@ export class NewStringInfo implements Info {
 /**
  * NewObjectInfo
  */
-export class NewObjectInfo implements Info {
-
-    constructor(public name: string) { }
+export class NewObjectInfo extends NewInfo {
 
     type = objectType;
 
@@ -242,9 +235,13 @@ export class NewObjectInfo implements Info {
 /**
  * NewArrayInfo
  */
-export class NewArrayInfo implements Info {
+export class NewArrayInfo extends NewInfo {
 
-    constructor(public name: string, public type: ArrayTypeInfo) { }
+    constructor(public name: string, public type: ArrayTypeInfo) {
+
+        super(name);
+
+    }
 
     descriptor = types.TYPE_ARRAY;
 
@@ -253,12 +250,12 @@ export class NewArrayInfo implements Info {
 /**
  * NewFunInfo
  */
-export class NewFunInfo implements FunInfo {
+export class NewFunInfo extends NewInfo implements FunInfo  {
 
     constructor(
         public name: string,
         public argc: number,
-        public code: Instruction[]) { }
+        public code: Instruction[]) { super(name); }
 
     type = funType;
 
@@ -271,12 +268,12 @@ export class NewFunInfo implements FunInfo {
 /**
  * NewForeignFunInfo
  */
-export class NewForeignFunInfo implements FunInfo {
+export class NewForeignFunInfo extends NewInfo implements FunInfo {
 
     constructor(
         public name: string,
         public argc: number,
-        public exec: ForeignFun) { }
+        public exec: ForeignFun) { super(name); }
 
     type = funType;
 
@@ -291,13 +288,13 @@ export class NewForeignFunInfo implements FunInfo {
 /**
  * NewTypeInfo
  */
-export class NewTypeInfo implements TypeInfo {
+export class NewTypeInfo extends NewInfo implements TypeInfo {
 
     constructor(
         public name: string,
         public argc: number,
         public properties: PropInfo[],
-        public descriptor = types.TYPE_OBJECT) { }
+        public descriptor = types.TYPE_OBJECT) { super(name);  }
 
     type = funType;
 
@@ -308,11 +305,11 @@ export class NewTypeInfo implements TypeInfo {
 /**
  * NewArrayTypeInfo
  */
-export class NewArrayTypeInfo implements ArrayTypeInfo {
+export class NewArrayTypeInfo extends NewInfo implements ArrayTypeInfo {
 
     constructor(
         public name: string,
-        public elements: TypeInfo) { }
+        public elements: TypeInfo) { super(name); }
 
     type = funType;
 

@@ -90,14 +90,3 @@ export interface Template {
      */
     children?: Templates | Template[];
 }
-/**
- * normalize a Template so that its is easier to work with.
- */
-export declare const normalize: (t: Template) => Template & {
-    id: string;
-    children: Template[] | ((Template & {
-        id: string;
-    }) | (Cons & {
-        id: string;
-    }))[];
-};

@@ -1,20 +1,15 @@
 import { match } from '@quenk/noni/lib/control/match';
 import { isString, Any } from '@quenk/noni/lib/data/type';
-import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { rmerge } from '@quenk/noni/lib/data/record';
 import { parse } from '@quenk/noni/lib/data/json';
 
-import { Tell } from '../resident/scripts';
 import { RAISE, SEND } from '../system/vm/runtime/op';
 import { EVENT_SEND_FAILED } from '../system/vm/event';
-import { PTValue } from '../system/vm/type';
-import { Script } from '../system/vm/script';
 import { Conf } from '../system/vm/conf';
 import { PVM } from '../system/vm';
 import { System } from '../system';
 import { Message } from '../message';
 import { Address } from '../address';
-import { Instance } from '../';
 
 //ENV vars:
 //POTOO_ACTOR_ID
@@ -23,7 +18,7 @@ import { Instance } from '../';
 
 class Sys {
 
-    vm = PVM.create(this, rmerge(getConf(), {
+    vm: PVM = PVM.create(this, rmerge(getConf(), {
 
         on: {
 
@@ -44,15 +39,9 @@ class Sys {
 
     }));
 
-    exec(i: Instance, s: Script) {
+    getPlatform() {
 
-        this.vm.exec(i, s);
-
-    }
-
-    execNow(i: Instance, s: Script): Maybe<PTValue> {
-
-        return this.vm.execNow(i, s);
+        return this.vm;
 
     }
 
@@ -97,7 +86,8 @@ const main = () => {
         (<Function>process.send)({
 
             code: RAISE,
-            error: e.stack,
+            message: e.message,
+            stack: e.stack,
             src: address,
             dest: address
 
@@ -107,11 +97,11 @@ const main = () => {
 
     });
 
-    sys.vm.spawn({
+    sys.vm.spawn(sys.vm, {
 
         id,
 
-        create: (s:System) => {
+        create: (s: System) => {
 
             //TODO: Handle invalid messages?
             process.on('message', (m: Message) =>
@@ -129,7 +119,6 @@ const main = () => {
 }
 
 const filterTell = (vm: PVM) =>
-    ({ to, message }: { to: string, from: string, message: Message }) =>
-        vm.exec(vm, new Tell(to, message));
+    ({ to, message }: { to: string, message: Message }) =>        vm.tell(to, message);
 
 main();

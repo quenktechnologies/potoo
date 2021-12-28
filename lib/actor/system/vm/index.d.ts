@@ -9,18 +9,21 @@ import { Template } from '../../template';
 import { Message } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
-import { State, Runtimes } from './state';
+import { SharedThreadRunner } from './thread/shared/runner';
+import { Thread, VMThread } from './thread';
+import { State, Threads } from './state';
 import { Script } from './script';
 import { Context } from './runtime/context';
-import { Runtime, Operand } from './runtime';
-import { Conf } from './conf';
 import { Frame } from './runtime/stack/frame';
 import { Opcode } from './runtime/op';
-import { PTValue } from './type';
+import { Operand } from './runtime';
+import { Conf } from './conf';
+import { HeapLedger, DefaultHeapLedger } from './runtime/heap/ledger';
+import { Foreign } from './type';
 /**
  * Slot
  */
-export declare type Slot = [Address, Script, Runtime];
+export declare type Slot = [Address, Script, Thread];
 export declare const MAX_WORK_LOAD = 25;
 /**
  * Platform is the interface for a virtual machine.
@@ -28,46 +31,44 @@ export declare const MAX_WORK_LOAD = 25;
  * It provides methods for manipulating the state of the actors of the system.
  * Some opcode handlers depend on this interface to do their work.
  */
-export interface Platform {
+export interface Platform extends Actor {
     /**
-     * allocate a new Runtime for an actor.
+     * heap storage with builtin ownership tracking for all threads.
+     */
+    heap: HeapLedger;
+    /**
+     * allocate a new Thread for an actor.
      *
-     * It is an error if a Runtime has already been allocated for the actor.
+     * It is an error if a Thread has already been allocated for the actor.
      */
     allocate(self: Address, t: template.Template): Either<Err, Address>;
-    /**
-     * runActor provides a Future that when fork()'d will execute the
-     * start code/method for the target actor.
-     *
-     */
-    runActor(target: Address): Future<void>;
     /**
      * sendMessage to an actor in the system.
      *
      * The result is true if the actor was found or false
      * if the actor is not in the system.
      */
-    sendMessage(to: Address, from: Address, msg: PTValue): boolean;
+    sendMessage(to: Address, from: Address, msg: Message): boolean;
     /**
-     * getRuntime from the system given its address.
+     * getThread from the system given its address.
      */
-    getRuntime(addr: Address): Maybe<Runtime>;
+    getThread(addr: Address): Maybe<Thread>;
     /**
      * getRouter attempts to retrieve a router for the address specified.
      */
     getRouter(addr: Address): Maybe<Context>;
     /**
-     * getGroup attemps to retreive all the members of a group.
+     * getGroup attempts to retrieve all the members of a group.
      */
     getGroup(name: string): Maybe<Address[]>;
     /**
      * getChildren provides the children contexts for an address.
      */
-    getChildren(addr: Address): Maybe<Runtimes>;
+    getChildren(addr: Address): Maybe<Threads>;
     /**
-     * putRuntime in the system at the specified address.
+     * putThread in the system at the specified address.
      */
-    putRuntime(addr: Address, r: Runtime): Platform;
+    putThread(addr: Address, r: Thread): Platform;
     /**
      * putRoute configures a router for all actors that are under the
      * target address.
@@ -78,7 +79,7 @@ export interface Platform {
      */
     putMember(group: string, addr: Address): Platform;
     /**
-     * remove a Runtime from the system.
+     * remove a Thread from the system.
      */
     remove(addr: Address): Platform;
     /**
@@ -86,90 +87,100 @@ export interface Platform {
      */
     removeRoute(target: Address): Platform;
     /**
+     * spawn an actor using the given Instance as the parent.
+     *
+     * The Instance is required to verify if it is still part of the system.
+     */
+    spawn(parent: Instance, tmpl: template.Spawnable): Address;
+    /**
+     * identify an actor Instance producing its address if it is part of the
+     * system.
+     */
+    identify(target: Instance): Maybe<Address>;
+    /**
      * kill terminates the actor at the specified address.
      *
      * The actor must be a child of parent to succeed.
      */
-    kill(parent: Address, target: Address): Future<void>;
+    kill(parent: Instance, target: Address): Future<void>;
     /**
-     * raise does the error handling on behalf of Runtimes.
+     * raise an exception within the system
      */
-    raise(addr: Address, err: Err): void;
+    raise(src: Instance, err: Err): void;
     /**
      * trigger is used to generate events as the system runs.
      */
     trigger(addr: Address, evt: string, ...args: Type[]): void;
     /**
-     * logOp is used by Runtimes to log which opcodes are executed.
+     * logOp is used by Thread to log which opcodes are executed.
      */
-    logOp(r: Runtime, f: Frame, op: Opcode, operand: Operand): void;
+    logOp(r: VMThread, f: Frame, op: Opcode, operand: Operand): void;
     /**
-     * runTask executes an async operation on behalf of a Runtime.
+     * exec a function by name with the provided arguments using the actor
+     * instance's thread.
      */
-    runTask(addr: Address, ft: Future<void>): void;
+    exec(actor: Instance, funName: string, args?: Foreign[]): void;
 }
 /**
- * PVM is the Potoo Virtual Machine.
+ * PVM (Potoo Virtual Machine) is a JavaScript implemented virtual machine that
+ * functions as a message delivery system between target actors.
+ *
+ * Actors known to the VM are considered to be part of a system and may or may
+ * not reside on the same process/worker/thread depending on the underlying
+ * platform and individual actor implementations.
  */
-export declare class PVM implements Platform, Actor {
+export declare class PVM implements Platform {
     system: System;
     conf: Conf;
     constructor(system: System, conf?: Conf);
-    static create<S extends System>(s: S, conf: object): PVM;
+    _actorIdCounter: number;
+    /**
+     * heap memory shared between actor Threads.
+     */
+    heap: DefaultHeapLedger;
+    /**
+     * threadRunner shared between vm threads.
+     */
+    threadRunner: SharedThreadRunner;
     /**
      * state contains information about all the actors in the system, routers
      * and groups.
      */
     state: State;
     /**
-     * runQ is the queue of pending Scripts to be executed.
+     * Create a new PVM instance using the provided System implementation and
+     * configuration object.
      */
-    runQ: Slot[];
-    /**
-     * waitQ is the queue of pending Scripts for Runtimes that are awaiting
-     * the completion of an async task.
-     */
-    waitQ: Slot[];
-    /**
-     * blocked is a
-     */
-    blocked: Address[];
-    running: boolean;
+    static create<S extends System>(s: S, conf?: object): PVM;
     init(c: Context): Context;
     accept(m: Message): import("../..").Eff;
     start(): void;
     notify(): void;
     stop(): Future<void>;
-    allocate(parent: Address, t: Template): Either<Err, Address>;
-    runActor(target: Address): Future<void>;
-    runTask(addr: Address, ft: Future<void>): void;
-    sendMessage(to: Address, from: Address, m: PTValue): boolean;
-    getRuntime(addr: Address): Maybe<Runtime>;
+    identify(inst: Instance): Maybe<Address>;
+    spawn(parent: Instance, tmpl: template.Spawnable): Address;
+    _spawn(parent: Address, tmpl: Template): Address;
+    allocate(parent: Address, tmpl: Template): Either<Err, Address>;
+    runActor(target: Address): Future<unknown> | undefined;
+    sendMessage(to: Address, from: Address, msg: Message): boolean;
+    getThread(addr: Address): Maybe<Thread>;
     getRouter(addr: Address): Maybe<Context>;
     getGroup(name: string): Maybe<Address[]>;
-    getChildren(addr: Address): Maybe<Runtimes>;
-    putRuntime(addr: Address, r: Runtime): PVM;
+    getChildren(addr: Address): Maybe<Threads>;
+    putThread(addr: Address, r: Thread): PVM;
     putMember(group: string, addr: Address): PVM;
     putRoute(target: Address, router: Address): PVM;
     remove(addr: Address): PVM;
     removeRoute(target: Address): PVM;
-    raise(addr: Address, err: Err): void;
+    raise(src: Instance, err: Err): void;
     trigger(addr: Address, evt: string, ...args: Type[]): void;
-    logOp(r: Runtime, f: Frame, op: Opcode, oper: Operand): void;
-    kill(parent: Address, target: Address): Future<void>;
-    /**
-     * spawn an actor.
-     *
-     * This actor will be a direct child of the root.
-     */
-    spawn(t: Template): Address;
+    logOp(r: VMThread, f: Frame, op: Opcode, oper: Operand): void;
+    kill(parent: Instance, target: Address): Future<void>;
     /**
      * tell allows the vm to send a message to another actor via opcodes.
      *
      * If you want to immediately deliver a message, use [[sendMessage]] instead.
      */
-    tell<M>(ref: Address, m: M): PVM;
-    execNow(i: Instance, s: Script): Maybe<PTValue>;
-    exec(i: Instance, s: Script): void;
-    run(): void;
+    tell<M>(ref: Address, msg: M): PVM;
+    exec(actor: Instance, funName: string, args?: Foreign[]): void;
 }

@@ -1,7 +1,8 @@
 import { Record } from '@quenk/noni/lib/data/record';
 import { Type } from '@quenk/noni/lib/data/type';
 import { Frame } from '../stack/frame';
-import { Runtime, Operand } from '../';
+import { VMThread } from '../../thread';
+import { Operand } from '../';
 export declare const OP_CODE_RANGE_LOW = 16777216;
 export declare const OP_CODE_RANGE_HIGH = 4278190080;
 export declare const OP_CODE_RANGE_STEP = 16777216;
@@ -24,14 +25,12 @@ export declare const IFNZJMP: number;
 export declare const IFEQJMP: number;
 export declare const IFNEQJMP: number;
 export declare const ALLOC: number;
-export declare const RUN: number;
 export declare const SEND: number;
 export declare const RECV: number;
 export declare const RECVCOUNT: number;
 export declare const MAILCOUNT: number;
 export declare const MAILDQ: number;
 export declare const SELF: number;
-export declare const READ: number;
 export declare const STOP: number;
 export declare const GETPROP: number;
 export declare const ARLENGTH: number;
@@ -43,7 +42,7 @@ export declare type Opcode = number;
 /**
  * OpcodeHandler
  */
-export declare type OpcodeHandler = (r: Runtime, f: Frame, o: Operand) => void;
+export declare type OpcodeHandler = (r: VMThread, f: Frame, o: Operand) => void;
 /**
  * OpcodeInfo provides needed details of a single opcode.
  */
@@ -60,7 +59,7 @@ export interface OpcodeInfo {
      * log is a function that is applied to convert the op into an op log
      * entry.
      */
-    log: (r: Runtime, f: Frame, oper: Operand) => Type[];
+    log: (r: VMThread, f: Frame, oper: Operand) => Type[];
 }
 /**
  * OpcodeInfos is a map of opcode numbers to their respective OpCodeInfo objects.
@@ -90,4 +89,4 @@ export declare const toName: (op: Opcode) => string;
  *
  * If the op is invalid an empty line is produced.
  */
-export declare const toLog: (op: Opcode, r: Runtime, f: Frame, oper: Operand) => any[];
+export declare const toLog: (op: Opcode, r: VMThread, f: Frame, oper: Operand) => any[];

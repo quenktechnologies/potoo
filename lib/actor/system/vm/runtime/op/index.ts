@@ -14,7 +14,8 @@ import {
     DATA_TYPE_LOCAL
 } from '../stack/frame';
 import { PTValue } from '../../type';
-import { Runtime, Operand } from '../';
+import { VMThread } from '../../thread';
+import { Operand } from '../';
 
 export const OP_CODE_RANGE_LOW = 0x1000000;
 export const OP_CODE_RANGE_HIGH = 0xff000000;
@@ -40,14 +41,12 @@ export const IFNZJMP = OP_CODE_RANGE_STEP * 80;
 export const IFEQJMP = OP_CODE_RANGE_STEP * 81;
 export const IFNEQJMP = OP_CODE_RANGE_STEP * 82;
 export const ALLOC = OP_CODE_RANGE_STEP * 92;
-export const RUN = OP_CODE_RANGE_STEP * 93;
 export const SEND = OP_CODE_RANGE_STEP * 94;
 export const RECV = OP_CODE_RANGE_STEP * 95;
 export const RECVCOUNT = OP_CODE_RANGE_STEP * 96;
 export const MAILCOUNT = OP_CODE_RANGE_STEP * 97;
 export const MAILDQ = OP_CODE_RANGE_STEP * 98;
 export const SELF = OP_CODE_RANGE_STEP * 99;
-export const READ = OP_CODE_RANGE_STEP * 100;
 export const STOP = OP_CODE_RANGE_STEP * 101;
 export const GETPROP = OP_CODE_RANGE_STEP * 110;
 export const ARLENGTH = OP_CODE_RANGE_STEP * 111;
@@ -61,7 +60,7 @@ export type Opcode = number;
 /**
  * OpcodeHandler
  */
-export type OpcodeHandler = (r: Runtime, f: Frame, o: Operand) => void;
+export type OpcodeHandler = (r: VMThread, f: Frame, o: Operand) => void;
 
 /**
  * OpcodeInfo provides needed details of a single opcode.
@@ -82,7 +81,7 @@ export interface OpcodeInfo {
      * log is a function that is applied to convert the op into an op log
      * entry.
      */
-    log: (r: Runtime, f: Frame, oper: Operand) => Type[]
+    log: (r: VMThread, f: Frame, oper: Operand) => Type[]
 
 }
 
@@ -121,7 +120,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.pushui8,
 
-        log: (_: Runtime, __: Frame, oper: Operand) => ['pushui8', oper]
+        log: (_: VMThread, __: Frame, oper: Operand) => ['pushui8', oper]
 
     },
 
@@ -131,7 +130,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.pushui16,
 
-        log: (_: Runtime, __: Frame, oper: Operand) => ['pushui16', oper]
+        log: (_: VMThread, __: Frame, oper: Operand) => ['pushui16', oper]
 
     },
 
@@ -141,7 +140,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.pushui32,
 
-        log: (_: Runtime, __: Frame, oper: Operand) => ['pushui32', oper]
+        log: (_: VMThread, __: Frame, oper: Operand) => ['pushui32', oper]
 
     },
 
@@ -151,7 +150,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.lds,
 
-        log: (_: Runtime, f: Frame, oper: Operand) =>
+        log: (_: VMThread, f: Frame, oper: Operand) =>
             ['lds', oper, eToLog(f.resolve(DATA_TYPE_STRING | oper))]
 
     },
@@ -162,7 +161,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ldn,
 
-        log: (_: Runtime, f: Frame, oper: Operand) =>
+        log: (_: VMThread, f: Frame, oper: Operand) =>
             ['ldn', oper, eToLog(f.resolve(DATA_TYPE_INFO | oper))]
 
     },
@@ -173,7 +172,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.dup,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['dup']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['dup']
     },
 
     [STORE]: {
@@ -182,7 +181,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.store,
 
-        log: (_: Runtime, __: Frame, oper: Operand) =>
+        log: (_: VMThread, __: Frame, oper: Operand) =>
             ['store', oper]
 
     },
@@ -193,7 +192,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.load,
 
-        log: (_: Runtime, f: Frame, oper: Operand) =>
+        log: (_: VMThread, f: Frame, oper: Operand) =>
             ['load', oper, eToLog(f.resolve(DATA_TYPE_LOCAL | oper))]
 
     },
@@ -204,7 +203,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ceq,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['ceq']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['ceq']
 
     },
 
@@ -214,7 +213,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.addui32,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['addui32']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['addui32']
 
     },
 
@@ -224,7 +223,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.call,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['call']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['call']
 
     },
 
@@ -234,7 +233,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.raise,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['raise']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['raise']
 
     },
 
@@ -244,7 +243,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.jmp,
 
-        log: (_: Runtime, __: Frame, oper: Operand) => ['jmp', oper]
+        log: (_: VMThread, __: Frame, oper: Operand) => ['jmp', oper]
 
     },
 
@@ -254,7 +253,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ifzjmp,
 
-        log: (_: Runtime, __: Frame, oper: Operand) => ['ifzjmp', oper]
+        log: (_: VMThread, __: Frame, oper: Operand) => ['ifzjmp', oper]
 
     },
 
@@ -264,7 +263,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ifnzjmp,
 
-        log: (_: Runtime, __: Frame, oper: Operand) => ['ifnzjmp', oper]
+        log: (_: VMThread, __: Frame, oper: Operand) => ['ifnzjmp', oper]
 
     },
 
@@ -274,7 +273,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ifeqjmp,
 
-        log: (_: Runtime, __: Frame, oper: Operand) => ['ifeqjmp', oper]
+        log: (_: VMThread, __: Frame, oper: Operand) => ['ifeqjmp', oper]
 
     },
 
@@ -284,7 +283,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ifneqjmp,
 
-        log: (_: Runtime, __: Frame, oper: Operand) => ['ifneqjmp', oper]
+        log: (_: VMThread, __: Frame, oper: Operand) => ['ifneqjmp', oper]
 
     },
 
@@ -294,17 +293,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.alloc,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['alloc']
-
-    },
-
-    [RUN]: {
-
-        name: 'run',
-
-        handler: actor.run,
-
-        log: (_: Runtime, __: Frame, ___: Operand) => ['run']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['alloc']
 
     },
 
@@ -314,7 +303,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.send,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['send']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['send']
 
     },
 
@@ -324,7 +313,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.recv,
 
-        log: (_: Runtime, f: Frame, oper: Operand) =>
+        log: (_: VMThread, f: Frame, oper: Operand) =>
             ['recv', oper, eToLog(f.resolve(DATA_TYPE_INFO | oper))]
 
     },
@@ -335,7 +324,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.recvcount,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['recvcount']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['recvcount']
 
     },
 
@@ -345,7 +334,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.mailcount,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['mailcount']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['mailcount']
 
     },
 
@@ -355,7 +344,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.maildq,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['maildq']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['maildq']
 
     },
 
@@ -365,17 +354,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.self,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['self']
-
-    },
-
-    [READ]: {
-
-        name: 'read',
-
-        handler: actor.read,
-
-        log: (_: Runtime, __: Frame, ___: Operand) => ['read']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['self']
 
     },
 
@@ -385,7 +364,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.stop,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['stop']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['stop']
 
     },
 
@@ -395,7 +374,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: obj.getprop,
 
-        log: (_: Runtime, __: Frame, oper: Operand) => ['getprop', oper]
+        log: (_: VMThread, __: Frame, oper: Operand) => ['getprop', oper]
 
     },
 
@@ -405,7 +384,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: obj.arelm,
 
-        log: (_: Runtime, __: Frame, oper: Operand) => ['arelm', oper]
+        log: (_: VMThread, __: Frame, oper: Operand) => ['arelm', oper]
 
     },
 
@@ -415,7 +394,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: obj.arlength,
 
-        log: (_: Runtime, __: Frame, ___: Operand) => ['arlength']
+        log: (_: VMThread, __: Frame, ___: Operand) => ['arlength']
 
     }
 
@@ -440,5 +419,5 @@ export const toName = (op: Opcode) => opcodes.hasOwnProperty(op) ?
  *
  * If the op is invalid an empty line is produced.
  */
-export const toLog = (op: Opcode, r: Runtime, f: Frame, oper: Operand) =>
+export const toLog = (op: Opcode, r: VMThread, f: Frame, oper: Operand) =>
     opcodes.hasOwnProperty(op) ? opcodes[op].log(r, f, oper) : []

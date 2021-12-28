@@ -1,83 +1,38 @@
-import { ForeignFunInfo, NewForeignFunInfo, NewFunInfo, NewTypeInfo } from '../system/vm/script/info';
-import { Script, Constants } from '../system/vm/script';
-import { Template } from '../template';
-import { Address } from '../address';
-import { Message } from '../message';
+import { NewForeignFunInfo, NewFunInfo } from '../system/vm/script/info';
+import { BaseScript } from '../system/vm/scripts';
+import { Callback } from './immutable/callback';
+import { Immutable } from './immutable';
+import { Mutable } from './mutable';
 /**
- * Spawn spawns a single child actor from a template.
+ * ImmutableActorScript used by Immutable actor instances.
  */
-export declare class Spawn implements Script {
-    template: Template;
-    constructor(template: Template);
-    name: string;
-    constants: Constants;
-    immediate: boolean;
-    info: (NewTypeInfo | NewForeignFunInfo | NewFunInfo)[];
-    code: number[];
+export declare class ImmutableActorScript<T> extends BaseScript {
+    actor: Immutable<T>;
+    constructor(actor: Immutable<T>);
+    info: (NewFunInfo | NewForeignFunInfo)[];
+    code: never[];
 }
 /**
- * Self provides the address of the current instance.
+ * CallbackActorScript used by Callback actor instances.
  */
-export declare class Self implements Script {
-    constants: Constants;
-    name: string;
-    immediate: boolean;
-    info: never[];
-    code: number[];
+export declare class CallbackActorScript<T> extends BaseScript {
+    actor: Callback<T>;
+    constructor(actor: Callback<T>);
+    info: (NewFunInfo | NewForeignFunInfo)[];
+    code: never[];
 }
 /**
- * Tell used to deliver messages to other actors.
+ * MutableActorScript used by Mutable actor instances.
  */
-export declare class Tell implements Script {
-    to: Address;
-    msg: Message;
-    constructor(to: Address, msg: Message);
-    constants: Constants;
-    name: string;
-    info: NewForeignFunInfo[];
-    code: number[];
+export declare class MutableActorScript extends BaseScript {
+    actor: Mutable;
+    constructor(actor: Mutable);
+    info: (NewFunInfo | NewForeignFunInfo)[];
+    code: never[];
 }
 /**
- * Receive schedules a receiver for the actor.
+ * TaskActorScript used by the Task actor.
  */
-export declare class Receive implements Script {
-    f: ForeignFunInfo;
-    constructor(f: ForeignFunInfo);
-    constants: Constants;
-    name: string;
-    info: ForeignFunInfo[];
-    code: number[];
-}
-/**
- * Notify attempts to consume the next available message in the mailbox.
- */
-export declare class Notify implements Script {
-    constants: Constants;
-    name: string;
-    info: never[];
-    code: number[];
-}
-/**
- * Raise an exception triggering the systems error handling mechanism.
- * TODO: implement
- */
-export declare class Raise implements Script {
-    msg: string;
-    constructor(msg: string);
-    name: string;
-    constants: Constants;
-    info: NewForeignFunInfo[];
-    code: number[];
-}
-/**
- * Kill stops an actor within the executing actor's process tree (inclusive).
- * TODO: implement.
- */
-export declare class Kill implements Script {
-    addr: string;
-    constructor(addr: string);
-    name: string;
-    constants: Constants;
-    info: NewForeignFunInfo[];
-    code: number[];
+export declare class TaskActorScript extends BaseScript {
+    info: NewFunInfo[];
 }

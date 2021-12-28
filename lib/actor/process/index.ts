@@ -4,15 +4,15 @@ import { fork } from 'child_process';
 import { match } from '@quenk/noni/lib/control/match';
 import { Any, Type } from '@quenk/noni/lib/data/type';
 
-import { System } from '../system';
 import { RAISE, SEND } from '../system/vm/runtime/op';
 import { Context } from '../system/vm/runtime/context';
+import { PVM } from '../system/vm';
+import { System } from '../system';
 import { Envelope } from '../mailbox';
 import { Message } from '../message';
 import { Address, getId } from '../address';
 import { FLAG_IMMUTABLE, FLAG_ROUTER } from '../flags';
 import { ADDRESS_DISCARD } from '../address';
-import { Tell, Raise, Kill } from '../resident/scripts';
 import { Actor } from '../';
 
 export const SCRIPT_PATH = `${__dirname}/../../../lib/actor/process/script.js`;
@@ -25,7 +25,9 @@ const raiseShape = {
 
     dest: String,
 
-    error: Any
+    message: String,
+
+    stack: String
 
 }
 
@@ -55,7 +57,9 @@ interface TellMsg {
 
 interface RaiseMsg {
 
-    error: { message: string },
+    message: string,
+
+    stack: string,
 
     src: string
 
@@ -119,9 +123,7 @@ export class Process implements Actor {
 
     }
 
-    notify() {
-
-    }
+    notify() { }
 
     stop() {
 
@@ -135,7 +137,7 @@ export class Process implements Actor {
 
         let p = fork(resolve(this.script), [], spawnOpts(this));
 
-        p.on('error', e => this.system.exec(this, new Raise(e.message)));
+        p.on('error', e => this.system.getPlatform().raise(this, e));
 
         //TODO: What should we do with invalid messages?
         p.on('message', (m: Message) =>
@@ -149,7 +151,7 @@ export class Process implements Actor {
 
             this.process = nullHandle;
 
-            this.system.exec(this, new Kill(this.self()));
+            this.system.getPlatform().kill(this, this.self());
 
         });
 
@@ -161,14 +163,9 @@ export class Process implements Actor {
 
 const nullHandle = {
 
-    send() {
+    send() { },
 
-    },
-
-    kill() {
-
-
-    }
+    kill() { }
 
 }
 
@@ -189,8 +186,15 @@ const spawnOpts = (p: Process) => ({
 });
 
 const handleTell = (p: Process) => (m: TellMsg) =>
-    p.system.exec(p, new Tell(m.to, m.message));
+    (<PVM>p.system.getPlatform()).tell(m.to, m.message);
 
 const handleRaise =
-    (p: Process) => ({ error, src }: RaiseMsg) =>
-        p.system.exec(p, new Raise(`[${src}]: ${error}`));
+    (p: Process) => ({ message, stack }: RaiseMsg) => {
+
+        let err = new Error(message);
+
+        err.stack = stack;
+
+        p.system.getPlatform().raise(p, err);
+
+    }

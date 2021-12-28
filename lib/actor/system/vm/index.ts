@@ -1,23 +1,32 @@
 import * as template from '../../template';
-import * as scripts from '../../resident/scripts';
 import * as errors from './runtime/error';
 import * as events from './event';
 
 import { Err } from '@quenk/noni/lib/control/error';
-import { Future, pure, raise, batch } from '@quenk/noni/lib/control/monad/future';
-import { Maybe, nothing, fromNullable } from '@quenk/noni/lib/data/maybe'
+import {
+    Future,
+    pure,
+    raise,
+    batch,
+    voidPure,
+    doFuture
+} from '@quenk/noni/lib/control/monad/future';
+import { Maybe, fromNullable } from '@quenk/noni/lib/data/maybe'
+import { isFunction } from '@quenk/noni/lib/data/type';
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import {
-    empty,
-    dedupe,
-    contains, partition,
     distribute
 } from '@quenk/noni/lib/data/array';
-import { Record, reduce, map, rmerge, mapTo } from '@quenk/noni/lib/data/record';
-import { remove as arremove } from '@quenk/noni/lib/data/array';
-import { Type, isObject } from '@quenk/noni/lib/data/type';
+import {
+    Record,
+    map,
+    merge,
+    rmerge,
+    mapTo,
+    isRecord
+} from '@quenk/noni/lib/data/record';
+import { Type } from '@quenk/noni/lib/data/type';
 
-import { spawn } from '../../resident';
 import {
     Address,
     isGroup,
@@ -27,12 +36,14 @@ import {
     ADDRESS_SYSTEM,
     isChild
 } from '../../address';
-import { normalize, Template } from '../../template';
-import { isRouter, isBuffered } from '../../flags';
+import { Template } from '../../template';
+import { isRouter, isBuffered, FLAG_EXIT_AFTER_RUN } from '../../flags';
 import { Message, Envelope } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
-
+import { SharedThreadRunner } from './thread/shared/runner';
+import { SharedThread } from './thread/shared';
+import { Thread, VMThread } from './thread';
 import {
     State,
     get,
@@ -44,16 +55,15 @@ import {
     getGroup,
     getChildren,
     remove,
-    Runtimes
+    Threads,
+    getAddress
 } from './state';
 import { Script } from './script';
 import { Context, newContext } from './runtime/context';
-import { Thread } from './runtime/thread';
-import { Heap } from './runtime/heap';
-import { Runtime, Operand } from './runtime';
-import { Conf, defaults } from './conf';
 import { Frame } from './runtime/stack/frame';
 import { Opcode, toLog } from './runtime/op';
+import { Operand } from './runtime';
+import { Conf, defaults } from './conf';
 import {
     LOG_LEVEL_DEBUG,
     LOG_LEVEL_INFO,
@@ -61,13 +71,17 @@ import {
     LOG_LEVEL_WARN,
     LOG_LEVEL_ERROR
 } from './log';
+import { HeapLedger, DefaultHeapLedger } from './runtime/heap/ledger';
+import { ScriptFactory } from './scripts/factory';
+import { Foreign } from './type';
 import { getLevel } from './event';
-import { PTValue } from './type';
 
 /**
  * Slot
  */
-export type Slot = [Address, Script, Runtime];
+export type Slot = [Address, Script, Thread];
+
+const ID_RANDOM = `#?POTOORAND?#${Date.now()}`;
 
 export const MAX_WORK_LOAD = 25;
 
@@ -77,21 +91,19 @@ export const MAX_WORK_LOAD = 25;
  * It provides methods for manipulating the state of the actors of the system.
  * Some opcode handlers depend on this interface to do their work.
  */
-export interface Platform {
+export interface Platform extends Actor {
 
     /**
-     * allocate a new Runtime for an actor.
+     * heap storage with builtin ownership tracking for all threads.
+     */
+    heap: HeapLedger
+
+    /**
+     * allocate a new Thread for an actor.
      *
-     * It is an error if a Runtime has already been allocated for the actor.
+     * It is an error if a Thread has already been allocated for the actor.
      */
     allocate(self: Address, t: template.Template): Either<Err, Address>
-
-    /**
-     * runActor provides a Future that when fork()'d will execute the 
-     * start code/method for the target actor.
-     *
-     */
-    runActor(target: Address): Future<void>
 
     /**
      * sendMessage to an actor in the system.
@@ -99,12 +111,12 @@ export interface Platform {
      * The result is true if the actor was found or false
      * if the actor is not in the system.
      */
-    sendMessage(to: Address, from: Address, msg: PTValue): boolean
+    sendMessage(to: Address, from: Address, msg: Message): boolean
 
     /**
-     * getRuntime from the system given its address.
+     * getThread from the system given its address.
      */
-    getRuntime(addr: Address): Maybe<Runtime>
+    getThread(addr: Address): Maybe<Thread>
 
     /**
      * getRouter attempts to retrieve a router for the address specified.
@@ -112,19 +124,19 @@ export interface Platform {
     getRouter(addr: Address): Maybe<Context>
 
     /**
-     * getGroup attemps to retreive all the members of a group.
+     * getGroup attempts to retrieve all the members of a group.
      */
     getGroup(name: string): Maybe<Address[]>
 
     /**
      * getChildren provides the children contexts for an address.
      */
-    getChildren(addr: Address): Maybe<Runtimes>
+    getChildren(addr: Address): Maybe<Threads>
 
     /**
-     * putRuntime in the system at the specified address.
+     * putThread in the system at the specified address.
      */
-    putRuntime(addr: Address, r: Runtime): Platform
+    putThread(addr: Address, r: Thread): Platform
 
     /**
      * putRoute configures a router for all actors that are under the
@@ -138,7 +150,7 @@ export interface Platform {
     putMember(group: string, addr: Address): Platform
 
     /**
-     * remove a Runtime from the system.
+     * remove a Thread from the system.
      */
     remove(addr: Address): Platform
 
@@ -148,16 +160,29 @@ export interface Platform {
     removeRoute(target: Address): Platform
 
     /**
+     * spawn an actor using the given Instance as the parent.
+     *
+     * The Instance is required to verify if it is still part of the system.
+     */
+    spawn(parent: Instance, tmpl: template.Spawnable): Address
+
+    /**
+     * identify an actor Instance producing its address if it is part of the 
+     * system.
+     */
+    identify(target: Instance): Maybe<Address>
+
+    /**
      * kill terminates the actor at the specified address.
      *
      * The actor must be a child of parent to succeed.
      */
-    kill(parent: Address, target: Address): Future<void>
+    kill(parent: Instance, target: Address): Future<void>
 
     /**
-     * raise does the error handling on behalf of Runtimes.
+     * raise an exception within the system
      */
-    raise(addr: Address, err: Err): void
+    raise(src: Instance, err: Err): void
 
     /**
      * trigger is used to generate events as the system runs.
@@ -165,29 +190,41 @@ export interface Platform {
     trigger(addr: Address, evt: string, ...args: Type[]): void
 
     /**
-     * logOp is used by Runtimes to log which opcodes are executed.
+     * logOp is used by Thread to log which opcodes are executed.
      */
-    logOp(r: Runtime, f: Frame, op: Opcode, operand: Operand): void
+    logOp(r: VMThread, f: Frame, op: Opcode, operand: Operand): void
 
     /**
-     * runTask executes an async operation on behalf of a Runtime.
+     * exec a function by name with the provided arguments using the actor
+     * instance's thread.
      */
-    runTask(addr: Address, ft: Future<void>): void
+    exec(actor: Instance, funName: string, args?: Foreign[]): void
 
 }
 
 /**
- * PVM is the Potoo Virtual Machine.
+ * PVM (Potoo Virtual Machine) is a JavaScript implemented virtual machine that
+ * functions as a message delivery system between target actors.
+ *
+ * Actors known to the VM are considered to be part of a system and may or may
+ * not reside on the same process/worker/thread depending on the underlying 
+ * platform and individual actor implementations.
  */
-export class PVM implements Platform, Actor {
+export class PVM implements Platform {
 
     constructor(public system: System, public conf: Conf = defaults()) { }
 
-    static create<S extends System>(s: S, conf: object): PVM {
+    _actorIdCounter = -1;
 
-        return new PVM(s, <Conf>rmerge(<Record<Type>>defaults(), <any>conf));
+    /**
+     * heap memory shared between actor Threads.
+     */
+    heap = new DefaultHeapLedger();
 
-    }
+    /**
+     * threadRunner shared between vm threads.
+     */
+    threadRunner = new SharedThreadRunner(this);
 
     /**
      * state contains information about all the actors in the system, routers
@@ -195,36 +232,39 @@ export class PVM implements Platform, Actor {
      */
     state: State = {
 
-        runtimes: {
+        threads: {
 
-            $: new Thread(this, new Heap(),
-                (newContext(this, '$', { create: () => this })))
+            $: new SharedThread(
+                this,
+                ScriptFactory.getScript(this),
+                this.threadRunner,
+                newContext(this._actorIdCounter++, this, '$', {
+
+                    create: () => this,
+
+                    trap: () => template.ACTION_RAISE
+
+                }))
 
         },
 
         routers: {},
 
-        groups: {}
+        groups: {},
+
+        pendingMessages: {}
 
     };
 
     /**
-     * runQ is the queue of pending Scripts to be executed.
+     * Create a new PVM instance using the provided System implementation and
+     * configuration object.
      */
-    runQ: Slot[] = [];
+    static create<S extends System>(s: S, conf: object = {}): PVM {
 
-    /**
-     * waitQ is the queue of pending Scripts for Runtimes that are awaiting
-     * the completion of an async task.
-     */
-    waitQ: Slot[] = [];
+        return new PVM(s, <Conf>rmerge(<Record<Type>>defaults(), <any>conf));
 
-    /**
-     * blocked is a 
-     */
-    blocked: Address[] = [];
-
-    running = false;
+    }
 
     init(c: Context): Context {
 
@@ -238,50 +278,102 @@ export class PVM implements Platform, Actor {
 
     }
 
-    start() {
+    start() { }
 
-    }
-
-    notify() {
-
-    }
+    notify() { }
 
     stop(): Future<void> {
 
-        return this.kill(ADDRESS_SYSTEM, ADDRESS_SYSTEM);
+        return this.kill(this, ADDRESS_SYSTEM);
 
     }
 
-    allocate(parent: Address, t: Template): Either<Err, Address> {
+    identify(inst: Instance): Maybe<Address> {
 
-        let temp = normalize(t);
+        return getAddress(this.state, inst);
 
-        if (isRestricted(temp.id))
-            return left(new errors.InvalidIdErr(temp.id));
+    }
 
-        let addr = make(parent, temp.id);
+    spawn(parent: Instance, tmpl: template.Spawnable): Address {
 
-        if (this.getRuntime(addr).isJust())
+        let mparentAddr = this.identify(parent);
+
+        if (mparentAddr.isNothing()) {
+
+            this.raise(this, new errors.UnknownInstanceErr(parent));
+
+            return '?';
+
+        }
+
+        return this._spawn(mparentAddr.get(), normalize(tmpl));
+
+    }
+
+    _spawn(parent: Address, tmpl: Template): Address {
+
+        let eresult = this.allocate(parent, tmpl);
+
+        if (eresult.isLeft()) {
+
+            this.raise(this.state.threads[parent].context.actor,
+                eresult.takeLeft());
+
+            return '?';
+
+        }
+
+        let result = eresult.takeRight();
+
+        this.runActor(result);
+
+        if (Array.isArray(tmpl.children))
+            // TODO: Make this call stack friendly some day.
+            tmpl.children.forEach(tmp => this._spawn(result, tmp));
+
+        return result;
+
+    }
+
+    allocate(parent: Address, tmpl: Template): Either<Err, Address> {
+
+        if (tmpl.id === ID_RANDOM) {
+            let rtime = get(this.state, parent).get();
+            let prefix = rtime.context.actor.constructor.name.toLowerCase();
+            tmpl.id = `actor::${this._actorIdCounter + 1}~${prefix}`;
+        }
+
+        if (isRestricted(<string>tmpl.id))
+            return left(new errors.InvalidIdErr(<string>tmpl.id));
+
+        let addr = make(parent, <string>tmpl.id);
+
+        if (this.getThread(addr).isJust())
             return left(new errors.DuplicateAddressErr(addr));
 
-        let args = Array.isArray(t.args) ? t.args : [];
+        let args = Array.isArray(tmpl.args) ? tmpl.args : [];
 
-        let act = t.create(this.system, t, ...args);
+        let act = tmpl.create(this.system, tmpl, ...args);
 
-        let thr = new Thread(this, new Heap(),
-            act.init(newContext(act, addr, t)));
+        // TODO: Have thread types depending on the actor type instead.
+        let thr = new SharedThread(
+            this,
+            ScriptFactory.getScript(act),
+            this.threadRunner,
+            act.init(newContext(this._actorIdCounter++, act, addr, tmpl))
+        );
 
-        this.putRuntime(addr, thr);
+        this.putThread(addr, thr);
 
         this.trigger(addr, events.EVENT_ACTOR_CREATED);
 
         if (isRouter(thr.context.flags))
             this.putRoute(addr, addr);
 
-        if (temp.group) {
+        if (tmpl.group) {
 
-            let groups = (typeof temp.group === 'string') ?
-                [temp.group] : temp.group;
+            let groups = (typeof tmpl.group === 'string') ?
+                [tmpl.group] : tmpl.group;
 
             groups.forEach(g => this.putMember(g, addr));
 
@@ -291,70 +383,37 @@ export class PVM implements Platform, Actor {
 
     }
 
-    runActor(target: Address): Future<void> {
+    runActor(target: Address) {
 
-        let mrtime = this.getRuntime(target);
+        let mthread = this.getThread(target);
 
-        if (mrtime.isNothing())
+        if (mthread.isNothing())
             return raise(new errors.UnknownAddressErr(target));
 
-        let rtime = mrtime.get();
+        let rtime = mthread.get();
 
         let ft = rtime.context.actor.start(target);
 
+        // Assumes the actor returned a Future
+        if (ft)
+            rtime.wait(ft);
+
+        // Actors with this flag need to be brought down immediately.
+        // TODO: Move this to the actors own run method after #47
+        if (rtime.context.flags & FLAG_EXIT_AFTER_RUN)
+            rtime.wait(this.kill(rtime.context.actor, target));
+
         this.trigger(rtime.context.address, events.EVENT_ACTOR_STARTED);
 
-        return ((ft != null) ? <Future<void>>ft : pure(<void>undefined));
-
     }
 
-    runTask(addr: Address, ft: Future<void>) {
-
-        this.blocked = dedupe(this.blocked.concat(addr));
-
-        //XXX: Fork is used here instead of finally because the raise() method
-        // may trigger side-effects. For example the actor being stopped or 
-        // restarted.
-        ft
-            .fork(
-                (e: Error) => {
-
-                    this.blocked = arremove(this.blocked, addr);
-
-                    this.raise(addr, e);
-
-                },
-                () => {
-
-                    this.blocked = arremove(this.blocked, addr);
-
-                    //TODO: This is done to keep any waiting scripts going after
-                    //the task completes. The side-effect of this needs to be
-                    //observed a bit more but scripts of blocked actors other
-                    //than addr should not be affected. In future it may suffice
-                    //to run only scripts for addr.
-                    this.run();
-
-                });
-
-    }
-
-    sendMessage(to: Address, from: Address, m: PTValue): boolean {
+    sendMessage(to: Address, from: Address, msg: Message): boolean {
 
         let mRouter = this.getRouter(to);
 
         let mctx = mRouter.isJust() ?
             mRouter :
-            this.getRuntime(to).map(r => r.context)
-
-        //TODO: We dont want to pass HeapObjects to actors?
-        //Its annoying for ES actors but may be necessary for vm actors.
-        //There are various things that could be done here. If we make all 
-        //PTValues an interface then we could just promote. Alternatively we
-        //could introduce a Foreign PTValue to represent foreign values.
-        //Much more thought is needed but for now we don't want HeapObjects
-        //passed to ES actors.
-        let msg = isObject(m) ? m.promote() : m;
+            this.getThread(to).map(r => r.context)
 
         //routers receive enveloped messages.
         let actualMessage = mRouter.isJust() ?
@@ -372,23 +431,26 @@ export class PVM implements Platform, Actor {
 
             } else {
 
+                // TODO: Support async.
                 ctx.actor.accept(actualMessage);
 
             }
 
             this.trigger(from, events.EVENT_SEND_OK, to, msg);
+
             return true;
 
         } else {
 
             this.trigger(from, events.EVENT_SEND_FAILED, to, msg);
+
             return false;
 
         }
 
     }
 
-    getRuntime(addr: Address): Maybe<Runtime> {
+    getThread(addr: Address): Maybe<Thread> {
 
         return get(this.state, addr);
 
@@ -406,13 +468,13 @@ export class PVM implements Platform, Actor {
 
     }
 
-    getChildren(addr: Address): Maybe<Runtimes> {
+    getChildren(addr: Address): Maybe<Threads> {
 
         return fromNullable(getChildren(this.state, addr));
 
     }
 
-    putRuntime(addr: Address, r: Runtime): PVM {
+    putThread(addr: Address, r: Thread): PVM {
 
         this.state = put(this.state, addr, r);
         return this;
@@ -455,7 +517,14 @@ export class PVM implements Platform, Actor {
 
     }
 
-    raise(addr: Address, err: Err): void {
+    raise(src: Instance, err: Err): void {
+
+        let maddr = this.identify(src);
+
+        // For now, ignore requests from unknown instances.
+        if (maddr.isNothing()) return;
+
+        let addr = maddr.get();
 
         //TODO: pause the runtime.
         let next = addr;
@@ -463,16 +532,7 @@ export class PVM implements Platform, Actor {
         loop:
         while (true) {
 
-            let mrtime = this.getRuntime(next);
-
-            if (next === ADDRESS_SYSTEM) {
-
-                if (err instanceof Error)
-                    throw err;
-
-                throw new Error(err.message);
-
-            }
+            let mrtime = this.getThread(next);
 
             //TODO: This risks swallowing errors.
             if (mrtime.isNothing()) return;
@@ -489,29 +549,49 @@ export class PVM implements Platform, Actor {
 
                 case template.ACTION_RESTART:
 
-                    this.runTask(next,
+                    let maddr = get(this.state, next);
+
+                    if (maddr.isJust())
                         this
-                            .kill(next, next)
+                            .kill(maddr.get().context.actor, next)
                             .chain(() => {
 
                                 let eRes = this.allocate(getParent(next),
                                     rtime.context.template);
 
-                                return eRes.isLeft() ?
-                                    raise(new Error(eRes.takeLeft().message)) :
-                                    this.runActor(eRes.takeRight());
+                                if (eRes.isLeft())
+                                    return raise(new Error(
+                                        eRes.takeLeft().message));
 
-                            }));
+                                this.runActor(eRes.takeRight());
 
+                                return voidPure;
+
+                            }).fork(e => this.raise(this, e));
                     break loop;
 
                 case template.ACTION_STOP:
-                    this.runTask(next, this.kill(next, next));
+
+                    let smaddr = get(this.state, next);
+
+                    if (smaddr.isJust())
+                        this.kill(smaddr.get().context.actor, next)
+                            .fork(e => this.raise(this, e));
                     break loop;
 
                 default:
-                    //escalate
-                    next = getParent(next);
+                    if (next === ADDRESS_SYSTEM) {
+
+                        if (err instanceof Error) throw err;
+
+                        throw new Error(err.message);
+
+                    } else {
+
+                        next = getParent(next);
+
+                    }
+
                     break;
 
             }
@@ -559,80 +639,78 @@ export class PVM implements Platform, Actor {
 
     }
 
-    logOp(r: Runtime, f: Frame, op: Opcode, oper: Operand) {
+    logOp(r: VMThread, f: Frame, op: Opcode, oper: Operand) {
 
-        if (this.conf.log.level >= LOG_LEVEL_DEBUG)
-            this.conf.log.logger.debug.apply(null, [
-                `[${r.context.address}]`,
-                `(${f.script.name})`,
-                ...toLog(op, r, f, oper)
-            ]);
-
-    }
-
-    kill(parent: Address, target: Address): Future<void> {
-
-        let addrs = isGroup(target) ?
-            this.getGroup(target).orJust(() => []).get() : [target];
-
-        return scheduleFutures(addrs.map((addr): Future<void> => {
-
-            if ((!isChild(parent, target)) && (target !== parent))
-                return raise(new Error(`IllegalStopErr: Actor ${parent} ` +
-                    `cannot kill non-child ${addr}!`));
-
-            let mrun = this.getRuntime(addr);
-
-            if (mrun.isNothing()) return pure(<void>undefined);
-
-            let run = mrun.get();
-
-            let mchilds = this.getChildren(target);
-
-            let childs = mchilds.isJust() ? mchilds.get() : {};
-
-            let cwork = mapTo(map(childs, (r, k) =>
-                r
-                    .die()
-                    .chain(() => {
-
-                        this.remove(k);
-                        return pure(<void>undefined);
-
-                    })), f => f);
-
-            return scheduleFutures(cwork)
-                .chain(() => {
-
-                    return addr === ADDRESS_SYSTEM ?
-                        pure(<void>undefined) :
-                        run.die();
-
-                })
-                .chain(() => {
-
-                    this.trigger(run.context.address,
-                        events.EVENT_ACTOR_STOPPED);
-
-                    if (addr !== ADDRESS_SYSTEM)
-                        this.remove(addr);
-
-                    return pure(<void>undefined);
-
-                });
-
-        }));
+        this.conf.log.logger.debug.apply(null, [
+            `[${r.context.address}]`,
+            `(${f.script.name})`,
+            ...toLog(op, r, f, oper)
+        ]);
 
     }
 
-    /**
-     * spawn an actor.
-     *
-     * This actor will be a direct child of the root.
-     */
-    spawn(t: Template): Address {
+    kill(parent: Instance, target: Address): Future<void> {
 
-        return spawn(this.system, this, t);
+        let that = this;
+
+        return doFuture<void>(function*() {
+
+            let mparentAddr = that.identify(parent);
+
+            // For now, ignore unknown kill requests.
+            if (mparentAddr.isNothing()) return pure(undefined);
+
+            let parentAddr = mparentAddr.get();
+
+            let addrs = isGroup(target) ?
+                that.getGroup(target).orJust(() => []).get() : [target];
+
+            return runBatch(addrs.map(addr => doFuture<void>(function*() {
+                if ((!isChild(parentAddr, target)) && (target !== parentAddr)) {
+
+                    let err = new Error(
+                        `IllegalStopErr: Actor "${parentAddr}" ` +
+                        `cannot kill non-child "${addr}"!`);
+
+                    that.raise(parent, err);
+
+                    return raise<void>(err);
+
+                }
+
+                let mthread = that.getThread(addr);
+
+                if (mthread.isNothing()) return pure(<void>undefined);
+
+                let thread = mthread.get();
+
+                let mchilds = that.getChildren(target);
+
+                let childs = mchilds.isJust() ? mchilds.get() : {};
+
+                let killChild = (child: Thread, addr: Address) =>
+                    doFuture(function*() {
+
+                        yield child.die();
+
+                        that.remove(addr);
+
+                        that.trigger(addr, events.EVENT_ACTOR_STOPPED);
+
+                        return voidPure;
+
+                    });
+
+                yield runBatch(mapTo(map(childs, killChild), f => f));
+
+                if (addr !== ADDRESS_SYSTEM)
+                    yield killChild(thread, addr);
+
+                return voidPure;
+
+            })));
+
+        });
 
     }
 
@@ -641,116 +719,51 @@ export class PVM implements Platform, Actor {
      *
      * If you want to immediately deliver a message, use [[sendMessage]] instead.
      */
-    tell<M>(ref: Address, m: M): PVM {
+    tell<M>(ref: Address, msg: M): PVM {
 
-        this.system.exec(this, new scripts.Tell(ref, m));
+        this.exec(this, 'tell', [ref, msg]);
         return this;
 
     }
 
-    execNow(i: Instance, s: Script): Maybe<PTValue> {
+    exec(actor: Instance, funName: string, args: Foreign[] = []) {
 
-        let mslot = getSlot(this.state, i);
+        let mAddress = this.identify(actor);
 
-        if (mslot.isNothing()) {
+        if (mAddress.isNothing())
+            return this.raise(this, new errors.UnknownInstanceErr(actor));
 
-            this.trigger(ADDRESS_SYSTEM, events.EVENT_EXEC_INSTANCE_STALE);
+        let thread = <VMThread>(this.state.threads[mAddress.get()]);
 
-            return nothing();
+        thread.exec(funName, args);
 
-        } else {
-
-            let [, rtime] = mslot.get();
-
-            return new Thread(this, rtime.heap, rtime.context).exec(s);
-
-        }
-
-    }
-
-    exec(i: Instance, s: Script): void {
-
-        let mslot = getSlot(this.state, i);
-
-        if (mslot.isNothing()) {
-
-            this.trigger(ADDRESS_SYSTEM, events.EVENT_EXEC_INSTANCE_STALE);
-
-        } else {
-
-            let [addr, rtime] = mslot.get();
-
-            this.runQ.push([addr, s, rtime]);
-
-            this.run();
-
-        }
-
-    }
-
-    run() {
-
-        if (this.running === true) return;
-
-        this.running = true;
-
-        doRun:
-        while (this.running) {
-
-            while (!empty(this.runQ)) {
-
-                let next = <Slot>this.runQ.shift();
-
-                let [addr, script, rtime] = next;
-
-                let mctime = this.getRuntime(addr);
-
-                //is the runtime still here?
-                if (mctime.isNothing()) {
-
-                    this.trigger(addr, events.EVENT_EXEC_ACTOR_GONE);
-
-                    //is it the same instance?
-                } else if (mctime.get() !== rtime) {
-
-                    this.trigger(addr, events.EVENT_EXEC_ACTOR_CHANGED);
-
-                    // is the runtime awaiting an async task?
-                } else if (contains(this.blocked, addr)) {
-
-                    this.waitQ.push(next);
-
-                } else {
-
-                    rtime.exec(script);
-
-                }
-
-            }
-
-            let [unblocked, blocked] = partition(this.waitQ, s =>
-                !contains(this.blocked, s[0]));
-
-            this.waitQ = blocked;
-
-            if (unblocked.length > 0) {
-
-                this.runQ = this.runQ.concat(unblocked);
-                continue doRun;
-
-            }
-
-            this.running = false;
-
-        }
     }
 
 }
 
-const getSlot = (s: State, actor: Instance): Maybe<[Address, Runtime]> =>
-    reduce(s.runtimes, nothing(), (p: Maybe<[Address, Runtime]>, c, k) =>
-        c.context.actor === actor ? fromNullable([k, c]) : p);
+const runBatch = (work: Future<void>[]): Future<void> =>
+    doFuture(function*() {
 
-const scheduleFutures = (work: Future<void>[]): Future<void> =>
-    batch(distribute(work, MAX_WORK_LOAD))
-        .chain(() => pure(<void>undefined));
+        yield batch(distribute(work, MAX_WORK_LOAD))
+
+        return voidPure;
+
+    });
+
+const normalize = (spawnable: template.Spawnable) => {
+
+    let tmpl = <Partial<Template>>(isFunction(spawnable) ?
+        { create: spawnable } :
+        spawnable);
+
+    tmpl.id = tmpl.id ? tmpl.id : ID_RANDOM
+
+    return <Template>merge(tmpl, {
+
+        children: isRecord(tmpl.children) ?
+            mapTo(tmpl.children, (c, k) => merge(c, { id: k })) :
+            tmpl.children ? tmpl.children : []
+
+    })
+
+}

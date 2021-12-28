@@ -84,99 +84,88 @@ export interface PropInfo {
     type: TypeInfo;
 }
 /**
- * VoidInfo
+ * NewInfo
  */
-export declare class VoidInfo implements Info {
+export declare abstract class NewInfo implements Info {
     name: string;
     constructor(name: string);
+    abstract type: TypeInfo;
+    abstract descriptor: number;
+}
+/**
+ * VoidInfo
+ */
+export declare class VoidInfo extends NewInfo {
     type: NewTypeInfo;
     descriptor: number;
 }
 /**
  * NewUInt8Info
  */
-export declare class NewUInt8Info implements Info {
-    name: string;
-    constructor(name: string);
+export declare class NewUInt8Info extends NewInfo {
     type: NewTypeInfo;
     descriptor: number;
 }
 /**
  * NewUInt16Info
  */
-export declare class NewUInt16Info implements Info {
-    name: string;
-    constructor(name: string);
+export declare class NewUInt16Info extends NewInfo {
     type: NewTypeInfo;
     descriptor: number;
 }
 /**
  * NewUInt32Info
  */
-export declare class NewUInt32Info implements Info {
-    name: string;
-    constructor(name: string);
+export declare class NewUInt32Info extends NewInfo {
     type: NewTypeInfo;
     descriptor: number;
 }
 /**
  * NewInt8Info
  */
-export declare class NewInt8Info implements Info {
-    name: string;
-    constructor(name: string);
+export declare class NewInt8Info extends NewInfo {
     type: NewTypeInfo;
     descriptor: number;
 }
 /**
  * NewInt16Info
  */
-export declare class NewInt16Info implements Info {
-    name: string;
-    constructor(name: string);
+export declare class NewInt16Info extends NewInfo {
     type: NewTypeInfo;
     descriptor: number;
 }
 /**
  * NewInt32Info
  */
-export declare class Int32Info implements Info {
-    name: string;
-    constructor(name: string);
+export declare class NewInt32Info extends NewInfo {
     type: NewTypeInfo;
     descriptor: number;
 }
 /**
  * NewBooleanInfo
  */
-export declare class NewBooleanInfo implements Info {
-    name: string;
-    constructor(name: string);
+export declare class NewBooleanInfo extends NewInfo {
     type: NewTypeInfo;
     descriptor: number;
 }
 /**
  * NewStringInfo
  */
-export declare class NewStringInfo implements Info {
-    name: string;
-    constructor(name: string);
+export declare class NewStringInfo extends NewInfo {
     type: NewTypeInfo;
     descriptor: number;
 }
 /**
  * NewObjectInfo
  */
-export declare class NewObjectInfo implements Info {
-    name: string;
-    constructor(name: string);
+export declare class NewObjectInfo extends NewInfo {
     type: NewTypeInfo;
     descriptor: number;
 }
 /**
  * NewArrayInfo
  */
-export declare class NewArrayInfo implements Info {
+export declare class NewArrayInfo extends NewInfo {
     name: string;
     type: ArrayTypeInfo;
     constructor(name: string, type: ArrayTypeInfo);
@@ -185,7 +174,7 @@ export declare class NewArrayInfo implements Info {
 /**
  * NewFunInfo
  */
-export declare class NewFunInfo implements FunInfo {
+export declare class NewFunInfo extends NewInfo implements FunInfo {
     name: string;
     argc: number;
     code: Instruction[];
@@ -197,7 +186,7 @@ export declare class NewFunInfo implements FunInfo {
 /**
  * NewForeignFunInfo
  */
-export declare class NewForeignFunInfo implements FunInfo {
+export declare class NewForeignFunInfo extends NewInfo implements FunInfo {
     name: string;
     argc: number;
     exec: ForeignFun;
@@ -210,7 +199,7 @@ export declare class NewForeignFunInfo implements FunInfo {
 /**
  * NewTypeInfo
  */
-export declare class NewTypeInfo implements TypeInfo {
+export declare class NewTypeInfo extends NewInfo implements TypeInfo {
     name: string;
     argc: number;
     properties: PropInfo[];
@@ -222,7 +211,7 @@ export declare class NewTypeInfo implements TypeInfo {
 /**
  * NewArrayTypeInfo
  */
-export declare class NewArrayTypeInfo implements ArrayTypeInfo {
+export declare class NewArrayTypeInfo extends NewInfo implements ArrayTypeInfo {
     name: string;
     elements: TypeInfo;
     constructor(name: string, elements: TypeInfo);

@@ -4,15 +4,14 @@ import * as error from '../error';
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Type } from '@quenk/noni/lib/data/type';
-import { fromNullable, Maybe } from '@quenk/noni/lib/data/maybe';
+import { Maybe, fromNullable, nothing } from '@quenk/noni/lib/data/maybe';
 
 import { Script } from '../../script';
-import { Context } from '../context';
-import { HeapObject } from '../heap/object';
-import { Heap } from '../heap';
-import { Instruction, Operand } from '../';
+import { PTObject } from '../../type';
 import { PTValue, BYTE_TYPE, TYPE_FUN } from '../../type';
 import { FunInfo, Info } from '../../script/info';
+import { VMThread } from '../../thread';
+import { Instruction, Operand } from '../';
 
 export const DATA_RANGE_TYPE_HIGH = 0xf0000000;
 export const DATA_RANGE_TYPE_LOW = 0x1000000;
@@ -32,11 +31,13 @@ export const DATA_MAX_SAFE_UINT32 = 0x7fffffff;
 //They are not meant to be used to check the actual type of the underlying value.
 export const DATA_TYPE_STRING = DATA_RANGE_TYPE_STEP * 3;
 export const DATA_TYPE_INFO = DATA_RANGE_TYPE_STEP * 4;
-export const DATA_TYPE_HEAP_OBJECT = DATA_RANGE_TYPE_STEP * 6;
-export const DATA_TYPE_HEAP_STRING = DATA_RANGE_TYPE_STEP * 7
-export const DATA_TYPE_LOCAL = DATA_RANGE_TYPE_STEP * 8;
-export const DATA_TYPE_MAILBOX = DATA_RANGE_TYPE_STEP * 9;
-export const DATA_TYPE_SELF = DATA_RANGE_TYPE_STEP * 10;
+export const DATA_TYPE_HEAP_STRING = DATA_RANGE_TYPE_STEP * 6
+export const DATA_TYPE_HEAP_OBJECT = DATA_RANGE_TYPE_STEP * 7;
+export const DATA_TYPE_HEAP_FOREIGN = DATA_RANGE_TYPE_STEP * 8;
+export const DATA_TYPE_HEAP_FUN = DATA_RANGE_TYPE_STEP * 9;
+export const DATA_TYPE_LOCAL = DATA_RANGE_TYPE_STEP * 10;
+export const DATA_TYPE_MAILBOX = DATA_RANGE_TYPE_STEP * 11;
+export const DATA_TYPE_SELF = DATA_RANGE_TYPE_STEP * 12;
 
 export const BYTE_CONSTANT_NUM = 0x10000;
 export const BYTE_CONSTANT_STR = 0x20000;
@@ -50,13 +51,22 @@ export const BYTE_CONSTANT_INFO = 0x30000;
  * Typically, the highest byte is used to indicate the type of the data
  * in realtion to storage location and the remaining 3 bytes, value.
  *
- * 11111111        111111111111111111111111
- * <type/location> <     value      >
+ * 11111111            11111111 11111111 11111111
+ * <type/location>      <     value      >
  *
  * The actual interpretation of the location and value part are dependant on
  * the type.
  */
 export type Data = number;
+
+/**
+ * Used to identity frames via a specific format:
+ * <templateid>@<actorid>#<callstack>
+ * 
+ * Where <callstack> is a list of function names in the callstack up to the
+ * Frame's own function separated by '/'.
+ */
+export type FrameName = string;
 
 /**
  * Frame is the context for currently executing op codes.
@@ -67,9 +77,9 @@ export type Data = number;
 export interface Frame {
 
     /**
-     * name of the routine this frame belongs too.
+     * name of the Frame used to identity it.
      */
-    name: string
+    name: FrameName
 
     /**
      * script the routine is defined in.
@@ -77,14 +87,14 @@ export interface Frame {
     script: Script
 
     /**
-     * context of the actor that is executing this frame.
+     * thread for the actor.
      */
-    context: Context
+    thread: VMThread
 
     /**
-     * heap of the current Runtime
+     * parent Frame that created this Frame (if any).
      */
-    heap: Heap
+    parent: Maybe<Frame>
 
     /**
      * code the frame executes as part of the routine.
@@ -195,7 +205,12 @@ export interface Frame {
     /**
      * popObject provides the entry for an object in the heap.
      */
-    popObject(): Either<Err, HeapObject>
+    popObject(): Either<Err, PTObject>
+
+    /**
+     * popForeign provides the entry for a foreign object in the heap.
+     */
+    popForeign(): Either<Err, Type>
 
     /**
      * duplicate the top of the stack.
@@ -228,8 +243,8 @@ export class StackFrame implements Frame {
     constructor(
         public name: string,
         public script: Script,
-        public context: Context,
-        public heap: Heap,
+        public thread: VMThread,
+        public parent: Maybe<Frame> = nothing(),
         public code: Instruction[] = [],
         public data: Data[] = [],
         public locals: Data[] = [],
@@ -298,7 +313,7 @@ export class StackFrame implements Frame {
 
     resolve(data: Data): Either<Err, Type> {
 
-        let { context } = this;
+        let { context } = this.thread;
 
         let typ = data & DATA_MASK_TYPE;
 
@@ -311,9 +326,17 @@ export class StackFrame implements Frame {
                 this.push(data);
                 return this.popString();
 
+            case DATA_TYPE_HEAP_FUN:
+                this.push(data);
+                return this.popFunction();
+
             case DATA_TYPE_HEAP_OBJECT:
                 this.push(data);
                 return this.popObject();
+
+            case DATA_TYPE_HEAP_FOREIGN:
+                this.push(data);
+                return this.popForeign();
 
             case DATA_TYPE_INFO:
                 this.push(data);
@@ -380,11 +403,11 @@ export class StackFrame implements Frame {
 
         } else if (typ === DATA_TYPE_HEAP_STRING) {
 
-            return right(this.heap.getString(idx));
+            return right(this.thread.vm.heap.getString(data));
 
         } else if (typ === DATA_TYPE_SELF) {
 
-            return right(this.context.address);
+            return right(this.thread.context.address);
 
         } else {
 
@@ -419,28 +442,43 @@ export class StackFrame implements Frame {
 
     popFunction(): Either<Err, FunInfo> {
 
-        return <Either<Err, FunInfo>>this
-            .popName()
-            .chain(nfo => {
+        let data = this.pop();
 
-                if (((<FunInfo>nfo).descriptor & BYTE_TYPE) !== TYPE_FUN)
-                    return notAFunction(nfo.name);
+        let typ = data & DATA_MASK_TYPE;
 
-                return right(nfo);
+        if (typ === DATA_TYPE_HEAP_FUN) {
 
-            });
+            let mFun = this.thread.vm.heap.getObject(data);
+
+            return mFun.isJust() ? right(mFun.get()) : nullFunPtr(data);
+
+        } else {
+
+            this.push(data);
+
+            return <Either<Err, FunInfo>>this
+                .popName()
+                .chain(nfo => {
+
+                    if (((<FunInfo>nfo).descriptor & BYTE_TYPE) !== TYPE_FUN)
+                        return notAFunction(nfo.name);
+
+                    return right(nfo);
+
+                });
+
+        }
 
     }
 
-    popObject(): Either<Err, HeapObject> {
+    popObject(): Either<Err, PTObject> {
 
         let data = this.pop();
         let typ = data & DATA_MASK_TYPE;
-        let idx = data & DATA_MASK_VALUE24;
 
         if (typ === DATA_TYPE_HEAP_OBJECT) {
 
-            let mho = this.heap.getObject(idx);
+            let mho = this.thread.vm.heap.getObject(data);
 
             if (mho.isNothing())
                 return nullErr(data);
@@ -450,6 +488,28 @@ export class StackFrame implements Frame {
         } else {
 
             return wrongType(DATA_TYPE_HEAP_OBJECT, typ);
+
+        }
+
+    }
+
+    popForeign(): Either<Err, Type> {
+
+        let data = this.pop();
+        let typ = data & DATA_MASK_TYPE;
+
+        if (typ === DATA_TYPE_HEAP_FOREIGN) {
+
+            let mho = this.thread.vm.heap.getObject(data);
+
+            if (mho.isNothing())
+                return nullErr(data);
+
+            return right(mho.get());
+
+        } else {
+
+            return wrongType(DATA_TYPE_HEAP_FOREIGN, typ);
 
         }
 
@@ -498,6 +558,9 @@ const wrongType = <T>(expect: number, got: number): Either<Err, T> =>
 
 const notAFunction = <T>(name: string): Either<Err, T> =>
     left(new error.InvalidFunctionErr(name));
+
+const nullFunPtr = <T>(addr: Data): Either<Err, T> =>
+    left(new error.NullFunctionPointerErr(addr));
 
 const missingSymbol = <T>(data: Data): Either<Err, T> =>
     left(new error.MissingSymbolErr(data));

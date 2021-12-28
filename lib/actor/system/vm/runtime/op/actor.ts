@@ -1,20 +1,19 @@
-import * as error from '../error';
 
-import { isImmutable } from '../../../../flags';
 import { Template } from '../../../../template';
 import { Frame } from '../stack/frame';
-import { Runtime, Operand } from '../';
+import { Operand } from '../';
+import { VMThread } from '../../thread';
 
 /**
- * alloc a Runtime for a new actor.
+ * alloc a VMThread for a new actor.
  *
- * The Runtime is stored in the vm's state table. If the generated address
+ * The VMThread is stored in the vm's state table. If the generated address
  * already exists or is invalid an error will be raised.
  *
  * Stack:
  * <template>,<address> -> <address>
  */
-export const alloc = (r: Runtime, f: Frame, _: Operand) => {
+export const alloc = (r: VMThread, f: Frame, _: Operand) => {
 
     let eTemp = f.popObject();
 
@@ -34,7 +33,7 @@ export const alloc = (r: Runtime, f: Frame, _: Operand) => {
 
     } else {
 
-        f.push(f.heap.addString(eresult.takeRight()));
+        f.push(r.vm.heap.addString(f, eresult.takeRight()));
 
     }
 
@@ -44,28 +43,9 @@ export const alloc = (r: Runtime, f: Frame, _: Operand) => {
  * self puts the address of the current actor on to the stack.
  * TODO: make self an automatic variable
  */
-export const self = (_: Runtime, f: Frame, __: Operand) => {
+export const self = (_: VMThread, f: Frame, __: Operand) => {
 
     f.pushSelf();
-
-}
-
-/**
- * run triggers the run code for an actor.
- * 
- * TODO: Candidate for syscall.
- * Stack:
- * <address> -> 
- */
-export const run = (r: Runtime, f: Frame, _: Operand) => {
-
-    let eTarget = f.popString();
-
-    if (eTarget.isLeft()) return r.raise(eTarget.takeLeft());
-
-    let target = eTarget.takeRight();
-
-    r.vm.runTask(target, r.vm.runActor(target));
 
 }
 
@@ -75,7 +55,7 @@ export const run = (r: Runtime, f: Frame, _: Operand) => {
  * Stack:
  * <message>,<address> -> <uint8>
  */
-export const send = (r: Runtime, f: Frame, _: Operand) => {
+export const send = (r: VMThread, f: Frame, _: Operand) => {
 
     let eMsg = f.popValue();
 
@@ -102,7 +82,7 @@ export const send = (r: Runtime, f: Frame, _: Operand) => {
  * Stack:
  * <function> -> 
  */
-export const recv = (r: Runtime, f: Frame, _: Operand) => {
+export const recv = (r: VMThread, f: Frame, _: Operand) => {
 
     let einfo = f.popFunction();
 
@@ -121,7 +101,7 @@ export const recv = (r: Runtime, f: Frame, _: Operand) => {
  * Stack:
  *  -> <uint32>
  */
-export const recvcount = (r: Runtime, f: Frame, _: Operand) => {
+export const recvcount = (r: VMThread, f: Frame, _: Operand) => {
 
     f.push(r.context.receivers.length);
 
@@ -134,7 +114,7 @@ export const recvcount = (r: Runtime, f: Frame, _: Operand) => {
  * Stack:
  *  -> <uint32>
  */
-export const mailcount = (r: Runtime, f: Frame, _: Operand) => {
+export const mailcount = (r: VMThread, f: Frame, _: Operand) => {
 
     f.push(r.context.mailbox.length);
 
@@ -147,42 +127,9 @@ export const mailcount = (r: Runtime, f: Frame, _: Operand) => {
  *
  *  -> <message>?
  */
-export const maildq = (_: Runtime, f: Frame, __: Operand) => {
+export const maildq = (_: VMThread, f: Frame, __: Operand) => {
 
     f.pushMessage();
-
-}
-
-/**
- * read a message from the top of the stack.
- *
- * A receiver function is applied from the actors pending receiver list.
- * <message> -> <uint32>
- */
-export const read = (r: Runtime, f: Frame, __: Operand) => {
-
-    let func = isImmutable(r.context.flags) ?
-        r.context.receivers[0] : r.context.receivers.shift();
-
-    if (func == null)
-        return r.raise(new error.NoReceiveErr(r.context.address));
-
-    if (func.foreign === true) {
-
-        let emsg = f.popValue();
-
-        if (emsg.isLeft())
-            return r.raise(emsg.takeLeft());
-
-        let msg = emsg.takeRight();
-
-        r.invokeForeign(f, func, [msg]);
-
-    } else {
-
-        r.invokeVM(f, func);
-
-    }
 
 }
 
@@ -195,13 +142,13 @@ export const read = (r: Runtime, f: Frame, __: Operand) => {
  *
  * <address> ->
  */
-export const stop = (r: Runtime, f: Frame, _: Operand) => {
+export const stop = (r: VMThread, f: Frame, _: Operand) => {
 
     let eaddr = f.popString();
 
     if (eaddr.isLeft())
         return r.raise(eaddr.takeLeft());
 
-    r.kill(eaddr.takeRight());
+    r.wait(r.vm.kill(r.context.actor, eaddr.takeRight()));
 
 }

@@ -1,10 +1,8 @@
-import { mapTo, merge, isRecord } from '@quenk/noni/lib/data/record';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Type } from '@quenk/noni/lib/data/type';
 
 import { System } from './system';
 import { Actor } from './';
-import { randomID } from './address';
 
 export const ACTION_RAISE = -0x1;
 export const ACTION_IGNORE = 0x0;
@@ -27,7 +25,7 @@ export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * Cons is applied to produce an instance of an actor.
  */
-export type Cons= (s: System, t: Template, ...args: Type[]) => Actor;
+export type Cons = (s: System, t: Template, ...args: Type[]) => Actor;
 
 /**
  * DelayMilliseconds type.
@@ -112,16 +110,3 @@ export interface Template {
     children?: Templates | Template[]
 
 }
-
-/**
- * normalize a Template so that its is easier to work with.
- */
-export const normalize = (t: Template) => merge(t, {
-
-    id: t.id ? t.id : randomID(),
-
-    children: isRecord(t.children) ?
-        mapTo(t.children, (c, k) => merge(c, { id: k })) : 
-  t.children ? t.children : []
-
-})

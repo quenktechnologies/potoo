@@ -1,5 +1,6 @@
 import { Frame, } from '../stack/frame';
-import { Runtime, Operand } from '../';
+import { Operand } from '../';
+import { VMThread } from '../../thread';
 
 /**
  * getprop retrieves a property from an object.
@@ -7,7 +8,7 @@ import { Runtime, Operand } from '../';
  * Stack:
  *  <objectref> -> <value>
  */
-export const getprop = (r: Runtime, f: Frame, idx: Operand) => {
+export const getprop = (r: VMThread, f: Frame, idx: Operand) => {
 
     let eobj = f.popObject();
 
@@ -20,7 +21,7 @@ export const getprop = (r: Runtime, f: Frame, idx: Operand) => {
 
     if (mval.isJust()) {
 
-        f.push(r.heap.getAddress(mval.get()));
+        f.push(r.vm.heap.intern(f,mval.get()));
 
     } else {
 
@@ -41,7 +42,7 @@ export const getprop = (r: Runtime, f: Frame, idx: Operand) => {
  * Stack:
  * <arrayref> -> <uint32>
  */
-export const arlength = (r: Runtime, f: Frame, _: Operand) => {
+export const arlength = (r: VMThread, f: Frame, _: Operand) => {
 
     let eobj = f.popObject();
 
@@ -62,7 +63,7 @@ export const arlength = (r: Runtime, f: Frame, _: Operand) => {
  *
  * <arrayref>,<index> -> <element>
  */
-export const arelm = (r: Runtime, f: Frame, _: Operand) => {
+export const arelm = (r: VMThread, f: Frame, _: Operand) => {
 
     let earr = f.popObject();
 
@@ -74,7 +75,7 @@ export const arelm = (r: Runtime, f: Frame, _: Operand) => {
 
     if (melm.isJust()) {
 
-        f.push(r.heap.getAddress(melm.get()));
+        f.push(r.vm.heap.intern(f,melm.get()));
 
     } else {
 

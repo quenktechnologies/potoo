@@ -74,9 +74,9 @@ export declare class IllegalStopErr extends Error {
     constructor(parent: string, child: string);
 }
 /**
- * NoReceiveErr
+ * NoReceiverErr
  */
-export declare class NoReceiveErr extends Error {
+export declare class NoReceiverErr extends Error {
     actor: string;
     constructor(actor: string);
 }
@@ -145,6 +145,20 @@ export declare class InvalidConstructorErr extends Error {
  * InvalidFunctionErr
  */
 export declare class InvalidFunctionErr extends Error {
+    name: string;
+    constructor(name: string);
+}
+/**
+ * UnknownInstanceErr
+ */
+export declare class UnknownInstanceErr extends Error {
+    instance: object;
+    constructor(instance: object);
+}
+/**
+ * UnknownFuncErr
+ */
+export declare class UnknownFunErr extends Error {
     name: string;
     constructor(name: string);
 }

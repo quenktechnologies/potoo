@@ -110,7 +110,8 @@ export class UnexpectedDataType extends Error {
 
     constructor(public expected: number, public got: number) {
 
-        super(`Expected: ${expected}, Received: ${got}`);
+        super(`Expected: ${expected.toString(16)}, ` +
+            `Received: ${got.toString(16)}`);
 
     }
 
@@ -130,13 +131,13 @@ export class IllegalStopErr extends Error {
 }
 
 /**
- * NoReceiveErr
+ * NoReceiverErr
  */
-export class NoReceiveErr extends Error {
+export class NoReceiverErr extends Error {
 
     constructor(public actor: string) {
 
-        super(`Actor ${actor} tried to read without a handler!`);
+        super(`Actor ${actor} tried to read a message without a receiver!`);
 
     }
 
@@ -268,6 +269,35 @@ export class InvalidFunctionErr extends Error {
     constructor(public name: string) {
 
         super(`Named object "${name}" cannot be used as a function!`);
+
+    }
+
+}
+
+/**
+ * UnknownInstanceErr
+ */
+export class UnknownInstanceErr extends Error {
+
+    constructor(public instance: object) {
+
+        super(
+            'The instance provided with constructor ' +
+            (instance ? instance.constructor.name || instance : instance) +
+            '" is not in the system!'
+        );
+    }
+
+}
+
+/**
+ * UnknownFuncErr
+ */
+export class UnknownFunErr extends Error {
+
+    constructor(public name: string) {
+
+        super(`The function '${name}' does not exist and cannot be executed!`);
 
     }
 

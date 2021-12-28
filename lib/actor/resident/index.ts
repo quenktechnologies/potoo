@@ -1,25 +1,18 @@
-import * as scripts from './scripts';
-import * as events from '../system/vm/event';
 
-import { Future } from '@quenk/noni/lib/control/monad/future';
 import { map, merge } from '@quenk/noni/lib/data/record';
 import { isObject } from '@quenk/noni/lib/data/type';
 import { Err } from '@quenk/noni/lib/control/error';
 
 import { Context } from '../system/vm/runtime/context';
-import { NewForeignFunInfo } from '../system/vm/script/info';
+import { Foreign } from '../system/vm/type';
 import { System } from '../system';
 import {
-    ADDRESS_DISCARD,
     Address,
     AddressMap
 } from '../address';
 import { Message } from '../message';
-import { Template, Templates, Spawnable, normalize } from '../template';
-import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_TEMPORARY } from '../flags';
-import { Actor, Instance, Eff } from '../';
-
-import { Case } from './case';
+import { Templates, Spawnable } from '../template';
+import { Actor, Eff } from '../';
 import { Api } from './api';
 
 /**
@@ -36,7 +29,7 @@ export interface Resident
     Actor { }
 
 /**
- * AbstractResident implementation.
+ * AbstractResident is a base implementation of a Resident actor.
  */
 export abstract class AbstractResident
     implements
@@ -44,25 +37,21 @@ export abstract class AbstractResident
 
     constructor(public system: System) { }
 
-    self = (): Address => ADDRESS_DISCARD;
+    self = getSelf(this);
 
     abstract init(c: Context): Context;
 
-    abstract select<T>(_: Case<T>[]): AbstractResident;
-
     notify() {
 
-        this.system.exec(this, new scripts.Notify());
+        this.system.getPlatform().exec(this, 'notify');
 
     }
 
-    accept(_: Message) {
-
-    }
+    accept(_: Message) { }
 
     spawn(t: Spawnable): Address {
 
-        return spawn(this.system, this, t);
+        return this.system.getPlatform().spawn(this, t);
 
     }
 
@@ -75,28 +64,28 @@ export abstract class AbstractResident
 
     tell<M>(ref: Address, m: M): AbstractResident {
 
-        this.system.exec(this, new scripts.Tell(ref, m));
+        this.exec('tell', [ref, m]);
         return this;
 
     }
 
     raise(e: Err): AbstractResident {
 
-        this.system.exec(this, new scripts.Raise(e.message));
+        this.system.getPlatform().raise(this, e );
         return this;
 
     }
 
     kill(addr: Address): AbstractResident {
 
-        this.system.exec(this, new scripts.Kill(addr));
+        this.system.getPlatform().kill(this, addr).fork(e => this.raise(e));
         return this;
 
     }
 
     exit(): void {
 
-        this.system.exec(this, new scripts.Kill(this.self()));
+      this.kill(this.self());
 
     }
 
@@ -112,90 +101,13 @@ export abstract class AbstractResident
 
     stop(): void { }
 
-}
-
-/**
- * Immutable actors do not change their behaviour after receiving
- * a message.
- *
- * Once the receive property is provided, all messages will be
- * filtered by it.
- */
-export abstract class Immutable<T> extends AbstractResident {
-
-    init(c: Context): Context {
-
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
-
-        c.receivers.push(receiveFun(this.receive()));
-
-        return c;
-
-    }
-
     /**
-     * select noop.
+     * exec calls a VM function by name on behalf of this actor.
      */
-    select<M>(_: Case<M>[]): Immutable<T> {
+    exec(fname: string, args: Foreign[]) {
 
-        return this;
-
-    }
-
-
-    /**
-     * receive provides a static list of Case classes that the actor will 
-     * always use to process messages.
-     */
-    receive(): Case<T>[] {
-
-        return [];
-
-    }
-
-}
-
-/**
- * Temp automatically removes itself from the system after a succesfull match
- * of any of its cases.
- */
-export abstract class Temp<T> extends Immutable<T> {
-
-    init(c: Context): Context {
-
-        c.flags = c.flags | FLAG_TEMPORARY | FLAG_BUFFERED;
-
-        c.receivers.push(receiveFun(this.receive()));
-
-        return c;
-
-    }
-
-}
-
-/**
- * Mutable actors can change their behaviour after message processing.
- */
-export abstract class Mutable extends AbstractResident {
-
-    receive: Case<void>[] = [];
-
-    init(c: Context): Context {
-
-        c.flags = c.flags | FLAG_BUFFERED;
-
-        return c;
-
-    }
-
-    /**
-     * select allows for selectively receiving messages based on Case classes.
-     */
-    select<M>(cases: Case<M>[]): Mutable {
-
-        this.system.exec(this, new scripts.Receive(receiveFun(cases)));
-
-        return this;
+        let vm = this.system.getPlatform();
+        vm.exec(this, fname, args);
 
     }
 
@@ -209,48 +121,21 @@ export const ref =
         (m: Message) =>
             res.tell(addr, m);
 
-/**
- * spawn an actor using the Spawn script.
- */
-export const spawn = <S extends System>
-    (sys: S, i: Instance, t: Spawnable): Address => {
+const getSelf = (actor: AbstractResident) => {
 
-    let tmpl = normalize(isObject(t) ? <Template>t : { create: t });
+    let _self = '?';
 
-    return <string>sys
-        .execNow(i, new scripts.Spawn(tmpl))
-        .orJust(() => ADDRESS_DISCARD)
-        .get();
+    return () => {
+
+        if (_self === '?')
+            _self = actor
+                .system
+                .getPlatform()
+                .identify(actor)
+                .orJust(() => '?').get();
+
+        return _self;
+
+    }
 
 }
-
-const receiveFun = (cases: Case<Message>[]) =>
-    new NewForeignFunInfo('receive', 1, (r, m) => {
-
-        if (cases.some(c => {
-
-            let ok = c.test(m);
-
-            if (ok) {
-
-                let ft = c.apply(m);
-
-                if (ft != null) r.runTask(<Future<void>>ft);
-
-            }
-
-            return ok;
-
-        })) {
-
-            r.vm.trigger(r.context.address, events.EVENT_MESSAGE_READ, m);
-
-        } else {
-
-            r.vm.trigger(r.context.address, events.EVENT_MESSAGE_DROPPED, m);
-
-        }
-
-        return 0;
-
-    });

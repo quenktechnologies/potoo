@@ -3,7 +3,8 @@ import * as error from '../error';
 import { make } from '@quenk/noni/lib/data/array';
 
 import { Frame, DATA_MAX_SAFE_UINT32 } from '../stack/frame';
-import { Runtime, Operand } from '../';
+import { VMThread } from '../../thread';
+import { Operand } from '../';
 
 /**
  * nop does nothing.
@@ -11,7 +12,7 @@ import { Runtime, Operand } from '../';
  * Stack:
  *  ->
  */
-export const nop = (_: Runtime, __: Frame, ___: Operand) => { }
+export const nop = (_: VMThread, __: Frame, ___: Operand) => { }
 
 /**
  * pushui8 pushes an unsigned 8bit integer onto the stack.
@@ -19,7 +20,7 @@ export const nop = (_: Runtime, __: Frame, ___: Operand) => { }
  * Stack:
  * -> <uint8>
  */
-export const pushui8 = (_: Runtime, f: Frame, oper: Operand) => {
+export const pushui8 = (_: VMThread, f: Frame, oper: Operand) => {
 
     f.pushUInt8(oper);
 
@@ -31,7 +32,7 @@ export const pushui8 = (_: Runtime, f: Frame, oper: Operand) => {
  * Stack:
  *  -> <uint16>
  */
-export const pushui16 = (_: Runtime, f: Frame, oper: Operand) => {
+export const pushui16 = (_: VMThread, f: Frame, oper: Operand) => {
 
     f.pushUInt16(oper);
 
@@ -44,7 +45,7 @@ export const pushui16 = (_: Runtime, f: Frame, oper: Operand) => {
  * Stack:
  *  -> <uint32>
  */
-export const pushui32 = (_: Runtime, f: Frame, oper: Operand) => {
+export const pushui32 = (_: VMThread, f: Frame, oper: Operand) => {
 
     f.pushUInt32(oper);
 
@@ -56,7 +57,7 @@ export const pushui32 = (_: Runtime, f: Frame, oper: Operand) => {
  * Stack:
  *  -> <string>
  */
-export const lds = (_: Runtime, f: Frame, idx: Operand) => {
+export const lds = (_: VMThread, f: Frame, idx: Operand) => {
 
     f.pushString(idx);
 
@@ -67,7 +68,7 @@ export const lds = (_: Runtime, f: Frame, idx: Operand) => {
  *
  * -> <value>
  */
-export const ldn = (_: Runtime, f: Frame, idx: Operand) => {
+export const ldn = (_: VMThread, f: Frame, idx: Operand) => {
 
     f.pushName(idx);
 
@@ -79,7 +80,7 @@ export const ldn = (_: Runtime, f: Frame, idx: Operand) => {
  * Stack:
  * <any> -> <any>,<any>
  */
-export const dup = (_: Runtime, f: Frame, __: Operand) => {
+export const dup = (_: VMThread, f: Frame, __: Operand) => {
 
     f.duplicate();
 
@@ -92,7 +93,7 @@ export const dup = (_: Runtime, f: Frame, __: Operand) => {
  * Stack:
  * <any> -> 
  */
-export const store = (_: Runtime, f: Frame, idx: Operand) => {
+export const store = (_: VMThread, f: Frame, idx: Operand) => {
 
     f.locals[idx] = f.pop();
 
@@ -107,7 +108,7 @@ export const store = (_: Runtime, f: Frame, idx: Operand) => {
  * Stack:
  *  -> <any>
  */
-export const load = (_: Runtime, f: Frame, idx: Operand) => {
+export const load = (_: VMThread, f: Frame, idx: Operand) => {
 
     let d = f.locals[idx];
 
@@ -124,7 +125,7 @@ export const load = (_: Runtime, f: Frame, idx: Operand) => {
  *
  * <val1>,<val2> -> <unint32>
  */
-export const ceq = (r: Runtime, f: Frame, __: Operand) => {
+export const ceq = (r: VMThread, f: Frame, __: Operand) => {
 
     //TODO: Should null == null or raise an error?
 
@@ -150,7 +151,7 @@ export const ceq = (r: Runtime, f: Frame, __: Operand) => {
  * The result is a 32 bit value. If the result is more than MAX_SAFE_INTEGER an 
  * IntergerOverflowErr will be raised.
  */
-export const addui32 = (r: Runtime, f: Frame, _: Operand) => {
+export const addui32 = (r: VMThread, f: Frame, _: Operand) => {
 
     let val = f.pop() + f.pop();
 
@@ -168,7 +169,7 @@ export const addui32 = (r: Runtime, f: Frame, _: Operand) => {
  *
  * <arg>...? -> <result> 
  */
-export const call = (r: Runtime, f: Frame, _: Operand) => {
+export const call = (r: VMThread, f: Frame, _: Operand) => {
 
     let einfo = f.popFunction();
 
@@ -199,7 +200,7 @@ export const call = (r: Runtime, f: Frame, _: Operand) => {
  *
  * <message> -> 
  */
-export const raise = (r: Runtime, f: Frame, _: Operand) => {
+export const raise = (r: VMThread, f: Frame, _: Operand) => {
 
     let emsg = f.popString();
 
@@ -213,7 +214,7 @@ export const raise = (r: Runtime, f: Frame, _: Operand) => {
  * Stack:
  *  ->
  */
-export const jmp = (_: Runtime, f: Frame, oper: Operand) => {
+export const jmp = (_: VMThread, f: Frame, oper: Operand) => {
 
     f.seek(oper);
 
@@ -227,7 +228,7 @@ export const jmp = (_: Runtime, f: Frame, oper: Operand) => {
  *
  * <uint32> -> 
  */
-export const ifzjmp = (_: Runtime, f: Frame, oper: Operand) => {
+export const ifzjmp = (_: VMThread, f: Frame, oper: Operand) => {
 
     let eValue = f.popValue();
 
@@ -243,7 +244,7 @@ export const ifzjmp = (_: Runtime, f: Frame, oper: Operand) => {
  * Stack:
  * <uint32> ->
  */
-export const ifnzjmp = (_: Runtime, f: Frame, oper: Operand) => {
+export const ifnzjmp = (_: VMThread, f: Frame, oper: Operand) => {
 
     let eValue = f.popValue();
 
@@ -258,7 +259,7 @@ export const ifnzjmp = (_: Runtime, f: Frame, oper: Operand) => {
  * Stack:
  * <any><any> ->
  */
-export const ifeqjmp = (r: Runtime, f: Frame, oper: Operand) => {
+export const ifeqjmp = (r: VMThread, f: Frame, oper: Operand) => {
 
     let eLhs = f.popValue();
     let eRhs = f.popValue();
@@ -278,7 +279,7 @@ export const ifeqjmp = (r: Runtime, f: Frame, oper: Operand) => {
  * Stack:
  * <any><any> ->
  */
-export const ifneqjmp = (r: Runtime, f: Frame, oper: Operand) => {
+export const ifneqjmp = (r: VMThread, f: Frame, oper: Operand) => {
 
     let eLhs = f.popValue();
     let eRhs = f.popValue();

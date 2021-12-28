@@ -1,6 +1,6 @@
 import { Type } from '@quenk/noni/lib/data/type';
-import { System } from '../system';
 import { Context } from '../system/vm/runtime/context';
+import { System } from '../system';
 import { Envelope } from '../mailbox';
 import { Address } from '../address';
 import { Actor } from '../';
