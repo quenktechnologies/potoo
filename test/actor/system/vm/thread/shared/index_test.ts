@@ -2,7 +2,6 @@ import * as op from '../../../../../../lib/actor/system/vm/runtime/op';
 
 import { assert } from '@quenk/test/lib/assert';
 import { attempt, doFuture, voidPure } from '@quenk/noni/lib/control/monad/future';
-import { identity } from '@quenk/noni/lib/data/function';
 
 import {
     NewFunInfo,
@@ -10,12 +9,13 @@ import {
 } from '../../../../../../lib/actor/system/vm/script/info';
 import { Thread } from '../../../../../../lib/actor/system/vm/thread';
 import { PScript } from '../../../../../../lib/actor/system/vm/script';
+import { SharedThread } from '../../../../../../lib/actor/system/vm/thread/shared';
+import { SharedThreadRunner } from '../../../../../../lib/actor/system/vm/thread/shared/runner';
+import { THREAD_STATE_ERROR } from '../../../../../../lib/actor/system/vm/thread';
 import { newPlatform } from '../../fixtures/vm';
 import { newContext } from '../../fixtures/context';
 import { newInstance } from '../../fixtures/instance';
 import { newFrame } from '../../fixtures/frame';
-import { SharedThread } from '../../../../../../lib/actor/system/vm/thread/shared';
-import { SharedThreadRunner } from '../../../../../../lib/actor/system/vm/thread/shared/runner';
 
 describe('shared', () => {
 
@@ -146,5 +146,28 @@ describe('shared', () => {
 
             }))
         })
+
+        describe('raise', () => {
+
+            it('should set the thread state to THREAD_STATE_ERROR', () => {
+
+                let vm = newPlatform();
+
+                let ctx = newContext();
+
+                let act = newInstance();
+
+                ctx.actor = act;
+
+                let thread = new SharedThread(vm, new PScript('main'),
+                    new SharedThreadRunner(vm), ctx);
+
+                thread.raise(new Error('test'));
+
+                assert(thread.state).equal(THREAD_STATE_ERROR);
+
+            });
+
+        });
     })
 })

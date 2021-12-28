@@ -37,5 +37,5 @@ export declare class SharedThread implements VMThread {
     die(): Future<void>;
     restore(eframe: ExecutionFrame): void;
     processNextFrame(rp: Data): void;
-    exec(name: string, args: Foreign[]): void;
+    exec(name: string, args?: Foreign[]): void;
 }

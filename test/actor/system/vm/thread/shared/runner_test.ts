@@ -4,21 +4,23 @@ import { assert } from '@quenk/test/lib/assert';
 
 import { nothing } from '@quenk/noni/lib/data/maybe';
 
-import { 
-  StackFrame 
+import {
+    StackFrame
 } from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
-import { 
-  SharedThread
+import {
+    SharedThread
 } from '../../../../../../lib/actor/system/vm/thread/shared';
-import { 
-  SharedThreadRunner 
+import {
+    SharedThreadRunner
 } from '../../../../../../lib/actor/system/vm/thread/shared/runner';
 import { PScript } from '../../../../../../lib/actor/system/vm/script';
 import {
-  ExecutionFrame 
+    ExecutionFrame
 } from '../../../../../../lib/actor/system/vm/thread/shared/runner';
 import { newPlatform } from '../../fixtures/vm';
 import { newContext } from '../../fixtures/context';
+import { NewForeignFunInfo } from '../../../../../../lib/actor/system/vm/script/info';
+import { Thread } from '../../../../../../lib/actor/system/vm/thread';
 
 describe('runtime', () => {
 
@@ -54,8 +56,57 @@ describe('runtime', () => {
 
             })
 
-        })
+            it('should stop execution when the thread raises', () => {
 
+                let vm = newPlatform();
+
+                let ctx = newContext();
+
+                let runner = new SharedThreadRunner(vm);
+
+                let counter = 0;
+
+                let script = new PScript('main', undefined, [
+
+                    new NewForeignFunInfo('main', 0, (thr: Thread) => {
+
+                        counter++;
+
+                        if (counter === 2)
+                            thr.raise(new Error('Reached 2'));
+
+                        return counter;
+
+                    })
+
+                ]);
+
+                let thread = new SharedThread(vm, script, runner, ctx);
+
+                let frame = new StackFrame('main', script, thread, nothing(), [
+
+                    op.LDN | 0,
+                    op.CALL,
+                    op.LDN | 0,
+                    op.CALL,
+                    op.LDN | 0,
+                    op.CALL
+
+                ]);
+
+                runner.enqueue(new ExecutionFrame(thread, [frame]));
+
+                runner.run();
+
+                vm.mock.setReturnCallback('raise', () => undefined);
+
+                assert(vm.mock.wasCalled('raise')).true();
+
+                assert(counter, 'call counter').equal(2);
+
+            })
+
+        })
 
     })
 

@@ -109,6 +109,8 @@ export class SharedThread implements VMThread {
 
     raise(e: Err) {
 
+        this.state = THREAD_STATE_ERROR;
+
         this.vm.raise(this.context.actor, e);
 
     }
@@ -123,11 +125,11 @@ export class SharedThread implements VMThread {
 
             let ret = that.context.actor.stop();
 
-          if(ret) yield ret;
+            if (ret) yield ret;
 
-          that.vm.heap.threadExit(that);
+            that.vm.heap.threadExit(that);
 
-            return  pure(<void>undefined);
+            return pure(<void>undefined);
 
         });
 
@@ -151,7 +153,7 @@ export class SharedThread implements VMThread {
 
     }
 
-    exec(name: string, args: Foreign[]) {
+    exec(name: string, args: Foreign[]=[]) {
 
         let { script } = this;
 
