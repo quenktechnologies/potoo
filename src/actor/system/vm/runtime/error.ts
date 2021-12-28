@@ -110,8 +110,8 @@ export class UnexpectedDataType extends Error {
 
     constructor(public expected: number, public got: number) {
 
-        super(`Expected: ${expected.toString(16)}, `+
-          `Received: ${got.toString(16)}`);
+        super(`Expected: ${expected.toString(16)}, ` +
+            `Received: ${got.toString(16)}`);
 
     }
 
@@ -131,13 +131,13 @@ export class IllegalStopErr extends Error {
 }
 
 /**
- * NoReceiveErr
+ * NoReceiverErr
  */
-export class NoReceiveErr extends Error {
+export class NoReceiverErr extends Error {
 
     constructor(public actor: string) {
 
-        super(`Actor ${actor} tried to read without a handler!`);
+        super(`Actor ${actor} tried to read a message without a receiver!`);
 
     }
 

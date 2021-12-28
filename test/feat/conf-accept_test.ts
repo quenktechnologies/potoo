@@ -1,10 +1,10 @@
 import { assert } from '@quenk/test/lib/assert';
 
-import { Temp } from '../../lib/actor/resident';
+import { Callback } from '../../lib/actor/resident/immutable/callback';
 import { TestSystem } from '../actor/resident/fixtures/system';
 import { Message } from '../../lib/actor/message';
 
-class RootTeller extends Temp<void> {
+class RootTeller extends Callback<void> {
 
     receive() {
 

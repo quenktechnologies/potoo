@@ -37,7 +37,7 @@ import {
     isChild
 } from '../../address';
 import { Template } from '../../template';
-import { isRouter, isBuffered } from '../../flags';
+import { isRouter, isBuffered, FLAG_EXIT_AFTER_RUN } from '../../flags';
 import { Message, Envelope } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
@@ -71,8 +71,8 @@ import {
     LOG_LEVEL_WARN,
     LOG_LEVEL_ERROR
 } from './log';
-import { ResidentActorScript } from '../../resident/scripts';
 import { HeapLedger, DefaultHeapLedger } from './runtime/heap/ledger';
+import { ScriptFactory } from './scripts/factory';
 import { Foreign } from './type';
 import { getLevel } from './event';
 
@@ -167,6 +167,12 @@ export interface Platform extends Actor {
     spawn(parent: Instance, tmpl: template.Spawnable): Address
 
     /**
+     * identify an actor Instance producing its address if it is part of the 
+     * system.
+     */
+    identify(target: Instance): Maybe<Address>
+
+    /**
      * kill terminates the actor at the specified address.
      *
      * The actor must be a child of parent to succeed.
@@ -230,7 +236,7 @@ export class PVM implements Platform {
 
             $: new SharedThread(
                 this,
-                new ResidentActorScript(),
+                ScriptFactory.getScript(this),
                 this.threadRunner,
                 newContext(this._actorIdCounter++, this, '$', {
 
@@ -282,9 +288,15 @@ export class PVM implements Platform {
 
     }
 
+    identify(inst: Instance): Maybe<Address> {
+
+        return getAddress(this.state, inst);
+
+    }
+
     spawn(parent: Instance, tmpl: template.Spawnable): Address {
 
-        let mparentAddr = getAddress(this.state, parent);
+        let mparentAddr = this.identify(parent);
 
         if (mparentAddr.isNothing()) {
 
@@ -346,7 +358,7 @@ export class PVM implements Platform {
         // TODO: Have thread types depending on the actor type instead.
         let thr = new SharedThread(
             this,
-            new ResidentActorScript(),
+            ScriptFactory.getScript(act),
             this.threadRunner,
             act.init(newContext(this._actorIdCounter++, act, addr, tmpl))
         );
@@ -386,6 +398,11 @@ export class PVM implements Platform {
         if (ft)
             rtime.wait(ft);
 
+        // Actors with this flag need to be brought down immediately.
+        // TODO: Move this to the actors own run method after #47
+        if (rtime.context.flags & FLAG_EXIT_AFTER_RUN)
+            rtime.wait(this.kill(rtime.context.actor, target));
+
         this.trigger(rtime.context.address, events.EVENT_ACTOR_STARTED);
 
     }
@@ -414,16 +431,19 @@ export class PVM implements Platform {
 
             } else {
 
+                // TODO: Support async.
                 ctx.actor.accept(actualMessage);
 
             }
 
             this.trigger(from, events.EVENT_SEND_OK, to, msg);
+
             return true;
 
         } else {
 
             this.trigger(from, events.EVENT_SEND_FAILED, to, msg);
+
             return false;
 
         }
@@ -499,7 +519,7 @@ export class PVM implements Platform {
 
     raise(src: Instance, err: Err): void {
 
-        let maddr = getAddress(this.state, src);
+        let maddr = this.identify(src);
 
         // For now, ignore requests from unknown instances.
         if (maddr.isNothing()) return;
@@ -635,7 +655,7 @@ export class PVM implements Platform {
 
         return doFuture<void>(function*() {
 
-            let mparentAddr = getAddress(that.state, parent);
+            let mparentAddr = that.identify(parent);
 
             // For now, ignore unknown kill requests.
             if (mparentAddr.isNothing()) return pure(undefined);
@@ -708,7 +728,7 @@ export class PVM implements Platform {
 
     exec(actor: Instance, funName: string, args: Foreign[] = []) {
 
-        let mAddress = getAddress(this.state, actor);
+        let mAddress = this.identify(actor);
 
         if (mAddress.isNothing())
             return this.raise(this, new errors.UnknownInstanceErr(actor));

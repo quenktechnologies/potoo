@@ -1,4 +1,4 @@
-const Immutable = require('../../../lib/actor/resident').Immutable;
+const Immutable = require('../../../lib/actor/resident/immutable').Immutable;
 const Case = require('../../../lib/actor/resident/case').Case;
 
 class Echo extends Immutable {

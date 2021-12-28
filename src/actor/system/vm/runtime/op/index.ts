@@ -47,7 +47,6 @@ export const RECVCOUNT = OP_CODE_RANGE_STEP * 96;
 export const MAILCOUNT = OP_CODE_RANGE_STEP * 97;
 export const MAILDQ = OP_CODE_RANGE_STEP * 98;
 export const SELF = OP_CODE_RANGE_STEP * 99;
-export const READ = OP_CODE_RANGE_STEP * 100;
 export const STOP = OP_CODE_RANGE_STEP * 101;
 export const GETPROP = OP_CODE_RANGE_STEP * 110;
 export const ARLENGTH = OP_CODE_RANGE_STEP * 111;
@@ -356,16 +355,6 @@ export const opcodes: OpcodeInfos = {
         handler: actor.self,
 
         log: (_: VMThread, __: Frame, ___: Operand) => ['self']
-
-    },
-
-    [READ]: {
-
-        name: 'read',
-
-        handler: actor.read,
-
-        log: (_: VMThread, __: Frame, ___: Operand) => ['read']
 
     },
 

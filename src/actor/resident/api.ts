@@ -3,8 +3,6 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Address, AddressMap } from '../address';
 import { Spawnable, Templates } from '../template';
 
-import { Case } from './case';
-
 /**
  * Spawner is an object that can spawn a new actor.
  */
@@ -38,12 +36,6 @@ export interface Api extends Spawner {
      * tell a message to an actor address.
      */
     tell<M>(ref: string, m: M): Api;
-
-    /**
-     * select the next message to be processed, applying each Case 
-     * until one matches.
-     */
-    select<T>(c: Case<T>[]): Api;
 
     /**
      * raise an error triggering the systems error handling mechanism.

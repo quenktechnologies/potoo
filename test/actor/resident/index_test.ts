@@ -18,7 +18,10 @@ import {
     AsyncReceiverMutable,
     AsyncReceiverImmutable,
     AssertSpawnReturnsAddress,
-    Parent
+    Parent,
+    SomeCallback,
+    SomeTask,
+
 } from './fixtures/actors';
 import { ACTION_STOP } from '../../../lib/actor/template';
 
@@ -207,24 +210,40 @@ describe('resident', () => {
 
             it('should kill grand children', done => {
 
+                let steps = 0;
+
                 let s = system()
                     .spawn({
 
                         id: 'a',
                         create: sys => new Killer(<TestSystem>sys, k => {
 
-                            setTimeout(() =>
-                                assert(s.vm.state.threads['a/targets/a'])
-                                    .not.equal(undefined), 200);
+                            setTimeout(() => {
 
-                            setTimeout(() => k.kill('a/targets/a'), 300);
+                                assert(s.vm.state.threads['a/targets/a'])
+                                    .not.equal(undefined);
+
+                                steps++;
+
+                            }, 200);
+
+                            setTimeout(() => {
+
+                                k.kill('a/targets/a');
+
+                                steps++;
+
+                            }, 300);
 
                         })
                     })
 
                 setTimeout(() => {
 
+                    assert(steps, 'timeout callbacks executed').equal(2);
+
                     assert(s.vm.state.threads['a/targets/a']).equal(undefined);
+
                     done();
 
                 }, 400);
@@ -296,7 +315,7 @@ describe('resident', () => {
 
                         trap: e => {
 
-                            assert(e.message).equal('Error: risen');
+                            assert(e.message).equal('risen');
 
                             ok = true;
 
@@ -441,4 +460,63 @@ describe('resident', () => {
 
             });
     })
+
+    describe('Callback', () => {
+
+        it('should exit after a successful message', done => {
+
+            let s = system();
+
+            let wasCalled = false;
+
+            let cb = (msg: string) => {
+
+                assert(msg).equal('done');
+
+                wasCalled = true;
+
+            }
+
+            s.spawn({ id: 'cb', create: () => new SomeCallback(s, cb) });
+
+            s.vm.tell('cb', 'done');
+
+            setTimeout(() => {
+
+                assert(wasCalled).true();
+
+                assert(s.vm.state.threads['cb'], 'callback actor').undefined();
+
+                done();
+
+            }, 100);
+
+        });
+
+    });
+
+    describe('Task', () => {
+
+        it('should exit after run', done => {
+
+            let s = system();
+
+            let wasCalled = false;
+
+            let cb = () => { wasCalled = true; }
+
+            s.spawn({ id: 'task', create: () => new SomeTask(s, cb) });
+
+            setTimeout(() => {
+
+                assert(wasCalled).true();
+                assert(s.vm.state.threads['task'], 'task actor').undefined();
+
+                done();
+
+            }, 100);
+
+        });
+
+    });
 })

@@ -1,6 +1,4 @@
-import * as error from '../error';
 
-import { isImmutable } from '../../../../flags';
 import { Template } from '../../../../template';
 import { Frame } from '../stack/frame';
 import { Operand } from '../';
@@ -132,39 +130,6 @@ export const mailcount = (r: VMThread, f: Frame, _: Operand) => {
 export const maildq = (_: VMThread, f: Frame, __: Operand) => {
 
     f.pushMessage();
-
-}
-
-/**
- * read a message from the top of the stack.
- *
- * A receiver function is applied from the actors pending receiver list.
- * <message> -> <uint32>
- */
-export const read = (r: VMThread, f: Frame, __: Operand) => {
-
-    let func = isImmutable(r.context.flags) ?
-        r.context.receivers[0] : r.context.receivers.shift();
-
-    if (func == null)
-        return r.raise(new error.NoReceiveErr(r.context.address));
-
-    if (func.foreign === true) {
-
-        let emsg = f.popValue();
-
-        if (emsg.isLeft())
-            return r.raise(emsg.takeLeft());
-
-        let msg = emsg.takeRight();
-
-        r.invokeForeign(f, func, [msg]);
-
-    } else {
-
-        r.invokeVM(f, func);
-
-    }
 
 }
 

@@ -1,7 +1,7 @@
 import { assert } from '@quenk/test/lib/assert';
 
 import { Case } from '../../../lib/actor/resident/case';
-import { Mutable } from '../../../lib/actor/resident';
+import { Mutable } from '../../../lib/actor/resident/mutable';
 import { Process } from '../../../lib/actor/process';
 import { TestSystem, system } from '../resident/fixtures/system';
 

@@ -8,11 +8,12 @@ import { assert } from '@quenk/test/lib/assert';
 import { Context } from '../../../../lib/actor/system/vm/runtime/context';
 import { Case } from '../../../../lib/actor/resident/case';
 import { FLAG_IMMUTABLE, FLAG_BUFFERED } from '../../../../lib/actor/flags';
-import {
-    AbstractResident,
-    Mutable,
-    Immutable
-} from '../../../../lib/actor/resident';
+import { Mutable } from '../../../../lib/actor/resident/mutable';
+import { Immutable } from '../../../../lib/actor/resident/immutable';
+
+import { AbstractResident } from '../../../../lib/actor/resident';
+import { Callback } from '../../../../lib/actor/resident/immutable/callback';
+import { Task } from '../../../../lib/actor/resident/task';
 import { TestSystem } from './system';
 
 export class Killer extends AbstractResident {
@@ -529,6 +530,34 @@ export class GrandChild extends Immutable<string> {
     run() {
 
         this.tell('parent', 'test');
+
+    }
+
+}
+
+export class SomeCallback extends Callback<string> {
+
+    constructor(
+        public s: TestSystem,
+        public done: (msg: string) => void) { super(s); }
+
+    receive() {
+
+        return [new Case('done', this.done)];
+
+    }
+
+}
+
+export class SomeTask extends Task {
+
+    constructor(
+        public s: TestSystem,
+        public done: () => void) { super(s); }
+
+    run() {
+
+        this.done();
 
     }
 

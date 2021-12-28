@@ -168,29 +168,6 @@ describe('actor', () => {
 
     });
 
-    describe('read', () => {
-
-        it('should consume the TOS', () => {
-
-            let f = newFrame();
-            let r = newThread();
-
-            let func = new NewForeignFunInfo('foo', 1,
-                (_: any, __: any) => 0)
-
-            f.mock.setReturnValue('popValue', right('hi'));
-
-            r.context.receivers.push(func);
-
-            actor.read(r, f, 0);
-
-            assert(r.mock.getCalledArgs('invokeForeign'))
-                .equate([f, func, ['hi']]);
-
-        });
-
-    });
-
     describe('stop', () => {
 
         it('should stop the target', () => {

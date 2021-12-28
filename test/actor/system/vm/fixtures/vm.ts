@@ -126,6 +126,12 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
+  identify(target: Instance) : Maybe<Address> {
+
+    return this.mock.invoke('identify', [target], nothing());
+
+  }
+
     raise(parent: Instance, err: Err): void {
 
         this.mock.invoke<undefined>('raise', [parent, err], undefined);

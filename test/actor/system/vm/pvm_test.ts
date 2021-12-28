@@ -1,5 +1,3 @@
-import * as op from '../../../../lib/actor/system/vm/runtime/op';
-
 import { assert } from '@quenk/test/lib/assert';
 import { tick } from '@quenk/noni/lib/control/timer';
 import {
@@ -10,7 +8,6 @@ import {
     doFuture
 } from '@quenk/noni/lib/control/monad/future';
 
-import { PScript } from '../../../../lib/actor/system/vm/script';
 import { PVM } from '../../../../lib/actor/system/vm';
 import { newInstance } from './fixtures/instance';
 import { newThread } from './fixtures/thread';
@@ -27,7 +24,7 @@ import {
     ACTION_RAISE
 } from '../../../../lib/actor/template';
 import { ADDRESS_SYSTEM } from '../../../../lib/actor/address';
-import { Immutable } from '../../../../lib/actor/resident';
+import { Immutable } from '../../../../lib/actor/resident/immutable';
 import { UnknownInstanceErr } from '../../../../lib/actor/system/vm/runtime/error';
 
 describe('vm', () => {
@@ -507,10 +504,10 @@ describe('vm', () => {
 
                         })
                         .finally(() => attempt(() => {
-                        
-                          assert(escalated).true();
 
-                          assert(thrown).true();
+                            assert(escalated).true();
+
+                            assert(thrown).true();
 
                         })))
 

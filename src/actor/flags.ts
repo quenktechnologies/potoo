@@ -1,9 +1,10 @@
 
-export const FLAG_IMMUTABLE = 0x1;
-export const FLAG_BUFFERED = 0x2;
-export const FLAG_TEMPORARY = 0x4
-export const FLAG_ROUTER = 0x8;
-export const FLAG_RESIDENT = 0x16;
+export const FLAG_IMMUTABLE = 1;
+export const FLAG_BUFFERED = 2;
+export const FLAG_EXIT_AFTER_RECEIVE = 4
+export const FLAG_ROUTER = 8;
+export const FLAG_RESIDENT = 16;
+export const FLAG_EXIT_AFTER_RUN = 32;
 
 /**
  * Flags allow an actor to enable or disable various features provided by 
