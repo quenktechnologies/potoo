@@ -11,6 +11,7 @@ export declare const THREAD_STATE_IDLE = 0;
 export declare const THREAD_STATE_RUN = 1;
 export declare const THREAD_STATE_WAIT = 2;
 export declare const THREAD_STATE_ERROR = 3;
+export declare const THREAD_STATE_INVALID = 4;
 /**
  * ThreadState is a number corresponding to one of the THREAD_STATE_X constants.
  */

@@ -17,7 +17,8 @@ import {
     THREAD_STATE_IDLE,
     THREAD_STATE_RUN,
     THREAD_STATE_WAIT,
-    THREAD_STATE_ERROR
+    THREAD_STATE_ERROR,
+    THREAD_STATE_INVALID
 } from '../';
 import { ExecutionFrame, SharedThreadRunner } from './runner';
 
@@ -119,6 +120,8 @@ export class SharedThread implements VMThread {
 
         let that = this;
 
+      this.state = THREAD_STATE_INVALID;
+
         this.runner.dequeue(this);
 
         return doFuture(function*() {
@@ -153,7 +156,7 @@ export class SharedThread implements VMThread {
 
     }
 
-    exec(name: string, args: Foreign[]=[]) {
+    exec(name: string, args: Foreign[] = []) {
 
         let { script } = this;
 
