@@ -8,10 +8,10 @@
     "lib"
   ],
   "scripts": {
-    "test": "./node_modules/.bin/mocha --opts mocha.opts $(find test -name *_test.ts)"
+    "test": "./node_modules/.bin/mocha $(find test -name *_test.ts)"
   },
   "devDependencies": {
-    "@quenk/test": "^2.3.0",
+    "@quenk/test": "^2.5.0",
     "@types/mocha": "^9.0.0",
     "@types/node": "^13.13.38",
     "@types/uuid": "^7.0.4",
