@@ -58,6 +58,30 @@ export interface Owners extends Record<FrameName> { }
 export interface HeapLedger {
 
     /**
+     * string adds a string to the heap without specifying an owner.
+     *
+     * This string will remain on the heap until it is removed or assigned an
+     * owner.
+     */
+    string(value: string): HeapAddress
+
+    /**
+     * object adds a object to the heap without specifying an owner.
+     *
+     * This object will remain on the heap until it is removed or assigned an
+     * owner.
+     */
+    object(value: Foreign): HeapAddress
+
+    /**
+     * fun adds a fun to the heap without specifying an owner.
+     *
+     * This fun will remain on the heap until it is removed or assigned an
+     * owner.
+     */
+    fun(value: FunInfo): HeapAddress
+
+    /**
      * addString to the heap on behalf of a frame.
      */
     addString(frame: Frame, value: string): HeapAddress
@@ -103,6 +127,13 @@ export interface HeapLedger {
     intern(frame: Frame, value: Type): HeapAddress
 
     /**
+     * move a HeapAddress from one owner to another.
+     *
+     * This method assumes the address is valid.
+     */
+    move(ref: HeapAddress, newOwner: FrameName): HeapAddress
+
+    /**
      * frameExit is called whenever a Frame has finished execution and ready
      * to return its value (if any) to its parent frame.
      *
@@ -131,33 +162,52 @@ export class DefaultHeapLedger implements HeapLedger {
 
     counter = 0;
 
-    _addItem(frame: Frame, value: Type, flag: number) {
+    _addItem(name: FrameName, value: Type, flag: number) {
 
         let addr = (this.counter++) | flag;
 
         this.objects[addr] = value;
 
-        this.owners[addr] = frame.name;
+        if (name !== '')
+            this.owners[addr] = name;
 
         return addr;
 
     }
 
+    string(value: string): HeapAddress {
+
+        return this._addItem('', value, DATA_TYPE_HEAP_STRING);
+
+    }
+
+    object(value: HeapObject): HeapAddress {
+
+        return this._addItem('', value, DATA_TYPE_HEAP_OBJECT);
+
+    }
+
+    fun(value: FunInfo): HeapAddress {
+
+        return this._addItem('', value, DATA_TYPE_HEAP_FUN);
+
+    }
+
     addString(frame: Frame, value: string): HeapAddress {
 
-        return this._addItem(frame, value, DATA_TYPE_HEAP_STRING);
+        return this._addItem(frame.name, value, DATA_TYPE_HEAP_STRING);
 
     }
 
     addObject(frame: Frame, obj: HeapObject): HeapAddress {
 
-        return this._addItem(frame, obj, DATA_TYPE_HEAP_OBJECT);
+        return this._addItem(frame.name, obj, DATA_TYPE_HEAP_OBJECT);
 
     }
 
     addFun(frame: Frame, obj: FunInfo): HeapAddress {
 
-        return this._addItem(frame, obj, DATA_TYPE_HEAP_FUN);
+        return this._addItem(frame.name, obj, DATA_TYPE_HEAP_FUN);
 
     }
 
@@ -208,9 +258,11 @@ export class DefaultHeapLedger implements HeapLedger {
 
     }
 
-    move(ref: HeapAddress, newOwner: FrameName) {
+    move(ref: HeapAddress, newOwner: FrameName): HeapAddress {
 
         this.owners[ref] = newOwner;
+
+        return ref;
 
     }
 
@@ -241,7 +293,7 @@ export class DefaultHeapLedger implements HeapLedger {
 
 }
 
-const isHeapAddress = (ref: number) => {
+export const isHeapAddress = (ref: number) => {
 
     let kind = ref & DATA_MASK_TYPE;
 

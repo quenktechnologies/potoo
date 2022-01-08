@@ -60,7 +60,7 @@ import {
 } from './state';
 import { Script } from './script';
 import { Context, newContext } from './runtime/context';
-import { Frame } from './runtime/stack/frame';
+import { Data, Frame } from './runtime/stack/frame';
 import { Opcode, toLog } from './runtime/op';
 import { Operand } from './runtime';
 import { Conf, defaults } from './conf';
@@ -198,7 +198,7 @@ export interface Platform extends Actor {
      * exec a function by name with the provided arguments using the actor
      * instance's thread.
      */
-    exec(actor: Instance, funName: string, args?: Foreign[]): void
+    exec(actor: Instance, funName: string, args?: Data[]): void
 
 }
 
@@ -721,7 +721,8 @@ export class PVM implements Platform {
      */
     tell<M>(ref: Address, msg: M): PVM {
 
-        this.exec(this, 'tell', [ref, msg]);
+        this.exec(this, 'tell', [this.heap.string(ref), this.heap.object(msg)]);
+
         return this;
 
     }

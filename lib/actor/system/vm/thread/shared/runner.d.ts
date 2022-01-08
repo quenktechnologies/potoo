@@ -1,20 +1,16 @@
 import { Platform } from '../../';
-import { StackFrame } from '../../runtime/stack/frame';
+import { Data } from '../../runtime/stack/frame';
+import { FunInfo } from '../../script/info';
 import { VMThread } from '../';
 /**
- * ExecutionFrame stores the state of the fstack for a VMThread.
- *
- * This is used to both trigger execution of an fstack as well as restore
- * execution in the shared environment. When a VMThread needs to perform an
- * async task for example, it's current state is saved an a new ExecutionFrame
- * is pushed to the runner to continue where it left off.
+ * Job is a request by a thread to execute VM code on its behalf to
+ * the SharedThreadRunner
  */
-export declare class ExecutionFrame {
+export declare class Job {
     thread: VMThread;
-    fstack: StackFrame[];
-    fsp: number;
-    rp: number;
-    constructor(thread: VMThread, fstack?: StackFrame[], fsp?: number, rp?: number);
+    fun: FunInfo;
+    args: Data[];
+    constructor(thread: VMThread, fun: FunInfo, args?: Data[]);
 }
 /**
  * SharedThreadRunner allows multiple Threads to execute their code sequentially
@@ -34,17 +30,26 @@ export declare class ExecutionFrame {
  */
 export declare class SharedThreadRunner {
     vm: Platform;
-    eframes: ExecutionFrame[];
-    constructor(vm: Platform, eframes?: ExecutionFrame[]);
+    jobs: Job[];
+    constructor(vm: Platform, jobs?: Job[]);
     _running: boolean;
     /**
-     * enqueue an ExecutionFrame for future execution.
+     * enqueue a Job for future execution.
      */
-    enqueue(frame: ExecutionFrame): this;
+    enqueue(job: Job): this;
     /**
-     * dequeue all ExecutionFrames for the provide thread effectively ending its
+     * dequeue all Jobs for the provide thread effectively ending its
      * execution.
      */
     dequeue(thread: VMThread): void;
+    /**
+     * postJob enqueues a Job for execution triggering the run() loop immediately
+     * if not already running.
+     */
+    postJob(job: Job): void;
+    /**
+     * run the Job processing loop until there are no more Jobs to process in
+     * the queue.
+     */
     run(): void;
 }

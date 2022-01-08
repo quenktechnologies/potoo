@@ -14,7 +14,7 @@ import { Thread, VMThread } from './thread';
 import { State, Threads } from './state';
 import { Script } from './script';
 import { Context } from './runtime/context';
-import { Frame } from './runtime/stack/frame';
+import { Data, Frame } from './runtime/stack/frame';
 import { Opcode } from './runtime/op';
 import { Operand } from './runtime';
 import { Conf } from './conf';
@@ -119,7 +119,7 @@ export interface Platform extends Actor {
      * exec a function by name with the provided arguments using the actor
      * instance's thread.
      */
-    exec(actor: Instance, funName: string, args?: Foreign[]): void;
+    exec(actor: Instance, funName: string, args?: Data[]): void;
 }
 /**
  * PVM (Potoo Virtual Machine) is a JavaScript implemented virtual machine that

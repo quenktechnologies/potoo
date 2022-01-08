@@ -1,18 +1,8 @@
-import { Either } from '@quenk/noni/lib/data/either';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 
 import { Context } from './system/vm/runtime/context';
 import { Message } from './message';
 import { Address } from './address';
-
-/**
- * Behaviour of an actor.
- *
- * Behaviours are procedures that return an
- * Either type indicating whether a message
- * was processed or rejected.
- */
-export type Behaviour = (m: Message) => Either<Message, void>;
 
 /**
  * Eff is used in various places to represent the potentially sync or async

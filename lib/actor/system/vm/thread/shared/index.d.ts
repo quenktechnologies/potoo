@@ -4,16 +4,16 @@ import { Frame, Data, FrameName } from '../../runtime/stack/frame';
 import { Context } from '../../runtime/context';
 import { FunInfo, ForeignFunInfo } from '../../script/info';
 import { Script } from '../../script';
-import { Foreign, PTValue } from '../../type';
+import { PTValue } from '../../type';
 import { Platform } from '../../';
 import { VMThread } from '../';
-import { ExecutionFrame, SharedThreadRunner } from './runner';
+import { Job, SharedThreadRunner } from './runner';
 /**
  * SharedThread is used by actors that run in a shared runtime i.e. the single
  * threaded JS event loop.
  *
  * Actual code execution takes place in a SharedThreadRunner which queues up
- * ExecutionFrame on behalf every SharedThread in the system.
+ * Job on behalf every SharedThread in the system.
  */
 export declare class SharedThread implements VMThread {
     vm: Platform;
@@ -35,7 +35,7 @@ export declare class SharedThread implements VMThread {
     wait(task: Future<void>): void;
     raise(e: Err): void;
     die(): Future<void>;
-    restore(eframe: ExecutionFrame): void;
-    processNextFrame(rp: Data): void;
-    exec(name: string, args?: Foreign[]): void;
+    restore({ fun, args }: Job): void;
+    nextFrame(rp: Data): void;
+    exec(name: string, args?: Data[]): void;
 }

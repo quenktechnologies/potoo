@@ -35,6 +35,27 @@ export interface Owners extends Record<FrameName> {
  */
 export interface HeapLedger {
     /**
+     * string adds a string to the heap without specifying an owner.
+     *
+     * This string will remain on the heap until it is removed or assigned an
+     * owner.
+     */
+    string(value: string): HeapAddress;
+    /**
+     * object adds a object to the heap without specifying an owner.
+     *
+     * This object will remain on the heap until it is removed or assigned an
+     * owner.
+     */
+    object(value: Foreign): HeapAddress;
+    /**
+     * fun adds a fun to the heap without specifying an owner.
+     *
+     * This fun will remain on the heap until it is removed or assigned an
+     * owner.
+     */
+    fun(value: FunInfo): HeapAddress;
+    /**
      * addString to the heap on behalf of a frame.
      */
     addString(frame: Frame, value: string): HeapAddress;
@@ -72,6 +93,12 @@ export interface HeapLedger {
      */
     intern(frame: Frame, value: Type): HeapAddress;
     /**
+     * move a HeapAddress from one owner to another.
+     *
+     * This method assumes the address is valid.
+     */
+    move(ref: HeapAddress, newOwner: FrameName): HeapAddress;
+    /**
      * frameExit is called whenever a Frame has finished execution and ready
      * to return its value (if any) to its parent frame.
      *
@@ -96,7 +123,10 @@ export declare class DefaultHeapLedger implements HeapLedger {
     owners: Owners;
     constructor(objects?: HeapMap, owners?: Owners);
     counter: number;
-    _addItem(frame: Frame, value: Type, flag: number): number;
+    _addItem(name: FrameName, value: Type, flag: number): number;
+    string(value: string): HeapAddress;
+    object(value: HeapObject): HeapAddress;
+    fun(value: FunInfo): HeapAddress;
     addString(frame: Frame, value: string): HeapAddress;
     addObject(frame: Frame, obj: HeapObject): HeapAddress;
     addFun(frame: Frame, obj: FunInfo): HeapAddress;
@@ -105,7 +135,8 @@ export declare class DefaultHeapLedger implements HeapLedger {
     getFrameRefs(frame: Frame): HeapAddress[];
     getThreadRefs(thread: VMThread): HeapAddress[];
     intern(frame: Frame, value: Type): HeapAddress;
-    move(ref: HeapAddress, newOwner: FrameName): void;
+    move(ref: HeapAddress, newOwner: FrameName): HeapAddress;
     frameExit(frame: Frame): void;
     threadExit(thread: VMThread): void;
 }
+export declare const isHeapAddress: (ref: number) => boolean;
