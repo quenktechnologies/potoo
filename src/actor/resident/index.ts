@@ -4,7 +4,6 @@ import { isObject } from '@quenk/noni/lib/data/type';
 import { Err } from '@quenk/noni/lib/control/error';
 
 import { Context } from '../system/vm/runtime/context';
-import { Foreign } from '../system/vm/type';
 import { System } from '../system';
 import {
     Address,
@@ -14,6 +13,7 @@ import { Message } from '../message';
 import { Templates, Spawnable } from '../template';
 import { Actor, Eff } from '../';
 import { Api } from './api';
+import { Data } from '../system/vm/runtime/stack/frame';
 
 /**
  * Reference to an actor address.
@@ -39,11 +39,17 @@ export abstract class AbstractResident
 
     self = getSelf(this);
 
+    get platform() {
+
+        return this.system.getPlatform();
+
+    }
+
     abstract init(c: Context): Context;
 
     notify() {
 
-        this.system.getPlatform().exec(this, 'notify');
+        this.platform.exec(this, 'notify');
 
     }
 
@@ -62,30 +68,34 @@ export abstract class AbstractResident
 
     }
 
-    tell<M>(ref: Address, m: M): AbstractResident {
+    tell<M>(ref: Address, msg: M): AbstractResident {
 
-        this.exec('tell', [ref, m]);
+        let { heap } = this.platform;
+
+        this.exec('tell', [heap.string(ref), heap.object(msg)]);
+
         return this;
 
     }
 
     raise(e: Err): AbstractResident {
 
-        this.system.getPlatform().raise(this, e );
+        this.system.getPlatform().raise(this, e);
         return this;
 
     }
 
     kill(addr: Address): AbstractResident {
 
-        this.system.getPlatform().kill(this, addr).fork(e => this.raise(e));
+        this.platform.kill(this, addr).fork(e => this.raise(e));
+
         return this;
 
     }
 
     exit(): void {
 
-      this.kill(this.self());
+        this.kill(this.self());
 
     }
 
@@ -104,10 +114,9 @@ export abstract class AbstractResident
     /**
      * exec calls a VM function by name on behalf of this actor.
      */
-    exec(fname: string, args: Foreign[]) {
+    exec(fname: string, args: Data[]) {
 
-        let vm = this.system.getPlatform();
-        vm.exec(this, fname, args);
+        this.platform.exec(this, fname, args);
 
     }
 

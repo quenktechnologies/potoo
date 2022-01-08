@@ -7,10 +7,11 @@ import { empty, tail } from '@quenk/noni/lib/data/array';
 import { just, nothing } from '@quenk/noni/lib/data/maybe';
 
 import { Frame, StackFrame, Data, FrameName } from '../../runtime/stack/frame';
+import { isHeapAddress } from '../../runtime/heap/ledger';
 import { Context } from '../../runtime/context';
 import { FunInfo, ForeignFunInfo } from '../../script/info';
 import { Script } from '../../script';
-import { Foreign, PTValue, TYPE_FUN } from '../../type';
+import { PTValue, TYPE_FUN } from '../../type';
 import { Platform } from '../../';
 import {
     VMThread,
@@ -20,14 +21,14 @@ import {
     THREAD_STATE_ERROR,
     THREAD_STATE_INVALID
 } from '../';
-import { ExecutionFrame, SharedThreadRunner } from './runner';
+import { Job, SharedThreadRunner } from './runner';
 
 /**
  * SharedThread is used by actors that run in a shared runtime i.e. the single
  * threaded JS event loop.
  *
  * Actual code execution takes place in a SharedThreadRunner which queues up
- * ExecutionFrame on behalf every SharedThread in the system.
+ * Job on behalf every SharedThread in the system.
  */
 export class SharedThread implements VMThread {
 
@@ -138,16 +139,30 @@ export class SharedThread implements VMThread {
 
     }
 
-    restore(eframe: ExecutionFrame) {
+    restore({ fun, args }: Job) {
 
-        this.fstack = eframe.fstack;
-        this.fsp = eframe.fsp;
-        this.rp = eframe.rp;
+        let frame = new StackFrame(
+            this.makeFrameName(fun.name),
+            this.script,
+            this,
+            nothing(),
+            fun.foreign ?
+                [op.LDN | this.script.info.indexOf(fun), op.CALL] :
+                fun.code.slice(),
+        );
+
+        frame.data = args.map(arg => isHeapAddress(arg) ?
+            this.vm.heap.move(arg, frame.name)
+            : arg);
+
+        this.fstack = [frame];
+        this.fsp = 0;
+        this.rp = 0;
         this.state = THREAD_STATE_RUN;
 
     }
 
-    processNextFrame(rp: Data) {
+    nextFrame(rp: Data) {
 
         this.vm.heap.frameExit(<Frame>this.fstack.pop());
         this.fsp--;
@@ -156,7 +171,7 @@ export class SharedThread implements VMThread {
 
     }
 
-    exec(name: string, args: Foreign[] = []) {
+    exec(name: string, args: Data[] = []) {
 
         let { script } = this;
 
@@ -166,21 +181,7 @@ export class SharedThread implements VMThread {
         if (!fun)
             return this.raise(new errors.UnknownFunErr(name));
 
-        let frame = new StackFrame(
-            this.makeFrameName(fun.name),
-            script,
-            this,
-            nothing(),
-            fun.foreign ?
-                [op.LDN | this.script.info.indexOf(fun), op.CALL] :
-                fun.code.slice(),
-        );
-
-        frame.data = args.map(arg => this.vm.heap.intern(frame, arg));
-
-        this.runner.enqueue(new ExecutionFrame(this, [frame]));
-
-        this.runner.run();
+        this.runner.postJob(new Job(this, fun, args));
 
     }
 

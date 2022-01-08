@@ -1,9 +1,10 @@
 import { empty, remove } from '@quenk/noni/lib/data/array';
 
 import { Platform } from '../../';
-import { Frame, StackFrame, Data } from '../../runtime/stack/frame';
+import { Frame, Data } from '../../runtime/stack/frame';
 import { handlers } from '../../runtime/op';
 import { OPCODE_MASK, OPERAND_MASK } from '../../runtime';
+import { FunInfo } from '../../script/info';
 import {
     THREAD_STATE_IDLE,
     THREAD_STATE_RUN,
@@ -12,20 +13,15 @@ import {
 } from '../';
 
 /**
- * ExecutionFrame stores the state of the fstack for a VMThread.
- *
- * This is used to both trigger execution of an fstack as well as restore
- * execution in the shared environment. When a VMThread needs to perform an 
- * async task for example, it's current state is saved an a new ExecutionFrame
- * is pushed to the runner to continue where it left off.
+ * Job is a request by a thread to execute VM code on its behalf to
+ * the SharedThreadRunner
  */
-export class ExecutionFrame {
+export class Job {
 
     constructor(
         public thread: VMThread,
-        public fstack: StackFrame[] = [],
-        public fsp = 0,
-        public rp = 0) { }
+        public fun: FunInfo,
+        public args: Data[] = []) { }
 
 }
 
@@ -49,44 +45,60 @@ export class SharedThreadRunner {
 
     constructor(
         public vm: Platform,
-        public eframes: ExecutionFrame[] = []) { }
+        public jobs: Job[] = []) { }
 
     _running = false;
 
     /**
-     * enqueue an ExecutionFrame for future execution.
+     * enqueue a Job for future execution.
      */
-    enqueue(frame: ExecutionFrame) {
+    enqueue(job: Job) {
 
-        this.eframes.push(frame);
+        this.jobs.push(job);
 
         return this;
 
     }
 
     /**
-     * dequeue all ExecutionFrames for the provide thread effectively ending its
+     * dequeue all Jobs for the provide thread effectively ending its
      * execution.
      */
     dequeue(thread: VMThread) {
 
-        this.eframes = this.eframes.filter(frame => frame.thread !== thread);
+        this.jobs = this.jobs.filter(job => job.thread !== thread);
 
     }
 
+    /**
+     * postJob enqueues a Job for execution triggering the run() loop immediately
+     * if not already running.
+     */
+    postJob(job: Job) {
+
+        this.enqueue(job);
+
+        this.run();
+
+    }
+
+    /**
+     * run the Job processing loop until there are no more Jobs to process in 
+     * the queue.
+     */
     run() {
 
         if (this._running) return;
 
         this._running = true;
 
-        let eframe;
-        while (eframe = this.eframes.find(frame =>
-            frame.thread.state === THREAD_STATE_IDLE)) {
+        let job;
+        while (job = this.jobs.find(job =>
+            job.thread.state === THREAD_STATE_IDLE)) {
 
-            let thread = eframe.thread;
+            let thread = job.thread;
 
-            thread.restore(eframe);
+            thread.restore(job);
 
             while (!empty(thread.fstack)) {
 
@@ -125,14 +137,14 @@ export class SharedThreadRunner {
                     break;
 
                 if (sp === thread.fsp)
-                    thread.processNextFrame(<Data>frame.data.pop() || 0);
+                    thread.nextFrame(<Data>frame.data.pop() || 0);
 
             }
 
             if (empty(thread.fstack))
                 // The thread's frame stack is empty, meaning all execution is 
-                // complete. Remove the eframe from the queue.
-                this.eframes = remove(this.eframes, eframe);
+                // complete. Remove the job from the queue.
+                this.jobs = remove(this.jobs, job);
 
         }
 

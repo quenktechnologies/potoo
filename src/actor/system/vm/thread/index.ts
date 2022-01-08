@@ -5,10 +5,10 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 import { FunInfo } from '../script/info';
 import { Data, Frame } from '../runtime/stack/frame';
 import { Script } from '../script';
-import { Foreign, PTValue } from '../type';
+import { PTValue } from '../type';
 import { Context } from '../runtime/context';
 import { Platform } from '../';
-import { ExecutionFrame } from './shared/runner';
+import { Job } from './shared/runner';
 
 export const THREAD_STATE_IDLE = 0;
 export const THREAD_STATE_RUN = 1;
@@ -110,12 +110,12 @@ export interface VMThread extends Thread {
 
     /**
      * restore sets the thread's internal values using the provided 
-     * ExecutionFrame. The thread's state will be updated to THREAD_STATE_RUN.
+     * Job. The thread's state will be updated to THREAD_STATE_RUN.
      */
-    restore(eframe: ExecutionFrame): void
+    restore(eframe: Job): void
 
     /**
-     * processNextFrame instructs the thread to process the next stack frame
+     * nextFrame instructs the thread to process the next stack frame
      * in the thread's stack.
      *
      * This does not actually execute the frame but prepares the internal
@@ -124,12 +124,12 @@ export interface VMThread extends Thread {
      * 
      * @param rp - The value to set the 
      */
-    processNextFrame(rp: Data): void
+    nextFrame(rp: Data): void
 
     /**
      * exec a function by name on this thread.
      *
      * The function must be declared in the thread's Script.
      */
-    exec(name: string, args: Foreign[]): void
+    exec(name: string, args: Data[]): void
 }
