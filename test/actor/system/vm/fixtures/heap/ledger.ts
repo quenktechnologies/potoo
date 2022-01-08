@@ -12,7 +12,9 @@ import {
     HeapAddress
 } from '../../../../../../lib/actor/system/vm/runtime/heap';
 import {
-    DATA_TYPE_HEAP_STRING, Frame
+    DATA_TYPE_HEAP_FUN,
+    DATA_TYPE_HEAP_OBJECT,
+    DATA_TYPE_HEAP_STRING, Frame, FrameName
 } from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { VMThread } from '../../../../../../lib/actor/system/vm/thread';
 import { FunInfo } from '../../../../../../lib/actor/system/vm/script/info';
@@ -25,6 +27,27 @@ export class HeapLedgerImpl implements HeapLedger {
 
     mock = new Mock();
 
+    string(value: string): HeapAddress {
+
+        return this.mock.invoke<HeapAddress>('string', [value],
+            DATA_TYPE_HEAP_STRING | 0);
+
+    }
+
+    object(value: object): HeapAddress {
+
+        return this.mock.invoke<HeapAddress>('object', [value],
+            DATA_TYPE_HEAP_OBJECT | 0);
+
+    }
+
+    fun(value: FunInfo): HeapAddress {
+
+        return this.mock.invoke<HeapAddress>('fun', [value],
+            DATA_TYPE_HEAP_FUN | 0);
+
+    }
+
     addString(frame: Frame, value: string): HeapAddress {
 
         return this.mock.invoke<HeapAddress>('addString', [frame, value],
@@ -34,13 +57,15 @@ export class HeapLedgerImpl implements HeapLedger {
 
     addObject(frame: Frame, obj: HeapObject): HeapAddress {
 
-        return this.mock.invoke<HeapAddress>('addObject', [frame, obj], 0);
+        return this.mock.invoke<HeapAddress>('addObject', [frame, obj],
+            DATA_TYPE_HEAP_OBJECT | 0);
 
     }
 
     addFun(frame: Frame, obj: FunInfo): HeapAddress {
 
-        return this.mock.invoke<HeapAddress>('addFun', [frame, obj], 0);
+        return this.mock.invoke<HeapAddress>('addFun', [frame, obj],
+            DATA_TYPE_HEAP_FUN | 0);
 
     }
 
@@ -68,20 +93,18 @@ export class HeapLedgerImpl implements HeapLedger {
 
     }
 
-    intern(frame:Frame, value: HeapValue): HeapAddress {
+    intern(frame: Frame, value: HeapValue): HeapAddress {
 
         return this.mock.invoke('intern', [frame, value], 0);
 
     }
 
-    /**
-     * frameExit is called whenever a Frame has finished execution and ready
-     * to return its value (if any) to its parent frame.
-     *
-     * When this method is called, the HeapLedger transfers ownership of the return
-     * value to the parent frame if it is a HeapAddress. All other objects owned
-     * by the Frame are then removed.
-     */
+    move(ref:HeapAddress, newOwner: FrameName) : HeapAddress {
+
+    return this.mock.invoke('intern', [ref, newOwner], 0);
+
+    }
+
     frameExit(frame: Frame): void {
 
         return this.mock.invoke('frameExit', [frame], undefined);

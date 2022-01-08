@@ -15,11 +15,11 @@ import {
 } from '../../../../../../lib/actor/system/vm/thread/shared/runner';
 import { PScript } from '../../../../../../lib/actor/system/vm/script';
 import {
-    ExecutionFrame
+    Job
 } from '../../../../../../lib/actor/system/vm/thread/shared/runner';
 import { newPlatform } from '../../fixtures/vm';
 import { newContext } from '../../fixtures/context';
-import { NewForeignFunInfo } from '../../../../../../lib/actor/system/vm/script/info';
+import { NewForeignFunInfo, NewFunInfo } from '../../../../../../lib/actor/system/vm/script/info';
 import { Thread } from '../../../../../../lib/actor/system/vm/thread';
 
 describe('runtime', () => {
@@ -37,8 +37,7 @@ describe('runtime', () => {
                 let thread = new SharedThread(vm, new PScript('main'), runner,
                     newContext());
 
-                let frame = new StackFrame('main', new PScript('main'), thread,
-                    nothing(), [
+                let main = new NewFunInfo('main', 0, [
 
                     op.PUSHUI8 | 0x5,
                     op.PUSHUI16 | 0xc000,
@@ -46,7 +45,7 @@ describe('runtime', () => {
 
                 ]);
 
-                runner.enqueue(new ExecutionFrame(thread, [frame]));
+                runner.enqueue(new Job(thread, main, []));
 
                 runner.run();
 
@@ -83,7 +82,7 @@ describe('runtime', () => {
 
                 let thread = new SharedThread(vm, script, runner, ctx);
 
-                let frame = new StackFrame('main', script, thread, nothing(), [
+                let main = new NewFunInfo('main', 0, [
 
                     op.LDN | 0,
                     op.CALL,
@@ -94,7 +93,7 @@ describe('runtime', () => {
 
                 ]);
 
-                runner.enqueue(new ExecutionFrame(thread, [frame]));
+                runner.enqueue(new Job(thread,main));
 
                 runner.run();
 

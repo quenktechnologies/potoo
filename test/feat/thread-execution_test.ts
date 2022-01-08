@@ -5,13 +5,12 @@ import { assert } from '@quenk/test/lib/assert';
 import { nothing } from '@quenk/noni/lib/data/maybe';
 
 import { Immutable } from '../../lib/actor/resident/immutable';
-import { NewForeignFunInfo } from '../../lib/actor/system/vm/script/info';
+import { NewForeignFunInfo, NewFunInfo } from '../../lib/actor/system/vm/script/info';
 import { Thread } from '../../lib/actor/system/vm/thread';
 import { SharedThread } from '../../lib/actor/system/vm/thread/shared';
 import { system } from '../actor/resident/fixtures/system';
 import { StackFrame } from '../../lib/actor/system/vm/runtime/stack/frame';
-import { ExecutionFrame } from '../../lib/actor/system/vm/thread/shared/runner';
-import { ACTION_IGNORE } from '../../lib/actor/template';
+import { Job } from '../../lib/actor/system/vm/thread/shared/runner';
 
 describe('thread execution', function() {
 
@@ -44,7 +43,7 @@ describe('thread execution', function() {
 
         let idx = thread.script.info.length - 1;
 
-        let frame = new StackFrame('main', thread.script, thread, nothing(), [
+        let main = new NewFunInfo('main', 0, [
 
             op.LDN | idx,
             op.CALL,
@@ -55,9 +54,7 @@ describe('thread execution', function() {
 
         ]);
 
-        thread.runner.enqueue(new ExecutionFrame(thread, [frame]));
-
-        thread.runner.run();
+        thread.runner.postJob(new Job(thread, main, []));
 
         assert(counter).equal(2);
 
