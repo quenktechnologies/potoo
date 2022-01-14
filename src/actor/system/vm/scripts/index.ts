@@ -44,10 +44,6 @@ export class NoScript extends BaseScript { }
  */
 export class VMActorScript extends BaseScript {
 
-    info = [
-
-        ...commonFunctions,
-
-    ];
+    info = commonFunctions;
 
 }

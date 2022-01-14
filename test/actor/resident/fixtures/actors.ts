@@ -562,3 +562,4 @@ export class SomeTask extends Task {
     }
 
 }
+

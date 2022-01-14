@@ -1,8 +1,10 @@
 import {
     CallbackActorScript,
+    GenericResidentScript,
     ImmutableActorScript,
     MutableActorScript
 } from '../../../resident/scripts';
+import { AbstractResident } from '../../../resident';
 import { Callback } from '../../../resident/immutable/callback';
 import { Immutable } from '../../../resident/immutable';
 import {  Mutable } from '../../../resident/mutable';
@@ -35,6 +37,10 @@ export class ScriptFactory {
         } else if (actor instanceof Mutable) {
 
             script = new MutableActorScript(actor);
+
+        } else if (actor instanceof AbstractResident) {
+
+          script = new GenericResidentScript();
 
         } else if (actor instanceof PVM) {
 

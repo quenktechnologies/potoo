@@ -24,6 +24,8 @@ import {
 
 } from './fixtures/actors';
 import { ACTION_STOP } from '../../../lib/actor/template';
+import { Case } from '../../../lib/actor/resident/case';
+import { Immutable } from '../../../lib/actor/resident/immutable';
 
 describe('resident', () => {
 
@@ -459,6 +461,80 @@ describe('resident', () => {
                 });
 
             });
+
+        it('should not preempt when exiting', done => {
+
+            class TellTellExit extends Immutable<void> {
+
+                constructor(public s: TestSystem) { super(s); }
+
+                run() {
+
+                    this.tell('telltellitcanexit', 'one');
+                    this.tell('telltellitcanexit', 'two');
+                    this.tell('telltellitcanexit', 'three');
+                    this.tell('telltellitcanexit', 'done');
+                    this.exit();
+
+                }
+
+            }
+
+            class TellTellItCanExit extends Immutable<string> {
+
+                constructor(
+                    public s: TestSystem,
+                    public done: (received: string[]) => void) { super(s); }
+
+                received: string[] = [];
+
+                receive() {
+
+                    return [new Case(String, (str: string) => {
+
+                        if (str === 'done')
+                            this.done(this.received);
+                        else
+                            this.received.push(str);
+
+                    })]
+
+                }
+
+            }
+
+            let sys = system();
+
+            sys.spawn({
+
+                id: 'telltellitcanexit',
+
+                create: () => new TellTellItCanExit(sys, received => {
+
+                    setTimeout(() => {
+
+                        assert(received).equate(['one', 'two', 'three']);
+
+                        assert(sys.vm.state.threads['telltellexit']).undefined();
+
+                        done();
+
+                    }, 100);
+
+                })
+
+            });
+
+            sys.spawn({
+
+                id: 'telltellexit',
+
+                create: () => new TellTellExit(sys)
+
+            });
+
+        });
+
     })
 
     describe('Callback', () => {
