@@ -149,8 +149,7 @@ export class MutableActorScript extends BaseScript {
             op.MAILCOUNT,         // Get the count of messages in the mailbox.
             op.IFZJMP | 4,        // If none go to end.
             op.MAILDQ,            // Push the earliest message on to the stack.
-                                  // Apply the handler for messages once.
-            op.CALL | residentCommonFunctions.length + 1, 
+            op.CALL | receiveIdx, // Apply the handler for messages once.
             op.NOP                // End
         ]),
 
