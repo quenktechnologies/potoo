@@ -5,16 +5,17 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 import { FunInfo } from '../script/info';
 import { Data, Frame } from '../runtime/stack/frame';
 import { Script } from '../script';
-import { PTValue } from '../type';
 import { Context } from '../runtime/context';
 import { Platform } from '../';
 import { Job } from './shared/runner';
+import { Type } from '@quenk/noni/lib/data/type';
 
 export const THREAD_STATE_IDLE = 0;
 export const THREAD_STATE_RUN = 1;
 export const THREAD_STATE_WAIT = 2;
-export const THREAD_STATE_ERROR = 3;
-export const THREAD_STATE_INVALID = 4;
+export const THREAD_STATE_CONTINUE = 3
+export const THREAD_STATE_ERROR = 4;
+export const THREAD_STATE_INVALID = 5;
 
 /**
  * ThreadState is a number corresponding to one of the THREAD_STATE_X constants.
@@ -98,7 +99,7 @@ export interface VMThread extends Thread {
      *
      * The frame specified is the parent frame that will receive it's result.
      */
-    invokeForeign(caller: Frame, func: FunInfo, args: PTValue[]): void
+    invokeForeign(caller: Frame, func: FunInfo, args: Type[]): void
 
     /**
      * invokeVM invokes a VM function.

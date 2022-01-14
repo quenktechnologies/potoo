@@ -1,10 +1,10 @@
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
+import { Type } from '@quenk/noni/lib/data/type';
 import { Frame, Data, FrameName } from '../../runtime/stack/frame';
 import { Context } from '../../runtime/context';
 import { FunInfo, ForeignFunInfo } from '../../script/info';
 import { Script } from '../../script';
-import { PTValue } from '../../type';
 import { Platform } from '../../';
 import { VMThread } from '../';
 import { Job, SharedThreadRunner } from './runner';
@@ -31,7 +31,7 @@ export declare class SharedThread implements VMThread {
      */
     makeFrameName(funName: string): FrameName;
     invokeVM(p: Frame, f: FunInfo): void;
-    invokeForeign(frame: Frame, fun: ForeignFunInfo, args: PTValue[]): void;
+    invokeForeign(frame: Frame, fun: ForeignFunInfo, args: Type[]): void;
     wait(task: Future<void>): void;
     raise(e: Err): void;
     die(): Future<void>;

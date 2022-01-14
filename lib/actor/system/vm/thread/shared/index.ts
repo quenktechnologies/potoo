@@ -5,13 +5,14 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Future, doFuture, pure } from '@quenk/noni/lib/control/monad/future';
 import { empty, tail } from '@quenk/noni/lib/data/array';
 import { just, nothing } from '@quenk/noni/lib/data/maybe';
+import { Type } from '@quenk/noni/lib/data/type';
 
 import { Frame, StackFrame, Data, FrameName } from '../../runtime/stack/frame';
 import { isHeapAddress } from '../../runtime/heap/ledger';
 import { Context } from '../../runtime/context';
 import { FunInfo, ForeignFunInfo } from '../../script/info';
 import { Script } from '../../script';
-import { PTValue, TYPE_FUN } from '../../type';
+import { TYPE_FUN } from '../../type';
 import { Platform } from '../../';
 import {
     VMThread,
@@ -19,7 +20,8 @@ import {
     THREAD_STATE_RUN,
     THREAD_STATE_WAIT,
     THREAD_STATE_ERROR,
-    THREAD_STATE_INVALID
+    THREAD_STATE_INVALID,
+    THREAD_STATE_CONTINUE
 } from '../';
 import { Job, SharedThreadRunner } from './runner';
 
@@ -74,7 +76,7 @@ export class SharedThread implements VMThread {
 
     }
 
-    invokeForeign(frame: Frame, fun: ForeignFunInfo, args: PTValue[]) {
+    invokeForeign(frame: Frame, fun: ForeignFunInfo, args: Type[]) {
 
         //TODO: Support async functions.   
         let val = fun.exec.apply(null, [this, ...args]);
@@ -99,7 +101,7 @@ export class SharedThread implements VMThread {
 
         let onSuccess = () => {
 
-            this.state = THREAD_STATE_IDLE;
+            this.state = THREAD_STATE_CONTINUE;
 
             this.runner.run(); // Continue execution.
 
@@ -176,7 +178,7 @@ export class SharedThread implements VMThread {
         let { script } = this;
 
         let fun: FunInfo = <FunInfo>script.info.find(info =>
-            (info.name === name) && info.descriptor === TYPE_FUN);
+            (info.name === name) && (info.descriptor === TYPE_FUN));
 
         if (!fun)
             return this.raise(new errors.UnknownFunErr(name));

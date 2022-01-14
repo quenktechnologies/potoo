@@ -4,6 +4,12 @@ import { Callback } from './immutable/callback';
 import { Immutable } from './immutable';
 import { Mutable } from './mutable';
 /**
+ * GenericResidentScript used by resident actors not declared here.
+ */
+export declare class GenericResidentScript extends BaseScript {
+    info: (NewFunInfo | NewForeignFunInfo)[];
+}
+/**
  * ImmutableActorScript used by Immutable actor instances.
  */
 export declare class ImmutableActorScript<T> extends BaseScript {

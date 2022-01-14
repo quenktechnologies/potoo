@@ -1,6 +1,7 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Type } from '@quenk/noni/lib/data/type';
 import { HeapAddress } from './runtime/heap';
+import { Data } from './runtime/stack/frame';
 import { TypeInfo } from './script/info';
 import { Thread } from './thread';
 export declare const TYPE_STEP = 16777216;
@@ -74,7 +75,7 @@ export declare type Foreign = Type;
 /**
  * ForeignFun
  */
-export declare type ForeignFun = (r: Thread, ...args: PTValue[]) => PTValue;
+export declare type ForeignFun = (r: Thread, ...args: Type[]) => Data;
 /**
  * PTObject is the interface of objects stored in the object pool.
  */

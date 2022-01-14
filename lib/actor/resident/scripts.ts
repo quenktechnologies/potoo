@@ -15,8 +15,11 @@ import { Message } from '../message';
 import { Callback } from './immutable/callback';
 import { Immutable } from './immutable';
 import { Mutable } from './mutable';
+import { Address } from '../address';
 
-const receiveIdx = commonFunctions.length + 1;
+// XXX: This needs to be updated when new functions are added to 
+// residentCommonFunctions.
+const receiveIdx = commonFunctions.length + 2;
 
 const residentCommonFunctions = [
 
@@ -29,9 +32,23 @@ const residentCommonFunctions = [
         op.LDN | receiveIdx,  // Load the 'receive' function on to the stack.
         op.CALL | 1,          // Apply the handler for messages once.
         op.NOP                // End
-    ])
+    ]),
+
+    new NewForeignFunInfo('kill', 1, (thr: Thread, addr: Address) => {
+        thr.wait(thr.vm.kill(thr.context.actor, addr));
+        return 0;
+    })
 
 ];
+
+/**
+ * GenericResidentScript used by resident actors not declared here.
+ */
+export class GenericResidentScript extends BaseScript {
+
+    info = residentCommonFunctions
+
+}
 
 /**
  * ImmutableActorScript used by Immutable actor instances.
@@ -79,7 +96,6 @@ export class CallbackActorScript<T> extends BaseScript {
     code = [];
 
 }
-
 
 /**
  * MutableActorScript used by Mutable actor instances.
@@ -133,7 +149,8 @@ export class MutableActorScript extends BaseScript {
             op.MAILCOUNT,         // Get the count of messages in the mailbox.
             op.IFZJMP | 4,        // If none go to end.
             op.MAILDQ,            // Push the earliest message on to the stack.
-            op.CALL | receiveIdx, // Apply the handler for messages once.
+                                  // Apply the handler for messages once.
+            op.CALL | residentCommonFunctions.length + 1, 
             op.NOP                // End
         ]),
 
@@ -169,9 +186,7 @@ const immutableExec = <T>(actor: Immutable<T>, thr: Thread, msg: Message) => {
 
     } else {
 
-        vm.trigger(thr.context.address, events.EVENT_MESSAGE_DROPPED,
-            msg);
-
+        vm.trigger(thr.context.address, events.EVENT_MESSAGE_DROPPED, msg);
         return 0;
 
     }

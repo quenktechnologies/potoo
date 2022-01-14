@@ -6,6 +6,7 @@ import { handlers } from '../../runtime/op';
 import { OPCODE_MASK, OPERAND_MASK } from '../../runtime';
 import { FunInfo } from '../../script/info';
 import {
+    THREAD_STATE_CONTINUE,
     THREAD_STATE_IDLE,
     THREAD_STATE_RUN,
     THREAD_STATE_WAIT,
@@ -94,11 +95,12 @@ export class SharedThreadRunner {
 
         let job;
         while (job = this.jobs.find(job =>
-            job.thread.state === THREAD_STATE_IDLE)) {
+            (job.thread.state === THREAD_STATE_IDLE) ||
+        (job.thread.state === THREAD_STATE_CONTINUE))) {
 
             let thread = job.thread;
 
-            thread.restore(job);
+          if(thread.state != THREAD_STATE_CONTINUE)            thread.restore(job);
 
             while (!empty(thread.fstack)) {
 

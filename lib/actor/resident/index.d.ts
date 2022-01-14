@@ -1,4 +1,5 @@
 import { Err } from '@quenk/noni/lib/control/error';
+import { Data } from '../system/vm/runtime/stack/frame';
 import { Context } from '../system/vm/runtime/context';
 import { System } from '../system';
 import { Address, AddressMap } from '../address';
@@ -6,7 +7,6 @@ import { Message } from '../message';
 import { Templates, Spawnable } from '../template';
 import { Actor, Eff } from '../';
 import { Api } from './api';
-import { Data } from '../system/vm/runtime/stack/frame';
 /**
  * Reference to an actor address.
  */
