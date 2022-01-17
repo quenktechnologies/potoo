@@ -41,7 +41,7 @@ import { isRouter, isBuffered, FLAG_EXIT_AFTER_RUN } from '../../flags';
 import { Message, Envelope } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
-import { SharedThreadRunner } from './thread/shared/runner';
+import { SharedScheduler } from './thread/shared/scheduler';
 import { SharedThread } from './thread/shared';
 import { Thread, VMThread } from './thread';
 import {
@@ -224,7 +224,7 @@ export class PVM implements Platform {
     /**
      * threadRunner shared between vm threads.
      */
-    threadRunner = new SharedThreadRunner(this);
+    threadRunner = new SharedScheduler(this);
 
     /**
      * state contains information about all the actors in the system, routers

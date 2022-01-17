@@ -1,5 +1,5 @@
 import { assert } from '@quenk/test/lib/assert';
-import { Case, Default } from '../../../src/actor/resident/case';
+import { Case, Default } from '../../../lib/actor/resident/case';
 
 class Flag { constructor(public value: boolean) { } }
 
@@ -25,8 +25,7 @@ describe('case', () => {
 
         it('assert match', () => {
 
-            let x = 0;
-            let f = (n: number) => { x = n }
+            let f = () => { }
             let c = new Case(12, f);
 
             assert(c.test(12)).equal(true);
@@ -39,8 +38,7 @@ describe('case', () => {
 
         it('assert match', () => {
 
-            let x = 0;
-            let f = (_: any) => { x++ }
+            let f = () => {  }
             let c = new Default(f);
 
             assert(c.test(1)).equal(true);

@@ -254,13 +254,7 @@ export class AssertSpawnReturnsAddress extends AbstractResident {
 
 export class ShouldWork extends Mutable {
 
-    constructor(
-        public s: TestSystem,
-        public done: () => void) {
-
-        super(s);
-
-    }
+    constructor(public s: TestSystem, public done: () => void) {       super(s);    }
 
     run() {
 
@@ -562,4 +556,3 @@ export class SomeTask extends Task {
     }
 
 }
-

@@ -9,8 +9,8 @@ import {
 } from '../../../../../../lib/actor/system/vm/script/info';
 import { Thread } from '../../../../../../lib/actor/system/vm/thread';
 import { PScript } from '../../../../../../lib/actor/system/vm/script';
-import { SharedThread } from '../../../../../../lib/actor/system/vm/thread/shared';
-import { SharedThreadRunner } from '../../../../../../lib/actor/system/vm/thread/shared/runner';
+import { makeFrameName, SharedThread } from '../../../../../../lib/actor/system/vm/thread/shared';
+import { SharedScheduler } from '../../../../../../lib/actor/system/vm/thread/shared/scheduler';
 import { THREAD_STATE_ERROR } from '../../../../../../lib/actor/system/vm/thread';
 import { newPlatform } from '../../fixtures/vm';
 import { newContext } from '../../fixtures/context';
@@ -36,9 +36,9 @@ describe('shared', () => {
                 ctx.aid = 1;
 
                 let thread = new SharedThread(vm, script,
-                    new SharedThreadRunner(vm), ctx);
+                    new SharedScheduler(vm), ctx);
 
-                assert(thread.makeFrameName('spin')).equal('testplate@1#spin');
+                assert(makeFrameName(thread, 'spin')).equal('testplate@1#spin');
             });
 
             it('should use the stack for subsequent frame names', () => {
@@ -54,11 +54,11 @@ describe('shared', () => {
                 ctx.aid = 1;
 
                 let thread = new SharedThread(vm, script,
-                    new SharedThreadRunner(vm), ctx);
+                    new SharedScheduler(vm), ctx);
 
                 thread.fstack.push(newFrame('testplate@1#main'));
 
-                assert(thread.makeFrameName('second'))
+                assert(makeFrameName(thread, 'second'))
                     .equal('testplate@1#main/second');
             });
 
@@ -75,7 +75,7 @@ describe('shared', () => {
                 ]);
 
                 let thread = new SharedThread(vm, script,
-                    new SharedThreadRunner(vm), newContext());
+                    new SharedScheduler(vm), newContext());
 
                 vm.heap.mock.setReturnCallback('intern', (_, val) => val);
 
@@ -105,7 +105,7 @@ describe('shared', () => {
                 ]);
 
                 let thread = new SharedThread(vm, script,
-                    new SharedThreadRunner(vm), newContext());
+                    new SharedScheduler(vm), newContext());
 
                 vm.heap.mock.setReturnCallback('intern', (_, val) => val);
 
@@ -132,7 +132,7 @@ describe('shared', () => {
                 ctx.actor = act;
 
                 let thread = new SharedThread(vm, new PScript('main'),
-                    new SharedThreadRunner(vm), ctx);
+                    new SharedScheduler(vm), ctx);
 
                 yield thread.die();
 
@@ -160,7 +160,7 @@ describe('shared', () => {
                 ctx.actor = act;
 
                 let thread = new SharedThread(vm, new PScript('main'),
-                    new SharedThreadRunner(vm), ctx);
+                    new SharedScheduler(vm), ctx);
 
                 thread.raise(new Error('test'));
 

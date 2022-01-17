@@ -22,10 +22,10 @@ export class FrameImpl implements Frame {
         public context = newContext(),
         public thread = newThread(),
         public parent: Maybe<Frame> = nothing(),
-        public code = [],
-        public data = [],
-        public rdata = [],
-        public locals = [],
+        public code:number[] = [],
+        public data:number[] = [],
+        public rdata: number[] = [],
+        public locals: number[] = [],
         public ip = 0) { }
 
     mock = new Mock();

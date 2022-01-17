@@ -5,7 +5,7 @@ import { right, Either } from '@quenk/noni/lib/data/either';
 import { Future, pure } from '@quenk/noni/lib/control/monad/future';
 
 import { VMThread, THREAD_STATE_IDLE } from '../../../../../lib/actor/system/vm/thread';
-import { Job } from '../../../../../lib/actor/system/vm/thread/shared/runner';
+import { Job } from '../../../../../lib/actor/system/vm/thread/shared';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { Message } from '../../../../../lib/actor/message';
 import { FunInfo } from '../../../../../lib/actor/system/vm/script/info';
@@ -88,15 +88,9 @@ export class ThreadImpl implements VMThread {
 
     }
 
-    restore(job: Job): void {
+    resume(job: Job): void {
 
-        return this.mock.invoke('restore', [job], undefined);
-
-    }
-
-    nextFrame(rp: number): void {
-
-        return this.mock.invoke('nextFrame', [rp], undefined);
+        return this.mock.invoke('resume', [job], undefined);
 
     }
 

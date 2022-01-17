@@ -2,15 +2,12 @@ import * as op from '../../lib/actor/system/vm/runtime/op';
 
 import { assert } from '@quenk/test/lib/assert';
 
-import { nothing } from '@quenk/noni/lib/data/maybe';
-
 import { Immutable } from '../../lib/actor/resident/immutable';
 import { NewForeignFunInfo, NewFunInfo } from '../../lib/actor/system/vm/script/info';
 import { Thread } from '../../lib/actor/system/vm/thread';
 import { SharedThread } from '../../lib/actor/system/vm/thread/shared';
 import { system } from '../actor/resident/fixtures/system';
-import { StackFrame } from '../../lib/actor/system/vm/runtime/stack/frame';
-import { Job } from '../../lib/actor/system/vm/thread/shared/runner';
+import { Job } from '../../lib/actor/system/vm/thread/shared';
 
 describe('thread execution', function() {
 
@@ -54,7 +51,7 @@ describe('thread execution', function() {
 
         ]);
 
-        thread.runner.postJob(new Job(thread, main, []));
+        thread.scheduler.postJob(new Job(thread, main, []));
 
         assert(counter).equal(2);
 

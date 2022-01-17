@@ -71,7 +71,7 @@ describe('vm', () => {
 
                     let msg = new UnknownInstanceErr(actor).message;
 
-                    assert(e.message).equal(msg);
+                    assert((<Error>e).message).equal(msg);
 
                 }
 
@@ -343,7 +343,7 @@ describe('vm', () => {
 
                 } catch (e) {
 
-                    assert(e.message).equal('err');
+                    assert((<Error>e).message).equal('err');
                     caught = true;
 
                 }
@@ -540,8 +540,6 @@ describe('vm', () => {
             it('should stop all actors', () => doFuture(function*() {
 
                 let vm = new PVM(newSystem());
-                let ok = false;
-
                 let self0 = newThread();
                 let self1 = newThread();
                 let self2 = newThread();

@@ -291,7 +291,7 @@ describe('base', () => {
 
             });
 
-            f.mock.setReturnValue('popFunction', (v: number) => finfo);
+            f.mock.setReturnValue('popFunction', () => finfo);
 
             base.addui32(r, f, 0);
 
@@ -313,7 +313,7 @@ describe('base', () => {
 
             base.raise(r, f, 0);
 
-            assert(r.mock.getCalledArgs('raise')[0].message).equate('err');
+            assert((<any>r.mock.getCalledArgs('raise'))[0].message).equate('err');
 
         });
 

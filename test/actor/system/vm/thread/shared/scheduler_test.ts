@@ -2,21 +2,16 @@ import * as op from '../../../../../../lib/actor/system/vm/runtime/op';
 
 import { assert } from '@quenk/test/lib/assert';
 
-import { nothing } from '@quenk/noni/lib/data/maybe';
-
-import {
-    StackFrame
-} from '../../../../../../lib/actor/system/vm/runtime/stack/frame';
 import {
     SharedThread
 } from '../../../../../../lib/actor/system/vm/thread/shared';
 import {
-    SharedThreadRunner
-} from '../../../../../../lib/actor/system/vm/thread/shared/runner';
+    SharedScheduler
+} from '../../../../../../lib/actor/system/vm/thread/shared/scheduler';
 import { PScript } from '../../../../../../lib/actor/system/vm/script';
 import {
     Job
-} from '../../../../../../lib/actor/system/vm/thread/shared/runner';
+} from '../../../../../../lib/actor/system/vm/thread/shared';
 import { newPlatform } from '../../fixtures/vm';
 import { newContext } from '../../fixtures/context';
 import { NewForeignFunInfo, NewFunInfo } from '../../../../../../lib/actor/system/vm/script/info';
@@ -32,7 +27,7 @@ describe('runtime', () => {
 
                 let vm = newPlatform();
 
-                let runner = new SharedThreadRunner(vm);
+                let runner = new SharedScheduler(vm);
 
                 let thread = new SharedThread(vm, new PScript('main'), runner,
                     newContext());
@@ -45,9 +40,7 @@ describe('runtime', () => {
 
                 ]);
 
-                runner.enqueue(new Job(thread, main, []));
-
-                runner.run();
+                runner.postJob(new Job(thread, main, []));
 
                 assert(thread.fstack.length).equal(0);
 
@@ -61,7 +54,7 @@ describe('runtime', () => {
 
                 let ctx = newContext();
 
-                let runner = new SharedThreadRunner(vm);
+                let runner = new SharedScheduler(vm);
 
                 let counter = 0;
 
@@ -93,9 +86,7 @@ describe('runtime', () => {
 
                 ]);
 
-                runner.enqueue(new Job(thread,main));
-
-                runner.run();
+                runner.postJob(new Job(thread, main));
 
                 vm.mock.setReturnCallback('raise', () => undefined);
 
