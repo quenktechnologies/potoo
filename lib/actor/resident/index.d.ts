@@ -1,4 +1,5 @@
 import { Err } from '@quenk/noni/lib/control/error';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Data } from '../system/vm/runtime/stack/frame';
 import { Context } from '../system/vm/runtime/context';
 import { System } from '../system';
@@ -36,6 +37,7 @@ export declare abstract class AbstractResident implements Resident {
     start(addr: Address): Eff;
     run(): void;
     stop(): void;
+    wait(ft: Future<void>): void;
     /**
      * exec calls a VM function by name on behalf of this actor.
      */

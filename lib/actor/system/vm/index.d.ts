@@ -9,7 +9,7 @@ import { Template } from '../../template';
 import { Message } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
-import { SharedThreadRunner } from './thread/shared/runner';
+import { SharedScheduler } from './thread/shared/scheduler';
 import { Thread, VMThread } from './thread';
 import { State, Threads } from './state';
 import { Script } from './script';
@@ -141,7 +141,7 @@ export declare class PVM implements Platform {
     /**
      * threadRunner shared between vm threads.
      */
-    threadRunner: SharedThreadRunner;
+    threadRunner: SharedScheduler;
     /**
      * state contains information about all the actors in the system, routers
      * and groups.
@@ -153,7 +153,7 @@ export declare class PVM implements Platform {
      */
     static create<S extends System>(s: S, conf?: object): PVM;
     init(c: Context): Context;
-    accept(m: Message): import("../..").Eff;
+    accept(m: Message): import("../../").Eff;
     start(): void;
     notify(): void;
     stop(): Future<void>;

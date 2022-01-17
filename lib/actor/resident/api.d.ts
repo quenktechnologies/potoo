@@ -1,4 +1,5 @@
 import { Err } from '@quenk/noni/lib/control/error';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Address, AddressMap } from '../address';
 import { Spawnable, Templates } from '../template';
 /**
@@ -33,6 +34,14 @@ export interface Api extends Spawner {
      * kill a child actor.
      */
     kill(addr: Address): Api;
+    /**
+     * wait on a Future to complete blocking the actor until it does.
+     *
+     * The blocking only occurs in the VM and not the JS event loop. Errors are
+     * propagated through the event handling machinery and any return values
+     * are ignored.
+     */
+    wait(ft: Future<void>): void;
     /**
      * exit instructs the system to kill off this actor.
      */

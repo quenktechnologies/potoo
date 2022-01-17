@@ -1,21 +1,19 @@
 import { Err } from '@quenk/noni/lib/control/error';
-
 import { Future } from '@quenk/noni/lib/control/monad/future';
+import { Type } from '@quenk/noni/lib/data/type';
 
 import { FunInfo } from '../script/info';
 import { Data, Frame } from '../runtime/stack/frame';
 import { Script } from '../script';
 import { Context } from '../runtime/context';
 import { Platform } from '../';
-import { Job } from './shared/runner';
-import { Type } from '@quenk/noni/lib/data/type';
+import { Job } from './shared';
 
 export const THREAD_STATE_IDLE = 0;
 export const THREAD_STATE_RUN = 1;
 export const THREAD_STATE_WAIT = 2;
-export const THREAD_STATE_CONTINUE = 3
-export const THREAD_STATE_ERROR = 4;
-export const THREAD_STATE_INVALID = 5;
+export const THREAD_STATE_ERROR = 3;
+export const THREAD_STATE_INVALID = 4;
 
 /**
  * ThreadState is a number corresponding to one of the THREAD_STATE_X constants.
@@ -63,12 +61,14 @@ export interface Thread {
 }
 
 /** 
- * VMThread is a Thread for actors operating locally for the vm, i.e. resident
- * actors.
+ * VMThread is the Thread type for actor implementations that rely entirely on
+ * the VM.
  *
- * VMThreads contain a Script that is executed to perform basic actor 
- * functionality. Resident actors use the call() method to execute procedures
- * from this Script when they need to.
+ * This is used for resident actors and the VM itself (root actor). The reason
+ * for this interface is the potential need to implement other thread types to 
+ * take advantage of technologies like WebWorkers in the future. For now however, 
+ * all Threads found within the system can be expected to be VMThreads. 
+ * Furthermore, the only implementation of this is interface is the SharedThread.
  */
 export interface VMThread extends Thread {
 
@@ -90,7 +90,7 @@ export interface VMThread extends Thread {
     rp: Data
 
     /**
-     * script this VMThread executes from.
+     * script this VMThread executes code from.
      */
     script: Script
 
@@ -110,22 +110,12 @@ export interface VMThread extends Thread {
     invokeVM(caller: Frame, func: FunInfo): void
 
     /**
-     * restore sets the thread's internal values using the provided 
-     * Job. The thread's state will be updated to THREAD_STATE_RUN.
-     */
-    restore(eframe: Job): void
-
-    /**
-     * nextFrame instructs the thread to process the next stack frame
-     * in the thread's stack.
+     * resume a thread's execution.
      *
-     * This does not actually execute the frame but prepares the internal
-     * values for execution by pointing to the next one. The thread's state is 
-     * set to THREAD_STATE_IDLE.
-     * 
-     * @param rp - The value to set the 
+     * This is called by the scheduler to execute one (and only one) job in 
+     * the VMThreads internal queue.
      */
-    nextFrame(rp: Data): void
+    resume(job: Job): void
 
     /**
      * exec a function by name on this thread.
