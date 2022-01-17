@@ -1,6 +1,8 @@
 import { assert } from '@quenk/test/lib/assert';
 
-import { ACTION_STOP } from '../../../lib/actor/template';
+import { Future,delay, raise } from '@quenk/noni/lib/control/monad/future';
+
+import { ACTION_IGNORE, ACTION_STOP } from '../../../lib/actor/template';
 import { system, TestSystem } from './fixtures/system';
 import {
     Spawner,
@@ -12,6 +14,8 @@ import {
     AssertSpawnReturnsAddress,
 
 } from './fixtures/actors';
+import { Context } from '../../../lib/actor/system/vm/runtime/context';
+import { AbstractResident } from '../../../lib/actor/resident';
 
 describe('resident', () => {
 
@@ -325,6 +329,83 @@ describe('resident', () => {
 
                 }, 200);
             })
+        })
+
+        describe('wait', () => {
+
+            it('should work', done => {
+
+                let sys = system();
+
+                let ft = delay(done);
+
+                let Actor = class extends AbstractResident {
+
+                    init(c: Context) {
+
+                        return c;
+
+                    }
+
+                    run() {
+
+                        this.wait(ft);
+
+                    }
+
+                }
+
+                sys.spawn({
+
+                    id: 'future',
+
+                    create: () => new Actor(sys)
+                })
+
+            });
+
+            it('should raise errors', done => {
+
+                let sys = system();
+
+                let ft: Future<void> = raise(new Error('bad things'));
+
+                let Actor = class extends AbstractResident {
+
+                    init(c: Context) {
+
+                        return c;
+
+                    }
+
+                    run() {
+
+                        this.wait(ft);
+
+                    }
+
+                }
+
+                sys.spawn({
+
+                    id: 'future',
+
+                    create: () => new Actor(sys),
+
+                    trap: e => {
+
+                        if (e.message === 'bad things')
+                            done();
+                        else
+                            done(e);
+
+                        return ACTION_IGNORE;
+
+                    }
+                })
+
+            })
+
         })
 
     })

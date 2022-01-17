@@ -2,7 +2,9 @@
 import { map, merge } from '@quenk/noni/lib/data/record';
 import { isObject } from '@quenk/noni/lib/data/type';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 
+import { UnknownInstanceErr } from '../system/vm/runtime/error';
 import { Data } from '../system/vm/runtime/stack/frame';
 import { Context } from '../system/vm/runtime/context';
 import { System } from '../system';
@@ -112,6 +114,17 @@ export abstract class AbstractResident
     run(): void { }
 
     stop(): void { }
+
+    wait(ft: Future<void>) {
+
+        let mthread = this.platform.getThread(this.self());
+
+        if (mthread.isJust())
+            mthread.get().wait(ft);
+        else
+            this.raise(new UnknownInstanceErr(this));
+
+    }
 
     /**
      * exec calls a VM function by name on behalf of this actor.
