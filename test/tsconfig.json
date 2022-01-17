@@ -1,16 +1,18 @@
 {
     "compilerOptions": {
         "baseUrl": "src",
-        "lib": ["ES2015", "DOM"],
+        "lib": ["es5", "ES2015", "DOM"],
         "module": "commonjs",
-        "target": "es5",
+        "target": "es6",
         "rootDir": ".",
         "moduleResolution": "node",
         "allowUnreachableCode": true,
         "noUnusedParameters": true,
         "noUnusedLocals": true,
+        "skipLibCheck": true,
         "sourceMap": true,
         "strict": true,
+        "downlevelIteration": true,
         "declaration": true,
         "types": ["node", "mocha"],
         "typeRoots": ["node_modules/@types"]
