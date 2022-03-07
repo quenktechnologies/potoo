@@ -43,7 +43,7 @@ import { Instance, Actor } from '../../';
 import { System } from '../';
 import { SharedScheduler } from './thread/shared/scheduler';
 import { SharedThread } from './thread/shared';
-import { Thread, VMThread } from './thread';
+import { Thread, THREAD_STATE_IDLE, VMThread } from './thread';
 import {
     State,
     get,
@@ -545,6 +545,9 @@ export class PVM implements Platform {
             switch (trap(err)) {
 
                 case template.ACTION_IGNORE:
+                    this.getThread(addr).map(thr => {
+                        thr.state = THREAD_STATE_IDLE
+                    });
                     break loop;
 
                 case template.ACTION_RESTART:
