@@ -12,18 +12,18 @@
   },
   "devDependencies": {
     "@quenk/test": "^2.5.0",
-    "@types/mocha": "^9.0.0",
+    "@types/mocha": "^9.1.1",
     "@types/node": "^13.13.38",
     "@types/uuid": "^7.0.4",
-    "mocha": "^9.1.3",
+    "mocha": "^9.2.2",
     "ts-node": "^8.10.2",
     "typedoc": "^0.17.8",
-    "typescript": "^4.5.4"
+    "typescript": "^4.7.3"
   },
   "author": "Quenk Technologies Limited",
   "license": "Apache-2.0",
   "dependencies": {
-    "@quenk/noni": "^1.41.1",
+    "@quenk/noni": "^1.43.3",
     "uuid": "^7.0.3"
   }
 }
