@@ -10,12 +10,12 @@ import { State, Threads } from '../../../../../lib/actor/system/vm/state';
 import { Address } from '../../../../../lib/actor/address';
 import { Context } from '../../../../../lib/actor/system/vm/runtime/context';
 import { Platform } from '../../../../../lib/actor/system/vm';
-import { Thread, VMThread } from '../../../../../lib/actor/system/vm/thread';
+import { Thread  } from '../../../../../lib/actor/system/vm/thread';
 import { Message } from '../../../../../lib/actor/message';
-import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { Instance } from '../../../../../lib/actor';
 import { HeapLedgerImpl } from './heap/ledger';
 import { LogWritableImpl } from './log';
+import { EventSourceImpl } from './event';
 
 export class FPVM<S extends System> implements Platform {
 
@@ -36,6 +36,8 @@ export class FPVM<S extends System> implements Platform {
     heap = new HeapLedgerImpl();
 
     log = new LogWritableImpl();
+
+    events = new EventSourceImpl();
 
     configuration = {};
 
@@ -147,18 +149,6 @@ export class FPVM<S extends System> implements Platform {
     kill(parent: Instance, target: Address): Future<void> {
 
         return this.mock.invoke('kill', [parent, target], pure(<void>undefined));
-
-    }
-
-    trigger(addr: Address, evt: string, ...args: any[]) {
-
-        return this.mock.invoke('kill', [addr, evt, args], undefined);
-
-    }
-
-    logOp(r: VMThread, f: Frame, op: number, oper: number) {
-
-        return this.mock.invoke('logOp', [r, f, op, oper], undefined);
 
     }
 

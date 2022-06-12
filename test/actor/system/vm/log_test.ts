@@ -52,7 +52,7 @@ let frame = new FrameImpl();
 
 describe('LogWriter', () => {
 
-    xdescribe('opcode', () => {
+    describe('opcode', () => {
 
         it('should log opcodes', () => {
 

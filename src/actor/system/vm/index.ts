@@ -66,6 +66,7 @@ import { LogWritable, LogWriter } from './log';
 import { HeapLedger, DefaultHeapLedger } from './runtime/heap/ledger';
 import { ScriptFactory } from './scripts/factory';
 import { Foreign } from './type';
+import { EventSource, Publisher } from './event';
 
 /**
  * Slot
@@ -95,6 +96,13 @@ export interface Platform extends Actor {
      * Used to access the internal logging API.
      */
     log: LogWritable
+
+    /**
+     * events service for the VM.
+     *
+     * Used to publish VM events to interested listeners.
+     */
+    events: EventSource
 
     /**
      * allocate a new Thread for an actor.
@@ -183,11 +191,6 @@ export interface Platform extends Actor {
     raise(src: Instance, err: Err): void
 
     /**
-     * trigger is used to generate events as the system runs.
-     */
-    trigger(addr: Address, evt: string, ...args: Type[]): void
-
-    /**
      * exec a function by name with the provided arguments using the actor
      * instance's thread.
      */
@@ -212,6 +215,8 @@ export class PVM implements Platform {
     heap = new DefaultHeapLedger();
 
     log = new LogWriter(this.conf.long_sink, this.conf.log_level);
+
+    events = new Publisher(this.log);
 
     /**
      * threadRunner shared between vm threads.
@@ -357,7 +362,7 @@ export class PVM implements Platform {
 
         this.putThread(addr, thr);
 
-        this.trigger(addr, events.EVENT_ACTOR_CREATED);
+        this.events.publish(addr, events.EVENT_ACTOR_CREATED);
 
         if (isRouter(thr.context.flags))
             this.putRoute(addr, addr);
@@ -395,7 +400,7 @@ export class PVM implements Platform {
         if (rtime.context.flags & FLAG_EXIT_AFTER_RUN)
             rtime.wait(this.kill(rtime.context.actor, target));
 
-        this.trigger(rtime.context.address, events.EVENT_ACTOR_STARTED);
+        this.events.publish(rtime.context.address, events.EVENT_ACTOR_STARTED);
 
     }
 
@@ -428,13 +433,13 @@ export class PVM implements Platform {
 
             }
 
-            this.trigger(from, events.EVENT_SEND_OK, to, msg);
+            this.events.publish(from, events.EVENT_SEND_OK, to, msg);
 
             return true;
 
         } else {
 
-            this.trigger(from, events.EVENT_SEND_FAILED, to, msg);
+            this.events.publish(from, events.EVENT_SEND_FAILED, to, msg);
 
             return false;
 
@@ -595,12 +600,6 @@ export class PVM implements Platform {
 
     }
 
-    trigger(addr: Address, evt: string, ...args: Type[]) {
-
-        this.log.event(addr, evt, ...args);
-
-    }
-
     kill(parent: Instance, target: Address): Future<void> {
 
         let that = this;
@@ -647,7 +646,7 @@ export class PVM implements Platform {
 
                         that.remove(addr);
 
-                        that.trigger(addr, events.EVENT_ACTOR_STOPPED);
+                        that.events.publish(addr, events.EVENT_ACTOR_STOPPED);
 
                         return voidPure;
 
