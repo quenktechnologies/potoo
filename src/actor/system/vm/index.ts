@@ -60,21 +60,12 @@ import {
 } from './state';
 import { Script } from './script';
 import { Context, newContext } from './runtime/context';
-import { Data, Frame } from './runtime/stack/frame';
-import { Opcode, toLog } from './runtime/op';
-import { Operand } from './runtime';
+import { Data } from './runtime/stack/frame';
 import { Conf, defaults } from './conf';
-import {
-    LOG_LEVEL_DEBUG,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_NOTICE,
-    LOG_LEVEL_WARN,
-    LOG_LEVEL_ERROR
-} from './log';
+import { LogWritable, LogWriter } from './log';
 import { HeapLedger, DefaultHeapLedger } from './runtime/heap/ledger';
 import { ScriptFactory } from './scripts/factory';
 import { Foreign } from './type';
-import { getLevel } from './event';
 
 /**
  * Slot
@@ -97,6 +88,13 @@ export interface Platform extends Actor {
      * heap storage with builtin ownership tracking for all threads.
      */
     heap: HeapLedger
+
+    /**
+     * log service for the VM.
+     *
+     * Used to access the internal logging API.
+     */
+    log: LogWritable
 
     /**
      * allocate a new Thread for an actor.
@@ -190,11 +188,6 @@ export interface Platform extends Actor {
     trigger(addr: Address, evt: string, ...args: Type[]): void
 
     /**
-     * logOp is used by Thread to log which opcodes are executed.
-     */
-    logOp(r: VMThread, f: Frame, op: Opcode, operand: Operand): void
-
-    /**
      * exec a function by name with the provided arguments using the actor
      * instance's thread.
      */
@@ -216,10 +209,9 @@ export class PVM implements Platform {
 
     _actorIdCounter = -1;
 
-    /**
-     * heap memory shared between actor Threads.
-     */
     heap = new DefaultHeapLedger();
+
+    log = new LogWriter(this.conf.long_sink, this.conf.log_level);
 
     /**
      * threadRunner shared between vm threads.
@@ -605,50 +597,7 @@ export class PVM implements Platform {
 
     trigger(addr: Address, evt: string, ...args: Type[]) {
 
-        let elvl = getLevel(evt);
-        let { level, logger } = this.conf.log;
-
-        if (level >= elvl) {
-
-            switch (elvl) {
-
-                case LOG_LEVEL_DEBUG:
-                    logger.debug(addr, evt, args);
-                    break;
-
-                case LOG_LEVEL_INFO:
-                    logger.info(addr, evt, args);
-                    break;
-
-                case LOG_LEVEL_NOTICE:
-                case LOG_LEVEL_WARN:
-                    logger.warn(addr, evt, args);
-                    break;
-
-                case LOG_LEVEL_ERROR:
-                    logger.error(addr, evt, args);
-                    break;
-
-                default:
-                    break;
-
-            }
-
-        }
-
-        //forward the event to relevant hooks.
-        if (this.conf.on[evt] != null)
-            this.conf.on[evt].apply(null, [addr, evt, ...args]);
-
-    }
-
-    logOp(r: VMThread, f: Frame, op: Opcode, oper: Operand) {
-
-        this.conf.log.logger.debug.apply(null, [
-            `[${r.context.address}]`,
-            `(${f.script.name})`,
-            ...toLog(op, r, f, oper)
-        ]);
+        this.log.event(addr, evt, ...args);
 
     }
 

@@ -15,6 +15,7 @@ import { Message } from '../../../../../lib/actor/message';
 import { Frame } from '../../../../../lib/actor/system/vm/runtime/stack/frame';
 import { Instance } from '../../../../../lib/actor';
 import { HeapLedgerImpl } from './heap/ledger';
+import { LogWritableImpl } from './log';
 
 export class FPVM<S extends System> implements Platform {
 
@@ -33,6 +34,8 @@ export class FPVM<S extends System> implements Platform {
     };
 
     heap = new HeapLedgerImpl();
+
+    log = new LogWritableImpl();
 
     configuration = {};
 
@@ -126,11 +129,11 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-  identify(target: Instance) : Maybe<Address> {
+    identify(target: Instance): Maybe<Address> {
 
-    return this.mock.invoke('identify', [target], nothing());
+        return this.mock.invoke('identify', [target], nothing());
 
-  }
+    }
 
     raise(parent: Instance, err: Err): void {
 

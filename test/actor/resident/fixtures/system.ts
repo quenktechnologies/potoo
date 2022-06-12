@@ -30,8 +30,4 @@ export class TestSystem {
 
 }
 
-export const system = (conf: Partial<Conf> = {
-
-    log: { logger: console, level: 7 }
-
-}) => new TestSystem(conf)
+export const system = (conf: Partial<Conf> = {}) => new TestSystem(conf);

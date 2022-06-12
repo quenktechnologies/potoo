@@ -1,13 +1,6 @@
-import { Record } from '@quenk/noni/lib/data/record';
 import { Type } from '@quenk/noni/lib/data/type';
 
 import { Address } from '../../address';
-import {
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_WARN,
-    LogLevel,
-    LOG_LEVEL_DEBUG
-} from './log';
 
 export const EVENT_SEND_OK = 'message-send-ok';
 export const EVENT_SEND_FAILED = 'message-send-failed';
@@ -33,95 +26,3 @@ export interface Handlers {
     [key: string]: Handler
 
 }
-
-/**
- * EventInfo holds needed information about events the system can generate.
- */
-export interface EventInfo {
-
-    /**
-     * level of logging
-     */
-    level: LogLevel
-
-}
-
-/**
- * EventInfos map.
- */
-export interface EventInfos extends Record<EventInfo> { }
-
-/**
- * events holds the EventInfo details for all system events.
- */
-export const events: EventInfos = {
-
-    [EVENT_ACTOR_CREATED]: {
-
-        level: LOG_LEVEL_INFO
-
-    },
-
-    [EVENT_ACTOR_STARTED]: {
-
-        level: LOG_LEVEL_INFO
-
-    },
-
-    [EVENT_SEND_OK]: {
-
-        level: LOG_LEVEL_INFO
-
-    },
-
-    [EVENT_MESSAGE_READ]: {
-
-        level: LOG_LEVEL_INFO
-
-    },
-
-    [EVENT_SEND_FAILED]: {
-
-        level: LOG_LEVEL_WARN
-
-    },
-
-    [EVENT_MESSAGE_DROPPED]: {
-
-        level: LOG_LEVEL_WARN
-
-    },
-
-    [EVENT_EXEC_INSTANCE_STALE]: {
-
-        level: LOG_LEVEL_WARN
-
-    },
-
-    [EVENT_EXEC_ACTOR_GONE]: {
-
-        level: LOG_LEVEL_WARN
-
-    },
-
-    [EVENT_EXEC_ACTOR_CHANGED]: {
-
-        level: LOG_LEVEL_WARN
-
-    },
-
-    [EVENT_ACTOR_STOPPED]: {
-
-        level: LOG_LEVEL_WARN
-
-    }
-
-}
-
-/**
- * getLevel provides the LogLevel for an event.
- *
- * If none is configured LOG_LEVEL_DEBUG is used.
- */
-export const getLevel = (e: string): number => events.hasOwnProperty(e) ?
-    events[e].level : LOG_LEVEL_DEBUG;
