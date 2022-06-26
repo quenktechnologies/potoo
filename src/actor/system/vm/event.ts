@@ -3,6 +3,7 @@ import { Type } from '@quenk/noni/lib/data/type';
 import { Address } from '../../address';
 import { LogWritable } from './log';
 
+export const EVENT_SEND_START = 'message-send-start';
 export const EVENT_SEND_OK = 'message-send-ok';
 export const EVENT_SEND_FAILED = 'message-send-failed';
 export const EVENT_EXEC_INSTANCE_STALE = 'exec-instance-stale';

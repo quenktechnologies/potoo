@@ -406,6 +406,8 @@ export class PVM implements Platform {
 
     sendMessage(to: Address, from: Address, msg: Message): boolean {
 
+        this.events.publish(from, events.EVENT_SEND_START, to, from, msg);
+
         let mRouter = this.getRouter(to);
 
         let mctx = mRouter.isJust() ?
@@ -680,12 +682,22 @@ export class PVM implements Platform {
 
     exec(actor: Instance, funName: string, args: Foreign[] = []) {
 
-        let mAddress = this.identify(actor);
+        let thread: VMThread;
 
-        if (mAddress.isNothing())
-            return this.raise(this, new errors.UnknownInstanceErr(actor));
+        if (actor === this) {
 
-        let thread = <VMThread>(this.state.threads[mAddress.get()]);
+            thread = <VMThread>this.state.threads.$;
+
+        } else {
+
+            let mAddress = this.identify(actor);
+
+            if (mAddress.isNothing())
+                return this.raise(this, new errors.UnknownInstanceErr(actor));
+
+            thread = <VMThread>(this.state.threads[mAddress.get()]);
+
+        }
 
         thread.exec(funName, args);
 

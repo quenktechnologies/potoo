@@ -1,29 +1,113 @@
-import { assert } from '@quenk/test/lib/assert';
-
 import { Case } from '../../../lib/actor/resident/case';
-import { Mutable } from '../../../lib/actor/resident/mutable';
-import { Process } from '../../../lib/actor/process';
+import { Immutable } from '../../../lib/actor/resident/immutable';
+import { Process, VMProcess } from '../../../lib/actor/remote/process';
 import { TestSystem, system } from '../resident/fixtures/system';
 
-class Sender extends Mutable {
+class ProcessTest extends Immutable<string> {
 
     constructor(
         public system: TestSystem,
         public done: () => void) { super(system); }
 
+    process = '?';
+
+    receive() {
+
+        return [
+
+            new Case('started', () => { this.tell(this.process, 'ping'); }),
+
+            new Case('pong', () => { this.tell(this.process, 'self'); }),
+
+            new Case(this.process, () => { this.tell(this.process, 'parent'); }),
+
+            new Case(this.self(), () => { this.tell(this.process, 'exit'); }),
+
+            new Case('exiting', () => { this.done() })
+
+        ];
+
+    }
+
     run() {
 
-        this.tell('echo', { client: this.self(), message: 'hi' });
+        this.process = this.spawn({
 
-        this.select([
+            id: 'process',
 
-            new Case(String, (m: string) => {
+            create: s => new Process(s, `${__dirname}/ping.js`)
 
-                assert(m).equal('hi');
+        });
 
-                this.done();
+        this.tell(this.process, this.self());
 
-            })]);
+    }
+
+}
+
+class VMProcessTest extends Immutable<string> {
+
+    process = '?';
+
+    constructor(
+        public system: TestSystem,
+        public path: string,
+        public done: () => void) { super(system); }
+
+    receive() {
+
+        return [
+
+            new Case('parent/adder/one', (addr: string) => {
+
+                this.tell(addr, 'spawn');
+
+            }),
+
+            new Case('parent/adder/one/two', (addr: string) => {
+
+                this.tell(addr, 'spawn');
+
+            }),
+
+            new Case('parent/adder/one/two/three', (addr: string) => {
+
+                this.tell(addr, 'add');
+
+                this.tell(addr, 'add');
+
+                this.tell(addr, 'add');
+
+            }),
+
+            new Case('finish', () => {
+
+                this.tell('parent/adder/one/two/three', 'total');
+
+            }),
+
+
+            new Case(3, () => {
+
+                this.tell('parent/adder/one/two/three', 'exit');
+
+            }),
+
+            new Case('exiting', () => this.done())
+
+        ];
+
+    }
+
+    run() {
+
+        this.process = this.spawn({
+
+            id: 'adder',
+
+            create: s => new VMProcess(s, this.path)
+
+        });
 
     }
 
@@ -33,30 +117,42 @@ describe('process', () => {
 
     describe('Process', () => {
 
-        let s = system();
+        let sys = system({ log_level: 7 });
 
-        after(() => s.stop())
+        after(() => sys.stop())
 
-        it('should be spawnable', done => {
+        it('should work', done => {
 
-            s.spawn({
+            sys.spawn({
 
-                id: 'echo',
+                id: 'parent',
 
-                create: s => new Process(`${__dirname}/echo.js`, s)
+                create: () => new ProcessTest(sys, done)
 
-            });
+            })
 
-            s.spawn({
+        });
 
-                id: 'sender',
+    });
 
-                create: s => new Sender(<TestSystem>s,
-                    () => (<TestSystem>s).vm.stop().fork(done, done))
+    describe('VMProcess', () => {
 
-            });
+        let sys = system({ log_level: 7 });
 
-        })
+        after(() => sys.stop())
+
+        it('should work', done => {
+
+            sys.spawn({
+
+                id: 'parent',
+
+                create: () =>
+                    new VMProcessTest(sys, `${__dirname}/vm-ping.js`, done)
+
+            })
+
+        });
 
     })
 

@@ -13,6 +13,8 @@ export class LogWritableImpl implements LogWritable {
 
     mock = new Mock();
 
+  level = 9;
+
     /**
      * opcode logs the execution of an opcode once the log level is >=
      * [[LOG_LEVEL_TRACE]].

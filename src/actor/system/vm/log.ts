@@ -65,9 +65,14 @@ export interface LogSink {
 export interface LogWritable {
 
     /**
-    * opcode logs the execution of an opcode once the log level is >=
-    * [[LOG_LEVEL_TRACE]].
-    */
+     * level below which we log messages for.
+     */
+    level: LogLevel
+
+    /**
+     * opcode logs the execution of an opcode once the log level is >=
+     * [[LOG_LEVEL_TRACE]].
+     */
     opcode(thr: VMThread, frame: Frame, op: Opcode, operand: Operand): void
 
     /**
@@ -147,6 +152,12 @@ const eventLevels: Record<{ level: number }> = {
         level: LOG_LEVEL_INFO
 
     },
+
+  [events.EVENT_SEND_START]: {
+
+    level: LOG_LEVEL_INFO
+
+  },
 
     [events.EVENT_SEND_OK]: {
 
