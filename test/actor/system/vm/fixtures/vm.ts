@@ -4,34 +4,22 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Either, right } from '@quenk/noni/lib/data/either';
 import { Future, pure } from '@quenk/noni/lib/control/monad/future';
 
-import { System } from '../../../../../lib/actor/system';
 import { Spawnable, Template } from '../../../../../lib/actor/template';
-import { State, Threads } from '../../../../../lib/actor/system/vm/state';
 import { Address } from '../../../../../lib/actor/address';
-import { Context } from '../../../../../lib/actor/system/vm/runtime/context';
+import { Context  } from '../../../../../lib/actor/system/vm/runtime/context';
 import { Platform } from '../../../../../lib/actor/system/vm';
-import { Thread  } from '../../../../../lib/actor/system/vm/thread';
 import { Message } from '../../../../../lib/actor/message';
 import { Instance } from '../../../../../lib/actor';
 import { HeapLedgerImpl } from './heap/ledger';
 import { LogWritableImpl } from './log';
 import { EventSourceImpl } from './event';
+import { ActorTable } from '../../../../../lib/actor/system/vm/table';
 
-export class FPVM<S extends System> implements Platform {
+export class FPVM implements Platform {
 
     mock = new Mock();
 
-    state: State = {
-
-        threads: {},
-
-        routers: {},
-
-        groups: {},
-
-        pendingMessages: {}
-
-    };
+    actors = new ActorTable();
 
     heap = new HeapLedgerImpl();
 
@@ -39,23 +27,9 @@ export class FPVM<S extends System> implements Platform {
 
     events = new EventSourceImpl();
 
-    configuration = {};
-
-    ident(): string {
-
-        return '?';
-
-    }
-
     allocate(addr: Address, t: Template): Either<Err, Address> {
 
         return this.mock.invoke('allocate', [addr, t], right('?'));
-
-    }
-
-    runActor(addr: Address): Future<void> {
-
-        return this.mock.invoke('runActor', [addr], pure(<void>undefined));
 
     }
 
@@ -65,69 +39,9 @@ export class FPVM<S extends System> implements Platform {
 
     }
 
-    getThread(addr: Address): Maybe<Thread> {
-
-        return this.mock.invoke('getThread', [addr], nothing());
-
-    }
-
-    getRouter(addr: Address): Maybe<Context> {
-
-        return this.mock.invoke('getRouter', [addr], nothing());
-
-    }
-
-    getGroup(addr: Address): Maybe<Address[]> {
-
-        return this.mock.invoke('getGroup', [addr], nothing());
-
-    }
-
-    putThread(addr: Address, ctx: Thread): FPVM<S> {
-
-        return this.mock.invoke('putThread', [addr, ctx], this);
-
-    }
-
-    getChildren(addr: Address): Maybe<Threads> {
-
-        return this.mock.invoke('getChildren', [addr], nothing());
-
-    }
-
     spawn(inst: Instance, spec: Spawnable): Address {
 
         return this.mock.invoke('spawn', [inst, spec], '?');
-
-    }
-
-    remove(addr: Address): FPVM<S> {
-
-        return this.mock.invoke('remove', [addr], this);
-
-    }
-
-    putRoute(target: Address, router: Address): FPVM<S> {
-
-        return this.mock.invoke('putRoute', [target, router], this);
-
-    }
-
-    removeRoute(target: Address): FPVM<S> {
-
-        return this.mock.invoke('removeRoute', [target], this);
-
-    }
-
-    putMember(group: string, addr: Address): FPVM<S> {
-
-        return this.mock.invoke('putRoute', [group, addr], this);
-
-    }
-
-    removeMember(group: string, addr: Address): FPVM<S> {
-
-        return this.mock.invoke('removeGroup', [group, addr], this);
 
     }
 

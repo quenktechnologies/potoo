@@ -1,8 +1,9 @@
 import { assert } from '@quenk/test/lib/assert';
 
-import { Future,delay, raise } from '@quenk/noni/lib/control/monad/future';
+import { Future, delay, raise } from '@quenk/noni/lib/control/monad/future';
 
 import { ACTION_IGNORE, ACTION_STOP } from '../../../lib/actor/template';
+import { AbstractResident } from '../../../lib/actor/resident';
 import { system, TestSystem } from './fixtures/system';
 import {
     Spawner,
@@ -12,10 +13,7 @@ import {
     Raiser,
     DelayOnRun,
     AssertSpawnReturnsAddress,
-
 } from './fixtures/actors';
-import { Context } from '../../../lib/actor/system/vm/runtime/context';
-import { AbstractResident } from '../../../lib/actor/resident';
 
 describe('resident', () => {
 
@@ -30,10 +28,11 @@ describe('resident', () => {
                 s.spawn({
 
                     id: 'spawner',
+
                     create: sys => new Spawner(<TestSystem>sys, () => {
 
-                        assert(s.vm.state.threads['spawner'])
-                            .not.equal(undefined);
+                        assert(s.vm.actors.getThread('spawner').isJust())
+                            .true();
 
                         done();
 
@@ -138,14 +137,14 @@ describe('resident', () => {
 
                 });
 
-                assert(s.vm.state.threads['a']).not.undefined();
-                assert(s.vm.state.threads['a/aa']).not.undefined();
-                assert(s.vm.state.threads['a/ab']).not.undefined();
-                assert(s.vm.state.threads['a/ab/aba']).not.undefined();
-                assert(s.vm.state.threads['a/ac']).not.undefined();
-                assert(s.vm.state.threads['a/ac/aca']).not.undefined();
-                assert(s.vm.state.threads['a/ac/acb']).not.undefined();
-                assert(s.vm.state.threads['a/ac/acc']).not.undefined();
+                assert(s.vm.actors.getThread('a').isJust()).true();;
+                assert(s.vm.actors.getThread('a/aa').isJust()).true();
+                assert(s.vm.actors.getThread('a/ab').isJust()).true();
+                assert(s.vm.actors.getThread('a/ab/aba').isJust()).true();
+                assert(s.vm.actors.getThread('a/ac').isJust()).true();
+                assert(s.vm.actors.getThread('a/ac/aca').isJust()).true();
+                assert(s.vm.actors.getThread('a/ac/acb').isJust()).true();
+                assert(s.vm.actors.getThread('a/ac/acc').isJust()).true();
 
             });
 
@@ -182,8 +181,8 @@ describe('resident', () => {
 
                     create: sys => new Killer(<TestSystem>sys, k => {
 
-                        assert(s.vm.state.threads['a/targets'])
-                            .not.equal(undefined);
+                        assert(s.vm.actors.getThread('a/targets').isJust())
+                            .true();
 
                         setTimeout(() => k.kill('a/targets'), 0);
 
@@ -193,7 +192,7 @@ describe('resident', () => {
 
                 setTimeout(() => {
 
-                    assert(s.vm.state.threads['a/targets']).equal(undefined);
+                    assert(s.vm.actors.getThread('a/targets').isNothing()).true();
 
                     done();
 
@@ -212,8 +211,8 @@ describe('resident', () => {
 
                             setTimeout(() => {
 
-                                assert(s.vm.state.threads['a/targets/a'])
-                                    .not.equal(undefined);
+                                assert(s.vm.actors.getThread('a/targets/a').isJust())
+                                    .true();
 
                                 steps++;
 
@@ -234,7 +233,8 @@ describe('resident', () => {
 
                     assert(steps, 'timeout callbacks executed').equal(2);
 
-                    assert(s.vm.state.threads['a/targets/a']).equal(undefined);
+                    assert(s.vm.actors.getThread('a/targets/a').isNothing())
+                        .true();
 
                     done();
 
@@ -254,13 +254,13 @@ describe('resident', () => {
                         create: sys => new Exiter(<TestSystem>sys, () => {
 
                             setTimeout(() =>
-                                assert(s.vm.state.threads['a'])
-                                    .not.equal(undefined), 100);
+                                assert(s.vm.actors.getThread('a').isJust())
+                                    .true(), 100);
 
                             setTimeout(() => {
 
-                                assert(s.vm.state.threads['a'])
-                                    .equal(undefined);
+                                assert(s.vm.actors.getThread('a').isNothing())
+                                    .true();
 
                                 done();
 
@@ -284,7 +284,7 @@ describe('resident', () => {
 
                 setTimeout(() => {
 
-                    assert(s.vm.state.groups['test'])
+                    assert(s.vm.groups.get('test').get())
                         .equate(['a/b', 'a/c', 'a/d']);
 
                     done();
@@ -323,7 +323,7 @@ describe('resident', () => {
 
                     assert(ok).true();
 
-                    assert(s.vm.state.threads['raiser']).undefined();
+                    assert(s.vm.actors.getThread('raiser').isNothing()).true();
 
                     done();
 
@@ -339,13 +339,7 @@ describe('resident', () => {
 
                 let ft = delay(done);
 
-                let Actor = class extends AbstractResident {
-
-                    init(c: Context) {
-
-                        return c;
-
-                    }
+                class Waiter extends AbstractResident {
 
                     run() {
 
@@ -359,7 +353,7 @@ describe('resident', () => {
 
                     id: 'future',
 
-                    create: () => new Actor(sys)
+                    create: () => new Waiter(sys)
                 })
 
             });
@@ -371,12 +365,6 @@ describe('resident', () => {
                 let ft: Future<void> = raise(new Error('bad things'));
 
                 let Actor = class extends AbstractResident {
-
-                    init(c: Context) {
-
-                        return c;
-
-                    }
 
                     run() {
 

@@ -1,6 +1,6 @@
 
 import { Context } from '../../system/vm/runtime/context';
-import { FLAG_IMMUTABLE, FLAG_BUFFERED } from '../../flags';
+import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_VM_THREAD } from '../../flags';
 import { CaseFunction } from '../case/function';
 import { Case } from '../case';
 import { AbstractResident } from '../';
@@ -19,7 +19,7 @@ export abstract class Immutable<T> extends AbstractResident {
 
     init(c: Context): Context {
 
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED | FLAG_VM_THREAD;
 
         return c;
 

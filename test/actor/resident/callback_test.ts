@@ -29,7 +29,7 @@ describe('resident', () => {
 
                 assert(wasCalled).true();
 
-                assert(s.vm.state.threads['cb'], 'callback actor').undefined();
+                assert(s.vm.actors.items['cb'], 'callback actor').undefined();
 
                 done();
 

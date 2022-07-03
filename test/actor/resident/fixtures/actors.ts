@@ -7,7 +7,7 @@ import { assert } from '@quenk/test/lib/assert';
 
 import { Context } from '../../../../lib/actor/system/vm/runtime/context';
 import { Case } from '../../../../lib/actor/resident/case';
-import { FLAG_IMMUTABLE, FLAG_BUFFERED } from '../../../../lib/actor/flags';
+import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_VM_THREAD } from '../../../../lib/actor/flags';
 import { Mutable } from '../../../../lib/actor/resident/mutable';
 import { Immutable } from '../../../../lib/actor/resident/immutable';
 
@@ -24,7 +24,7 @@ export class Killer extends AbstractResident {
 
     init(c: Context): Context {
 
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED | FLAG_VM_THREAD;
         return c;
 
     }
@@ -53,7 +53,7 @@ export class DelayOnRun extends AbstractResident {
 
     init(c: Context): Context {
 
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED | FLAG_VM_THREAD;
         return c;
 
     }
@@ -103,7 +103,7 @@ export class Group extends AbstractResident {
 
     init(c: Context): Context {
 
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED | FLAG_VM_THREAD;
         return c;
 
     }
@@ -138,7 +138,7 @@ export class Exiter extends AbstractResident {
 
     init(c: Context): Context {
 
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED | FLAG_VM_THREAD;
         return c;
 
     }
@@ -167,7 +167,7 @@ export class Raiser extends AbstractResident {
 
     init(c: Context): Context {
 
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED | FLAG_VM_THREAD;
         return c;
 
     }
@@ -198,7 +198,7 @@ export class Spawner extends AbstractResident {
 
     init(c: Context): Context {
 
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED | FLAG_VM_THREAD;
         return c;
 
     }
@@ -227,7 +227,7 @@ export class AssertSpawnReturnsAddress extends AbstractResident {
 
     init(c: Context): Context {
 
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED;
+        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED | FLAG_VM_THREAD;
         return c;
 
     }
@@ -254,7 +254,7 @@ export class AssertSpawnReturnsAddress extends AbstractResident {
 
 export class ShouldWork extends Mutable {
 
-    constructor(public s: TestSystem, public done: () => void) {       super(s);    }
+    constructor(public s: TestSystem, public done: () => void) { super(s); }
 
     run() {
 

@@ -1,7 +1,7 @@
 
 import { Context } from '../../system/vm/runtime/context';
 import { Message } from '../../message';
-import { FLAG_BUFFERED, } from '../../flags';
+import { FLAG_BUFFERED, FLAG_VM_THREAD, } from '../../flags';
 import { AbstractResident } from '../';
 import { CaseFunction } from '../case/function';
 import { Case } from '../case';
@@ -15,7 +15,7 @@ export abstract class Mutable extends AbstractResident {
 
     init(c: Context): Context {
 
-        c.flags = c.flags | FLAG_BUFFERED;
+        c.flags = c.flags | FLAG_BUFFERED | FLAG_VM_THREAD;
 
         return c;
 

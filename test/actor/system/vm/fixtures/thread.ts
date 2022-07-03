@@ -46,8 +46,6 @@ export class ThreadImpl implements VMThread {
 
     raise(err: Err): void {
 
-        console.error('ThreadImp.raise: ', err);
-
         return this.mock.invoke<undefined>('raise', [err], undefined);
 
     }

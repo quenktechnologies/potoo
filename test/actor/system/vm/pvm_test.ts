@@ -1,5 +1,8 @@
-import { assert } from '@quenk/test/lib/assert';
+import { assert, Type } from '@quenk/test/lib/assert';
+
 import { tick } from '@quenk/noni/lib/control/timer';
+import { just, nothing } from '@quenk/noni/lib/data/maybe';
+import { merge } from '@quenk/noni/lib/data/record';
 import {
     raise,
     pure,
@@ -26,6 +29,30 @@ import {
 import { ADDRESS_SYSTEM } from '../../../../lib/actor/address';
 import { Immutable } from '../../../../lib/actor/resident/immutable';
 import { UnknownInstanceErr } from '../../../../lib/actor/system/vm/runtime/error';
+import { ActorTableEntry } from '../../../../lib/actor/system/vm/table';
+
+const mkEntry = (addr = '?', ate: Partial<ActorTableEntry> = {}) => {
+
+    let val = <ActorTableEntry>merge({
+        context: newContext(),
+        thread: nothing()
+    }, ate);
+
+
+    if (val.thread.isJust()) {
+
+        if (!ate.context)
+            val.context = val.thread.get().context;
+        else
+            val.thread.get().context = val.context;
+
+    }
+
+    val.context.address = addr;
+
+    return val;
+
+}
 
 describe('vm', () => {
 
@@ -39,15 +66,20 @@ describe('vm', () => {
 
                 let actor = newInstance();
 
-                let thread = newThread(newContext({ actor }));
+                let thread = newThread();
 
-                vm.state.threads['test'] = thread;
+                let entry = mkEntry('test', { thread: just(thread) });
+
+                entry.context.actor = actor;
+
+                vm.actors.items['test'] = entry;
 
                 let args = [0, 0, 0];
 
                 vm.exec(actor, 'sum', args);
 
-                assert(thread.mock.wasCalledWith('exec', ['sum', args])).true();
+                assert(thread.mock.wasCalledWith('exec',
+                    ['sum', args])).true();
 
             });
 
@@ -57,11 +89,13 @@ describe('vm', () => {
 
                 let actor = newInstance();
 
-                let thread = newThread(newContext({ actor }));
+                let context = newContext({ actor });
 
-                vm.state.threads['test'] = thread;
+                let thread = just(newThread(context));
 
-                vm.state.threads['test'].context.actor = newInstance();
+                vm.actors.items['test'] = mkEntry('test', { thread });
+
+                vm.actors.items['test'].context.actor = newInstance();
 
                 try {
 
@@ -75,7 +109,7 @@ describe('vm', () => {
 
                 }
 
-                assert(thread.mock.getCalledList().length === 0).true();
+                assert(thread.get().mock.getCalledList().length === 0).true();
 
             });
 
@@ -87,11 +121,11 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
 
-                assert(vm.state.threads['self']).undefined();
+                assert(vm.actors.getThread('self').isNothing()).true();
 
                 vm.allocate('self', { id: '0', create: newInstance });
 
-                assert(vm.state.threads['self/0']).not.undefined();
+                assert(vm.actors.get('self/0').isJust()).true();
 
             });
 
@@ -99,7 +133,7 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
 
-                assert(vm.state.threads['self']).undefined();
+                assert(vm.actors.getThread('self').isNothing()).true();
 
                 let er1 = vm.allocate('self', { id: '0', create: newInstance });
 
@@ -119,16 +153,17 @@ describe('vm', () => {
 
                 act.mock.setReturnCallback('init', (ctx: Context) => {
 
-                    ctx.flags = ctx.flags | FLAG_ROUTER
+                    ctx.flags = ctx.flags | FLAG_ROUTER;
+
                     return ctx;
 
                 });
 
-                assert(vm.state.routers['self']).undefined();
+                assert(vm.routers.get('self').isNothing()).true();
 
                 vm.allocate('', { id: 'self', create: () => act });
 
-                assert(vm.state.routers['self']).not.undefined();
+                assert(vm.routers.get('self').isJust()).true();
 
             });
 
@@ -138,9 +173,9 @@ describe('vm', () => {
 
                 vm.allocate('', { id: 'self', create: newInstance, group: 'foo' });
 
-                assert(vm.state.groups['foo']).not.undefined();
+                assert(vm.groups.get('foo').isJust()).true();
 
-                assert(vm.state.groups['foo']).equate(['self']);
+                assert(vm.groups.items['foo']).equate(['self']);
 
             });
 
@@ -163,6 +198,7 @@ describe('vm', () => {
                 tick(() => {
 
                     assert(act.mock.wasCalled('start')).true();
+
                     done();
 
                 });
@@ -177,15 +213,15 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
 
-                let r = newThread();
+                let entry = mkEntry();
 
                 let act = newInstance();
 
-                r.context.actor = act;
+                entry.context.actor = act;
 
-                r.context.flags = 0;
+                entry.context.flags = 0;
 
-                vm.state.threads['to'] = r;
+                vm.actors.items['to'] = entry;
 
                 assert(vm.sendMessage('to', 'from', 'msg')).true();
 
@@ -197,19 +233,19 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
 
-                let r = newThread();
-
                 let act = newInstance();
 
-                r.context.actor = act;
+                let entry = mkEntry();
 
-                r.context.flags = FLAG_BUFFERED;
+                entry.context.actor = act;
 
-                vm.state.threads['to'] = r;
+                entry.context.flags = FLAG_BUFFERED;
+
+                vm.actors.items['to'] = entry;
 
                 assert(vm.sendMessage('to', 'from', 'msg')).true();
 
-                assert(vm.state.threads['to'].context.mailbox)
+                assert(vm.actors.items['to'].context.mailbox)
                     .equate(['msg']);
 
                 assert(act.mock.wasCalled('notify')).true();
@@ -226,40 +262,27 @@ describe('vm', () => {
 
         });
 
-        describe('putRoute', () => {
-
-            it('should flag an address as a router', () => {
-
-                let vm = new PVM(newSystem());
-
-                vm.putRoute('self', 'self');
-
-                assert(vm.state.routers).equate({ 'self': 'self' });
-
-            });
-
-        });
-
         describe('raise', () => {
 
             it('should use the template\'s trap function', () => {
 
                 let vm = new PVM(newSystem());
-                let r = newThread();
+
+                let entry = mkEntry();
+
                 let called = false;
 
-                r.context.actor = newInstance();
-
-                r.context.template.trap = () => {
+                entry.context.template.trap = () => {
 
                     called = true;
+
                     return ACTION_IGNORE;
 
                 }
 
-                vm.state.threads['self'] = r;
+                vm.actors.items['self'] = entry;
 
-                vm.raise(r.context.actor, new Error('err'));
+                vm.raise(entry.context.actor, new Error('err'));
 
                 assert(called).true();
 
@@ -268,21 +291,36 @@ describe('vm', () => {
             it('should escalate by default', () => {
 
                 let vm = new PVM(newSystem());
-                let r = newThread();
+
                 let called = false;
 
-                r.context.template.trap = () => {
+                let entry = mkEntry();
+
+                entry.context.template.trap = () => {
 
                     called = true;
+
                     return ACTION_IGNORE;
 
                 }
 
-                vm.state.threads['self'] = r;
-                vm.state.threads['self/0'] = newThread();
-                vm.state.threads['self/0'].context.template.trap = undefined;
+                vm.actors.items.$ = entry;
 
-                vm.raise(vm.state.threads['self/0'].context.actor,
+                vm.actors.items['self'] = mkEntry('self', {
+
+                    context: newContext({ address: 'self' })
+
+                });
+
+                vm.actors.items['self/0'] = mkEntry('self/0', {
+
+                    context: newContext({ address: 'self/0' })
+
+                });
+
+                vm.actors.items['self/0'].context.template.trap = undefined;
+
+                vm.raise(vm.actors.items['self/0'].context.actor,
                     new Error('err'));
 
                 assert(called).true();
@@ -292,26 +330,35 @@ describe('vm', () => {
             it('should restart actors', done => {
 
                 let vm = new PVM(newSystem());
+
                 let act = newInstance();
-                let r = newThread();
+
                 let called = false;
 
-                r.context.template.create = () => {
+                let entry = mkEntry();
+
+                entry.context.address = 'self';
+
+                entry.context.template.create = () => {
 
                     called = true;
+
                     return act
 
                 };
 
-                r.context.template.trap = () => ACTION_RESTART;
+                entry.context.template.trap = () => ACTION_RESTART;
 
-                vm.state.threads['self'] = r;
-                vm.raise(r.context.actor, new Error('err'));
+                vm.actors.items['self'] = entry;
+
+                vm.raise(entry.context.actor, new Error('err'));
 
                 setTimeout(() => {
 
                     assert(called).true();
+
                     assert(act.mock.wasCalled('start')).true();
+
                     done();
 
                 }, 100);
@@ -321,21 +368,26 @@ describe('vm', () => {
             it('should throw if unhandled', () => {
 
                 let vm = new PVM(newSystem());
+
                 let caught = false;
 
-                let r1 = newThread();
+                let r1 = mkEntry();
 
-                let r2 = newThread();
+                let r2 = mkEntry();
 
-                let r3 = newThread();
+                let r3 = mkEntry();
 
                 r3.context.template.trap = () => ACTION_RAISE;
+
                 r2.context.template.trap = () => ACTION_RAISE;
+
                 r1.context.template.trap = () => ACTION_RAISE;
 
-                vm.state.threads['self'] = r1;
-                vm.state.threads['self/2'] = r2;
-                vm.state.threads['self/2/3'] = r3;
+                vm.actors.items['self'] = r1;
+
+                vm.actors.items['self/2'] = r2;
+
+                vm.actors.items['self/2/3'] = r3;
 
                 try {
 
@@ -356,28 +408,26 @@ describe('vm', () => {
 
         describe('kill', () => {
 
-            it('should kill the intended target', () => doFuture(function*() {
+            it('should kill actors with threads', () => doFuture(function*() {
 
                 let vm = new PVM(newSystem());
-                let r0 = newThread();
-                let r1 = newThread();
-                let r2 = newThread();
 
-                vm.state.threads['self'] = r0;
-                vm.state.threads['self/1'] = r1;
-                vm.state.threads['self/2'] = r2;
+                let thread = newThread();
 
-                yield vm.kill(r0.context.actor, 'self/1');
+                let entry = mkEntry('self', { thread: just(thread) });
+
+                vm.actors.items['self'] = entry;
+
+                yield attempt(() => assert(vm.actors.getThread('self').isJust())
+                    .true());
+
+                yield vm.kill(entry.context.actor, 'self');
 
                 yield attempt(() => {
 
-                    assert(vm.state.threads['self']).not.undefined();
-                    assert(vm.state.threads['self/1']).undefined();
-                    assert(vm.state.threads['self/2']).not.undefined();
+                    assert(vm.actors.getThread('self').isNothing()).true();
 
-                    assert(r0.mock.wasCalled('die')).false();
-                    assert(r1.mock.wasCalled('die')).true();
-                    assert(r2.mock.wasCalled('die')).false();
+                    assert(thread.mock.wasCalled('die')).true();
 
                 });
 
@@ -385,36 +435,124 @@ describe('vm', () => {
 
             }));
 
-            it('should kill a group', () => {
+            it('should kill actors without threads', () => doFuture(function*() {
 
                 let vm = new PVM(newSystem());
 
-                let self0 = newThread(newContext({ address: 'self/0' }));
-                let self1 = newThread(newContext({ address: 'self/1' }));
-                let self2 = newThread(newContext({ address: 'self/2' }));
+                let entry = mkEntry('self');
 
-                vm.state.threads['self/0'] = self0;
-                vm.state.threads['self/1'] = self1;
-                vm.state.threads['self/2'] = self2;
+                vm.actors.items['self'] = entry;
 
-                vm.state.groups['us'] = ['self/0', 'self/1', 'self/2'];
+                yield attempt(() => assert(vm.actors.get('self').isJust())
+                    .true());
 
-                return toPromise(
-                    vm
-                        .kill(vm, '$us')
-                        .chain(() => attempt(() => {
+                yield vm.kill(entry.context.actor, 'self');
 
-                            assert(vm.state.threads['self/0']).undefined();
-                            assert(vm.state.threads['self/1']).undefined();
-                            assert(vm.state.threads['self/2']).undefined();
+                yield attempt(() => {
 
-                            assert(self0.mock.wasCalled('die')).true();
-                            assert(self1.mock.wasCalled('die')).true();
-                            assert(self2.mock.wasCalled('die')).true();
+                    assert(vm.actors.get('self').isNothing()).true();
 
-                        })));
+                    assert((<Type>entry.context.actor).mock.wasCalled('stop'))
+                    .true();
 
-            });
+                });
+
+                return pure(undefined);
+
+            }));
+
+            it('should kill the intended target', () => doFuture(function*() {
+
+                let vm = new PVM(newSystem());
+
+                let self = mkEntry('self');
+
+                let self1 = mkEntry('self/1');
+
+                let self2 = mkEntry('self/2');
+
+                vm.actors.items['self'] = self;
+
+                vm.actors.items['self/1'] = self1;
+
+                vm.actors.items['self/2'] = self2;
+
+                yield vm.kill(self1.context.actor, 'self/1');
+
+                yield attempt(() => {
+
+                    assert(vm.actors.get('self').isJust()).true();
+
+                    assert(vm.actors.get('self/1').isNothing()).true();
+
+                    assert(vm.actors.get('self/2').isJust()).true();
+
+                    assert((<Type>self.context.actor).mock.wasCalled('stop')).false();
+
+                    assert((<Type>self1.context.actor).mock.wasCalled('stop')).true();
+
+                    assert((<Type>self2.context.actor).mock.wasCalled('stop')).false();
+
+                });
+
+                return pure(undefined);
+
+            }));
+
+
+            it('should kill a group', () => doFuture(function*() {
+
+                let vm = new PVM(newSystem());
+
+                let self0 = mkEntry('self/0');
+
+                let self1 = mkEntry('self/1', { thread: just(newThread()) });
+
+                let self2 = mkEntry('self/2');
+
+                let self3 = mkEntry('self/3');
+
+                vm.actors.items['self/0'] = self0;
+
+                vm.actors.items['self/1'] = self1;
+
+                vm.actors.items['self/2'] = self2;
+
+                vm.actors.items['self/3'] = self3;
+
+                vm.groups.items['$us'] = ['self/0', 'self/1', 'self/2'];
+
+                yield vm.kill(vm, '$us');
+
+                return attempt(() => {
+
+                    assert(vm.actors.get('self/0').isNothing())
+                        .true();
+
+                    assert(vm.actors.get('self/1').isNothing())
+                        .true();
+
+                    assert(vm.actors.get('self/2').isNothing())
+                        .true();
+
+                    assert(vm.actors.get('self/3').isJust())
+                        .true();
+
+                    assert((<Type>self0.context.actor).mock.wasCalled('stop'))
+                        .true();
+
+                    assert((<Type>self1.thread.get()).mock.wasCalled('die'))
+                        .true();
+
+                    assert((<Type>self2.context.actor).mock.wasCalled('stop'))
+                        .true();
+
+                    assert((<Type>self3.context.actor).mock.wasCalled('stop'))
+                        .false();
+
+                })
+
+            }));
 
             it('should refuse non-child', () => {
 
@@ -424,7 +562,7 @@ describe('vm', () => {
 
                 let vm = new PVM(newSystem());
 
-                vm.state.threads['$'].context.template.trap = () => {
+                vm.actors.items['$'].context.template.trap = () => {
 
                     escalated = true;
 
@@ -432,13 +570,16 @@ describe('vm', () => {
 
                 }
 
+                let e1 = mkEntry('that');
 
-                vm.state.threads['that'] = newThread();
+                let e2 = mkEntry('them/0');
 
-                vm.state.threads['them/0'] = newThread();
+                vm.actors.items['that'] = e1;
+
+                vm.actors.items['them/0'] = e2;
 
                 return vm
-                    .kill(vm.state.threads['that'].context.actor, 'them/0')
+                    .kill(vm.actors.items['that'].context.actor, 'them/0')
                     .catch(e => attempt(() => {
 
                         thrown = true;
@@ -449,7 +590,7 @@ describe('vm', () => {
                     .finally(() =>
                         attempt(() => {
 
-                            assert(vm.state.threads['them/0']).not.undefined();
+                            assert(vm.actors.get('them/0').isJust()).true();
 
                             assert(escalated).true();
 
@@ -459,41 +600,42 @@ describe('vm', () => {
 
             });
 
-            it('should reject a group with non-child', () => {
+            it('should reject a group with non-child', () =>
+                doFuture(function*() {
 
-                let thrown = false;
-                let escalated = false;
+                    let thrown = false;
 
-                let vm = new PVM(newSystem());
+                    let escalated = false;
 
-                vm.state.threads['$'].context.template.trap = () => {
+                    let vm = new PVM(newSystem());
 
-                    escalated = true;
+                    vm.actors.items.$.context.template.trap = () => {
 
-                    return ACTION_IGNORE;
+                        escalated = true;
 
-                }
+                        return ACTION_IGNORE;
 
-                let self = newThread();
-                let self0 = newThread();
-                let self1 = newThread();
-                let self2 = newThread();
+                    }
 
-                vm.state.threads['self'] = self;
-                vm.state.threads['self/0'] = self0;
-                vm.state.threads['them/1'] = self1;
-                vm.state.threads['self/2'] = self2;
+                    let self = mkEntry('self');
+                    let self0 = mkEntry('self/0');
+                    let self1 = mkEntry('self/1');
+                    let self2 = mkEntry('self/2');
 
-                vm.state.groups['us'] = ['self/0', 'them/1', 'self/2'];
+                    vm.actors.items['self'] = self;
+                    vm.actors.items['self/0'] = self0;
+                    vm.actors.items['self/1'] = self1;
+                    vm.actors.items['self/2'] = self2;
+                    vm.actors.items['them/1'] = mkEntry('them/1');
+                    vm.groups.items['$us'] = ['self/0', 'them/1', 'self/2'];
 
-                return toPromise(
-                    vm
-                        .kill(self.context.actor, '$us')
+                    return vm.kill(self.context.actor, '$us')
                         .catch(e => {
 
                             if (e.message.startsWith('IllegalStopErr')) {
 
                                 thrown = true;
+
                                 return pure(undefined);
 
                             } else {
@@ -509,25 +651,25 @@ describe('vm', () => {
 
                             assert(thrown).true();
 
-                        })))
+                        }))
+                }));
 
-            });
-
-            it('should not remove the system from state', () => {
+            it('should not remove the system from the table', () => {
 
                 let vm = new PVM(newSystem());
 
-                vm.state.threads['self'] = newThread();
+                vm.actors.items['self'] = mkEntry();
 
                 return toPromise(
                     vm
                         .kill(vm, ADDRESS_SYSTEM)
                         .chain(() => attempt(() => {
 
-                            assert(vm.state.threads['self']).undefined();
+                            assert(vm.actors.getThread('self')
+                                .isNothing()).true();
 
-                            assert(vm.state.threads[ADDRESS_SYSTEM])
-                                .not.undefined();
+                            assert(vm.actors.getThread(ADDRESS_SYSTEM).isJust())
+                                .true();
 
                         })));
 
@@ -540,25 +682,37 @@ describe('vm', () => {
             it('should stop all actors', () => doFuture(function*() {
 
                 let vm = new PVM(newSystem());
-                let self0 = newThread();
-                let self1 = newThread();
-                let self2 = newThread();
 
-                vm.state.threads['self/0'] = self0;
-                vm.state.threads['them/1'] = self1;
-                vm.state.threads['self/2'] = self2;
+                let self0 = mkEntry('self/0');
+
+                let them1 = mkEntry('self/1', { thread: just(newThread()) });
+
+                let self2 = mkEntry('self/2');
+
+                vm.actors.items['self/0'] = self0;
+
+                vm.actors.items['them/1'] = them1;
+
+                vm.actors.items['self/2'] = self2;
 
                 yield vm.stop();
 
                 yield attempt(() => {
 
-                    assert(self0.mock.wasCalled('die')).true();
-                    assert(self1.mock.wasCalled('die')).true();
-                    assert(self2.mock.wasCalled('die')).true();
+                    assert((<Type>self0.context.actor).mock
+                        .wasCalledNTimes('stop', 1)).true();
 
-                    assert(vm.state.threads['self/0']).undefined();
-                    assert(vm.state.threads['self/1']).undefined();
-                    assert(vm.state.threads['self/2']).undefined();
+                    assert((<Type>them1.thread.get()).mock
+                        .wasCalledNTimes('die', 1)).true();
+
+                    assert((<Type>self2.context.actor).mock
+                        .wasCalledNTimes('stop', 1)).true();
+
+                    assert(vm.actors.get('self/0').isNothing()).true();
+
+                    assert(vm.actors.get('self/1').isNothing()).true();
+
+                    assert(vm.actors.get('self/2').isNothing()).true();
 
                 });
 
@@ -577,7 +731,7 @@ describe('vm', () => {
 
                 let onRun = () => {
 
-                    assert(vm.state.threads[name]).not.undefined();
+                    assert(vm.actors.get(name).isJust()).true();
 
                     done();
 
@@ -592,8 +746,6 @@ describe('vm', () => {
                     }
 
                 }
-
-                assert(vm.state.threads[name]).undefined();
 
                 vm.spawn(vm, s => new ChildActor(s));
 

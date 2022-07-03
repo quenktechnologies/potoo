@@ -131,7 +131,8 @@ describe('resident', () => {
 
                         assert(received).equate(['one', 'two', 'three']);
 
-                        assert(sys.vm.state.threads['telltellexit']).undefined();
+                        assert(sys.vm.actors.getThread('telltellexit').isNothing())
+                            .true();
 
                         done();
 

@@ -27,14 +27,14 @@ describe('thread execution', function() {
 
             counter++;
 
-            if (counter === 2)
-                thr.die();
+            if (counter === 2) thr.die();
 
             return counter;
 
         });
 
-        let thread: SharedThread = <SharedThread>sys.vm.state.threads['test'];
+        let thread: SharedThread =
+            <SharedThread>sys.vm.actors.getThread('test').get();
 
         thread.script.info.push(func);
 
