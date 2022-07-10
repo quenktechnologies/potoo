@@ -96,7 +96,8 @@ export const getId = (addr: Address): string =>
  * isChild tests whether an address is a child of the parent address.
  */
 export const isChild = (parent: Address, child: Address): boolean =>
-    (parent === ADDRESS_SYSTEM) || (parent !== child) && startsWith(child, parent);
+    ((parent === ADDRESS_SYSTEM) && (child !== parent)) || 
+    startsWith(child, `${parent}${SEPERATOR}`);
 
 /**
  * isGroup determines if an address is a group reference.

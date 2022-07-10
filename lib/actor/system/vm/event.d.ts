@@ -1,7 +1,7 @@
-import { Record } from '@quenk/noni/lib/data/record';
 import { Type } from '@quenk/noni/lib/data/type';
 import { Address } from '../../address';
-import { LogLevel } from './log';
+import { LogWritable } from './log';
+export declare const EVENT_SEND_START = "message-send-start";
 export declare const EVENT_SEND_OK = "message-send-ok";
 export declare const EVENT_SEND_FAILED = "message-send-failed";
 export declare const EVENT_EXEC_INSTANCE_STALE = "exec-instance-stale";
@@ -13,6 +13,10 @@ export declare const EVENT_ACTOR_CREATED = "actor-created";
 export declare const EVENT_ACTOR_STARTED = "actor-started";
 export declare const EVENT_ACTOR_STOPPED = "actor-stopped";
 /**
+ * EventName identifying an event that occurred.
+ */
+export declare type EventName = string;
+/**
  * Handler for events.
  */
 export declare type Handler = (addr: Address, evt: string, ...args: Type[]) => void;
@@ -20,29 +24,31 @@ export declare type Handler = (addr: Address, evt: string, ...args: Type[]) => v
  * Handlers is a map of even Handler functions.
  */
 export interface Handlers {
-    [key: string]: Handler;
+    [key: string]: Handler[];
 }
 /**
- * EventInfo holds needed information about events the system can generate.
- */
-export interface EventInfo {
-    /**
-     * level of logging
-     */
-    level: LogLevel;
-}
-/**
- * EventInfos map.
- */
-export interface EventInfos extends Record<EventInfo> {
-}
-/**
- * events holds the EventInfo details for all system events.
- */
-export declare const events: EventInfos;
-/**
- * getLevel provides the LogLevel for an event.
+ * EventSource is an interface used by the VM to broadcast various events as
+ * they occur.
  *
- * If none is configured LOG_LEVEL_DEBUG is used.
+ * External code can use this interface to hook into these events.
  */
-export declare const getLevel: (e: string) => number;
+export interface EventSource {
+    /**
+     * on queues an event handler for the target event.
+     */
+    on(evt: EventName, handler: Handler): void;
+    /**
+     * publish an event (used internally).
+     */
+    publish(addr: Address, evt: string, ...args: Type[]): void;
+}
+/**
+ * Publisher serves as the EventSource implementation for the VM.
+ */
+export declare class Publisher implements EventSource {
+    log: LogWritable;
+    handlers: Handlers;
+    constructor(log: LogWritable, handlers?: Handlers);
+    on(evt: EventName, handler: Handler): void;
+    publish(addr: Address, evt: string, ...args: Type[]): void;
+}

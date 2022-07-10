@@ -25,7 +25,7 @@ export declare abstract class AbstractResident implements Resident {
     constructor(system: System);
     self: () => string;
     get platform(): import("../system/vm").Platform;
-    abstract init(c: Context): Context;
+    init(c: Context): Context;
     notify(): void;
     accept(_: Message): void;
     spawn(t: Spawnable): Address;

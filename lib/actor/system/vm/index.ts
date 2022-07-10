@@ -9,9 +9,10 @@ import {
     raise,
     batch,
     voidPure,
-    doFuture
+    doFuture,
+    wrap
 } from '@quenk/noni/lib/control/monad/future';
-import { Maybe, fromNullable } from '@quenk/noni/lib/data/maybe'
+import { Maybe, nothing, just } from '@quenk/noni/lib/data/maybe'
 import { isFunction } from '@quenk/noni/lib/data/type';
 import { Either, left, right } from '@quenk/noni/lib/data/either';
 import {
@@ -19,7 +20,6 @@ import {
 } from '@quenk/noni/lib/data/array';
 import {
     Record,
-    map,
     merge,
     rmerge,
     mapTo,
@@ -37,49 +37,24 @@ import {
     isChild
 } from '../../address';
 import { Template } from '../../template';
-import { isRouter, isBuffered, FLAG_EXIT_AFTER_RUN } from '../../flags';
+import { isRouter, isBuffered, FLAG_EXIT_AFTER_RUN, usesVMThread } from '../../flags';
 import { Message, Envelope } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
 import { SharedScheduler } from './thread/shared/scheduler';
 import { SharedThread } from './thread/shared';
 import { Thread, THREAD_STATE_IDLE, VMThread } from './thread';
-import {
-    State,
-    get,
-    put,
-    putRoute,
-    putMember,
-    removeRoute,
-    getRouter,
-    getGroup,
-    getChildren,
-    remove,
-    Threads,
-    getAddress
-} from './state';
-import { Script } from './script';
 import { Context, newContext } from './runtime/context';
-import { Data, Frame } from './runtime/stack/frame';
-import { Opcode, toLog } from './runtime/op';
-import { Operand } from './runtime';
+import { Data } from './runtime/stack/frame';
 import { Conf, defaults } from './conf';
-import {
-    LOG_LEVEL_DEBUG,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_NOTICE,
-    LOG_LEVEL_WARN,
-    LOG_LEVEL_ERROR
-} from './log';
+import { LogWritable, LogWriter } from './log';
 import { HeapLedger, DefaultHeapLedger } from './runtime/heap/ledger';
 import { ScriptFactory } from './scripts/factory';
 import { Foreign } from './type';
-import { getLevel } from './event';
-
-/**
- * Slot
- */
-export type Slot = [Address, Script, Thread];
+import { EventSource, Publisher } from './event';
+import { GroupMap } from './groups';
+import { ActorTable, ActorTableEntry } from './table';
+import { RouterMap } from './routers';
 
 const ID_RANDOM = `#?POTOORAND?#${Date.now()}`;
 
@@ -99,6 +74,26 @@ export interface Platform extends Actor {
     heap: HeapLedger
 
     /**
+     * log service for the VM.
+     *
+     * Used to access the internal logging API.
+     */
+    log: LogWritable
+
+    /**
+     * events service for the VM.
+     *
+     * Used to publish VM events to interested listeners.
+     */
+    events: EventSource
+
+    /**
+     * actors holds all the actors within the system at any given point along
+     * with needed bookkeeping information.
+     */
+    actors: ActorTable
+
+    /**
      * allocate a new Thread for an actor.
      *
      * It is an error if a Thread has already been allocated for the actor.
@@ -112,52 +107,6 @@ export interface Platform extends Actor {
      * if the actor is not in the system.
      */
     sendMessage(to: Address, from: Address, msg: Message): boolean
-
-    /**
-     * getThread from the system given its address.
-     */
-    getThread(addr: Address): Maybe<Thread>
-
-    /**
-     * getRouter attempts to retrieve a router for the address specified.
-     */
-    getRouter(addr: Address): Maybe<Context>
-
-    /**
-     * getGroup attempts to retrieve all the members of a group.
-     */
-    getGroup(name: string): Maybe<Address[]>
-
-    /**
-     * getChildren provides the children contexts for an address.
-     */
-    getChildren(addr: Address): Maybe<Threads>
-
-    /**
-     * putThread in the system at the specified address.
-     */
-    putThread(addr: Address, r: Thread): Platform
-
-    /**
-     * putRoute configures a router for all actors that are under the
-     * target address.
-     */
-    putRoute(target: Address, router: Address): Platform
-
-    /**
-     * putMember puts an address into a group.
-     */
-    putMember(group: string, addr: Address): Platform
-
-    /**
-     * remove a Thread from the system.
-     */
-    remove(addr: Address): Platform
-
-    /**
-     * removeRoute configuration.
-     */
-    removeRoute(target: Address): Platform
 
     /**
      * spawn an actor using the given Instance as the parent.
@@ -185,16 +134,6 @@ export interface Platform extends Actor {
     raise(src: Instance, err: Err): void
 
     /**
-     * trigger is used to generate events as the system runs.
-     */
-    trigger(addr: Address, evt: string, ...args: Type[]): void
-
-    /**
-     * logOp is used by Thread to log which opcodes are executed.
-     */
-    logOp(r: VMThread, f: Frame, op: Opcode, operand: Operand): void
-
-    /**
      * exec a function by name with the provided arguments using the actor
      * instance's thread.
      */
@@ -216,45 +155,51 @@ export class PVM implements Platform {
 
     _actorIdCounter = -1;
 
+    _context = newContext(this._actorIdCounter++, this, '$', {
+
+        create: () => this,
+
+        trap: () => template.ACTION_RAISE
+
+    });
+
     /**
-     * heap memory shared between actor Threads.
+     * scheduler shared between vm threads.
      */
+    scheduler = new SharedScheduler(this);
+
     heap = new DefaultHeapLedger();
 
-    /**
-     * threadRunner shared between vm threads.
-     */
-    threadRunner = new SharedScheduler(this);
+    log = new LogWriter(this.conf.long_sink, this.conf.log_level);
+
+    events = new Publisher(this.log);
+
+    actors: ActorTable = new ActorTable({
+
+        $: {
+
+            context: this._context,
+
+            thread: just(
+                new SharedThread(
+                    this,
+                    ScriptFactory.getScript(this),
+                    this.scheduler,
+                    this._context))
+
+        }
+
+    });
 
     /**
-     * state contains information about all the actors in the system, routers
-     * and groups.
+     * routers configured to handle any address that falls underneath them.
      */
-    state: State = {
+    routers = new RouterMap();
 
-        threads: {
-
-            $: new SharedThread(
-                this,
-                ScriptFactory.getScript(this),
-                this.threadRunner,
-                newContext(this._actorIdCounter++, this, '$', {
-
-                    create: () => this,
-
-                    trap: () => template.ACTION_RAISE
-
-                }))
-
-        },
-
-        routers: {},
-
-        groups: {},
-
-        pendingMessages: {}
-
-    };
+    /**
+     * groups combine multiple addresses into one.
+     */
+    groups = new GroupMap();
 
     /**
      * Create a new PVM instance using the provided System implementation and
@@ -290,7 +235,7 @@ export class PVM implements Platform {
 
     identify(inst: Instance): Maybe<Address> {
 
-        return getAddress(this.state, inst);
+        return this.actors.addressFromActor(inst);
 
     }
 
@@ -316,8 +261,10 @@ export class PVM implements Platform {
 
         if (eresult.isLeft()) {
 
-            this.raise(this.state.threads[parent].context.actor,
-                eresult.takeLeft());
+            let mparentActor = this.actors.get(parent);
+
+            if (mparentActor.isJust())
+                this.raise(mparentActor.get().context.actor, eresult.takeLeft());
 
             return '?';
 
@@ -327,8 +274,8 @@ export class PVM implements Platform {
 
         this.runActor(result);
 
+        // TODO: Make this call stack friendly some day.
         if (Array.isArray(tmpl.children))
-            // TODO: Make this call stack friendly some day.
             tmpl.children.forEach(tmp => this._spawn(result, tmp));
 
         return result;
@@ -338,9 +285,13 @@ export class PVM implements Platform {
     allocate(parent: Address, tmpl: Template): Either<Err, Address> {
 
         if (tmpl.id === ID_RANDOM) {
-            let rtime = get(this.state, parent).get();
-            let prefix = rtime.context.actor.constructor.name.toLowerCase();
+
+            let actor = this.actors.get(parent).get().context.actor;
+
+            let prefix = actor.constructor.name.toLowerCase();
+
             tmpl.id = `actor::${this._actorIdCounter + 1}~${prefix}`;
+
         }
 
         if (isRestricted(<string>tmpl.id))
@@ -348,34 +299,35 @@ export class PVM implements Platform {
 
         let addr = make(parent, <string>tmpl.id);
 
-        if (this.getThread(addr).isJust())
+        if (this.actors.has(addr))
             return left(new errors.DuplicateAddressErr(addr));
 
         let args = Array.isArray(tmpl.args) ? tmpl.args : [];
 
-        let act = tmpl.create(this.system, tmpl, ...args);
+        let actor = tmpl.create(this.system, tmpl, ...args);
 
-        // TODO: Have thread types depending on the actor type instead.
-        let thr = new SharedThread(
-            this,
-            ScriptFactory.getScript(act),
-            this.threadRunner,
-            act.init(newContext(this._actorIdCounter++, act, addr, tmpl))
-        );
+        let context = actor.init(newContext(
+            this._actorIdCounter++, actor, addr, tmpl));
 
-        this.putThread(addr, thr);
+        let thread: Maybe<Thread> = usesVMThread(context.flags) ?
+            just(new SharedThread(
+                this,
+                ScriptFactory.getScript(actor),
+                this.scheduler,
+                context
+            )) : nothing();
 
-        this.trigger(addr, events.EVENT_ACTOR_CREATED);
+        this.actors.set(addr, { thread, context });
 
-        if (isRouter(thr.context.flags))
-            this.putRoute(addr, addr);
+        this.events.publish(addr, events.EVENT_ACTOR_CREATED);
+
+        if (isRouter(context.flags)) this.routers.set(addr, addr);
 
         if (tmpl.group) {
 
-            let groups = (typeof tmpl.group === 'string') ?
-                [tmpl.group] : tmpl.group;
+            let groups = Array.isArray(tmpl.group) ? tmpl.group : [tmpl.group];
 
-            groups.forEach(g => this.putMember(g, addr));
+            groups.forEach(group => this.groups.put(group, addr));
 
         }
 
@@ -385,35 +337,51 @@ export class PVM implements Platform {
 
     runActor(target: Address) {
 
-        let mthread = this.getThread(target);
-
-        if (mthread.isNothing())
+        if (!this.actors.has(target))
             return raise(new errors.UnknownAddressErr(target));
 
-        let rtime = mthread.get();
+        let ate = this.actors.get(target).get();
 
-        let ft = rtime.context.actor.start(target);
+        let ft = ate.context.actor.start(target);
 
-        // Assumes the actor returned a Future
-        if (ft)
-            rtime.wait(ft);
+        if (ft) {
 
-        // Actors with this flag need to be brought down immediately.
-        // TODO: Move this to the actors own run method after #47
-        if (rtime.context.flags & FLAG_EXIT_AFTER_RUN)
-            rtime.wait(this.kill(rtime.context.actor, target));
+            // Assumes the actor returned a Future.
 
-        this.trigger(rtime.context.address, events.EVENT_ACTOR_STARTED);
+            if (ate.thread.isNothing()) {
+
+                ft.fork(e => this.raise(ate.context.actor, e));
+
+            } else {
+
+                let thread = ate.thread.get();
+
+                if (ft) thread.wait(ft);
+
+                // Actors with this flag need to be brought down immediately.
+                // TODO: Move this to the actors own run method after #47
+                if (ate.context.flags & FLAG_EXIT_AFTER_RUN)
+                    thread.wait(this.kill(ate.context.actor, target));
+
+            }
+
+        }
+
+        this.events.publish(ate.context.address, events.EVENT_ACTOR_STARTED);
 
     }
 
     sendMessage(to: Address, from: Address, msg: Message): boolean {
 
-        let mRouter = this.getRouter(to);
+        this.events.publish(from, events.EVENT_SEND_START, to, from, msg);
+
+        let mRouter = this.routers.getFor(to)
+            .chain(addr => this.actors.get(addr))
+            .map(ate => ate.context);
 
         let mctx = mRouter.isJust() ?
             mRouter :
-            this.getThread(to).map(r => r.context)
+            this.actors.get(to).map(ate => ate.context)
 
         //routers receive enveloped messages.
         let actualMessage = mRouter.isJust() ?
@@ -436,84 +404,17 @@ export class PVM implements Platform {
 
             }
 
-            this.trigger(from, events.EVENT_SEND_OK, to, msg);
+            this.events.publish(from, events.EVENT_SEND_OK, to, msg);
 
             return true;
 
         } else {
 
-            this.trigger(from, events.EVENT_SEND_FAILED, to, msg);
+            this.events.publish(from, events.EVENT_SEND_FAILED, to, msg);
 
             return false;
 
         }
-
-    }
-
-    getThread(addr: Address): Maybe<Thread> {
-
-        return get(this.state, addr);
-
-    }
-
-    getRouter(addr: Address): Maybe<Context> {
-
-        return getRouter(this.state, addr).map(r => r.context);
-
-    }
-
-    getGroup(name: string): Maybe<Address[]> {
-
-        return getGroup(this.state, name.split('$').join(''));
-
-    }
-
-    getChildren(addr: Address): Maybe<Threads> {
-
-        return fromNullable(getChildren(this.state, addr));
-
-    }
-
-    putThread(addr: Address, r: Thread): PVM {
-
-        this.state = put(this.state, addr, r);
-        return this;
-
-    }
-
-    putMember(group: string, addr: Address): PVM {
-
-        putMember(this.state, group, addr);
-        return this;
-
-    }
-
-    putRoute(target: Address, router: Address): PVM {
-
-        putRoute(this.state, target, router);
-        return this;
-
-    }
-
-    remove(addr: Address): PVM {
-
-        this.state = remove(this.state, addr);
-
-        map(this.state.routers, (r, k) => {
-
-            if (r === addr)
-                delete this.state.routers[k];
-
-        });
-
-        return this;
-
-    }
-
-    removeRoute(target: Address): PVM {
-
-        removeRoute(this.state, target);
-        return this;
 
     }
 
@@ -526,41 +427,42 @@ export class PVM implements Platform {
 
         let addr = maddr.get();
 
-        //TODO: pause the runtime.
+        //TODO: pause the thread if one is used.
         let next = addr;
 
         loop:
         while (true) {
 
-            let mrtime = this.getThread(next);
+            let mate = this.actors.get(next);
 
             //TODO: This risks swallowing errors.
-            if (mrtime.isNothing()) return;
+            if (mate.isNothing()) return;
 
-            let rtime = mrtime.get();
+            let ate = mate.get();
 
-            let trap = rtime.context.template.trap ||
+            let trap = ate.context.template.trap ||
                 (() => template.ACTION_RAISE);
 
             switch (trap(err)) {
 
                 case template.ACTION_IGNORE:
-                    this.getThread(addr).map(thr => {
+                    // TODO: do this via a method.
+                    ate.thread.map(thr => {
                         thr.state = THREAD_STATE_IDLE
                     });
                     break loop;
 
                 case template.ACTION_RESTART:
 
-                    let maddr = get(this.state, next);
+                    let mate = this.actors.get(next);
 
-                    if (maddr.isJust())
+                    if (mate.isJust())
                         this
-                            .kill(maddr.get().context.actor, next)
+                            .kill(mate.get().context.actor, next)
                             .chain(() => {
 
                                 let eRes = this.allocate(getParent(next),
-                                    rtime.context.template);
+                                    ate.context.template);
 
                                 if (eRes.isLeft())
                                     return raise(new Error(
@@ -575,10 +477,10 @@ export class PVM implements Platform {
 
                 case template.ACTION_STOP:
 
-                    let smaddr = get(this.state, next);
+                    let smate = this.actors.get(next);
 
-                    if (smaddr.isJust())
-                        this.kill(smaddr.get().context.actor, next)
+                    if (smate.isJust())
+                        this.kill(smate.get().context.actor, next)
                             .fork(e => this.raise(this, e));
                     break loop;
 
@@ -603,55 +505,6 @@ export class PVM implements Platform {
 
     }
 
-    trigger(addr: Address, evt: string, ...args: Type[]) {
-
-        let elvl = getLevel(evt);
-        let { level, logger } = this.conf.log;
-
-        if (level >= elvl) {
-
-            switch (elvl) {
-
-                case LOG_LEVEL_DEBUG:
-                    logger.debug(addr, evt, args);
-                    break;
-
-                case LOG_LEVEL_INFO:
-                    logger.info(addr, evt, args);
-                    break;
-
-                case LOG_LEVEL_NOTICE:
-                case LOG_LEVEL_WARN:
-                    logger.warn(addr, evt, args);
-                    break;
-
-                case LOG_LEVEL_ERROR:
-                    logger.error(addr, evt, args);
-                    break;
-
-                default:
-                    break;
-
-            }
-
-        }
-
-        //forward the event to relevant hooks.
-        if (this.conf.on[evt] != null)
-            this.conf.on[evt].apply(null, [addr, evt, ...args]);
-
-    }
-
-    logOp(r: VMThread, f: Frame, op: Opcode, oper: Operand) {
-
-        this.conf.log.logger.debug.apply(null, [
-            `[${r.context.address}]`,
-            `(${f.script.name})`,
-            ...toLog(op, r, f, oper)
-        ]);
-
-    }
-
     kill(parent: Instance, target: Address): Future<void> {
 
         let that = this;
@@ -665,53 +518,58 @@ export class PVM implements Platform {
 
             let parentAddr = mparentAddr.get();
 
-            let addrs = isGroup(target) ?
-                that.getGroup(target).orJust(() => []).get() : [target];
+            let targets = isGroup(target) ?
+                that.groups.get(target).orJust(() => []).get() : [target];
 
-            return runBatch(addrs.map(addr => doFuture<void>(function*() {
-                if ((!isChild(parentAddr, target)) && (target !== parentAddr)) {
+            return runBatch(targets.map((next: Address) =>
+                doFuture<void>(function*() {
 
-                    let err = new Error(
-                        `IllegalStopErr: Actor "${parentAddr}" ` +
-                        `cannot kill non-child "${addr}"!`);
+                    if ((!isChild(parentAddr, target)) &&
+                        (target !== parentAddr)) {
 
-                    that.raise(parent, err);
+                        let err = new Error(
+                            `IllegalStopErr: Actor "${parentAddr}" ` +
+                            `cannot kill non-child "${next}"!`);
 
-                    return raise<void>(err);
+                        that.raise(parent, err);
 
-                }
+                        return raise<void>(err);
 
-                let mthread = that.getThread(addr);
+                    }
 
-                if (mthread.isNothing()) return pure(<void>undefined);
+                    let mentry = that.actors.get(next);
 
-                let thread = mthread.get();
+                    if (mentry.isNothing()) return pure(<void>undefined);
 
-                let mchilds = that.getChildren(target);
+                    let killChild = (ate: ActorTableEntry) =>
+                        doFuture(function*() {
 
-                let childs = mchilds.isJust() ? mchilds.get() : {};
+                            if (ate.thread.isJust())
+                                // The thread will clean up.
+                                yield ate.thread.get().die();
+                            else
+                                yield wrap(ate.context.actor.stop());
 
-                let killChild = (child: Thread, addr: Address) =>
-                    doFuture(function*() {
+                            let { address } = ate.context;
 
-                        yield child.die();
+                            that.actors.remove(address);
 
-                        that.remove(addr);
+                            that.events.publish(address,
+                                events.EVENT_ACTOR_STOPPED);
 
-                        that.trigger(addr, events.EVENT_ACTOR_STOPPED);
+                            return voidPure;
 
-                        return voidPure;
+                        });
 
-                    });
+                    yield runBatch(that.actors.getChildren(next)
+                        .reverse().map(killChild));
 
-                yield runBatch(mapTo(map(childs, killChild), f => f));
+                    if (next !== ADDRESS_SYSTEM)
+                        yield killChild(mentry.get());
 
-                if (addr !== ADDRESS_SYSTEM)
-                    yield killChild(thread, addr);
+                    return voidPure;
 
-                return voidPure;
-
-            })));
+                })));
 
         });
 
@@ -732,12 +590,22 @@ export class PVM implements Platform {
 
     exec(actor: Instance, funName: string, args: Foreign[] = []) {
 
-        let mAddress = this.identify(actor);
+        let thread: VMThread;
 
-        if (mAddress.isNothing())
-            return this.raise(this, new errors.UnknownInstanceErr(actor));
+        if (actor === this) {
 
-        let thread = <VMThread>(this.state.threads[mAddress.get()]);
+            thread = <VMThread>this.actors.getThread('$').get();
+
+        } else {
+
+            let mAddress = this.identify(actor);
+
+            if (mAddress.isNothing())
+                return this.raise(this, new errors.UnknownInstanceErr(actor));
+
+            thread = <VMThread>this.actors.getThread(mAddress.get()).get();
+
+        }
 
         thread.exec(funName, args);
 

@@ -1,1 +1,1 @@
-{"version":3,"file":"mailbox.js","sourceRoot":"","sources":["mailbox.ts"],"names":[],"mappings":";;;AAOA;;;;GAIG;AACH,MAAa,QAAQ;IAEnB,YACS,EAAU,EACV,IAAY,EACZ,OAAgB;QAFhB,OAAE,GAAF,EAAE,CAAQ;QACV,SAAI,GAAJ,IAAI,CAAQ;QACZ,YAAO,GAAP,OAAO,CAAS;IAAI,CAAC;CAE/B;AAPD,4BAOC"}
+{"version":3,"file":"mailbox.js","sourceRoot":"","sources":["mailbox.ts"],"names":[],"mappings":";;;AAOA;;;;GAIG;AACH,MAAa,QAAQ;IAEjB,YACW,EAAU,EACV,IAAY,EACZ,OAAgB;QAFhB,OAAE,GAAF,EAAE,CAAQ;QACV,SAAI,GAAJ,IAAI,CAAQ;QACZ,YAAO,GAAP,OAAO,CAAS;IAAI,CAAC;CAEnC;AAPD,4BAOC"}

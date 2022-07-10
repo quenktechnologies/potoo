@@ -280,9 +280,8 @@ export class InvalidFunctionErr extends Error {
 export class UnknownInstanceErr extends Error {
 
     constructor(public instance: object) {
-
         super(
-            'The instance provided with constructor ' +
+            'The instance provided with constructor "' +
             (instance ? instance.constructor.name || instance : instance) +
             '" is not in the system!'
         );

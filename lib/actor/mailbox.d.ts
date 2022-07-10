@@ -6,7 +6,7 @@ export declare type Mailbox = Envelope[];
 /**
  * Envelope for messages.
  *
- * Used to internally keep track of message sources and destintations.
+ * Used to internally keep track of message sources and destinations.
  */
 export declare class Envelope {
     to: string;

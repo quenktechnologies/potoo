@@ -14,6 +14,7 @@ import {
 } from '../address';
 import { Message } from '../message';
 import { Templates, Spawnable } from '../template';
+import { FLAG_VM_THREAD } from '../flags';
 import { Actor, Eff } from '../';
 import { Api } from './api';
 
@@ -47,7 +48,14 @@ export abstract class AbstractResident
 
     }
 
-    abstract init(c: Context): Context;
+    init(c: Context): Context {
+
+        c.flags = c.flags | FLAG_VM_THREAD;
+
+        return c;
+
+
+    }
 
     notify() {
 
@@ -117,7 +125,7 @@ export abstract class AbstractResident
 
     wait(ft: Future<void>) {
 
-        let mthread = this.platform.getThread(this.self());
+        let mthread = this.platform.actors.getThread(this.self());
 
         if (mthread.isJust())
             mthread.get().wait(ft);

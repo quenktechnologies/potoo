@@ -1,14 +1,9 @@
-import { Record } from '@quenk/noni/lib/data/record';
 import { Type } from '@quenk/noni/lib/data/type';
 
 import { Address } from '../../address';
-import {
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_WARN,
-    LogLevel,
-    LOG_LEVEL_DEBUG
-} from './log';
+import { LogWritable } from './log';
 
+export const EVENT_SEND_START = 'message-send-start';
 export const EVENT_SEND_OK = 'message-send-ok';
 export const EVENT_SEND_FAILED = 'message-send-failed';
 export const EVENT_EXEC_INSTANCE_STALE = 'exec-instance-stale';
@@ -21,6 +16,11 @@ export const EVENT_ACTOR_STARTED = 'actor-started';
 export const EVENT_ACTOR_STOPPED = 'actor-stopped';
 
 /**
+ * EventName identifying an event that occurred.
+ */
+export type EventName = string;
+
+/**
  * Handler for events.
  */
 export type Handler = (addr: Address, evt: string, ...args: Type[]) => void;
@@ -30,98 +30,56 @@ export type Handler = (addr: Address, evt: string, ...args: Type[]) => void;
  */
 export interface Handlers {
 
-    [key: string]: Handler
+    [key: string]: Handler[]
 
 }
 
 /**
- * EventInfo holds needed information about events the system can generate.
+ * EventSource is an interface used by the VM to broadcast various events as
+ * they occur.
+ *
+ * External code can use this interface to hook into these events.
  */
-export interface EventInfo {
+export interface EventSource {
 
     /**
-     * level of logging
+     * on queues an event handler for the target event.
      */
-    level: LogLevel
+    on(evt: EventName, handler: Handler): void
+
+    /**
+     * publish an event (used internally).
+     */
+    publish(addr: Address, evt: string, ...args: Type[]): void
 
 }
 
 /**
- * EventInfos map.
+ * Publisher serves as the EventSource implementation for the VM.
  */
-export interface EventInfos extends Record<EventInfo> { }
+export class Publisher implements EventSource {
 
-/**
- * events holds the EventInfo details for all system events.
- */
-export const events: EventInfos = {
+    constructor(public log: LogWritable, public handlers: Handlers = {}) { }
 
-    [EVENT_ACTOR_CREATED]: {
+    on(evt: EventName, handler: Handler) {
 
-        level: LOG_LEVEL_INFO
+        let handlers = this.handlers[evt] || [];
 
-    },
+        handlers.push(handler);
 
-    [EVENT_ACTOR_STARTED]: {
+        this.handlers[evt] = handlers;
 
-        level: LOG_LEVEL_INFO
+    }
 
-    },
+    publish(addr: Address, evt: string, ...args: Type[]) {
 
-    [EVENT_SEND_OK]: {
+        let handlers = this.handlers[evt];
 
-        level: LOG_LEVEL_INFO
+        if (handlers)
+            handlers.forEach(handler => handler(addr, evt, ...args));
 
-    },
-
-    [EVENT_MESSAGE_READ]: {
-
-        level: LOG_LEVEL_INFO
-
-    },
-
-    [EVENT_SEND_FAILED]: {
-
-        level: LOG_LEVEL_WARN
-
-    },
-
-    [EVENT_MESSAGE_DROPPED]: {
-
-        level: LOG_LEVEL_WARN
-
-    },
-
-    [EVENT_EXEC_INSTANCE_STALE]: {
-
-        level: LOG_LEVEL_WARN
-
-    },
-
-    [EVENT_EXEC_ACTOR_GONE]: {
-
-        level: LOG_LEVEL_WARN
-
-    },
-
-    [EVENT_EXEC_ACTOR_CHANGED]: {
-
-        level: LOG_LEVEL_WARN
-
-    },
-
-    [EVENT_ACTOR_STOPPED]: {
-
-        level: LOG_LEVEL_WARN
+        this.log.event(addr, evt, ...args);
 
     }
 
 }
-
-/**
- * getLevel provides the LogLevel for an event.
- *
- * If none is configured LOG_LEVEL_DEBUG is used.
- */
-export const getLevel = (e: string): number => events.hasOwnProperty(e) ?
-    events[e].level : LOG_LEVEL_DEBUG;

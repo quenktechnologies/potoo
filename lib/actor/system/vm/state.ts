@@ -65,7 +65,7 @@ export interface State {
 
     /**
      * pendingMessages is a Message buffer for actors that have not been fully
-     * initialized yet.'
+     * initialized yet.
      */
     pendingMessages: PendingMessages
 

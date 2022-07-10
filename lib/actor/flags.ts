@@ -5,6 +5,7 @@ export const FLAG_EXIT_AFTER_RECEIVE = 4
 export const FLAG_ROUTER = 8;
 export const FLAG_RESIDENT = 16;
 export const FLAG_EXIT_AFTER_RUN = 32;
+export const FLAG_VM_THREAD = 64;
 
 /**
  * Flags allow an actor to enable or disable various features provided by 
@@ -34,3 +35,9 @@ export const isRouter = (f: Flags) =>
  * isResident flag test.
  */
 export const isResident = (f: Flags) => (f & FLAG_RESIDENT) === FLAG_RESIDENT;
+
+/**
+ * usesVMThread flag test.
+ */
+export const usesVMThread = (f: Flags) =>
+  (f & FLAG_VM_THREAD) === FLAG_VM_THREAD;

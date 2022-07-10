@@ -1,29 +1,25 @@
 import * as template from '../../template';
+import * as events from './event';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Either } from '@quenk/noni/lib/data/either';
-import { Type } from '@quenk/noni/lib/data/type';
 import { Address } from '../../address';
 import { Template } from '../../template';
 import { Message } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
 import { SharedScheduler } from './thread/shared/scheduler';
-import { Thread, VMThread } from './thread';
-import { State, Threads } from './state';
-import { Script } from './script';
 import { Context } from './runtime/context';
-import { Data, Frame } from './runtime/stack/frame';
-import { Opcode } from './runtime/op';
-import { Operand } from './runtime';
+import { Data } from './runtime/stack/frame';
 import { Conf } from './conf';
+import { LogWritable, LogWriter } from './log';
 import { HeapLedger, DefaultHeapLedger } from './runtime/heap/ledger';
 import { Foreign } from './type';
-/**
- * Slot
- */
-export declare type Slot = [Address, Script, Thread];
+import { EventSource } from './event';
+import { GroupMap } from './groups';
+import { ActorTable } from './table';
+import { RouterMap } from './routers';
 export declare const MAX_WORK_LOAD = 25;
 /**
  * Platform is the interface for a virtual machine.
@@ -37,6 +33,23 @@ export interface Platform extends Actor {
      */
     heap: HeapLedger;
     /**
+     * log service for the VM.
+     *
+     * Used to access the internal logging API.
+     */
+    log: LogWritable;
+    /**
+     * events service for the VM.
+     *
+     * Used to publish VM events to interested listeners.
+     */
+    events: EventSource;
+    /**
+     * actors holds all the actors within the system at any given point along
+     * with needed bookkeeping information.
+     */
+    actors: ActorTable;
+    /**
      * allocate a new Thread for an actor.
      *
      * It is an error if a Thread has already been allocated for the actor.
@@ -49,43 +62,6 @@ export interface Platform extends Actor {
      * if the actor is not in the system.
      */
     sendMessage(to: Address, from: Address, msg: Message): boolean;
-    /**
-     * getThread from the system given its address.
-     */
-    getThread(addr: Address): Maybe<Thread>;
-    /**
-     * getRouter attempts to retrieve a router for the address specified.
-     */
-    getRouter(addr: Address): Maybe<Context>;
-    /**
-     * getGroup attempts to retrieve all the members of a group.
-     */
-    getGroup(name: string): Maybe<Address[]>;
-    /**
-     * getChildren provides the children contexts for an address.
-     */
-    getChildren(addr: Address): Maybe<Threads>;
-    /**
-     * putThread in the system at the specified address.
-     */
-    putThread(addr: Address, r: Thread): Platform;
-    /**
-     * putRoute configures a router for all actors that are under the
-     * target address.
-     */
-    putRoute(target: Address, router: Address): Platform;
-    /**
-     * putMember puts an address into a group.
-     */
-    putMember(group: string, addr: Address): Platform;
-    /**
-     * remove a Thread from the system.
-     */
-    remove(addr: Address): Platform;
-    /**
-     * removeRoute configuration.
-     */
-    removeRoute(target: Address): Platform;
     /**
      * spawn an actor using the given Instance as the parent.
      *
@@ -108,14 +84,6 @@ export interface Platform extends Actor {
      */
     raise(src: Instance, err: Err): void;
     /**
-     * trigger is used to generate events as the system runs.
-     */
-    trigger(addr: Address, evt: string, ...args: Type[]): void;
-    /**
-     * logOp is used by Thread to log which opcodes are executed.
-     */
-    logOp(r: VMThread, f: Frame, op: Opcode, operand: Operand): void;
-    /**
      * exec a function by name with the provided arguments using the actor
      * instance's thread.
      */
@@ -134,19 +102,23 @@ export declare class PVM implements Platform {
     conf: Conf;
     constructor(system: System, conf?: Conf);
     _actorIdCounter: number;
+    _context: Context;
     /**
-     * heap memory shared between actor Threads.
+     * scheduler shared between vm threads.
      */
+    scheduler: SharedScheduler;
     heap: DefaultHeapLedger;
+    log: LogWriter;
+    events: events.Publisher;
+    actors: ActorTable;
     /**
-     * threadRunner shared between vm threads.
+     * routers configured to handle any address that falls underneath them.
      */
-    threadRunner: SharedScheduler;
+    routers: RouterMap;
     /**
-     * state contains information about all the actors in the system, routers
-     * and groups.
+     * groups combine multiple addresses into one.
      */
-    state: State;
+    groups: GroupMap;
     /**
      * Create a new PVM instance using the provided System implementation and
      * configuration object.
@@ -163,18 +135,7 @@ export declare class PVM implements Platform {
     allocate(parent: Address, tmpl: Template): Either<Err, Address>;
     runActor(target: Address): Future<unknown> | undefined;
     sendMessage(to: Address, from: Address, msg: Message): boolean;
-    getThread(addr: Address): Maybe<Thread>;
-    getRouter(addr: Address): Maybe<Context>;
-    getGroup(name: string): Maybe<Address[]>;
-    getChildren(addr: Address): Maybe<Threads>;
-    putThread(addr: Address, r: Thread): PVM;
-    putMember(group: string, addr: Address): PVM;
-    putRoute(target: Address, router: Address): PVM;
-    remove(addr: Address): PVM;
-    removeRoute(target: Address): PVM;
     raise(src: Instance, err: Err): void;
-    trigger(addr: Address, evt: string, ...args: Type[]): void;
-    logOp(r: VMThread, f: Frame, op: Opcode, oper: Operand): void;
     kill(parent: Instance, target: Address): Future<void>;
     /**
      * tell allows the vm to send a message to another actor via opcodes.

@@ -130,14 +130,15 @@ export class MutableActorScript extends BaseScript {
 
                 if (future) thr.wait(future);
 
-                vm.trigger(thr.context.address, events.EVENT_MESSAGE_READ, msg);
+                vm.events.publish(thr.context.address,
+                    events.EVENT_MESSAGE_READ, msg);
 
                 return 1;
 
             } else {
 
-                vm.trigger(thr.context.address, events.EVENT_MESSAGE_DROPPED,
-                    msg);
+                vm.events.publish(thr.context.address,
+                    events.EVENT_MESSAGE_DROPPED, msg);
 
                 return 0;
 
@@ -179,13 +180,14 @@ const immutableExec = <T>(actor: Immutable<T>, thr: Thread, msg: Message) => {
         if (future)
             thr.wait(future);
 
-        vm.trigger(thr.context.address, events.EVENT_MESSAGE_READ, msg);
+        vm.events.publish(thr.context.address, events.EVENT_MESSAGE_READ, msg);
 
         return 1;
 
     } else {
 
-        vm.trigger(thr.context.address, events.EVENT_MESSAGE_DROPPED, msg);
+        vm.events.publish(thr.context.address, 
+          events.EVENT_MESSAGE_DROPPED, msg);
         return 0;
 
     }

@@ -21,12 +21,6 @@ export interface ErrorHandler {
     raise(e: Err): void;
 }
 /**
- * Contexts map.
- */
-export interface Contexts {
-    [key: string]: Context;
-}
-/**
  * Context stores all the information a system needs about a spawned actor.
  */
 export interface Context {
