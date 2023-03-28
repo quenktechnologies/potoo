@@ -1,6 +1,6 @@
+import { ACTION_RAISE, TrapFunc } from '../../template';
 import { Message } from '../../message';
 import { Eff } from '../..';
-
 import { LOG_LEVEL_ERROR, LogLevel, LogSink } from './log';
 import { Handlers } from './event';
 
@@ -29,6 +29,11 @@ export interface Conf {
      */
     accept: (m: Message) => Eff
 
+    /**
+     * trap function that intercepts all errors that reach the root actor.
+     */
+    trap: TrapFunc
+
 }
 
 /**
@@ -41,6 +46,8 @@ export const defaults = (): Conf => ({
     long_sink: console,
 
     on: {},
+
+    trap: () => ACTION_RAISE,
 
     accept: () => { }
 

@@ -487,6 +487,10 @@ export class PVM implements Platform {
                 default:
                     if (next === ADDRESS_SYSTEM) {
 
+                        let action = this.conf.trap(err);
+
+                        if (action === template.ACTION_IGNORE) break loop;
+
                         if (err instanceof Error) throw err;
 
                         throw new Error(err.message);

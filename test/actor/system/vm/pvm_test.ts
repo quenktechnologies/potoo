@@ -404,6 +404,29 @@ describe('vm', () => {
 
             });
 
+it('should use invoke the vms trap function', ()=> {
+
+                let vm = new PVM(newSystem());
+
+                let entry = mkEntry();
+
+                let called = false;
+
+                vm.conf.trap  = () => {
+
+                    called = true;
+
+                    return ACTION_IGNORE;
+
+                }
+
+                vm.actors.items['self'] = entry;
+
+                vm.raise(entry.context.actor, new Error('err'));
+
+                assert(called).true();
+
+        });
         });
 
         describe('kill', () => {
