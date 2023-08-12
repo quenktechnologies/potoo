@@ -297,15 +297,15 @@ const doReceive = () => {
 /**
  * receive the next message in the message queue.
  */
-export const receive = <M>(): Future<M> => run((_, onSuccess) => {
+export const receive = <M>(): Future<M> => run(()=>new Promise(resolve => {
 
-    receivers.push(() => onSuccess(messages.pop()));
+    receivers.push(() => resolve(messages.pop()));
 
     if (!empty(messages)) doReceive();
 
     return noop;
 
-});
+}));
 
 const writer = new LogWriter(
     console,
@@ -317,7 +317,7 @@ const writer = new LogWriter(
  * classes.
  */
 export const select = <M>(cases: Case<M>[]): Future<void> =>
-    run((onError, onSuccess) => {
+    run(()=> new Promise((onSuccess, onError) => {
 
         let f = new CaseFunction(cases);
 
@@ -334,7 +334,7 @@ export const select = <M>(cases: Case<M>[]): Future<void> =>
 
         return noop;
 
-    });
+    }));
 
 /**
  * exist the actor.

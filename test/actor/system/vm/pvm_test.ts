@@ -653,7 +653,7 @@ it('should use invoke the vms trap function', ()=> {
                     vm.groups.items['$us'] = ['self/0', 'them/1', 'self/2'];
 
                     return vm.kill(self.context.actor, '$us')
-                        .catch(e => {
+                        .trap(e => {
 
                             if (e.message.startsWith('IllegalStopErr')) {
 
@@ -668,7 +668,7 @@ it('should use invoke the vms trap function', ()=> {
                             }
 
                         })
-                        .finally(() => attempt(() => {
+                        .finish(() => attempt(() => {
 
                             assert(escalated).true();
 
