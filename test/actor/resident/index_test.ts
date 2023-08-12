@@ -1,389 +1,241 @@
 import { assert } from '@quenk/test/lib/assert';
-import { Context } from '../../../src/actor/context';
+
+import { Future, delay, raise } from '@quenk/noni/lib/control/monad/future';
+
+import { ACTION_IGNORE, ACTION_STOP } from '../../../lib/actor/template';
+import { AbstractResident } from '../../../lib/actor/resident';
+import { system, TestSystem } from './fixtures/system';
 import {
-    AbstractResident,
-    Mutable,
-    Immutable,
-} from '../../../src/actor/resident';
-import { ACTION_STOP } from '../../../src/actor/template';
-import { Case } from '../../../src/actor/resident/case';
-import { ActorSystem, system } from '../../../src/actor/system/framework/default';
-
-class Killer extends AbstractResident<Context, ActorSystem> {
-
-    constructor(
-        public s: ActorSystem,
-        public done: (k: Killer) => void) { super(s); }
-
-    init(c: Context): Context {
-
-        c.flags.immutable = true;
-        c.flags.buffered = true;
-        return c;
-
-    }
-
-    select<T>(_: Case<T>[]): Killer {
-
-        return this;
-
-    }
-
-    run() {
-
-        this.spawn({ id: 'targets', create: s => new Killable(s) });
-        this.done(this);
-
-    }
-
-}
-
-class Group extends AbstractResident<Context, ActorSystem> {
-
-    init(c: Context): Context {
-
-        c.flags.immutable = true;
-        c.flags.buffered = true;
-        return c;
-
-    }
-
-    select<T>(_: Case<T>[]): Group {
-
-        return this;
-
-    }
-
-    run() {
-
-        this.spawnGroup('test', {
-
-            b: { id: 'b', create: s => new Killable(s) },
-
-            c: { id: 'c', create: s => new Killable(s) },
-
-            d: { id: 'd', create: s => new Killable(s) }
-
-        });
-
-    }
-
-}
-
-
-class Killable extends Mutable<Context, ActorSystem> {
-
-    receive = [];
-
-    select<T>(_: Case<T>[]): Killable {
-
-        return this;
-
-    }
-
-    run() {
-
-        this.spawn({ id: 'a', create: s => new Victim(s) });
-
-    }
-
-}
-
-class Victim extends Immutable<void, Context, ActorSystem> {
-
-    receive = []
-
-    run() { }
-
-}
-
-class Exiter extends AbstractResident<Context, ActorSystem> {
-
-    constructor(
-        public s: ActorSystem,
-        public done: () => void) { super(s); }
-
-    init(c: Context): Context {
-
-        c.flags.immutable = true;
-        c.flags.buffered = true;
-        return c;
-
-    }
-
-    select<T>(_: Case<T>[]): Killer {
-
-        return this;
-
-    }
-
-    run() {
-
-        this.done();
-
-        setTimeout(() => {
-
-            this.exit();
-
-
-        }, 200);
-
-    }
-
-}
-
-class Raiser extends AbstractResident<Context, ActorSystem> {
-
-    init(c: Context): Context {
-
-        c.flags.immutable = true;
-        c.flags.buffered = true;
-        return c;
-
-    }
-
-    select<T>(_: Case<T>[]): Raiser {
-
-        return this;
-
-    }
-
-    run() {
-
-        this.raise(new Error('risen'));
-
-    }
-
-}
-
-class ShouldWork extends Mutable<Context, ActorSystem> {
-
-    constructor(
-        public s: ActorSystem,
-        public done: () => void) {
-
-        super(s);
-
-    }
-
-    run() {
-
-        let bucket: any = [];
-
-        let cases: Case<string>[] = [
-
-            new Case('one', () => (bucket.push(1), this.select(cases))),
-            new Case('two', () => (bucket.push(2), this.select(cases))),
-            new Case('three', () => (bucket.push(3), this.select(cases))),
-            new Case('done', () => {
-                assert(bucket.join(',')).equate('1,2,3'); this.done();
-            })
-
-        ];
-
-        this
-            .select(cases)
-            .tell('selector', 'one')
-            .tell('selector', 'two')
-            .tell('selector', 'three')
-            .tell('selector', 'done');
-
-    }
-
-}
-
-class MutableSelfTalk extends Mutable<Context, ActorSystem> {
-
-    constructor(
-        public s: ActorSystem,
-        public done: () => void) { super(s); }
-
-    count = 0;
-
-    blocks = [
-
-        new Case('ping', () => {
-
-            this.tell(this.self(), 'pong');
-            this.select(this.blocks);
-
-        }),
-
-        new Case('pong', () => {
-
-            if (this.count === 3) {
-
-                this.tell(this.self(), 'end');
-                this.select(this.blocks);
-
-            } else {
-
-                this.tell(this.self(), 'ping');
-                this.count = this.count + 1;
-                this.select(this.blocks);
-
-            }
-
-        }),
-
-        new Case('end', () => { assert(this.count).equate(3); this.done(); })
-
-    ]
-
-    run() {
-
-        this.select(this.blocks);
-        this.tell(this.self(), 'ping');
-
-    }
-
-}
-
-class ImmutableSelfTalk extends Immutable<string, Context, ActorSystem> {
-
-    constructor(
-        public s: ActorSystem,
-        public done: () => void) { super(s); }
-
-    count = 0;
-
-    receive = [
-
-        new Case('ping', () => this.tell(this.self(), 'pong')),
-
-        new Case('pong', () => {
-
-            if (this.count === 3) {
-
-                this.tell(this.self(), 'end');
-
-            } else {
-
-                this.tell(this.self(), 'ping');
-                this.count = this.count + 1;
-
-            }
-
-        }),
-
-        new Case('end', () => { assert(this.count).equal(3); this.done(); })
-
-    ]
-
-    run() {
-
-        this.tell(this.self(), 'ping');
-
-    }
-
-}
-
-class ImmutableCrossTalk extends Immutable<string, Context, ActorSystem> {
-
-    constructor(
-        public s: ActorSystem,
-        public partner: string,
-        public done?: () => void) { super(s); }
-
-    receive = [
-
-        new Case('syn', () => this.tell(this.partner, 'ack')),
-
-        new Case('ack', () => {
-
-            if (this.done)
-                this.done()
-
-        })
-
-    ]
-
-    run() {
-
-        if (this.done)
-            this.tell(this.partner, 'syn');
-
-    }
-
-}
-
-class MutableCrossTalk extends Mutable<Context, ActorSystem> {
-
-    constructor(
-        public s: ActorSystem,
-        public partner: string,
-        public done?: () => void) { super(s); }
-
-    run() {
-
-        this.select([
-
-            new Case('syn', () => this.tell(this.partner, 'ack')),
-
-            new Case('ack', () => {
-
-                if (this.done)
-                    this.done()
-
-            })
-
-        ]);
-
-        if (this.done)
-            this.tell(this.partner, 'syn');
-
-    }
-
-}
+    Spawner,
+    Killer,
+    Exiter,
+    Group,
+    Raiser,
+    DelayOnRun,
+    AssertSpawnReturnsAddress,
+} from './fixtures/actors';
 
 describe('resident', () => {
 
     describe('AbstractResident', () => {
 
+        describe('spawn', () => {
+
+            it('should work', done => {
+
+                let s = system();
+
+                s.spawn({
+
+                    id: 'spawner',
+
+                    create: sys => new Spawner(<TestSystem>sys, () => {
+
+                        assert(s.vm.actors.getThread('spawner').isJust())
+                            .true();
+
+                        done();
+
+                    })
+
+                });
+
+            });
+
+            it('should return the address', () => {
+
+                let s = system();
+
+                s.spawn({
+
+                    id: 'spawner',
+                    create: sys =>
+                        new AssertSpawnReturnsAddress(<TestSystem>sys, 'spawner')
+
+                });
+
+            });
+
+            it('should spawn a tree', () => {
+
+                let s = system();
+
+                s.spawn({
+
+                    id: 'a',
+
+                    create: sys => new Spawner(<TestSystem>sys, () => { }),
+
+                    children: [
+
+                        {
+
+                            id: 'aa',
+
+                            create: sys =>
+                                new Spawner(<TestSystem>sys, () => { })
+
+                        },
+
+                        {
+
+                            id: 'ab',
+
+                            create: sys =>
+                                new Spawner(<TestSystem>sys, () => { }),
+
+                            children: [
+
+                                {
+
+                                    id: 'aba',
+
+                                    create: sys =>
+                                        new Spawner(<TestSystem>sys, () => { })
+
+                                }
+
+                            ]
+
+                        },
+
+                        {
+
+                            id: 'ac',
+
+                            create: sys => new Spawner(<TestSystem>sys, () => { }),
+
+                            children: [
+
+                                {
+
+                                    id: 'aca',
+
+                                    create: sys => new Spawner(<TestSystem>sys, () => { })
+
+                                },
+                                {
+
+                                    id: 'acb',
+
+                                    create: sys => new Spawner(<TestSystem>sys, () => { })
+
+                                },
+                                {
+
+                                    id: 'acc',
+
+                                    create: sys => new Spawner(<TestSystem>sys, () => { })
+
+                                }
+
+                            ]
+
+                        }
+
+                    ]
+
+                });
+
+                assert(s.vm.actors.getThread('a').isJust()).true();;
+                assert(s.vm.actors.getThread('a/aa').isJust()).true();
+                assert(s.vm.actors.getThread('a/ab').isJust()).true();
+                assert(s.vm.actors.getThread('a/ab/aba').isJust()).true();
+                assert(s.vm.actors.getThread('a/ac').isJust()).true();
+                assert(s.vm.actors.getThread('a/ac/aca').isJust()).true();
+                assert(s.vm.actors.getThread('a/ac/acb').isJust()).true();
+                assert(s.vm.actors.getThread('a/ac/acc').isJust()).true();
+
+            });
+
+        });
+
+        it('should start actors that produce a future', done => {
+
+            let s = system();
+
+            s.spawn({
+
+                id: 'a',
+                create: sys => new DelayOnRun(<TestSystem>sys, () => {
+
+                    assert(true).true();
+
+                    done();
+
+                })
+
+            });
+
+        });
+
         describe('kill', () => {
 
             it('should kill children', done => {
 
-                let s = system({ log: { level: 1 } })
-                    .spawn({
+                let s = system();
 
-                        id: 'a',
-                        create: sys => new Killer(sys, k => {
+                s.spawn({
 
-                            assert(s.state.contexts['a/targets']).not.equal(undefined);
-                            setTimeout(() => k.kill('a/targets'), 100);
+                    id: 'a',
 
-                        })
+                    create: sys => new Killer(<TestSystem>sys, k => {
+
+                        assert(s.vm.actors.getThread('a/targets').isJust())
+                            .true();
+
+                        setTimeout(() => k.kill('a/targets'), 0);
+
                     })
+
+                });
 
                 setTimeout(() => {
 
-                    assert(s.state.contexts['a/targets']).equal(undefined);
+                    assert(s.vm.actors.getThread('a/targets').isNothing()).true();
+
                     done();
 
-                }, 200);
+                }, 500);
             })
 
             it('should kill grand children', done => {
 
-                let s = system({ log: { level: 1 } })
+                let steps = 0;
+
+                let s = system()
                     .spawn({
 
                         id: 'a',
-                        create: sys => new Killer(sys, k => {
+                        create: sys => new Killer(<TestSystem>sys, k => {
 
-                            setTimeout(() =>
-                                assert(s.state.contexts['a/targets/a'])
-                                    .not.equal(undefined), 200);
+                            setTimeout(() => {
 
-                            setTimeout(() => k.kill('a/targets/a'), 300);
+                                assert(s.vm.actors.getThread('a/targets/a').isJust())
+                                    .true();
+
+                                steps++;
+
+                            }, 200);
+
+                            setTimeout(() => {
+
+                                k.kill('a/targets/a');
+
+                                steps++;
+
+                            }, 300);
 
                         })
                     })
 
                 setTimeout(() => {
 
-                    assert(s.state.contexts['a/targets/a']).equal(undefined);
+                    assert(steps, 'timeout callbacks executed').equal(2);
+
+                    assert(s.vm.actors.getThread('a/targets/a').isNothing())
+                        .true();
+
                     done();
 
                 }, 400);
@@ -395,19 +247,21 @@ describe('resident', () => {
 
             it('should work', done => {
 
-                let s = system({ log: { level: 1 } })
+                let s = system()
                     .spawn({
 
                         id: 'a',
-                        create: sys => new Exiter(sys, () => {
-
+                        create: sys => new Exiter(<TestSystem>sys, () => {
 
                             setTimeout(() =>
-                                assert(s.state.contexts['a']).not.equal(undefined), 100);
+                                assert(s.vm.actors.getThread('a').isJust())
+                                    .true(), 100);
 
                             setTimeout(() => {
 
-                                assert(s.state.contexts['a']).equal(undefined);
+                                assert(s.vm.actors.getThread('a').isNothing())
+                                    .true();
+
                                 done();
 
                             }, 300);
@@ -415,23 +269,24 @@ describe('resident', () => {
                         })
                     })
             })
-
         })
 
         describe('group', () => {
 
             it('should assign actors to a group', done => {
 
-                let s = system({ log: { level: 1 } })
+                let s = system()
                     .spawn({
 
                         id: 'a',
-                        create: sys => new Group(sys)
+                        create: sys => new Group(<TestSystem>sys)
                     })
 
                 setTimeout(() => {
 
-                    assert(s.state.groups['test']).equate(['a/b', 'a/c', 'a/d']);
+                    assert(s.vm.groups.get('test').get())
+                        .equate(['a/b', 'a/c', 'a/d']);
+
                     done();
 
                 }, 200)
@@ -439,110 +294,107 @@ describe('resident', () => {
 
         })
 
-        it('should be able to talk to itself', done => {
+        describe('raise', () => {
 
-            let ok = false;
+            it('should trigger exception handling', done => {
 
-            let s = system({ log: { level: 1 } })
-                .spawn({
+                let ok = false;
 
-                    id: 'raiser',
+                let s = system()
+                    .spawn({
 
-                    trap: e => {
+                        id: 'raiser',
 
-                        assert(e.message).equal('risen');
-                        ok = true;
-                        return ACTION_STOP
-                    },
+                        trap: e => {
 
-                    create: s => new Raiser(s)
+                            assert(e.message).equal('risen');
 
-                });
+                            ok = true;
 
-            assert(s.state.contexts['raiser']).object();
+                            return ACTION_STOP;
 
-            setTimeout(() => {
+                        },
 
-                assert(ok).true();
+                        create: s => new Raiser(<TestSystem>s)
 
-                assert(s.state.contexts['raiser']).undefined();
+                    });
 
-                done();
+                setTimeout(() => {
 
-            }, 200);
+                    assert(ok).true();
 
-        });
+                    assert(s.vm.actors.getThread('raiser').isNothing()).true();
 
-    })
+                    done();
 
-    describe('Mutable', () => {
+                }, 200);
+            })
+        })
 
-        describe('#select', () => {
+        describe('wait', () => {
 
             it('should work', done => {
 
-                system({ log: { level: 100 } })
-                    .spawn({
-                        id: 'selector',
-                        create: s => new ShouldWork(s, done)
-                    });
+                let sys = system();
 
-            })
+                let ft = delay(done);
 
-            it('should be able to talk to itself', done => {
+                class Waiter extends AbstractResident {
 
-                system({ log: { level: 1 } })
-                    .spawn({
-                        id: 'MutableSelfTalk',
-                        create: s => new MutableSelfTalk(s, done)
-                    });
+                    run() {
 
+                        this.wait(ft);
+
+                    }
+
+                }
+
+                sys.spawn({
+
+                    id: 'future',
+
+                    create: () => new Waiter(sys)
+                })
 
             });
 
+            it('should raise errors', done => {
+
+                let sys = system();
+
+                let ft: Future<void> = raise(new Error('bad things'));
+
+                let Actor = class extends AbstractResident {
+
+                    run() {
+
+                        this.wait(ft);
+
+                    }
+
+                }
+
+                sys.spawn({
+
+                    id: 'future',
+
+                    create: () => new Actor(sys),
+
+                    trap: e => {
+
+                        if (e.message === 'bad things')
+                            done();
+                        else
+                            done(e);
+
+                        return ACTION_IGNORE;
+
+                    }
+                })
+
+            })
+
         })
-
-        it('should be able to cross talk', done => {
-
-            system({ log: { level: 1 } })
-                .spawn({
-                    id: 'a',
-                    create: s => new MutableCrossTalk(s, 'b')
-                })
-                .spawn({
-                    id: 'b',
-                    create: s => new MutableCrossTalk(s, 'a', done)
-                });
-
-        });
-
-    })
-
-    describe('Immutable', () => {
-
-        it('should be able to talk to itself', done => {
-
-            system({ log: { level: 1 } })
-                .spawn({
-                    id: 'selector',
-                    create: s => new ImmutableSelfTalk(s, done)
-                });
-
-        });
-
-        it('should be able to cross talk', done => {
-
-            system({ log: { level: 1 } })
-                .spawn({
-                    id: 'a',
-                    create: s => new ImmutableCrossTalk(s, 'b')
-                })
-                .spawn({
-                    id: 'b',
-                    create: s => new ImmutableCrossTalk(s, 'a', done)
-                });
-
-        });
 
     })
 

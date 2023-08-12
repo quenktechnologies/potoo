@@ -1,7 +1,7 @@
-import { Type } from '@quenk/noni/lib/data/type';
 import { Err } from '@quenk/noni/lib/control/error';
+import { Type } from '@quenk/noni/lib/data/type';
+
 import { System } from './system';
-import { Context } from './context';
 import { Actor } from './';
 
 export const ACTION_RAISE = -0x1;
@@ -25,7 +25,7 @@ export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * Cons is applied to produce an instance of an actor.
  */
-export type Cons<S extends System> = (s: S, ...args: Type[]) => Actor<Context>;
+export type Cons = (s: System, t: Template, ...args: Type[]) => Actor;
 
 /**
  * DelayMilliseconds type.
@@ -41,14 +41,14 @@ export type TrapFunc = (e: Err) => TrapAction;
 /**
  * Spawnable is anything that can be spawned by an actor.
  */
-export type Spawnable<S extends System> = Template<S> | Cons<S>;
+export type Spawnable = Template | Cons;
 
 /**
  * Templates
  */
-export interface Templates<S extends System> {
+export interface Templates {
 
-    [key: string]: Spawnable<S>
+    [key: string]: Spawnable
 
 }
 
@@ -61,7 +61,7 @@ export interface Templates<S extends System> {
  * The are the minimum amount of information required to create
  * a new actor instance.
  */
-export interface Template<S extends System> {
+export interface Template {
 
     /**
      * id of the actor used when constructing its address.
@@ -77,7 +77,7 @@ export interface Template<S extends System> {
     /**
      * create function.
      */
-    create: Cons<S>;
+    create: Cons;
 
     /**
      * args are passed to the create function when creating a new instance.
@@ -107,6 +107,6 @@ export interface Template<S extends System> {
     /**
      * children is list of child actors that will automatically be spawned.
      */
-    children?: Template<S>[]
+    children?: Templates | Template[]
 
 }

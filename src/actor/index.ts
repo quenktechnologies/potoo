@@ -1,58 +1,49 @@
-import { Either } from '@quenk/noni/lib/data/either';
+import { Future } from '@quenk/noni/lib/control/monad/future';
+
+import { Context } from './system/vm/runtime/context';
 import { Message } from './message';
-import { Context } from './context';
+import { Address } from './address';
 
 /**
- * Behaviour of an actor.
+ * Eff is used in various places to represent the potentially sync or async
+ * side-effect of an actor operation.
+ */
+export type Eff = void | Future<void>;
+
+/**
+ * Instance of an actor that resides within the system.
  *
- * Behaviours are procedures that return an
- * Either type indicating whether a message
- * was processed or rejected.
- */
-export type Behaviour = (m: Message) => Either<Message, void>;
-
-/**
- * Contexts map.
- */
-export interface Contexts<C extends Context> {
-
-    [key: string]: C
-
-}
-
-/**
- * Instance of an actor already running in its context.
+ * The interface is implemented by actors to react to the lifecycle the 
+ * system takes them through.
  */
 export interface Instance {
 
     /**
      * accept a message directly.
      *
-     * Some actors may have a mailbox disabling usage
-     * of this method.
+     * This method is used by actors that skip the mailbox.
      */
     accept(m: Message): void;
 
     /**
-     * run the actor instance.
+     * start the Instance.
      *
-     * Once instantiated this method is called to allow the actor to begin
-     * execution.
+     * If a Future is returned, the actor will block its thread until it is 
+     * complete.
+     * The address provided is the address of the newly spawned instance.
      */
-    run(): void;
+    start(addr: Address): Eff;
 
     /**
      * notify is called by the system to indicate new messages
      * have been placed in the actor's mailbox.
-     *
-     * (Buffered actors only!)
      */
     notify(): void;
 
     /**
-     * stop the actor instance.
+     * stop the Instance.
      */
-    stop(): void;
+    stop(): Eff;
 
 }
 
@@ -62,7 +53,7 @@ export interface Instance {
  * The system expects all actors to satisfy this interface so they 
  * can be managed properly.
  */
-export interface Actor<C extends Context> extends Instance {
+export interface Actor extends Instance {
 
     /**
      * init the Actor.
@@ -70,6 +61,6 @@ export interface Actor<C extends Context> extends Instance {
      * This method allows an actor to configure its Context just
      * before it is added to the system.
      */
-    init(c: C): C;
+    init(c: Context): Context;
 
 }

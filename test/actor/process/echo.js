@@ -1,23 +1,27 @@
-const Immutable = require('../../../lib/actor/resident').Immutable;
+const Immutable = require('../../../lib/actor/resident/immutable').Immutable;
 const Case = require('../../../lib/actor/resident/case').Case;
 
-function Echo (s) {
+class Echo extends Immutable {
 
-    this.system = s;
+    constructor(s) {
 
-    this.receive = [
+        super();
 
-        new Case({client:String, message:String},
-            p => this.tell(p.client, p.message))
+        this.system = s;
 
-    ];
+    }
 
-  return Immutable.apply(this, [s]);
+    receive() {
+
+        return [
+
+            new Case({ client: String, message: String },
+                p => { this.tell(p.client, p.message); })
+
+        ];
+
+    }
 
 }
-
-Echo.prototype = Object.create(Immutable.prototype);
-
-Echo.prototype.run = () =>{}
 
 module.exports.create = s => new Echo(s);

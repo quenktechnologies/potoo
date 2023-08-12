@@ -1,29 +1,113 @@
-import { assert } from '@quenk/test/lib/assert';
-import { ActorSystem, system } from '../../../src/actor/system/framework/default';
-import { Case } from '../../../src/actor/resident/case';
-import { Mutable } from '../../../src/actor/resident';
-import { Context } from '../../../src/actor/context';
-import { Process } from '../../../src/actor/process';
+import { Case } from '../../../lib/actor/resident/case';
+import { Immutable } from '../../../lib/actor/resident/immutable';
+import { Process, VMProcess } from '../../../lib/actor/remote/process';
+import { TestSystem, system } from '../resident/fixtures/system';
 
-class Sender extends Mutable<Context, ActorSystem> {
+class ProcessTest extends Immutable<string> {
 
     constructor(
-        public system: ActorSystem,
+        public system: TestSystem,
         public done: () => void) { super(system); }
+
+    process = '?';
+
+    receive() {
+
+        return [
+
+            new Case('started', () => { this.tell(this.process, 'ping'); }),
+
+            new Case('pong', () => { this.tell(this.process, 'self'); }),
+
+            new Case(this.process, () => { this.tell(this.process, 'parent'); }),
+
+            new Case(this.self(), () => { this.tell(this.process, 'exit'); }),
+
+            new Case('exiting', () => { this.done() })
+
+        ];
+
+    }
 
     run() {
 
-        this.tell('echo', { client: this.self(), message: 'hi' });
+        this.process = this.spawn({
 
-        this.select([
+            id: 'process',
 
-            new Case(String, (m: string) => {
+            create: s => new Process(s, `${__dirname}/ping.js`)
 
-                assert(m).equal('hi');
+        });
 
-                this.done();
+        this.tell(this.process, this.self());
 
-            })]);
+    }
+
+}
+
+class VMProcessTest extends Immutable<string> {
+
+    process = '?';
+
+    constructor(
+        public system: TestSystem,
+        public path: string,
+        public done: () => void) { super(system); }
+
+    receive() {
+
+        return [
+
+            new Case('parent/adder/one', (addr: string) => {
+
+                this.tell(addr, 'spawn');
+
+            }),
+
+            new Case('parent/adder/one/two', (addr: string) => {
+
+                this.tell(addr, 'spawn');
+
+            }),
+
+            new Case('parent/adder/one/two/three', (addr: string) => {
+
+                this.tell(addr, 'add');
+
+                this.tell(addr, 'add');
+
+                this.tell(addr, 'add');
+
+            }),
+
+            new Case('finish', () => {
+
+                this.tell('parent/adder/one/two/three', 'total');
+
+            }),
+
+
+            new Case(3, () => {
+
+                this.tell('parent/adder/one/two/three', 'exit');
+
+            }),
+
+            new Case('exiting', () => this.done())
+
+        ];
+
+    }
+
+    run() {
+
+        this.process = this.spawn({
+
+            id: 'adder',
+
+            create: s => new VMProcess(s, this.path)
+
+        });
 
     }
 
@@ -33,23 +117,42 @@ describe('process', () => {
 
     describe('Process', () => {
 
-        it('should be spawnable', done => {
+        let sys = system({ log_level: 7 });
 
-            system({ log: { level: 1 } })
+        after(() => sys.stop())
 
-                .spawn({
+        it('should work', done => {
 
-                    id: 'echo',
-                    create: s => new Process(`${__dirname}/echo.js`, s)
+            sys.spawn({
 
-                })
-                .spawn({
+                id: 'parent',
 
-                    id: 'sender',
-                    create: s => new Sender(s, done)
+                create: () => new ProcessTest(sys, done)
 
-                })
-        })
+            })
+
+        });
+
+    });
+
+    describe('VMProcess', () => {
+
+        let sys = system({ log_level: 7 });
+
+        after(() => sys.stop())
+
+        it('should work', done => {
+
+            sys.spawn({
+
+                id: 'parent',
+
+                create: () =>
+                    new VMProcessTest(sys, `${__dirname}/vm-ping.js`, done)
+
+            })
+
+        });
 
     })
 

@@ -1,228 +1,173 @@
-import { fromBoolean } from '@quenk/noni/lib/data/either';
-import { just } from '@quenk/noni/lib/data/maybe';
-import { noop } from '@quenk/noni/lib/data/function';
-import { Err } from '@quenk/noni/lib/control/error';
+
 import { map, merge } from '@quenk/noni/lib/data/record';
 import { isObject } from '@quenk/noni/lib/data/type';
+import { Err } from '@quenk/noni/lib/control/error';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 
-import { StopScript } from '../system/vm/runtime/scripts';
-import { SpawnScript } from '../system/framework/scripts';
-import { System, Void } from '../system';
+import { UnknownInstanceErr } from '../system/vm/runtime/error';
+import { Data } from '../system/vm/runtime/stack/frame';
+import { Context } from '../system/vm/runtime/context';
+import { System } from '../system';
 import {
-    ADDRESS_DISCARD,
     Address,
-    AddressMap,
-    isRestricted,
-    make,
-    randomID
+    AddressMap
 } from '../address';
 import { Message } from '../message';
-import { Template, Templates, Spawnable } from '../template';
-import { Context } from '../context';
-import { Actor } from '../';
-import { Case } from './case';
+import { Templates, Spawnable } from '../template';
+import { FLAG_VM_THREAD } from '../flags';
+import { Actor, Eff } from '../';
 import { Api } from './api';
-import {
-    TellScript,
-    AcceptScript,
-    ReceiveScript,
-    NotifyScript,
-    RaiseScript
-} from './scripts';
 
 /**
  * Reference to an actor address.
  */
 export type Reference = (m: Message) => void;
 
-
 /**
  * Resident is an actor that exists in the current runtime.
  */
-export interface Resident<C extends Context, S extends System>
-    extends Api<C, S>, Actor<C> { }
+export interface Resident
+    extends
+    Api,
+    Actor { }
 
 /**
- * AbstractResident implementation.
+ * AbstractResident is a base implementation of a Resident actor.
  */
-export abstract class AbstractResident<C extends Context, S extends System>
-    implements Resident<C, S> {
+export abstract class AbstractResident
+    implements
+    Resident {
 
-    constructor(public system: S) { }
+    constructor(public system: System) { }
 
-    abstract init(c: C): C;
+    self = getSelf(this);
 
-    abstract select<T>(_: Case<T>[]): AbstractResident<C, S>;
+    get platform() {
 
-    abstract run(): void;
+        return this.system.getPlatform();
+
+    }
+
+    init(c: Context): Context {
+
+        c.flags = c.flags | FLAG_VM_THREAD;
+
+        return c;
+
+
+    }
 
     notify() {
 
-        this.system.exec(this, new NotifyScript());
+        this.platform.exec(this, 'notify');
 
     }
 
-    self() {
+    accept(_: Message) { }
 
-        return this.system.ident(this);
+    spawn(t: Spawnable): Address {
 
-    }
-
-    accept(m: Message) {
-
-        this.system.exec(this, new AcceptScript(m));
+        return this.system.getPlatform().spawn(this, t);
 
     }
 
-    spawn(t: Spawnable<S>): Address {
+    spawnGroup(group: string | string[], tmpls: Templates): AddressMap {
 
-        let id = randomID();
-
-        let tmpl = isObject(t) ?
-            merge({ id }, <Template<System>>t) :
-            { id, create: t };
-
-        this.system.exec(this, new SpawnScript(this.self(), tmpl));
-
-        return isRestricted(<string>tmpl.id) ?
-            ADDRESS_DISCARD :
-            make(this.self(), tmpl.id);
-
-    }
-
-    spawnGroup(group: string | string[], tmpls: Templates<S>): AddressMap {
-
-        return map(tmpls, (t: Spawnable<S>) => this.spawn(isObject(t) ?
+        return map(tmpls, (t: Spawnable) => this.spawn(isObject(t) ?
             merge(t, { group: group }) : { group, create: t }));
 
     }
 
-    tell<M>(ref: Address, m: M): AbstractResident<C, S> {
+    tell<M>(ref: Address, msg: M): AbstractResident {
 
-        this.system.exec(this, new TellScript(ref, m));
+        let { heap } = this.platform;
+
+        this.exec('tell', [heap.string(ref), heap.object(msg)]);
+
         return this;
 
     }
 
-    raise(e: Err): AbstractResident<C, S> {
+    raise(e: Err): AbstractResident {
 
-        this.system.exec(this, new RaiseScript(e));
+        this.system.getPlatform().raise(this, e);
         return this;
 
     }
 
-    kill(addr: Address): AbstractResident<C, S> {
+    kill(addr: Address): AbstractResident {
 
-        this.system.exec(this, new StopScript(addr));
+        let { heap } = this.platform;
+
+        this.exec('kill', [heap.string(addr)]);
+
         return this;
 
     }
 
     exit(): void {
 
-        this.system.exec(this, new StopScript(this.self()));
+        this.kill(this.self());
 
     }
 
-    stop(): void {
+    start(addr: Address): Eff {
 
-        //XXX: this is a temp hack to avoid the system parameter being of type
-        //System<C>. As much as possibl we want to keep the system type to
-        //make implementing an actor system simple.
-        //
-        //In future revisions we may wrap the system in a Maybe or have
-        //the runtime check if the actor is the valid instance but for now,
-        //we force void. This may result in some crashes if not careful.
-        this.system = <any>new Void();
+        this.self = () => addr;
+
+        return this.run();
 
     }
 
-}
+    run(): void { }
 
-/**
- * Immutable actors do not change their behaviour after receiving
- * a message.
- *
- * Once the receive property is provided, all messages will be
- * filtered by it.
- */
-export abstract class Immutable<T, C extends Context, S extends System>
-    extends AbstractResident<C, S> {
+    stop(): void { }
 
-    /**
-     * receive is a static list of Case classes 
-     * that the actor will always use to process messages.
-     */
-    abstract receive: Case<T>[];
+    wait(ft: Future<void>) {
 
-    init(c: C): C {
+        let mthread = this.platform.actors.getThread(this.self());
 
-        c.behaviour.push(ibehaviour(this));
-        c.mailbox = just([]);
-        c.flags.immutable = true;
-        c.flags.buffered = true;
-        return c;
+        if (mthread.isJust())
+            mthread.get().wait(ft);
+        else
+            this.raise(new UnknownInstanceErr(this));
 
     }
 
     /**
-     * select noop.
+     * exec calls a VM function by name on behalf of this actor.
      */
-    select<M>(_: Case<M>[]): Immutable<T, C, S> {
+    exec(fname: string, args: Data[]) {
 
-        return this;
-
-    }
-
-    run() { }
-
-}
-
-/**
- * Mutable actors can change their behaviour after message processing.
- */
-export abstract class Mutable<C extends Context, S extends System>
-    extends AbstractResident<C, S> {
-
-    receive: Case<void>[] = [];
-
-    init(c: C): C {
-
-        c.mailbox = just([]);
-        c.flags.immutable = false;
-        c.flags.buffered = true;
-
-        return c;
-
-    }
-
-    /**
-     * select allows for selectively receiving messages based on Case classes.
-     */
-    select<M>(cases: Case<M>[]): Mutable<C, S> {
-
-        this.system.exec(this, new ReceiveScript(mbehaviour(cases)));
-        return this;
+        this.platform.exec(this, fname, args);
 
     }
 
 }
-
-const mbehaviour = <T>(cases: Case<T>[]) => (m: Message) =>
-    fromBoolean(cases.some(c => c.match(m)))
-        .lmap(() => m)
-        .map(noop);
-
-const ibehaviour = <T, C extends Context, S extends System>
-    (i: Immutable<T, C, S>) => (m: Message) =>
-        fromBoolean(i.receive.some(c => c.match(m)))
-            .lmap(() => m)
-            .map(noop);
 
 /**
  * ref produces a function for sending messages to an actor address.
  */
-export const ref = <C extends Context, S extends System>
-    (res: Resident<C, S>, addr: Address): Reference =>
-    (m: Message) =>
-        res.tell(addr, m);
+export const ref =
+    (res: Resident, addr: Address): Reference =>
+        (m: Message) =>
+            res.tell(addr, m);
+
+const getSelf = (actor: AbstractResident) => {
+
+    let _self = '?';
+
+    return () => {
+
+        if (_self === '?')
+            _self = actor
+                .system
+                .getPlatform()
+                .identify(actor)
+                .orJust(() => '?').get();
+
+        return _self;
+
+    }
+
+}
