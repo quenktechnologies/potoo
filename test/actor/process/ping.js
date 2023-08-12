@@ -5,6 +5,7 @@ const {
     receive,
     select,
     tell,
+    exit,
     self
 } = require('../../../lib/actor/remote/process');
 const { Case } = require('../../../lib/actor/resident/case');
@@ -21,9 +22,7 @@ doFuture(function*() {
 
     tell(parent, 'started');
 
-    let run = true;
-
-    while (run) {
+    while (true) {
 
         console.info('ping.js: blocking for select');
 
@@ -37,11 +36,9 @@ doFuture(function*() {
 
             new Case('exit', () => {
 
-                console.info('ping.js: exiting');
-
                 tell(parent, 'exiting');
 
-                run = false;
+                exit();
 
             })
         ]);

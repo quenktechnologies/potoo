@@ -92,6 +92,8 @@ class Three extends Mutable {
 
                 this.tell(parent, 'exiting');
 
+                setTimeout(()=> process.exit());
+
             })
 
         ];
