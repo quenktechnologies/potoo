@@ -8,12 +8,10 @@ import { Spawnable, Templates } from '../template';
  * Spawner is an object that can spawn a new actor.
  */
 export interface Spawner {
-
     /**
      * spawn an actor from a template.
      */
-    spawn(t: Spawnable): Address
-
+    spawn(t: Spawnable): Future<Address>;
 }
 
 /**
@@ -21,32 +19,31 @@ export interface Spawner {
  * of the system level methods.
  */
 export interface Api extends Spawner {
-
     /*
      * self retrieves the path of this actor from the system.
      */
     self(): string;
 
     /**
-     * spawnGroup spawns a map of actors assigning each to the specified 
+     * spawnGroup spawns a map of actors assigning each to the specified
      * group(s).
      */
-    spawnGroup(name: string | string[], tmpls: Templates): AddressMap;
+    spawnGroup(name: string | string[], tmpls: Templates): Future<AddressMap>;
 
     /**
      * tell a message to an actor address.
      */
-    tell<M>(ref: string, m: M): Api;
+    tell<M>(ref: string, m: M): Future<void>;
 
     /**
      * raise an error triggering the systems error handling mechanism.
      */
-    raise(e: Err): Api;
+    raise(e: Err): void;
 
     /**
      * kill a child actor.
      */
-    kill(addr: Address): Api;
+    kill(addr: Address): Future<void>;
 
     /**
      * wait on a Future to complete blocking the actor until it does.
@@ -55,11 +52,10 @@ export interface Api extends Spawner {
      * propagated through the event handling machinery and any return values
      * are ignored.
      */
-    wait(ft: Future<void>) : void
+    wait(ft: Future<void>): void;
 
     /**
      * exit instructs the system to kill off this actor.
      */
     exit(): void;
-
 }

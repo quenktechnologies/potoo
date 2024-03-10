@@ -1,19 +1,13 @@
-
-import { map, merge } from '@quenk/noni/lib/data/record';
+import { merge } from '@quenk/noni/lib/data/record';
 import { isObject } from '@quenk/noni/lib/data/type';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 
-import { UnknownInstanceErr } from '../system/vm/runtime/error';
-import { Data } from '../system/vm/runtime/stack/frame';
 import { Context } from '../system/vm/runtime/context';
-import { System } from '../system';
-import {
-    Address,
-    AddressMap
-} from '../address';
+import { Runtime } from '../system/vm/runtime';
+import { Address, AddressMap } from '../address';
 import { Message } from '../message';
-import { Templates, Spawnable } from '../template';
+import { Templates, Spawnable, fromSpawnable } from '../template';
 import { FLAG_VM_THREAD } from '../flags';
 import { Actor, Eff } from '../';
 import { Api } from './api';
@@ -26,123 +20,82 @@ export type Reference = (m: Message) => void;
 /**
  * Resident is an actor that exists in the current runtime.
  */
-export interface Resident
-    extends
-    Api,
-    Actor { }
+export interface Resident extends Api, Actor {}
 
 /**
  * AbstractResident is a base implementation of a Resident actor.
  */
-export abstract class AbstractResident
-    implements
-    Resident {
-
-    constructor(public system: System) { }
+export abstract class AbstractResident implements Resident {
+    constructor(public runtime: Runtime) {}
 
     self = getSelf(this);
 
-    get platform() {
-
-        return this.system.getPlatform();
-
-    }
-
     init(c: Context): Context {
-
         c.flags = c.flags | FLAG_VM_THREAD;
 
         return c;
-
-
     }
 
     notify() {
-
-        this.platform.exec(this, 'notify');
-
+        this.runtime.exec('notify');
     }
 
-    accept(_: Message) { }
+    accept(_: Message) {}
 
-    spawn(t: Spawnable): Address {
+    spawn(target: Spawnable): Future<Address> {
+        return this.runtime.spawn(fromSpawnable(target));
+     }
 
-        return this.system.getPlatform().spawn(this, t);
+    spawnGroup(group: string | string[], tmpls: Templates): Future<AddressMap> {
+        return Future.do(async () => {
+            let result: AddressMap = {};
 
+            for await (let [key, tmpl] of Object.entries(tmpls)) {
+                let addr = await this.spawn(
+                    isObject(tmpl)
+                        ? merge(tmpl, { group: group })
+                        : { group, create: tmpl }
+                );
+                result[key] = addr;
+            }
+
+            return Future.of(result);
+        });
     }
 
-    spawnGroup(group: string | string[], tmpls: Templates): AddressMap {
-
-        return map(tmpls, (t: Spawnable) => this.spawn(isObject(t) ?
-            merge(t, { group: group }) : { group, create: t }));
-
+    tell<M>(addr: Address, msg: M): Future<void> {
+      return this.runtime.send(addr, msg);
     }
 
-    tell<M>(ref: Address, msg: M): AbstractResident {
-
-        let { heap } = this.platform;
-
-        this.exec('tell', [heap.string(ref), heap.object(msg)]);
-
-        return this;
-
+    raise(e: Err) {
+        this.runtime.raise(e);
     }
 
-    raise(e: Err): AbstractResident {
-
-        this.system.getPlatform().raise(this, e);
-        return this;
-
-    }
-
-    kill(addr: Address): AbstractResident {
-
-        let { heap } = this.platform;
-
-        this.exec('kill', [heap.string(addr)]);
-
-        return this;
-
+    kill(addr: Address) {
+        return Future.do(async () => {
+            await this.runtime.exec<void>('kill', [
+                this.runtime.vm.registry.addString(addr)
+            ]);
+        });
     }
 
     exit(): void {
-
         this.kill(this.self());
-
     }
 
     start(addr: Address): Eff {
-
         this.self = () => addr;
 
         return this.run();
-
     }
 
-    run(): void { }
+    run(): void {}
 
-    stop(): void { }
+    stop(): void {}
 
-    wait(ft: Future<void>) {
-
-        let mthread = this.platform.actors.getThread(this.self());
-
-        if (mthread.isJust())
-            mthread.get().wait(ft);
-        else
-            this.raise(new UnknownInstanceErr(this));
-
+    wait(_ft: Future<void>) {
+        // TODO: Implement this.
     }
-
-    /**
-     * exec calls a VM function by name on behalf of this actor.
-     */
-    exec(fname: string, args: Data[]) {
-
-        this.platform.exec(this, fname, args);
-
-    }
-
 }
 
 /**
@@ -150,24 +103,21 @@ export abstract class AbstractResident
  */
 export const ref =
     (res: Resident, addr: Address): Reference =>
-        (m: Message) =>
-            res.tell(addr, m);
+    (m: Message) =>
+        res.tell(addr, m);
 
-const getSelf = (actor: AbstractResident) => {
-
+const getSelf = (_actor: AbstractResident) => {
     let _self = '?';
 
     return () => {
-
-        if (_self === '?')
-            _self = actor
-                .system
+        /* TODO: This should be given to the runtime now. */
+        /*if (_self === '?')
+            _self = actor.system
                 .getPlatform()
                 .identify(actor)
-                .orJust(() => '?').get();
-
+                .orJust(() => '?')
+                .get();
+*/
         return _self;
-
-    }
-
-}
+    };
+};

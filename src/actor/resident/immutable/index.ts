@@ -1,4 +1,3 @@
-
 import { Context } from '../../system/vm/runtime/context';
 import { FLAG_IMMUTABLE, FLAG_BUFFERED, FLAG_VM_THREAD } from '../../flags';
 import { CaseFunction } from '../case/function';
@@ -10,19 +9,14 @@ import { AbstractResident } from '../';
  * a message. The same receiver is applied to each and every message.
  */
 export abstract class Immutable<T> extends AbstractResident {
-
     get $receiver() {
-
         return new CaseFunction(this.receive());
-
     }
 
     init(c: Context): Context {
-
         c.flags = c.flags | FLAG_IMMUTABLE | FLAG_BUFFERED | FLAG_VM_THREAD;
 
         return c;
-
     }
 
     /**
@@ -30,9 +24,6 @@ export abstract class Immutable<T> extends AbstractResident {
      * to process incomming messages.
      */
     receive(): Case<T>[] {
-
         return [];
-
     }
-
 }

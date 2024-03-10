@@ -12,9 +12,8 @@ import {
     doFuture,
     wrap
 } from '@quenk/noni/lib/control/monad/future';
-import { Maybe, nothing, just } from '@quenk/noni/lib/data/maybe'
+import { Maybe,  just } from '@quenk/noni/lib/data/maybe'
 import { isFunction } from '@quenk/noni/lib/data/type';
-import { Either, left, right } from '@quenk/noni/lib/data/either';
 import {
     distribute
 } from '@quenk/noni/lib/data/array';
@@ -37,7 +36,7 @@ import {
     isChild
 } from '../../address';
 import { Template } from '../../template';
-import { isRouter, isBuffered, FLAG_EXIT_AFTER_RUN, usesVMThread } from '../../flags';
+import { isRouter, isBuffered, FLAG_EXIT_AFTER_RUN } from '../../flags';
 import { Message, Envelope } from '../../message';
 import { Instance, Actor } from '../../';
 import { System } from '../';
@@ -94,11 +93,9 @@ export interface Platform extends Actor {
     actors: ActorTable
 
     /**
-     * allocate a new Thread for an actor.
-     *
-     * It is an error if a Thread has already been allocated for the actor.
+     * allocate resources for an actor using the template provided.
      */
-    allocate(self: Address, t: template.Template): Either<Err, Address>
+    allocate(parent: Thread, t: template.Template): Future<Address>;
 
     /**
      * sendMessage to an actor in the system.
@@ -109,11 +106,9 @@ export interface Platform extends Actor {
     sendMessage(to: Address, from: Address, msg: Message): boolean
 
     /**
-     * spawn an actor using the given Instance as the parent.
-     *
-     * The Instance is required to verify if it is still part of the system.
+     * spawn an top level actor using the system as its parent.
      */
-    spawn(parent: Instance, tmpl: template.Spawnable): Address
+    spawn(tmpl: template.Spawnable): Future<Address>
 
     /**
      * identify an actor Instance producing its address if it is part of the 
@@ -239,100 +234,65 @@ export class PVM implements Platform {
 
     }
 
-    spawn(parent: Instance, tmpl: template.Spawnable): Address {
+    spawn(tmpl: template.Spawnable): Future<Address> {
 
-        let mparentAddr = this.identify(parent);
-
-        if (mparentAddr.isNothing()) {
-
-            this.raise(this, new errors.UnknownInstanceErr(parent));
-
-            return '?';
-
-        }
-
-        return this._spawn(mparentAddr.get(), normalize(tmpl));
+      return this.allocate(this.actors.getThread('$').get(), normalize(tmpl));
 
     }
 
-    _spawn(parent: Address, tmpl: Template): Address {
+       allocate(parent: Thread, tmpl: Template): Future<Address> {
 
-        let eresult = this.allocate(parent, tmpl);
+      return Future.do(async ()=> { 
 
-        if (eresult.isLeft()) {
+        let mvalidParent = this.actors.getThread(parent.context.address);
 
-            let mparentActor = this.actors.get(parent);
+        if(mvalidParent.isNothing()) return Future.raise(new errors.InvalidThreadErr(parent));
 
-            if (mparentActor.isJust())
-                this.raise(mparentActor.get().context.actor, eresult.takeLeft());
+        let validParent = mvalidParent.get();
 
-            return '?';
+        if(validParent !== parent) return Future.raise(new errors.InvalidThreadErr(parent));
 
-        }
+        let prefix = parent.context.actor.constructor.name.toLowerCase();
 
-        let result = eresult.takeRight();
+         let  id = tmpl.id ||  `actor::${this._actorIdCounter + 1}~${prefix}`;
 
-        this.runActor(result);
+        if (isRestricted(<string>id))
+            return Future.raise(new errors.InvalidIdErr(id));
 
-        // TODO: Make this call stack friendly some day.
-        if (Array.isArray(tmpl.children))
-            tmpl.children.forEach(tmp => this._spawn(result, tmp));
-
-        return result;
-
-    }
-
-    allocate(parent: Address, tmpl: Template): Either<Err, Address> {
-
-        if (tmpl.id === ID_RANDOM) {
-
-            let actor = this.actors.get(parent).get().context.actor;
-
-            let prefix = actor.constructor.name.toLowerCase();
-
-            tmpl.id = `actor::${this._actorIdCounter + 1}~${prefix}`;
-
-        }
-
-        if (isRestricted(<string>tmpl.id))
-            return left(new errors.InvalidIdErr(<string>tmpl.id));
-
-        let addr = make(parent, <string>tmpl.id);
+        let addr = make(parent.context.address, id);
 
         if (this.actors.has(addr))
-            return left(new errors.DuplicateAddressErr(addr));
+            return Future.raise(new errors.DuplicateAddressErr(addr));
 
-        let args = Array.isArray(tmpl.args) ? tmpl.args : [];
+        let context = newContext(this._actorIdCounter++, addr, tmpl)
 
-        let actor = tmpl.create(this.system, tmpl, ...args);
+        let thread = new SharedThread(
+                      this,
+                      ScriptFactory.getScript(actor),
+                      this.scheduler,
+                      context
+                  )
+  
+        let actor = tmpl.create(thread);
 
-        let context = actor.init(newContext(
-            this._actorIdCounter++, actor, addr, tmpl));
+        this.actors.set(addr, { thread, actor, context });
 
-        let thread: Maybe<Thread> = usesVMThread(context.flags) ?
-            just(new SharedThread(
-                this,
-                ScriptFactory.getScript(actor),
-                this.scheduler,
-                context
-            )) : nothing();
-
-        this.actors.set(addr, { thread, context });
-
+        //TODO: this.events.actor.onCreated.dispatch(addr)
         this.events.publish(addr, events.EVENT_ACTOR_CREATED);
 
-        if (isRouter(context.flags)) this.routers.set(addr, addr);
+        if (isRouter(thread.context.flags)) this.routers.set(addr, addr);
 
         if (tmpl.group) {
-
             let groups = Array.isArray(tmpl.group) ? tmpl.group : [tmpl.group];
 
             groups.forEach(group => this.groups.put(group, addr));
-
         }
 
-        return right(addr);
+        await actor.start(thread);
 
+        return Future.of(addr);
+
+      })
     }
 
     runActor(target: Address) {
@@ -580,15 +540,15 @@ export class PVM implements Platform {
     }
 
     /**
-     * tell allows the vm to send a message to another actor via opcodes.
+     * tell allows the vm to send a message to actors within the system.
      *
-     * If you want to immediately deliver a message, use [[sendMessage]] instead.
+     * This delivers the message immediately to the actor and should not be used
+     * for regular communication. Instead use it to send messages from external
+     * operations such as event handlers etc.
      */
-    tell<M>(ref: Address, msg: M): PVM {
+    tell<M>(ref: Address, msg: M) {
 
-        this.exec(this, 'tell', [this.heap.string(ref), this.heap.object(msg)]);
-
-        return this;
+        this.sendMessage(ref, ADDRESS_SYSTEM, msg);
 
     }
 

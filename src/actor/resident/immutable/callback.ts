@@ -6,4 +6,4 @@ import { Immutable } from './';
  *
  * Unmatched messages are ignored.
  */
-export abstract class Callback<T> extends Immutable<T> { }
+export abstract class Callback<T> extends Immutable<T> {}
