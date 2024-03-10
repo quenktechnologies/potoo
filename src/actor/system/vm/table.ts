@@ -3,7 +3,6 @@ import { empty, reduce, values } from '@quenk/noni/lib/data/record';
 
 import { Address, isChild } from '../../address';
 import { Instance } from '../..';
-import { Context } from './runtime/context';
 import { Thread } from './thread';
 import { Map } from './map';
 
@@ -14,14 +13,14 @@ import { Map } from './map';
 export interface ActorTableEntry {
 
     /**
-     * context for the actor.
+     * actor instance for the entry.
      */
-    context: Context,
+    actor: Instance,
 
     /**
-     * thread for actors that use threads.
+     * thread for the entry.
      */
-    thread: Maybe<Thread>
+    thread: Thread
 
 }
 
@@ -29,16 +28,18 @@ export interface ActorTableEntry {
  * ActorTable is a map for storing bookkeeping information about all actors
  * within the system.
  *
- * If an actor is not in this table then it is not part of the system!
+ * It is an abstraction for accessing actors, threads and their children within
+ * the system. If an actor is not in this table then it is not part of the 
+ * system!
  */
 export class ActorTable extends Map<ActorTableEntry> {
 
     /**
      * getThread provides the thread for an actor (if any).
      */
-    getThread(addr: Address) {
+    getThread(addr: Address) : Maybe<Thread> {
 
-        return this.get(addr).chain(ate => ate.thread);
+        return this.get(addr).map(ate => ate.thread);
 
     }
 
@@ -64,7 +65,7 @@ export class ActorTable extends Map<ActorTableEntry> {
 
             let result = items.reduce((prev, curr: ActorTableEntry) =>
                 <[ActorTableEntry[], ActorTableEntry[]]>(
-                    isChild(addr, curr.context.address) ?
+                    isChild(addr, curr.thread.context.address) ?
                         [prev[0], [...prev[1], curr]] :
                         [[...prev[0], curr], prev[1]]), init);
 
@@ -76,7 +77,7 @@ export class ActorTable extends Map<ActorTableEntry> {
 
                 unsortedItems = items.slice();
 
-                addr = items[0].context.address;
+                addr = items[0].thread.context.address;
 
                 maxRec = items.length;
 
@@ -90,7 +91,7 @@ export class ActorTable extends Map<ActorTableEntry> {
 
                 if (idx >= maxRec) break;
 
-                addr = unsortedItems[idx].context.address;
+                addr = unsortedItems[idx].thread.context.address;
 
             }
 
@@ -106,7 +107,7 @@ export class ActorTable extends Map<ActorTableEntry> {
     addressFromActor(actor: Instance): Maybe<Address> {
 
         return reduce(this.items, nothing(), (pre: Maybe<Address>, items, k) =>
-            items.context.actor === actor ? fromString(k) : pre);
+            items.actor === actor ? fromString(k) : pre);
 
     }
 
