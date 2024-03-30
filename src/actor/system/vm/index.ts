@@ -2,21 +2,11 @@ import * as template from '../../template';
 import * as errors from './runtime/error';
 import * as events from './event';
 
-import { Err } from '@quenk/noni/lib/control/error';
-import {
-    Future,
-    pure,
-    raise,
-    batch,
-    voidPure,
-    doFuture,
-    wrap
-} from '@quenk/noni/lib/control/monad/future';
-import { Maybe,  just } from '@quenk/noni/lib/data/maybe'
-import { isFunction } from '@quenk/noni/lib/data/type';
-import {
-    distribute
-} from '@quenk/noni/lib/data/array';
+import { Err, Except } from '@quenk/noni/lib/control/error';
+import { Future } from '@quenk/noni/lib/control/monad/future';
+import { Either } from '@quenk/noni/lib/data/either';
+import { isFunction, Type } from '@quenk/noni/lib/data/type';
+import { distribute, empty } from '@quenk/noni/lib/data/array';
 import {
     Record,
     merge,
@@ -24,40 +14,36 @@ import {
     mapTo,
     isRecord
 } from '@quenk/noni/lib/data/record';
-import { Type } from '@quenk/noni/lib/data/type';
 
 import {
     Address,
     isGroup,
     isRestricted,
     make,
-    getParent,
     ADDRESS_SYSTEM,
     isChild
 } from '../../address';
 import { Template } from '../../template';
-import { isRouter, isBuffered, FLAG_EXIT_AFTER_RUN } from '../../flags';
+import { isRouter } from '../../flags';
 import { Message, Envelope } from '../../message';
-import { Instance, Actor } from '../../';
+import { Actor } from '../../';
 import { System } from '../';
-import { SharedScheduler } from './thread/shared/scheduler';
 import { SharedThread } from './thread/shared';
-import { Thread, THREAD_STATE_IDLE, VMThread } from './thread';
+import { Thread, THREAD_STATE_IDLE } from './thread';
 import { Context, newContext } from './runtime/context';
-import { Data } from './runtime/stack/frame';
 import { Conf, defaults } from './conf';
 import { LogWritable, LogWriter } from './log';
-import { HeapLedger, DefaultHeapLedger } from './runtime/heap/ledger';
 import { ScriptFactory } from './scripts/factory';
-import { Foreign } from './type';
 import { EventSource, Publisher } from './event';
 import { GroupMap } from './groups';
 import { ActorTable, ActorTableEntry } from './table';
 import { RouterMap } from './routers';
+import { Scheduler } from './scheduler';
+import { RegistrySet } from './registry';
 
 const ID_RANDOM = `#?POTOORAND?#${Date.now()}`;
 
-export const MAX_WORK_LOAD = 25;
+export const MAX_WORKLOAD = 25;
 
 /**
  * Platform is the interface for a virtual machine.
@@ -66,74 +52,62 @@ export const MAX_WORK_LOAD = 25;
  * Some opcode handlers depend on this interface to do their work.
  */
 export interface Platform extends Actor {
-
-    /**
-     * heap storage with builtin ownership tracking for all threads.
-     */
-    heap: HeapLedger
-
     /**
      * log service for the VM.
      *
      * Used to access the internal logging API.
      */
-    log: LogWritable
+    log: LogWritable;
 
     /**
      * events service for the VM.
      *
      * Used to publish VM events to interested listeners.
      */
-    events: EventSource
+    events: EventSource;
 
     /**
      * actors holds all the actors within the system at any given point along
      * with needed bookkeeping information.
      */
-    actors: ActorTable
+    actors: ActorTable;
+
+    /**
+     * scheduler used to manage the execution of VM threads.
+     */
+    scheduler: Scheduler;
+
+    /**
+     * registry for VM objects.
+     */
+    registry: RegistrySet;
 
     /**
      * allocate resources for an actor using the template provided.
      */
-    allocate(parent: Thread, t: template.Template): Future<Address>;
+    allocate(parent: Thread, tmpl: template.Template): Except<Address>;
 
     /**
      * sendMessage to an actor in the system.
-     *
-     * The result is true if the actor was found or false
-     * if the actor is not in the system.
      */
-    sendMessage(to: Address, from: Address, msg: Message): boolean
+    sendMessage(from: Thread, to: Address, msg: Message): void;
 
     /**
      * spawn an top level actor using the system as its parent.
      */
-    spawn(tmpl: template.Spawnable): Future<Address>
-
-    /**
-     * identify an actor Instance producing its address if it is part of the 
-     * system.
-     */
-    identify(target: Instance): Maybe<Address>
+    spawn(tmpl: template.Spawnable): Future<Address>;
 
     /**
      * kill terminates the actor at the specified address.
      *
      * The actor must be a child of parent to succeed.
      */
-    kill(parent: Instance, target: Address): Future<void>
+    kill(src: Thread, target: Address): Future<void>;
 
     /**
      * raise an exception within the system
      */
-    raise(src: Instance, err: Err): void
-
-    /**
-     * exec a function by name with the provided arguments using the actor
-     * instance's thread.
-     */
-    exec(actor: Instance, funName: string, args?: Data[]): void
-
+    raise(src: Thread, err: Err): Future<void>;
 }
 
 /**
@@ -141,50 +115,45 @@ export interface Platform extends Actor {
  * functions as a message delivery system between target actors.
  *
  * Actors known to the VM are considered to be part of a system and may or may
- * not reside on the same process/worker/thread depending on the underlying 
+ * not reside on the same process/worker/thread depending on the underlying
  * platform and individual actor implementations.
  */
 export class PVM implements Platform {
-
-    constructor(public system: System, public conf: Conf = defaults()) { }
+    constructor(
+        public system: System,
+        public conf: Conf = defaults()
+    ) {}
 
     _actorIdCounter = -1;
 
-    _context = newContext(this._actorIdCounter++, this, '$', {
-
-        create: () => this,
-
-        trap: () => template.ACTION_RAISE
-
-    });
-
-    /**
-     * scheduler shared between vm threads.
-     */
-    scheduler = new SharedScheduler(this);
-
-    heap = new DefaultHeapLedger();
-
     log = new LogWriter(this.conf.long_sink, this.conf.log_level);
+
+    scheduler = new Scheduler();
+
+    registry = new RegistrySet();
 
     events = new Publisher(this.log);
 
-    actors: ActorTable = new ActorTable({
+    actors: ActorTable = new ActorTable(
+        new Map([
+            [
+                ADDRESS_SYSTEM,
+                {
+                    actor: this,
 
-        $: {
+                    thread: new SharedThread(
+                        this,
+                        ScriptFactory.getScript(),
+                        newContext(this._actorIdCounter++, '$', {
+                            create: () => this,
 
-            context: this._context,
-
-            thread: just(
-                new SharedThread(
-                    this,
-                    ScriptFactory.getScript(this),
-                    this.scheduler,
-                    this._context))
-
-        }
-
-    });
+                            trap: () => template.ACTION_RAISE
+                        })
+                    )
+                }
+            ]
+        ])
+    );
 
     /**
      * routers configured to handle any address that falls underneath them.
@@ -201,81 +170,65 @@ export class PVM implements Platform {
      * configuration object.
      */
     static create<S extends System>(s: S, conf: object = {}): PVM {
-
         return new PVM(s, <Conf>rmerge(<Record<Type>>defaults(), <any>conf));
-
     }
 
     init(c: Context): Context {
-
         return c;
-
     }
 
     accept(m: Message) {
-
         return this.conf.accept(m);
-
     }
 
-    start() { }
+    async start() {}
 
-    notify() { }
+    notify() {}
 
-    stop(): Future<void> {
-
-        return this.kill(this, ADDRESS_SYSTEM);
-
-    }
-
-    identify(inst: Instance): Maybe<Address> {
-
-        return this.actors.addressFromActor(inst);
-
-    }
+    async stop() {}
 
     spawn(tmpl: template.Spawnable): Future<Address> {
-
-      return this.allocate(this.actors.getThread('$').get(), normalize(tmpl));
-
+        return Future.do(async () => {
+            let eresult = this.allocate(
+                this.actors.getThread('$').get(),
+                normalize(tmpl)
+            );
+            return eresult.isLeft()
+                ? Future.raise(eresult.takeLeft())
+                : Future.of(eresult.takeRight());
+        });
     }
 
-       allocate(parent: Thread, tmpl: Template): Future<Address> {
+    allocate(parent: Thread, tmpl: Template): Except<Address> {
+        let mparentEntry = this.actors.get(parent.context.address);
 
-      return Future.do(async ()=> { 
+        if (mparentEntry.isNothing())
+            return Either.left(new errors.InvalidThreadErr(parent));
 
-        let mvalidParent = this.actors.getThread(parent.context.address);
+        let parentEntry = mparentEntry.get();
 
-        if(mvalidParent.isNothing()) return Future.raise(new errors.InvalidThreadErr(parent));
+        if (parent !== parentEntry.thread)
+            return Either.left(new errors.InvalidThreadErr(parent));
 
-        let validParent = mvalidParent.get();
+        let prefix = parentEntry.actor.constructor.name.toLowerCase();
 
-        if(validParent !== parent) return Future.raise(new errors.InvalidThreadErr(parent));
-
-        let prefix = parent.context.actor.constructor.name.toLowerCase();
-
-         let  id = tmpl.id ||  `actor::${this._actorIdCounter + 1}~${prefix}`;
+        let id = tmpl.id || `actor::${this._actorIdCounter + 1}~${prefix}`;
 
         if (isRestricted(<string>id))
-            return Future.raise(new errors.InvalidIdErr(id));
+            return Either.left(new errors.InvalidIdErr(id));
 
         let addr = make(parent.context.address, id);
 
         if (this.actors.has(addr))
-            return Future.raise(new errors.DuplicateAddressErr(addr));
+            return Either.left(new errors.DuplicateAddressErr(addr));
 
-        let context = newContext(this._actorIdCounter++, addr, tmpl)
+        let context = newContext(this._actorIdCounter++, addr, tmpl);
 
-        let thread = new SharedThread(
-                      this,
-                      ScriptFactory.getScript(actor),
-                      this.scheduler,
-                      context
-                  )
-  
+        let thread = new SharedThread(this, ScriptFactory.getScript(), context);
+
         let actor = tmpl.create(thread);
 
-        this.actors.set(addr, { thread, actor, context });
+        this.actors.set(addr, { thread, actor });
 
         //TODO: this.events.actor.onCreated.dispatch(addr)
         this.events.publish(addr, events.EVENT_ACTOR_CREATED);
@@ -288,318 +241,197 @@ export class PVM implements Platform {
             groups.forEach(group => this.groups.put(group, addr));
         }
 
-        await actor.start(thread);
+        thread.watch(() => actor.start());
 
-        return Future.of(addr);
-
-      })
+        return Either.right(addr);
     }
 
-    runActor(target: Address) {
+    sendMessage(from: Thread, to: Address, msg: Message) {
+        //TODO: this.events.actor.onSend.dispatch(from.context.address, to, msg);
+        this.events.publish(
+            from.context.address,
+            events.EVENT_SEND_START,
+            to,
+            from,
+            msg
+        );
 
-        if (!this.actors.has(target))
-            return raise(new errors.UnknownAddressErr(target));
+        let mRouter = this.routers
+            .getFor(to)
+            .chain(addr => this.actors.get(addr));
 
-        let ate = this.actors.get(target).get();
-
-        let ft = ate.context.actor.start(target);
-
-        if (ft) {
-
-            // Assumes the actor returned a Future.
-
-            if (ate.thread.isNothing()) {
-
-                ft.fork(e => this.raise(ate.context.actor, e));
-
-            } else {
-
-                let thread = ate.thread.get();
-
-                if (ft) thread.wait(ft);
-
-                // Actors with this flag need to be brought down immediately.
-                // TODO: Move this to the actors own run method after #47
-                if (ate.context.flags & FLAG_EXIT_AFTER_RUN)
-                    thread.wait(this.kill(ate.context.actor, target));
-
-            }
-
-        }
-
-        this.events.publish(ate.context.address, events.EVENT_ACTOR_STARTED);
-
-    }
-
-    sendMessage(to: Address, from: Address, msg: Message): boolean {
-
-        this.events.publish(from, events.EVENT_SEND_START, to, from, msg);
-
-        let mRouter = this.routers.getFor(to)
-            .chain(addr => this.actors.get(addr))
-            .map(ate => ate.context);
-
-        let mctx = mRouter.isJust() ?
-            mRouter :
-            this.actors.get(to).map(ate => ate.context)
+        let mentry = mRouter.isJust() ? mRouter : this.actors.get(to);
 
         //routers receive enveloped messages.
-        let actualMessage = mRouter.isJust() ?
-            new Envelope(to, from, msg) : msg;
+        let actualMessage = mRouter.isJust()
+            ? new Envelope(from.context.address, to, msg)
+            : msg;
 
-        if (mctx.isJust()) {
-
-            let ctx = mctx.get();
-
-            if (isBuffered(ctx.flags)) {
-
-                ctx.mailbox.push(actualMessage);
-
-                ctx.actor.notify();
-
-            } else {
-
-                // TODO: Support async.
-                ctx.actor.accept(actualMessage);
-
-            }
-
-            this.events.publish(from, events.EVENT_SEND_OK, to, msg);
-
-            return true;
-
-        } else {
-
-            this.events.publish(from, events.EVENT_SEND_FAILED, to, msg);
-
-            return false;
-
+        if (mentry.isNothing()) {
+            //TODO: this.events.actor.onSendFailed.dispatch(from.context.address, to, msg);
+            this.events.publish(
+                from.context.address,
+                events.EVENT_SEND_FAILED,
+                to,
+                msg
+            );
         }
 
+        let { thread } = mentry.get();
+
+        thread.context.mailbox.push(actualMessage);
+        thread.notify(actualMessage);
+
+        //TODO: this.events.actor.onSendOk.dispatch(from.context.address, to, msg);
+        this.events.publish(
+            from.context.address,
+            events.EVENT_SEND_OK,
+            to,
+            msg
+        );
     }
 
-    raise(src: Instance, err: Err): void {
+    raise(src: Thread, err: Err): Future<void> {
+        return Future.do(async () => {
+            let currentThread = src;
 
-        let maddr = this.identify(src);
+            loop: while (true) {
+                let mparent = this.actors
+                    .getParent(currentThread.context.address)
+                    .map(entry => entry.thread);
 
-        // For now, ignore requests from unknown instances.
-        if (maddr.isNothing()) return;
+                let trap = currentThread.context.template.trap || defaultTrap;
 
-        let addr = maddr.get();
+                switch (trap(err)) {
+                    case template.ACTION_IGNORE:
+                        // TODO: do this via a method.
+                        currentThread.state = THREAD_STATE_IDLE;
+                        break loop;
 
-        //TODO: pause the thread if one is used.
-        let next = addr;
+                    case template.ACTION_RESTART:
+                        await this.kill(
+                            currentThread,
+                            currentThread.context.address
+                        );
+                        if (mparent.isNothing()) return;
+                        this.allocate(
+                            mparent.get(),
+                            currentThread.context.template
+                        );
+                        break loop;
 
-        loop:
-        while (true) {
+                    case template.ACTION_STOP:
+                        await this.kill(
+                            currentThread,
+                            currentThread.context.address
+                        );
+                        break loop;
 
-            let mate = this.actors.get(next);
+                    default:
+                        if (currentThread.context.address === ADDRESS_SYSTEM) {
+                            let action = this.conf.trap(err);
 
-            //TODO: This risks swallowing errors.
-            if (mate.isNothing()) return;
+                            if (action === template.ACTION_IGNORE) break loop;
 
-            let ate = mate.get();
+                            if (err instanceof Error) throw err;
 
-            let trap = ate.context.template.trap ||
-                (() => template.ACTION_RAISE);
+                            throw new Error(err.message);
+                        }
 
-            switch (trap(err)) {
+                        if (mparent.isNothing()) return; // parent is dead.
 
-                case template.ACTION_IGNORE:
-                    // TODO: do this via a method.
-                    ate.thread.map(thr => {
-                        thr.state = THREAD_STATE_IDLE
-                    });
-                    break loop;
-
-                case template.ACTION_RESTART:
-
-                    let mate = this.actors.get(next);
-
-                    if (mate.isJust())
-                        this
-                            .kill(mate.get().context.actor, next)
-                            .chain(() => {
-
-                                let eRes = this.allocate(getParent(next),
-                                    ate.context.template);
-
-                                if (eRes.isLeft())
-                                    return raise(new Error(
-                                        eRes.takeLeft().message));
-
-                                this.runActor(eRes.takeRight());
-
-                                return voidPure;
-
-                            }).fork(e => this.raise(this, e));
-                    break loop;
-
-                case template.ACTION_STOP:
-
-                    let smate = this.actors.get(next);
-
-                    if (smate.isJust())
-                        this.kill(smate.get().context.actor, next)
-                            .fork(e => this.raise(this, e));
-                    break loop;
-
-                default:
-                    if (next === ADDRESS_SYSTEM) {
-
-                        let action = this.conf.trap(err);
-
-                        if (action === template.ACTION_IGNORE) break loop;
-
-                        if (err instanceof Error) throw err;
-
-                        throw new Error(err.message);
-
-                    } else {
-
-                        next = getParent(next);
-
-                    }
-
-                    break;
-
+                        currentThread = mparent.get();
+                        break loop;
+                }
             }
-
-        }
-
-    }
-
-    kill(parent: Instance, target: Address): Future<void> {
-
-        let that = this;
-
-        return doFuture<void>(function*() {
-
-            let mparentAddr = that.identify(parent);
-
-            // For now, ignore unknown kill requests.
-            if (mparentAddr.isNothing()) return pure(undefined);
-
-            let parentAddr = mparentAddr.get();
-
-            let targets = isGroup(target) ?
-                that.groups.get(target).orJust(() => []).get() : [target];
-
-            return runBatch(targets.map((next: Address) =>
-                doFuture<void>(function*() {
-
-                    if ((!isChild(parentAddr, target)) &&
-                        (target !== parentAddr)) {
-
-                        let err = new Error(
-                            `IllegalStopErr: Actor "${parentAddr}" ` +
-                            `cannot kill non-child "${next}"!`);
-
-                        that.raise(parent, err);
-
-                        return raise<void>(err);
-
-                    }
-
-                    let mentry = that.actors.get(next);
-
-                    if (mentry.isNothing()) return pure(<void>undefined);
-
-                    let killChild = (ate: ActorTableEntry) =>
-                        doFuture(function*() {
-
-                            if (ate.thread.isJust())
-                                // The thread will clean up.
-                                yield ate.thread.get().die();
-                            else
-                                yield wrap(ate.context.actor.stop());
-
-                            let { address } = ate.context;
-
-                            that.actors.remove(address);
-
-                            that.events.publish(address,
-                                events.EVENT_ACTOR_STOPPED);
-
-                            return voidPure;
-
-                        });
-
-                    yield runBatch(that.actors.getChildren(next)
-                        .reverse().map(killChild));
-
-                    if (next !== ADDRESS_SYSTEM)
-                        yield killChild(mentry.get());
-
-                    return voidPure;
-
-                })));
-
         });
+    }
 
+    kill(src: Thread, target: Address): Future<void> {
+        return Future.do(async () => {
+            let rootAddresses = isGroup(target)
+                ? this.groups.get(target)
+                : [target];
+
+            let roots = [];
+            for (let addr of rootAddresses) {
+                let mentry = this.actors.get(addr);
+                if (!isChild(src.context.address, addr)) {
+                    return Future.raise(
+                        new errors.IllegalStopErr(src.context.address, addr)
+                    );
+                }
+                if (mentry.isJust()) {
+                    roots.push(mentry.get());
+                }
+            }
+
+            let targets = [];
+
+            while (!empty(roots)) {
+                let next = <ActorTableEntry>roots.pop();
+                roots = [
+                    ...roots,
+                    this.actors.getChildren(next.thread.context.address)
+                ];
+                targets.push(next);
+            }
+
+            await Future.batch(
+                distribute(
+                    targets.map(target => {
+                        let { thread, actor } = target;
+
+                        //XXX: This is done now to prevent the thread from
+                        // executing any more jobs.
+                        thread.die();
+
+                        return Future.do(async () => {
+                            // TODO: Consider catching any error here and
+                            // escalating to the iniator of the kill.
+                            await actor.stop();
+
+                            this.actors.remove(target.thread.context.address);
+
+                            // TODO: dispatch event
+                            this.events.publish(
+                                target.thread.context.address,
+                                events.EVENT_ACTOR_STOPPED
+                            );
+                        });
+                    }),
+                    MAX_WORKLOAD
+                )
+            );
+        });
     }
 
     /**
-     * tell allows the vm to send a message to actors within the system.
+     * tell allows the VM to send a message to actors within the system.
      *
      * This delivers the message immediately to the actor and should not be used
      * for regular communication. Instead use it to send messages from external
      * operations such as event handlers etc.
      */
-    tell<M>(ref: Address, msg: M) {
-
-        this.sendMessage(ref, ADDRESS_SYSTEM, msg);
-
+    tell<M>(to: Address, msg: M) {
+        this.sendMessage(this.actors.items.get('$'), to, msg);
     }
-
-    exec(actor: Instance, funName: string, args: Foreign[] = []) {
-
-        let thread: VMThread;
-
-        if (actor === this) {
-
-            thread = <VMThread>this.actors.getThread('$').get();
-
-        } else {
-
-            let mAddress = this.identify(actor);
-
-            if (mAddress.isNothing())
-                return this.raise(this, new errors.UnknownInstanceErr(actor));
-
-            thread = <VMThread>this.actors.getThread(mAddress.get()).get();
-
-        }
-
-        thread.exec(funName, args);
-
-    }
-
 }
-
-const runBatch = (work: Future<void>[]): Future<void> =>
-    doFuture(function*() {
-
-        yield batch(distribute(work, MAX_WORK_LOAD))
-
-        return voidPure;
-
-    });
 
 const normalize = (spawnable: template.Spawnable) => {
+    let tmpl = <Partial<Template>>(
+        (isFunction(spawnable) ? { create: spawnable } : spawnable)
+    );
 
-    let tmpl = <Partial<Template>>(isFunction(spawnable) ?
-        { create: spawnable } :
-        spawnable);
-
-    tmpl.id = tmpl.id ? tmpl.id : ID_RANDOM
+    tmpl.id = tmpl.id ? tmpl.id : ID_RANDOM;
 
     return <Template>merge(tmpl, {
+        children: isRecord(tmpl.children)
+            ? mapTo(tmpl.children, (c, k) => merge(c, { id: k }))
+            : tmpl.children
+              ? tmpl.children
+              : []
+    });
+};
 
-        children: isRecord(tmpl.children) ?
-            mapTo(tmpl.children, (c, k) => merge(c, { id: k })) :
-            tmpl.children ? tmpl.children : []
-
-    })
-
-}
+const defaultTrap = () => template.ACTION_RAISE;

@@ -2,7 +2,6 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 
 import { Context } from './system/vm/runtime/context';
 import { Message } from './message';
-import { Address } from './address';
 
 /**
  * Eff is used in various places to represent the potentially sync or async
@@ -13,11 +12,10 @@ export type Eff = void | Future<void>;
 /**
  * Instance of an actor that resides within the system.
  *
- * The interface is implemented by actors to react to the lifecycle the 
+ * The interface is implemented by actors to react to the lifecycle the
  * system takes them through.
  */
 export interface Instance {
-
     /**
      * accept a message directly.
      *
@@ -28,11 +26,10 @@ export interface Instance {
     /**
      * start the Instance.
      *
-     * If a Future is returned, the actor will block its thread until it is 
-     * complete.
-     * The address provided is the address of the newly spawned instance.
+     * A Promise is returned here to make the method an async function.
+     * Actual execution will be handled via Futures.
      */
-    start(addr: Address): Eff;
+    start(): Promise<void>;
 
     /**
      * notify is called by the system to indicate new messages
@@ -42,19 +39,20 @@ export interface Instance {
 
     /**
      * stop the Instance.
+     *
+     * A Promise is returned here to make the method an async function.
+     * Actual execution will be handled via Futures.
      */
-    stop(): Eff;
-
+    stop(): Promise<void>;
 }
 
 /**
  * Actor common interface.
  *
- * The system expects all actors to satisfy this interface so they 
+ * The system expects all actors to satisfy this interface so they
  * can be managed properly.
  */
 export interface Actor extends Instance {
-
     /**
      * init the Actor.
      *
@@ -62,5 +60,4 @@ export interface Actor extends Instance {
      * before it is added to the system.
      */
     init(c: Context): Context;
-
 }

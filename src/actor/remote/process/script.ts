@@ -1,3 +1,3 @@
-import {PPVM} from './vm';
+import { PPVM } from './vm';
 
 PPVM.main();

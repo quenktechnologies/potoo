@@ -9,7 +9,7 @@ import { Address, AddressMap } from '../address';
 import { Message } from '../message';
 import { Templates, Spawnable, fromSpawnable } from '../template';
 import { FLAG_VM_THREAD } from '../flags';
-import { Actor, Eff } from '../';
+import { Actor } from '../';
 import { Api } from './api';
 
 /**
@@ -44,7 +44,7 @@ export abstract class AbstractResident implements Resident {
 
     spawn(target: Spawnable): Future<Address> {
         return this.runtime.spawn(fromSpawnable(target));
-     }
+    }
 
     spawnGroup(group: string | string[], tmpls: Templates): Future<AddressMap> {
         return Future.do(async () => {
@@ -64,7 +64,7 @@ export abstract class AbstractResident implements Resident {
     }
 
     tell<M>(addr: Address, msg: M): Future<void> {
-      return this.runtime.send(addr, msg);
+        return this.runtime.tell(addr, msg);
     }
 
     raise(e: Err) {
@@ -83,15 +83,13 @@ export abstract class AbstractResident implements Resident {
         this.kill(this.self());
     }
 
-    start(addr: Address): Eff {
-        this.self = () => addr;
-
+    async start() {
         return this.run();
     }
 
     run(): void {}
 
-    stop(): void {}
+    async stop() {}
 
     wait(_ft: Future<void>) {
         // TODO: Implement this.

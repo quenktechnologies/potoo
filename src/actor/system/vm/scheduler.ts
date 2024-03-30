@@ -1,24 +1,54 @@
 import { remove } from '@quenk/noni/lib/data/array';
 
-import { SharedThread } from './thread/shared';
-import { ThreadState } from './thread';
-import { Job } from './job';
-import { Callback } from '@quenk/noni/lib/control/monad/future';
+import { FunInfo } from './script/info';
+import { Thread, ThreadState } from './thread';
+import { Data } from './frame';
 
 /**
- * Task is the type the scheduler knows how to execute.
+ * Job type represents an intial unit of work the Scheduler co-ordinates for a
+ * thread.
  */
-export type Task 
-  = Job
-  | Callback<void>
-  ;
+export type Job = VMJob | JSJob;
+
+/**
+ * JobType distinguishes between the VM and JS jobs.
+ */
+export enum JobType {
+    VM = 'vm',
+    JS = 'js'
+}
+
+/**
+ * VMJob is a job that executes VM code.
+ */
+export class VMJob {
+    type = JobType.VM;
+    constructor(
+        public thread: Thread,
+        public fun: FunInfo,
+        public args: Data[] = [],
+        public onError: (err: Error) => void
+    ) {}
+}
+
+/**
+ * JSJob is a job that executes JavaScript code directly.
+ */
+export class JSJob {
+    type = JobType.JS;
+    constructor(
+        public thread: Thread,
+        public fun: () => void,
+        public onError: (err: Error) => void
+    ) {}
+}
 
 /**
  * Scheduler provides a mechanism for cooperative execution between VM threads.
  *
- * The main abstraction here is the Task which has two components:
- * 1. Jobs which are used to kick start code execution.
- * 2. Callbacks which are used to schedule execution of JS code.
+ * The main abstraction here is the Job which has two components:
+ * 1. VMJobs which are used to kick start code execution.
+ * 2. JSJobs which are used to schedule execution of JS code.
  *
  * In prior versions, VM threads executed code at will which made it possible
  * for actor state to be mutated  while still depended on. This created subtle,
@@ -39,18 +69,27 @@ export type Task
  * VM thread code are allowed to execute.
  */
 export class Scheduler {
-    constructor(public queue: Task[] = []) {}
+    constructor(public queue: Job[] = []) {}
 
     _running = false;
 
     /**
-     * post enqueues a Job for execution by the Scheduler.
+     * postJob enqueues a Job for execution by the Scheduler.
      *
      * If no other Jobs are being executed, the Job will be executed immediately
      * provided the Thread is able to do so.
      */
-    post(task: Task) {
-        this.queue.push(task);
+    postJob(job: Job) {
+        this.queue.push(job);
+        this.run();
+    }
+
+    /**
+     * preemptJob enqueues a Job at the head of the queue giving it priority over
+     * any existing Jobs for a thread.
+     */
+    preemptJob(job: Job) {
+        this.queue.unshift(job);
         this.run();
     }
 
@@ -60,16 +99,12 @@ export class Scheduler {
      *
      * Any existing jobs for the thread will throw "ERR_THREAD_ABORTED".
      */
-    dequeue(thread: SharedThread) {
-        let queue = [];
-
-        for (let job of this.queue) {
+    dequeue(thread: Thread) {
+        this.queue = this.queue.filter(job => {
             if (job.thread === thread)
-                job.handler(new Error('ERR_THREAD_ABORTED'));
-            else queue.push(job);
-        }
-
-        this.queue = queue;
+                job.onError(new Error('ERR_THREAD_ABORTED'));
+            return false;
+        });
     }
 
     /**
@@ -83,25 +118,26 @@ export class Scheduler {
 
         this._running = true;
 
-        let task;
+        let job;
         while (
-            (task = this.queue.find(
-                ({ thread }) => thread.state === ThreadState.READY
+            (job = this.queue.find(
+                ({ thread }) => thread.state === ThreadState.IDLE
             ))
         ) {
-            let { thread } = task;
+            let { thread } = job;
 
-            thread.resume(task);
+            thread.resume(job);
 
             // If the thread is waiting on async work to complete then do not
             // remove the Job.
-            if (thread.state !== ThreadState.WAITING) {
-                this.queue = remove(this.queue, task);
+            if (thread.state !== ThreadState.ASYNC_WAIT) {
+                this.queue = remove(this.queue, job);
             }
 
-            if (thread.state === ThreadState.ERROR)
-                task.handler(new Error('VMError'));
-            else task.handler(null, thread.deref(thread.returnPointer));
+            if (thread.state === ThreadState.ERROR) {
+                // TODO: better error
+                job.onError(new Error('VMError'));
+            }
         }
 
         this._running = false;

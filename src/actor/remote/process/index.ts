@@ -9,18 +9,17 @@ import { empty, tail } from '@quenk/noni/lib/data/array';
 import { noop } from '@quenk/noni/lib/data/function';
 
 import { Context } from '../../system/vm/runtime/context';
-import { EVENT_MESSAGE_DROPPED, EVENT_SEND_FAILED } from '../../system/vm/event';
+import { EVENT_MESSAGE_DROPPED } from '../../system/vm/event';
 import { LogWriter, LOG_LEVEL_ERROR } from '../../system/vm/log';
 import { CaseFunction } from '../../resident/case/function';
 import { Case } from '../../resident/case';
-import { PVM } from '../../system/vm';
-import { System } from '../../system';
+import { Runtime } from '../../system/vm/runtime';
 import { Envelope } from '../../mailbox';
 import { Message } from '../../message';
 import { Address, ADDRESS_DISCARD, getId } from '../../address';
 import { FLAG_IMMUTABLE, FLAG_ROUTER } from '../../flags';
 import { Actor } from '../../';
-import { Drop, Raise, RemoteError, Send, shapes } from '..';
+import { Raise, RemoteError, Send, shapes } from '..';
 
 export const SCRIPT_PATH = `${__dirname}/../../../actor/remote/process/script.js`;
 
@@ -35,23 +34,21 @@ export type Path = string;
  * This is declared here to limit it to the used methods.
  */
 export interface Handle {
-
     /**
      * send a message to the process.
      */
-    send(msg: Type): void
+    send(msg: Type): void;
 
     /**
      * kill the process.
      */
-    kill(): void
-
+    kill(): void;
 }
 
 /**
  * Process actor for spawning remote actors in a Node.js child process.
  *
- * The child process is treated as a single actor in the system and can 
+ * The child process is treated as a single actor in the system and can
  * communicate with the main process's VM via the relevant functions exported by
  * this module.
  *
@@ -63,12 +60,14 @@ export interface Handle {
  *                          This will be used as the value for self().
  */
 export class Process implements Actor {
-
     /**
-     * @param system - The system the actor belongs to.
+     * @param runtime - The runtime for the actor.
      * @param script - The script that will be executed in the child process.
      */
-    constructor(public system: System, public script: Path) { }
+    constructor(
+        public runtime: Runtime,
+        public script: Path
+    ) {}
 
     /**
      * handle is the child process spawned for this actor.
@@ -86,122 +85,97 @@ export class Process implements Actor {
      *                process to other actors in the system.
      * 3. "exit"    - will signal to the VM to kill this actor.
      */
-    spawnChildProcess(self: Address, opts: object): ChildProcess {
-
+    spawnChildProcess(opts: object): ChildProcess {
         let handle = fork(resolve(this.script), [], opts);
 
-        handle.on('error', (e: Error) =>
-            this.system.getPlatform().raise(this, e));
+        handle.on('error', (err: Error) => this.runtime.raise(err));
 
         handle.on('message', (m: Message) =>
             match(m)
                 .caseOf(shapes.raise, ({ message, stack }: Raise) => {
-
                     let err = new Error(message);
 
                     err.stack = stack;
 
-                    this.system.getPlatform().raise(this, err);
-
+                    this.runtime.raise(err);
                 })
 
                 .caseOf(shapes.send, (m: Envelope) => {
-
-                    let vm = (<PVM>this.system.getPlatform());
-
-                    vm.sendMessage(m.to, m.from, m.message)
-
+                    this.runtime.watch(() =>
+                        this.runtime.tell(m.to, m.message)
+                    );
                 })
 
-                .caseOf(shapes.drop, (m: Drop) =>
-                    this
-                        .system
-                        .getPlatform()
-                        .events
-                        .publish(m.from, EVENT_SEND_FAILED, m.to, m.message))
-                .orElse((m: any) => { console.error("SPC", m); })
-                .end());
+                .caseOf(shapes.drop, () => {
+                    //TODO: Publish drop event.
+                })
+                .end()
+        );
 
         handle.on('exit', () => {
-
             this.handle = nothing();
-
-            this.system.getPlatform().kill(this, self);
-
+            this.runtime.exit();
         });
 
         return handle;
-
     }
 
     init(c: Context): Context {
-
         c.flags = c.flags | FLAG_IMMUTABLE | FLAG_ROUTER;
 
         return c;
-
     }
 
     accept(e: Envelope): Process {
-
-        if (this.handle.isJust())
-            this.handle.get().send(e);
+        if (this.handle.isJust()) this.handle.get().send(e);
 
         return this;
-
     }
 
-    notify() { }
+    notify() {}
 
-    stop() {
-
+    async stop() {
         if (this.handle.isJust()) this.handle.get().kill();
-
     }
 
-    start(addr: Address) {
+    async start() {
+        let addr = this.runtime.self;
+        this.handle = just(
+            this.spawnChildProcess({
+                env: {
+                    POTOO_ACTOR_ID: getId(addr),
 
-        this.handle = just(this.spawnChildProcess(addr, {
-
-            env: {
-
-                POTOO_ACTOR_ID: getId(addr),
-
-                POTOO_ACTOR_ADDRESS: addr
-
-            }
-
-        }));
-
+                    POTOO_ACTOR_ADDRESS: addr
+                }
+            })
+        );
     }
-
 }
 
 /**
  * VMProcess spawns a child VM in a new Node.js process.
  *
- * This is different to the [[Process]] actor because it allows the child 
+ * This is different to the [[Process]] actor because it allows the child
  * process to maintain its own tree of actors, routing messaging between
  * it and the main process's VM.
  *
  * The sub-VM is created and setup via a script file local to this module.
  *
  * The child process will have access to the following environment variables:
- * 
- * 1. POTOO_ACTOR_ID -      The id of the VMProcess actor's template. This 
- *                          should be used as the id for the actor first actor 
+ *
+ * 1. POTOO_ACTOR_ID -      The id of the VMProcess actor's template. This
+ *                          should be used as the id for the actor first actor
  *                          spawned.
  *
- * 2. POTOO_ACTOR_ADDRESS   The full address of the VMProcess in the parent VM. 
+ * 2. POTOO_ACTOR_ADDRESS   The full address of the VMProcess in the parent VM.
  * 3. POTOO_ACTOR_MODULE    The path to a node module whose default export is a
  *                          function receiving a vm instance that produces a
  *                          template or list of templates to spawn.
  * 4. POTOO_PVM_CONF        A JSON.stringify() version of the main VM's conf.
  */
 export class VMProcess extends Process {
-
     /**
-     * @param system     - The parent system.
+     * @param runtime    - The actor runtime.
      * @param module     - A path to a module that exports a system() function
      *                     that provides the System instance and a property
      *                     "spawnable" that is a Spawnable that will be spawned.
@@ -210,40 +184,37 @@ export class VMProcess extends Process {
      *                     be overridden for a custom implementation.
      */
     constructor(
-        public system: System,
+        public runtime: Runtime,
         public module: Path,
-        public script = SCRIPT_PATH) { super(system, script); }
+        public script = SCRIPT_PATH
+    ) {
+        super(runtime, script);
+    }
 
     init(c: Context): Context {
-
         c.flags = c.flags | FLAG_IMMUTABLE | FLAG_ROUTER;
 
         return c;
-
     }
 
-    start(addr: Address) {
+    async start() {
+        let addr = this.runtime.self;
+        this.handle = just(
+            this.spawnChildProcess({
+                env: {
+                    POTOO_ACTOR_ID: getId(addr),
 
-        this.handle = just(this.spawnChildProcess(addr, {
+                    POTOO_ACTOR_ADDRESS: addr,
 
-            env: {
+                    POTOO_ACTOR_MODULE: this.module,
 
-                POTOO_ACTOR_ID: getId(addr),
+                    POTOO_PVM_CONF: process.env.POTOO_PVM_CONF,
 
-                POTOO_ACTOR_ADDRESS: addr,
-
-                POTOO_ACTOR_MODULE: this.module,
-
-                POTOO_PVM_CONF: process.env.POTOO_PVM_CONF,
-
-                POTOO_LOG_LEVEL: String(this.system.getPlatform().log.level)
-
-            }
-
-        }));
-
+                    POTOO_LOG_LEVEL: String(this.runtime.vm.log.level)
+                }
+            })
+        );
     }
-
 }
 
 const messages: Message[] = [];
@@ -256,10 +227,10 @@ const messages: Message[] = [];
  * be read later via receive() or select().
  */
 export const init = () => {
-
     if (!process.send)
-        throw new Error('process: direct API is meant to ' +
-            'be used in a child process!');
+        throw new Error(
+            'process: direct API is meant to ' + 'be used in a child process!'
+        );
 
     process.on('message', (m: Message) => {
         if (m && m.to && m.message) {
@@ -269,9 +240,9 @@ export const init = () => {
     });
 
     process.on('uncaughtExceptionMonitor', err =>
-        (<Function>process.send)(new RemoteError(err)));
-
-}
+        (<Function>process.send)(new RemoteError(err))
+    );
+};
 
 /**
  * self provides the address for this child actor.
@@ -279,7 +250,7 @@ export const init = () => {
 export const self = () => process.env.POTOO_ACTOR_ADDRESS || ADDRESS_DISCARD;
 
 /**
- * tell sends a message to another actor in the system using the VM in the 
+ * tell sends a message to another actor in the system using the VM in the
  * parent process.
  */
 export const tell = <M>(to: Address, msg: M) =>
@@ -288,24 +259,23 @@ export const tell = <M>(to: Address, msg: M) =>
 const receivers: Function[] = [];
 
 const doReceive = () => {
-
-    if (!empty(receivers))
-        (<Function>receivers.pop())();
-
-}
+    if (!empty(receivers)) (<Function>receivers.pop())();
+};
 
 /**
  * receive the next message in the message queue.
  */
-export const receive = <M>(): Future<M> => run(()=>new Promise(resolve => {
+export const receive = <M>(): Future<M> =>
+    run(
+        () =>
+            new Promise(resolve => {
+                receivers.push(() => resolve(messages.pop()));
 
-    receivers.push(() => resolve(messages.pop()));
+                if (!empty(messages)) doReceive();
 
-    if (!empty(messages)) doReceive();
-
-    return noop;
-
-}));
+                return noop;
+            })
+    );
 
 const writer = new LogWriter(
     console,
@@ -317,24 +287,27 @@ const writer = new LogWriter(
  * classes.
  */
 export const select = <M>(cases: Case<M>[]): Future<void> =>
-    run(()=> new Promise((onSuccess, onError) => {
+    run(
+        () =>
+            new Promise((onSuccess, onError) => {
+                let f = new CaseFunction(cases);
 
-        let f = new CaseFunction(cases);
+                receivers.push(() => {
+                    if (f.test(tail(messages)))
+                        wrap(f.apply(messages.pop())).fork(onError, onSuccess);
+                    else
+                        writer.event(
+                            self(),
+                            EVENT_MESSAGE_DROPPED,
+                            messages.pop()
+                        );
+                });
 
-        receivers.push(() => {
+                if (!empty(messages)) doReceive();
 
-            if (f.test(tail(messages)))
-                wrap(f.apply(messages.pop())).fork(onError, onSuccess);
-            else
-                writer.event(self(), EVENT_MESSAGE_DROPPED, messages.pop());
-
-        });
-
-        if (!empty(messages)) doReceive();
-
-        return noop;
-
-    }));
+                return noop;
+            })
+    );
 
 /**
  * exist the actor.

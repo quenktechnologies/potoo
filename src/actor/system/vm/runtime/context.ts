@@ -4,7 +4,6 @@ import { Message } from '../../../message';
 import { Flags } from '../../../flags';
 import { Address } from '../../../address';
 import { Template } from '../../../template';
-import { Instance } from '../../../';
 import { FunInfo } from '../script/info';
 
 /**
@@ -17,78 +16,67 @@ export type SystemId = number;
  * or raised by a child.
  */
 export interface ErrorHandler {
-
     /**
-     * raise an error within an actor's context triggering 
+     * raise an error within an actor's context triggering
      * the error handling machinery.
      */
     raise(e: Err): void;
-
 }
 
 /**
  * Context stores all the information a system needs about a spawned actor.
  */
 export interface Context {
-
     /**
      * aid is the identifier the system assigns to the actor.
      */
-    aid: SystemId,
+    aid: SystemId;
 
     /**
      * mailbox for the actor.
      *
      * Some actors may not use mailboxes and instead accept messages directly.
      */
-    mailbox: Message[],
-
-    /**
-     * actor instance.
-     */
-    actor: Instance,
+    mailbox: Message[];
 
     /**
      * receivers stack for the actor.
      */
-    receivers: FunInfo[],
+    receivers: FunInfo[];
 
     /**
      * flags currently enabled for the actor.
      */
-    flags: Flags,
+    flags: Flags;
 
     /**
      * address assigned to the actor.
      */
-    address: Address,
+    address: Address;
 
     /**
      * template used to create new instances of the actor.
      */
-    template: Template,
-
+    template: Template;
 }
 
 /**
- * newContext 
+ * newContext
  */
-export const newContext =
-    (aid: SystemId, actor: Instance, address: Address, template: Template)
-        : Context => ({
+export const newContext = (
+    aid: SystemId,
+    address: Address,
+    template: Template
+): Context => ({
+    aid,
 
-            aid,
+    mailbox: [],
 
-            mailbox: [],
+    receivers: [],
 
-            actor,
+    flags: 0,
 
-            receivers: [],
+    address,
 
-            flags: 0,
-
-            address,
-
-            template: template
-
-        });
+    template: template
+});

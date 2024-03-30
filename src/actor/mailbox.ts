@@ -11,10 +11,9 @@ export type Mailbox = Envelope[];
  * Used to internally keep track of message sources and destinations.
  */
 export class Envelope {
-
     constructor(
         public to: string,
         public from: string,
-        public message: Message) { }
-
+        public message: Message
+    ) {}
 }

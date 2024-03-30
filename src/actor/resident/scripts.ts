@@ -12,7 +12,6 @@ import { Message } from '../message';
 import { Callback } from './immutable/callback';
 import { Immutable } from './immutable';
 import { Mutable } from './mutable';
-import { Address } from '../address';
 
 // XXX: This needs to be updated when new functions are added to
 // residentCommonFunctions.
@@ -28,12 +27,7 @@ const residentCommonFunctions = [
         op.LDN | receiveIdx, // Load the 'receive' function on to the stack.
         op.CALL | 1, // Apply the handler for messages once.
         op.NOP // End
-    ]),
-
-    new NewForeignFunInfo('kill', 1, (thr: Thread, addr: Address) => {
-        thr.wait(thr.vm.kill(thr.context.actor, addr));
-        return 0;
-    })
+    ])
 ];
 
 /**
@@ -113,7 +107,7 @@ export class MutableActorScript extends BaseScript {
 
                 let future = receiver.apply(msg);
 
-                if (future) thr.wait(future);
+                if (future) thr.watch(future);
 
                 /*
                 vm.events.publish(
@@ -160,7 +154,7 @@ const immutableExec = <T>(actor: Immutable<T>, thr: Thread, msg: Message) => {
     if (actor.$receiver.test(msg)) {
         let future = actor.$receiver.apply(msg);
 
-        if (future) thr.wait(future);
+        if (future) thr.watch(future);
 
         //vm.events.publish(thr.context.address, events.EVENT_MESSAGE_READ, msg);
 

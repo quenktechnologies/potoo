@@ -1,8 +1,8 @@
 import { Err } from '@quenk/noni/lib/control/error';
-import { Type } from '@quenk/noni/lib/data/type';
+import { isFunction, Type } from '@quenk/noni/lib/data/type';
 
-import { System } from './system';
 import { Actor } from './';
+import { Runtime } from './system/vm/runtime';
 
 export const ACTION_RAISE = -0x1;
 export const ACTION_IGNORE = 0x0;
@@ -25,7 +25,7 @@ export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 /**
  * Cons is applied to produce an instance of an actor.
  */
-export type Cons = (s: System, t: Template, ...args: Type[]) => Actor;
+export type Cons = (runtime: Runtime) => Actor;
 
 /**
  * DelayMilliseconds type.
@@ -47,9 +47,7 @@ export type Spawnable = Template | Cons;
  * Templates
  */
 export interface Templates {
-
-    [key: string]: Spawnable
-
+    [key: string]: Spawnable;
 }
 
 /**
@@ -62,17 +60,16 @@ export interface Templates {
  * a new actor instance.
  */
 export interface Template {
-
     /**
      * id of the actor used when constructing its address.
      * If none is supplied, the system will generate one.
      */
     id?: string;
 
-    /** 
+    /**
      * group assignment for the actor.
      */
-    group?: string | string[],
+    group?: string | string[];
 
     /**
      * create function.
@@ -85,7 +82,7 @@ export interface Template {
      * This method of passing arguments is not type safe and care should be
      * taken to ensure they are used properly in the create function.
      */
-    args?: Type[],
+    args?: Type[];
 
     /**
      * trap is used to take action when the spanwed
@@ -102,11 +99,16 @@ export interface Template {
      * restart flag indicates whether an actor should be automatically
      * restarted after a normal exit.
      */
-    restart?: boolean
+    restart?: boolean;
 
     /**
      * children is list of child actors that will automatically be spawned.
      */
-    children?: Templates | Template[]
-
+    children?: Templates | Template[];
 }
+
+/**
+ * fromSpawnable converts a Spawnable to a Template.
+ */
+export const fromSpawnable = (create: Spawnable): Template =>
+    isFunction(create) ? { create } : create;

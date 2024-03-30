@@ -1,27 +1,24 @@
-import { Maybe, fromString, nothing } from '@quenk/noni/lib/data/maybe';
-import { empty, reduce, values } from '@quenk/noni/lib/data/record';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
+import { empty } from '@quenk/noni/lib/data/record';
 
-import { Address, isChild } from '../../address';
+import { Address, getParent, isChild } from '../../address';
 import { Instance } from '../..';
 import { Thread } from './thread';
-import { Map } from './map';
 
 /**
- * ActorTableEntry is the bookkeeping record for exactly one actor within the 
+ * ActorTableEntry is the bookkeeping record for exactly one actor within the
  * system.
  */
 export interface ActorTableEntry {
-
     /**
      * actor instance for the entry.
      */
-    actor: Instance,
+    actor: Instance;
 
     /**
      * thread for the entry.
      */
-    thread: Thread
-
+    thread: Thread;
 }
 
 /**
@@ -29,48 +26,85 @@ export interface ActorTableEntry {
  * within the system.
  *
  * It is an abstraction for accessing actors, threads and their children within
- * the system. If an actor is not in this table then it is not part of the 
+ * the system. If an actor is not in this table then it is not part of the
  * system!
  */
-export class ActorTable extends Map<ActorTableEntry> {
+export class ActorTable {
+    constructor(public items = new Map()) {}
+
+    /**
+     * get the entry for an actor given its address.
+     */
+    get(addr: Address): Maybe<ActorTableEntry> {
+        return Maybe.of(this.items.get(addr));
+    }
 
     /**
      * getThread provides the thread for an actor (if any).
      */
-    getThread(addr: Address) : Maybe<Thread> {
-
+    getThread(addr: Address): Maybe<Thread> {
         return this.get(addr).map(ate => ate.thread);
-
     }
 
     /**
-     * getChildren provides the [[ActorTableEntry]]'s of all the children for 
+     * has returns true if there is an entry for the address specified.
+     */
+    has(addr: Address): boolean {
+        return this.items.has(addr);
+    }
+
+    /**
+     * set an entry in the table.
+     */
+    set(addr: Address, entry: ActorTableEntry): void {
+        this.items.set(addr, entry);
+    }
+
+    /**
+     * remove an entry from the table.
+     */
+    remove(addr: Address): void {
+        this.items.delete(addr);
+    }
+
+    /**
+     * getParent provides the [[ActorTableEntry]] given the address of an
+     * actor.
+     */
+    getParent(addr: Address): Maybe<ActorTableEntry> {
+        let parentAddress = getParent(addr);
+        return this.get(parentAddress);
+    }
+
+    /**
+     * getChildren provides the [[ActorTableEntry]]'s of all the children for
      * the actor with the target address.
      *
-     * While the list is not sequential, actors that are children of other 
+     * While the list is not sequential, actors that are children of other
      * actors in the list are guaranteed to appear after their parents.
      */
     getChildren(addr: Address): ActorTableEntry[] {
-
-        if (!this.has(addr)) return [];
+        if (!this.items.has(addr)) return [];
 
         let firstRun = true;
         let idx = 0;
         let maxRec = 0;
         let unsortedItems: ActorTableEntry[] = [];
-        let items = values(this.items);
+        let items = [...this.items.values()];
         let init: [ActorTableEntry[], ActorTableEntry[]] = [[], []];
 
         while (true) {
-
-            let result = items.reduce((prev, curr: ActorTableEntry) =>
-                <[ActorTableEntry[], ActorTableEntry[]]>(
-                    isChild(addr, curr.thread.context.address) ?
-                        [prev[0], [...prev[1], curr]] :
-                        [[...prev[0], curr], prev[1]]), init);
+            let result = items.reduce(
+                (prev, curr: ActorTableEntry) =>
+                    <[ActorTableEntry[], ActorTableEntry[]]>(
+                        (isChild(addr, curr.thread.context.address)
+                            ? [prev[0], [...prev[1], curr]]
+                            : [[...prev[0], curr], prev[1]])
+                    ),
+                init
+            );
 
             if (firstRun) {
-
                 if (empty(result[1])) return result[1];
 
                 items = result[1];
@@ -82,9 +116,7 @@ export class ActorTable extends Map<ActorTableEntry> {
                 maxRec = items.length;
 
                 firstRun = false;
-
             } else {
-
                 items = [...result[0], ...result[1]];
 
                 idx++;
@@ -92,23 +124,9 @@ export class ActorTable extends Map<ActorTableEntry> {
                 if (idx >= maxRec) break;
 
                 addr = unsortedItems[idx].thread.context.address;
-
             }
-
         }
 
         return items;
-
     }
-
-    /**
-     * addressFromActor will provide the address of an actor given its instance.
-     */
-    addressFromActor(actor: Instance): Maybe<Address> {
-
-        return reduce(this.items, nothing(), (pre: Maybe<Address>, items, k) =>
-            items.actor === actor ? fromString(k) : pre);
-
-    }
-
 }

@@ -29,9 +29,7 @@ export type Handler = (addr: Address, evt: string, ...args: Type[]) => void;
  * Handlers is a map of even Handler functions.
  */
 export interface Handlers {
-
-    [key: string]: Handler[]
-
+    [key: string]: Handler[];
 }
 
 /**
@@ -41,45 +39,39 @@ export interface Handlers {
  * External code can use this interface to hook into these events.
  */
 export interface EventSource {
-
     /**
      * on queues an event handler for the target event.
      */
-    on(evt: EventName, handler: Handler): void
+    on(evt: EventName, handler: Handler): void;
 
     /**
      * publish an event (used internally).
      */
-    publish(addr: Address, evt: string, ...args: Type[]): void
-
+    publish(addr: Address, evt: string, ...args: Type[]): void;
 }
 
 /**
  * Publisher serves as the EventSource implementation for the VM.
  */
 export class Publisher implements EventSource {
-
-    constructor(public log: LogWritable, public handlers: Handlers = {}) { }
+    constructor(
+        public log: LogWritable,
+        public handlers: Handlers = {}
+    ) {}
 
     on(evt: EventName, handler: Handler) {
-
         let handlers = this.handlers[evt] || [];
 
         handlers.push(handler);
 
         this.handlers[evt] = handlers;
-
     }
 
     publish(addr: Address, evt: string, ...args: Type[]) {
-
         let handlers = this.handlers[evt];
 
-        if (handlers)
-            handlers.forEach(handler => handler(addr, evt, ...args));
+        if (handlers) handlers.forEach(handler => handler(addr, evt, ...args));
 
         this.log.event(addr, evt, ...args);
-
     }
-
 }
