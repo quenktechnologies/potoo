@@ -2,20 +2,16 @@ import { merge } from '@quenk/noni/lib/data/record';
 import { isObject } from '@quenk/noni/lib/data/type';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
+import { TypeCase } from '@quenk/noni/lib/control/match/case';
 
 import { Context } from '../system/vm/runtime/context';
 import { Runtime } from '../system/vm/runtime';
 import { Address, AddressMap } from '../address';
 import { Message } from '../message';
-import { Templates, Spawnable, fromSpawnable } from '../template';
+import { Templates, Spawnable } from '../template';
 import { FLAG_VM_THREAD } from '../flags';
 import { Actor } from '../';
-import { Api } from './api';
-
-/**
- * Reference to an actor address.
- */
-export type Reference = (m: Message) => void;
+import { Api, AsyncTask } from '../api';
 
 /**
  * Resident is an actor that exists in the current runtime.
@@ -28,22 +24,17 @@ export interface Resident extends Api, Actor {}
 export abstract class AbstractResident implements Resident {
     constructor(public runtime: Runtime) {}
 
-    self = getSelf(this);
+    self = this.runtime.self;
 
     init(c: Context): Context {
         c.flags = c.flags | FLAG_VM_THREAD;
-
         return c;
-    }
-
-    notify() {
-        this.runtime.exec('notify');
     }
 
     accept(_: Message) {}
 
     spawn(target: Spawnable): Future<Address> {
-        return this.runtime.spawn(fromSpawnable(target));
+        return this.runtime.spawn(target);
     }
 
     spawnGroup(group: string | string[], tmpls: Templates): Future<AddressMap> {
@@ -67,55 +58,62 @@ export abstract class AbstractResident implements Resident {
         return this.runtime.tell(addr, msg);
     }
 
-    raise(e: Err) {
-        this.runtime.raise(e);
+    raise(err: Err) {
+        return this.runtime.raise(err);
     }
 
     kill(addr: Address) {
-        return Future.do(async () => {
-            await this.runtime.exec<void>('kill', [
-                this.runtime.vm.registry.addString(addr)
-            ]);
-        });
+        return this.runtime.kill(addr);
     }
 
-    exit(): void {
-        this.kill(this.self());
+    exit() {
+        return this.runtime.exit();
     }
 
     async start() {
         return this.run();
     }
 
-    run(): void {}
+    async run() {}
 
     async stop() {}
 
-    wait(_ft: Future<void>) {
-        // TODO: Implement this.
+    watch<T>(task: AsyncTask<T>) {
+        return this.runtime.watch(task);
     }
 }
 
 /**
- * ref produces a function for sending messages to an actor address.
+ * Immutable actors do not change their receiver behaviour after receiving
+ * a message. The same receiver is applied to each and every message.
  */
-export const ref =
-    (res: Resident, addr: Address): Reference =>
-    (m: Message) =>
-        res.tell(addr, m);
+export abstract class Immutable<T> extends AbstractResident {
+    /**
+     * receive provides the list of Case classes that the actor will be used
+     * to process incomming messages.
+     */
+    receive(): TypeCase<T>[] {
+        return [];
+    }
 
-const getSelf = (_actor: AbstractResident) => {
-    let _self = '?';
+    async start() {
+        await this.run();
+        while (this.runtime.isValid())
+            await this.runtime.receive(this.receive());
+    }
+}
 
-    return () => {
-        /* TODO: This should be given to the runtime now. */
-        /*if (_self === '?')
-            _self = actor.system
-                .getPlatform()
-                .identify(actor)
-                .orJust(() => '?')
-                .get();
-*/
-        return _self;
-    };
-};
+/**
+ * Mutable actors can change their behaviour after message processing.
+ */
+export abstract class Mutable extends AbstractResident {
+    /**
+     * receive a message from the actor's mailbox.
+     */
+    receive<T>(cases: TypeCase<T>[] = []): Future<T> {
+        return Future.do(async () => {
+            let msg = await this.runtime.receive(cases);
+            return msg;
+        });
+    }
+}

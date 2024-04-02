@@ -3,7 +3,7 @@ import * as op from '../op';
 
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
-import { empty, tail } from '@quenk/noni/lib/data/array';
+import { empty, head, tail } from '@quenk/noni/lib/data/array';
 import { just, Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import {
     isFunction,
@@ -26,6 +26,12 @@ import { Message } from '../../../message';
 import { Thread, ThreadState } from './';
 import { Job, JobType, JSJob, VMJob } from '../scheduler';
 import { AsyncTask } from '../runtime';
+import {
+    CaseFunction,
+    Default,
+    TypeCase
+} from '@quenk/noni/lib/control/match/case';
+import { identity } from '@quenk/noni/lib/data/function';
 
 /**
  * SharedThread is used by actors that run in the same event loop as the VM.
@@ -108,6 +114,11 @@ export class SharedThread implements Thread {
         }).fork(onError, onSuccess);
     }
 
+    wait<T>(task: AsyncTask<T>) {
+        this.state = ThreadState.ASYNC_WAIT;
+        this.watch(task);
+    }
+
     exit() {
         this.state = ThreadState.INVALID;
         this.vm.kill(this, this.context.address).fork();
@@ -127,7 +138,7 @@ export class SharedThread implements Thread {
             this.vm.scheduler.postJob(
                 new JSJob(
                     this,
-                    () => {
+                    async () => {
                         let eresult = this.vm.allocate(this, tmpl);
                         if (eresult.isLeft()) this.raise(eresult.takeLeft());
                         else cb(null, eresult.takeRight());
@@ -141,25 +152,45 @@ export class SharedThread implements Thread {
     tell(addr: Address, msg: Message): Future<void> {
         return Future.fromCallback(cb => {
             this.vm.scheduler.postJob(
-                new JSJob(this, () => this.vm.sendMessage(this, addr, msg), cb)
+                new JSJob(
+                    this,
+                    async () => {
+                        this.vm.sendMessage(this, addr, msg);
+                    },
+                    cb
+                )
             );
         });
     }
 
-    receive(): Future<Message> {
+    receive<T = Message>(cases: TypeCase<T>[] = []): Future<T> {
         // TODO dispatch message received / wait event
+        let match = new CaseFunction(
+            empty(cases) ? [new Default(identity)] : cases
+        );
         return Future.fromCallback(cb => {
             let job = new JSJob(
                 this,
-                () => {
-                    if (empty(this.context.mailbox)) {
-                        this.state = ThreadState.MSG_WAIT;
-                        this.vm.scheduler.preemptJob(job);
-                    } else {
+                () =>
+                    Future.do(async () => {
+                        if (empty(this.context.mailbox)) {
+                            this.state = ThreadState.MSG_WAIT;
+                            this.vm.scheduler.preemptJob(job);
+                            return;
+                        }
+
+                        let msg = head(this.context.mailbox);
+                        if (!match.test(msg)) {
+                            //TODO dispatch message dropped event
+                            this.state = ThreadState.MSG_WAIT;
+                            this.vm.scheduler.preemptJob(job);
+                            return;
+                        }
+
+                        let result = await match.apply(msg);
                         this.state = ThreadState.IDLE;
-                        cb(null, this.context.mailbox.shift());
-                    }
-                },
+                        cb(null, result);
+                    }),
                 cb
             );
             this.vm.scheduler.postJob(job);
@@ -185,70 +216,74 @@ export class SharedThread implements Thread {
         return Maybe.of(data);
     }
 
+    isValid() {
+        return (
+            this.state !== ThreadState.INVALID &&
+            this.state !== ThreadState.ERROR
+        );
+    }
+
     resume(job: Job) {
         if (job.type === JobType.JS) {
-            (<JSJob>job).fun();
-        } else {
-            let { fun, args } = <VMJob>job;
+            this.wait((<JSJob>job).fun);
+            return;
+        }
+        //
+        //TODO: dispatch event
+        this.state = ThreadState.RUNNING;
 
-            let frame = new StackFrame(
-                makeFrameName(this, fun.name),
-                this.script,
-                this,
-                nothing(),
-                fun.foreign
-                    ? [op.LDN | this.script.info.indexOf(fun), op.CALL]
-                    : fun.code.slice(),
-                args
-            );
+        let { fun, args } = <VMJob>job;
 
-            this.frameStack = [frame];
-            this.frameStackPointer = 0;
-            this.returnPointer = 0;
+        let frame = new StackFrame(
+            makeFrameName(this, fun.name),
+            this.script,
+            this,
+            nothing(),
+            fun.foreign
+                ? [op.LDN | this.script.info.indexOf(fun), op.CALL]
+                : fun.code.slice(),
+            args
+        );
 
-            //TODO: dispatch event
-            this.state = ThreadState.RUNNING;
+        this.frameStack = [frame];
+        this.frameStackPointer = 0;
+        this.returnPointer = 0;
 
-            while (!empty(this.frameStack)) {
-                let sp = this.frameStackPointer;
+        while (!empty(this.frameStack)) {
+            let sp = this.frameStackPointer;
 
-                let frame = <Frame>this.frameStack[sp];
+            let frame = <Frame>this.frameStack[sp];
 
-                if (this.returnPointer != 0)
-                    frame.data.push(this.returnPointer);
+            if (this.returnPointer != 0) frame.data.push(this.returnPointer);
 
-                while (
-                    !frame.isFinished() &&
-                    this.state === ThreadState.RUNNING
-                ) {
-                    // execute frame instructions
-                    let pos = frame.getPosition();
-                    let next = frame.code[pos] >>> 0;
-                    let opcode = next & op.OPCODE_MASK;
-                    let operand = next & op.OPERAND_MASK;
+            while (!frame.isFinished() && this.state === ThreadState.RUNNING) {
+                // execute frame instructions
+                let pos = frame.getPosition();
+                let next = frame.code[pos] >>> 0;
+                let opcode = next & op.OPCODE_MASK;
+                let operand = next & op.OPERAND_MASK;
 
-                    this.vm.log.opcode(this, frame, opcode, operand);
+                this.vm.log.opcode(this, frame, opcode, operand);
 
-                    // TODO: Error if the opcode is invalid, out of range etc.
-                    handlers[opcode](this, frame, operand);
+                // TODO: Error if the opcode is invalid, out of range etc.
+                handlers[opcode](this, frame, operand);
 
-                    if (pos === frame.getPosition()) frame.advance();
+                if (pos === frame.getPosition()) frame.advance();
 
-                    // frame pointer changed, another frame has been pushed
-                    // and needs to be executed.
-                    if (sp !== this.frameStackPointer) break;
-                }
+                // frame pointer changed, another frame has been pushed
+                // and needs to be executed.
+                if (sp !== this.frameStackPointer) break;
+            }
 
-                // If this is true, give other threads a chance to execute while we
-                // wait on an async task to complete.
-                if (this.state === ThreadState.ASYNC_WAIT) return;
+            // If this is true, give other threads a chance to execute while we
+            // wait on an async task to complete.
+            if (this.state === ThreadState.ASYNC_WAIT) return;
 
-                // Handle the next frame.
-                if (sp === this.frameStackPointer) {
-                    //TODO: dispatch frame exit event
-                    this.frameStackPointer--;
-                    this.returnPointer = <Data>frame.data.pop();
-                }
+            // Handle the next frame.
+            if (sp === this.frameStackPointer) {
+                //TODO: dispatch frame exit event
+                this.frameStackPointer--;
+                this.returnPointer = <Data>frame.data.pop();
             }
         }
 

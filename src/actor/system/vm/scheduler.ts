@@ -1,5 +1,6 @@
 import { remove } from '@quenk/noni/lib/data/array';
 
+import { AsyncTask } from '../../api';
 import { FunInfo } from './script/info';
 import { Thread, ThreadState } from './thread';
 import { Data } from './frame';
@@ -38,7 +39,7 @@ export class JSJob {
     type = JobType.JS;
     constructor(
         public thread: Thread,
-        public fun: () => void,
+        public fun: AsyncTask<void>,
         public onError: (err: Error) => void
     ) {}
 }
