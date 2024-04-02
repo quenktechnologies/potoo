@@ -15,12 +15,13 @@
     "@types/mocha": "^9.1.1",
     "@types/node": "^13.13.38",
     "mocha": "^9.2.2",
+    "prettier": "^3.2.5",
     "ts-node": "^8.10.2",
     "typescript": "^4.7.3"
   },
   "author": "Quenk Technologies Limited",
   "license": "Apache-2.0",
   "dependencies": {
-    "@quenk/noni": "^1.43.3"
+    "@quenk/noni": "^1.52.5"
   }
 }
