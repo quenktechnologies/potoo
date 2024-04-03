@@ -3,16 +3,11 @@ import { ChildProcess, fork } from 'child_process';
 
 import { match } from '@quenk/noni/lib/control/match';
 import { just, Maybe, nothing } from '@quenk/noni/lib/data/maybe';
-import { Future, run, wrap } from '@quenk/noni/lib/control/monad/future';
+import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Type } from '@quenk/noni/lib/data/type';
-import { empty, tail } from '@quenk/noni/lib/data/array';
-import { noop } from '@quenk/noni/lib/data/function';
+import { empty } from '@quenk/noni/lib/data/array';
 
 import { Context } from '../../system/vm/runtime/context';
-import { EVENT_MESSAGE_DROPPED } from '../../system/vm/event';
-import { LogWriter, LOG_LEVEL_ERROR } from '../../system/vm/log';
-import { CaseFunction } from '../../resident/case/function';
-import { Case } from '../../resident/case';
 import { Runtime } from '../../system/vm/runtime';
 import { Envelope } from '../../mailbox';
 import { Message } from '../../message';
@@ -235,7 +230,7 @@ export const init = () => {
     process.on('message', (m: Message) => {
         if (m && m.to && m.message) {
             messages.unshift(m.message);
-            doReceive();
+            drain();
         }
     });
 
@@ -247,67 +242,35 @@ export const init = () => {
 /**
  * self provides the address for this child actor.
  */
-export const self = () => process.env.POTOO_ACTOR_ADDRESS || ADDRESS_DISCARD;
+export const self = process.env.POTOO_ACTOR_ADDRESS || ADDRESS_DISCARD;
 
 /**
  * tell sends a message to another actor in the system using the VM in the
  * parent process.
  */
 export const tell = <M>(to: Address, msg: M) =>
-    (<Function>process.send)(new Send(to, self(), msg));
+    (<Function>process.send)(new Send(to, self, msg));
 
-const receivers: Function[] = [];
+type Handler = (value: Type) => void;
 
-const doReceive = () => {
-    if (!empty(receivers)) (<Function>receivers.pop())();
-};
+const receivers: Handler[] = [];
 
 /**
  * receive the next message in the message queue.
  */
-export const receive = <M>(): Future<M> =>
-    run(
+export const receive = () =>
+    Future.do(
         () =>
             new Promise(resolve => {
-                receivers.push(() => resolve(messages.pop()));
-
-                if (!empty(messages)) doReceive();
-
-                return noop;
+                receivers.push(resolve);
+                drain();
             })
     );
 
-const writer = new LogWriter(
-    console,
-    Number(process.env.POTOO_LOG_LEVEL) || LOG_LEVEL_ERROR
-);
-
-/**
- * select the next desired message in the message queue using a list of [[Case]]
- * classes.
- */
-export const select = <M>(cases: Case<M>[]): Future<void> =>
-    run(
-        () =>
-            new Promise((onSuccess, onError) => {
-                let f = new CaseFunction(cases);
-
-                receivers.push(() => {
-                    if (f.test(tail(messages)))
-                        wrap(f.apply(messages.pop())).fork(onError, onSuccess);
-                    else
-                        writer.event(
-                            self(),
-                            EVENT_MESSAGE_DROPPED,
-                            messages.pop()
-                        );
-                });
-
-                if (!empty(messages)) doReceive();
-
-                return noop;
-            })
-    );
+const drain = () => {
+    if (!empty(messages) && !empty(receivers))
+        (<Handler>receivers.pop())(messages.shift());
+};
 
 /**
  * exist the actor.
