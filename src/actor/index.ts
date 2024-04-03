@@ -32,12 +32,6 @@ export interface Instance {
     start(): Promise<void>;
 
     /**
-     * notify is called by the system to indicate new messages
-     * have been placed in the actor's mailbox.
-     */
-    notify(): void;
-
-    /**
      * stop the Instance.
      *
      * A Promise is returned here to make the method an async function.
