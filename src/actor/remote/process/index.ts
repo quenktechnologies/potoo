@@ -203,9 +203,7 @@ export class VMProcess extends Process {
 
                     POTOO_ACTOR_MODULE: this.module,
 
-                    POTOO_PVM_CONF: process.env.POTOO_PVM_CONF,
-
-                    POTOO_LOG_LEVEL: String(this.runtime.vm.log.level)
+                    POTOO_PVM_CONF: process.env.POTOO_PVM_CONF
                 }
             })
         );

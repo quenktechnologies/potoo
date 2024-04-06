@@ -32,12 +32,14 @@ export const isRestricted = (id: string) =>
 /**
  * make a child address given its id and parent address.
  */
-export const make = (parent: Address, id: string): Address =>
-    parent === SEPERATOR || parent === ADDRESS_EMPTY
+export const make = (parent: Address, id: string): Address => {
+    id = id.trim();
+    return parent === SEPERATOR || parent === ADDRESS_EMPTY
         ? `${parent}${id}`
         : parent === ADDRESS_SYSTEM
           ? id
           : `${parent}${SEPERATOR}${id}`;
+};
 
 /**
  * getParent computes the parent of an Address.

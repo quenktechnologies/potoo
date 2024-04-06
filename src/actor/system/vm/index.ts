@@ -1,19 +1,12 @@
 import * as template from '../../template';
 import * as errors from './runtime/error';
-import * as events from './event';
 
 import { Err, Except } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Either } from '@quenk/noni/lib/data/either';
-import { isFunction, Type } from '@quenk/noni/lib/data/type';
+import { isFunction } from '@quenk/noni/lib/data/type';
 import { distribute, empty } from '@quenk/noni/lib/data/array';
-import {
-    Record,
-    merge,
-    rmerge,
-    mapTo,
-    isRecord
-} from '@quenk/noni/lib/data/record';
+import { merge, mapTo, isRecord } from '@quenk/noni/lib/data/record';
 
 import {
     Address,
@@ -24,17 +17,12 @@ import {
     isChild
 } from '../../address';
 import { Template } from '../../template';
-import { isRouter } from '../../flags';
 import { Message, Envelope } from '../../message';
 import { Actor } from '../../';
-import { System } from '../';
 import { SharedThread } from './thread/shared';
 import { Thread, THREAD_STATE_IDLE } from './thread';
 import { Context, newContext } from './runtime/context';
-import { Conf, defaults } from './conf';
-import { LogWritable, LogWriter } from './log';
 import { ScriptFactory } from './scripts/factory';
-import { EventSource, Publisher } from './event';
 import { GroupMap } from './groups';
 import { ActorTable, ActorTableEntry } from './table';
 import { RouterMap } from './routers';
@@ -57,14 +45,14 @@ export interface Platform extends Actor {
      *
      * Used to access the internal logging API.
      */
-    log: LogWritable;
+    //log: LogWritable;
 
     /**
      * events service for the VM.
      *
      * Used to publish VM events to interested listeners.
      */
-    events: EventSource;
+    //events: EventSource;
 
     /**
      * actors holds all the actors within the system at any given point along
@@ -120,65 +108,27 @@ export interface Platform extends Actor {
  */
 export class PVM implements Platform {
     constructor(
-        public system: System,
-        public conf: Conf = defaults()
+        public scheduler: Scheduler = new Scheduler(),
+        public actors: ActorTable = new ActorTable(),
+        public routers = new RouterMap(),
+        public groups = new GroupMap(),
+        public registry = new RegistrySet(),
+        public nextAID = 1
     ) {}
 
-    _actorIdCounter = -1;
-
-    log = new LogWriter(this.conf.long_sink, this.conf.log_level);
-
-    scheduler = new Scheduler();
-
-    registry = new RegistrySet();
-
-    events = new Publisher(this.log);
-
-    actors: ActorTable = new ActorTable(
-        new Map([
-            [
-                ADDRESS_SYSTEM,
-                {
-                    actor: this,
-
-                    thread: new SharedThread(
-                        this,
-                        ScriptFactory.getScript(),
-                        newContext(this._actorIdCounter++, '$', {
-                            create: () => this,
-
-                            trap: () => template.ACTION_RAISE
-                        })
-                    )
-                }
-            ]
-        ])
-    );
-
     /**
-     * routers configured to handle any address that falls underneath them.
+     * create a new PVM instance using the provided configuration.
      */
-    routers = new RouterMap();
-
-    /**
-     * groups combine multiple addresses into one.
-     */
-    groups = new GroupMap();
-
-    /**
-     * Create a new PVM instance using the provided System implementation and
-     * configuration object.
-     */
-    static create<S extends System>(s: S, conf: object = {}): PVM {
-        return new PVM(s, <Conf>rmerge(<Record<Type>>defaults(), <any>conf));
+    static create(): PVM {
+        return new PVM();
     }
 
     init(c: Context): Context {
         return c;
     }
 
-    accept(m: Message) {
-        return this.conf.accept(m);
+    accept() {
+        //TODO: events.OnRootMessage.dispatch();
     }
 
     async start() {}
@@ -200,19 +150,18 @@ export class PVM implements Platform {
     }
 
     allocate(parent: Thread, tmpl: Template): Except<Address> {
-        let mparentEntry = this.actors.get(parent.context.address);
+        let mparentEntry = this.actors.getForThread(parent);
 
         if (mparentEntry.isNothing())
             return Either.left(new errors.InvalidThreadErr(parent));
 
         let parentEntry = mparentEntry.get();
 
-        if (parent !== parentEntry.thread)
-            return Either.left(new errors.InvalidThreadErr(parent));
+        let aid = this.nextAID++;
 
-        let prefix = parentEntry.actor.constructor.name.toLowerCase();
+        let consName = parentEntry.actor.constructor.name.toLowerCase();
 
-        let id = tmpl.id || `actor::${this._actorIdCounter + 1}~${prefix}`;
+        let id = tmpl.id ?? `instance::${consName}::aid::${aid}`;
 
         if (isRestricted(<string>id))
             return Either.left(new errors.InvalidIdErr(id));
@@ -222,22 +171,26 @@ export class PVM implements Platform {
         if (this.actors.has(addr))
             return Either.left(new errors.DuplicateAddressErr(addr));
 
-        let context = newContext(this._actorIdCounter++, addr, tmpl);
+        let context = newContext(aid, addr, tmpl);
 
         let thread = new SharedThread(this, ScriptFactory.getScript(), context);
 
         let actor = tmpl.create(thread);
 
-        this.actors.set(addr, { thread, actor });
+        let entry = { parent: mparentEntry, thread, actor, children: [] };
+
+        this.actors.set(addr, entry);
+
+        parentEntry.children.push(entry);
 
         //TODO: this.events.actor.onCreated.dispatch(addr)
-        this.events.publish(addr, events.EVENT_ACTOR_CREATED);
+        //this.events.publish(addr, events.EVENT_ACTOR_CREATED);
 
-        if (isRouter(thread.context.flags)) this.routers.set(addr, addr);
+        // TODO: Router support
+        // if (isRouter(thread.context.flags)) this.routers.set(addr, addr);
 
         if (tmpl.group) {
             let groups = Array.isArray(tmpl.group) ? tmpl.group : [tmpl.group];
-
             groups.forEach(group => this.groups.put(group, addr));
         }
 
@@ -248,13 +201,13 @@ export class PVM implements Platform {
 
     sendMessage(from: Thread, to: Address, msg: Message) {
         //TODO: this.events.actor.onSend.dispatch(from.context.address, to, msg);
-        this.events.publish(
+        /*  this.events.publish(
             from.context.address,
             events.EVENT_SEND_START,
             to,
             from,
             msg
-        );
+        );*/
 
         let mRouter = this.routers
             .getFor(to)
@@ -269,26 +222,25 @@ export class PVM implements Platform {
 
         if (mentry.isNothing()) {
             //TODO: this.events.actor.onSendFailed.dispatch(from.context.address, to, msg);
-            this.events.publish(
+            /*   this.events.publish(
                 from.context.address,
                 events.EVENT_SEND_FAILED,
                 to,
                 msg
-            );
+            );*/
         }
 
         let { thread } = mentry.get();
-
         thread.context.mailbox.push(actualMessage);
         thread.notify(actualMessage);
 
         //TODO: this.events.actor.onSendOk.dispatch(from.context.address, to, msg);
-        this.events.publish(
+        /* this.events.publish(
             from.context.address,
             events.EVENT_SEND_OK,
             to,
             msg
-        );
+        );*/
     }
 
     raise(src: Thread, err: Err): Future<void> {
@@ -329,9 +281,9 @@ export class PVM implements Platform {
 
                     default:
                         if (currentThread.context.address === ADDRESS_SYSTEM) {
-                            let action = this.conf.trap(err);
-
-                            if (action === template.ACTION_IGNORE) break loop;
+                            // TODO
+                            // let action = this.conf.trap(err);
+                            // if (action === template.ACTION_IGNORE) break loop;
 
                             if (err instanceof Error) throw err;
 
@@ -380,7 +332,13 @@ export class PVM implements Platform {
             await Future.batch(
                 distribute(
                     targets.map(target => {
-                        let { thread, actor } = target;
+                        let { parent, thread, actor } = target;
+
+                        parent.map(entry => {
+                            entry.children = entry.children.filter(
+                                child => child !== target
+                            );
+                        });
 
                         //XXX: This is done now to prevent the thread from
                         // executing any more jobs.
@@ -394,10 +352,10 @@ export class PVM implements Platform {
                             this.actors.remove(target.thread.context.address);
 
                             // TODO: dispatch event
-                            this.events.publish(
+                            /* this.events.publish(
                                 target.thread.context.address,
                                 events.EVENT_ACTOR_STOPPED
-                            );
+                            );*/
                         });
                     }),
                     MAX_WORKLOAD

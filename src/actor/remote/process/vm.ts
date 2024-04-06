@@ -1,11 +1,7 @@
 import { match } from '@quenk/noni/lib/control/match';
-import { isString } from '@quenk/noni/lib/data/type';
-import { rmerge } from '@quenk/noni/lib/data/record';
-import { parse } from '@quenk/noni/lib/data/json';
 import { noop } from '@quenk/noni/lib/data/function';
 
 import { Template } from '../../template';
-import { Conf } from '../../system/vm/conf';
 import { PVM } from '../../system/vm';
 import { Message } from '../../message';
 import { Address } from '../../address';
@@ -20,15 +16,8 @@ const REMOTE_ADDRESS = <string>process.env.POTOO_ACTOR_ADDRESS;
  * @deprecated - Will be replaced by peering in the future.
  */
 export class PPVM extends PVM {
-    static getInstance(conf: Partial<Conf> = {}) {
-        let vm: PPVM = new PPVM(
-            {
-                getPlatform() {
-                    return vm;
-                }
-            },
-            <Conf>rmerge(getConf(), conf)
-        );
+    static getInstance() {
+        let vm: PPVM = new PPVM();
 
         return vm;
     }
@@ -88,13 +77,3 @@ export class PPVM extends PVM {
         }
     }
 }
-
-const getConf = (): Partial<Conf> => {
-    if (isString(process.env.POTOO_PVM_CONF)) {
-        let econf = parse(process.env.POTOO_PVM_CONF);
-
-        if (econf.isRight()) return <Partial<Conf>>econf.takeRight();
-    }
-
-    return {};
-};

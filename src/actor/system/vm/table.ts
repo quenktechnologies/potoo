@@ -11,6 +11,13 @@ import { Thread } from './thread';
  */
 export interface ActorTableEntry {
     /**
+     * parent is the entry for the parent actor.
+     *
+     * No parent indicates the root actor.
+     */
+    parent: Maybe<ActorTableEntry>;
+
+    /**
      * actor instance for the entry.
      */
     actor: Instance;
@@ -19,6 +26,11 @@ export interface ActorTableEntry {
      * thread for the entry.
      */
     thread: Thread;
+
+    /**
+     * children entries for the actor.
+     */
+    children: ActorTableEntry[];
 }
 
 /**
@@ -31,6 +43,17 @@ export interface ActorTableEntry {
  */
 export class ActorTable {
     constructor(public items = new Map()) {}
+
+    /**
+     * getForThread provides the entry for an actor given its thread.
+     */
+    getForThread(thread: Thread): Maybe<ActorTableEntry> {
+        for (let entry of this.items.values()) {
+            if (entry.thread === thread) return Maybe.of(entry);
+        }
+
+        return Maybe.nothing();
+    }
 
     /**
      * get the entry for an actor given its address.

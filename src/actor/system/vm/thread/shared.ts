@@ -263,7 +263,7 @@ export class SharedThread implements Thread {
                 let opcode = next & op.OPCODE_MASK;
                 let operand = next & op.OPERAND_MASK;
 
-                this.vm.log.opcode(this, frame, opcode, operand);
+                // this.vm.log.opcode(this, frame, opcode, operand);
 
                 // TODO: Error if the opcode is invalid, out of range etc.
                 handlers[opcode](this, frame, operand);

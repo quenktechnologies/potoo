@@ -111,9 +111,6 @@ export abstract class Mutable extends AbstractResident {
      * receive a message from the actor's mailbox.
      */
     receive<T>(cases: TypeCase<T>[] = []): Future<T> {
-        return Future.do(async () => {
-            let msg = await this.runtime.receive(cases);
-            return msg;
-        });
+        return Future.do(async () => this.runtime.receive(cases));
     }
 }
