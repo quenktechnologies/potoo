@@ -139,9 +139,8 @@ export class SharedThread implements Thread {
                 new JSJob(
                     this,
                     async () => {
-                        let eresult = this.vm.allocate(this, tmpl);
-                        if (eresult.isLeft()) this.raise(eresult.takeLeft());
-                        else cb(null, eresult.takeRight());
+                        let result = await this.vm.allocate(this, tmpl);
+                        cb(null, result);
                     },
                     cb
                 )

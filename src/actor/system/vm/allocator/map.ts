@@ -70,6 +70,14 @@ export class MapAllocator implements Allocator {
         return Maybe.nothing();
     }
 
+    getThread(address: Address): Maybe<Thread> {
+        for (let entry of this.actors.values()) {
+            if (entry.address === address) return Maybe.of(entry.thread);
+        }
+
+        return Maybe.nothing();
+    }
+
     allocate(vm: Platform, parent: Thread, tmpl: Template): Future<Address> {
         return Future.do(async () => {
             let mparentEntry = this.getEntry(parent);

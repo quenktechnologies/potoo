@@ -33,6 +33,22 @@ describe('MapAllocator', () => {
         };
     });
 
+    describe('getThread', () => {
+        it('should provide a thread when it exists', () => {
+            let map = new MapAllocator();
+            map.actors.set('/', parentEntry);
+            let mthread = map.getThread('/');
+            expect(mthread.isJust()).toBe(true);
+            expect(mthread.get()).toBe(parentEntry.thread);
+        });
+
+        it('should not provide a thread when it does not exists', () => {
+            let map = new MapAllocator();
+            let mthread = map.getThread('/');
+            expect(mthread.isJust()).toBe(false);
+        });
+    });
+
     describe('allocate', () => {
         it('should allocate threads for actors', async () => {
             let map = new MapAllocator();

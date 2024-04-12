@@ -21,13 +21,15 @@ export const alloc = (thread: SharedThread, frame: Frame, _: Operand) => {
 
     //TODO: if(!isTemplateLike(tmpl)) return thread.raise(new Error('alloc: Cannot allocate non-template!'));
 
-    let eresult = thread.vm.allocate(thread, <Template>tmpl);
+    //TODO: this is async
+    thread.vm.allocate(thread, <Template>tmpl);
 
+    /*
     if (eresult.isLeft()) {
         thread.raise(eresult.takeLeft());
     } else {
         frame.push(thread.vm.registry.addString(eresult.takeRight()));
-    }
+    }*/
 };
 
 /**
