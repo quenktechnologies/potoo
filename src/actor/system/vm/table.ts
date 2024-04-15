@@ -120,7 +120,7 @@ export class ActorTable {
             let result = items.reduce(
                 (prev, curr: ActorTableEntry) =>
                     <[ActorTableEntry[], ActorTableEntry[]]>(
-                        (isChild(addr, curr.thread.context.address)
+                        (isChild(addr, curr.thread.address)
                             ? [prev[0], [...prev[1], curr]]
                             : [[...prev[0], curr], prev[1]])
                     ),
@@ -134,7 +134,7 @@ export class ActorTable {
 
                 unsortedItems = items.slice();
 
-                addr = items[0].thread.context.address;
+                addr = items[0].thread.address;
 
                 maxRec = items.length;
 
@@ -146,7 +146,7 @@ export class ActorTable {
 
                 if (idx >= maxRec) break;
 
-                addr = unsortedItems[idx].thread.context.address;
+                addr = unsortedItems[idx].thread.address;
             }
         }
 

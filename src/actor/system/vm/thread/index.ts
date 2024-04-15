@@ -1,7 +1,7 @@
 import { Future } from '@quenk/noni/lib/control/monad/future';
 
 import { Message } from '../../../message';
-import { Context } from '../runtime/context';
+import { Address } from '../../../address';
 import { Job } from '../scheduler';
 import { Runtime } from '../runtime';
 import { Platform } from '../';
@@ -38,9 +38,9 @@ export interface Thread extends Runtime {
     vm: Platform;
 
     /**
-     * context (actor) of the Thread's actor.
+     * address for the Thread (actor) within the system.
      */
-    context: Context;
+    address: Address;
 
     /**
      * state indicates what state the Thread is currently in.

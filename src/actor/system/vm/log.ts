@@ -90,7 +90,7 @@ export class LogWriter implements LogWritable {
     opcode(thr: SharedThread, frame: Frame, op: Opcode, operand: Operand) {
         if (this.level >= LOG_LEVEL_TRACE)
             this.sink.debug.apply(this.sink, [
-                `[${thr.context.address}]`,
+                `[${thr.address}]`,
                 `(${frame.script.name}#${frame.name})`,
                 ...toLog(op, thr, frame, operand)
             ]);

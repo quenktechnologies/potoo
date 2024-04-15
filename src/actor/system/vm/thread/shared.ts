@@ -3,7 +3,7 @@ import * as op from '../op';
 
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
-import { empty, head, tail } from '@quenk/noni/lib/data/array';
+import { empty, head } from '@quenk/noni/lib/data/array';
 import { just, Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import {
     isFunction,
@@ -13,7 +13,6 @@ import {
     Type
 } from '@quenk/noni/lib/data/type';
 
-import { Context } from '../runtime/context';
 import { handlers } from '../op';
 import { FunInfo, ForeignFunInfo } from '../script/info';
 import { Frame, StackFrame, Data, FrameName } from '../frame';
@@ -43,14 +42,15 @@ export class SharedThread implements Thread {
     constructor(
         public vm: Platform,
         public script: Script,
-        public context: Context,
+        public address: Address,
+        public mailbox: Message[] = [],
         public frameStack: Frame[] = [],
         public frameStackPointer: number = 0,
         public returnPointer: Data = 0,
         public state: ThreadState = ThreadState.IDLE
     ) {}
 
-    readonly self = this.context.address;
+    readonly self = this.address;
 
     /**
      * invokeVM invokes a VM function.
@@ -93,7 +93,7 @@ export class SharedThread implements Thread {
     }
 
     notify(msg: Message) {
-        this.context.mailbox.push(msg);
+        this.mailbox.push(msg);
 
         if (this.state === ThreadState.MSG_WAIT) this.state = ThreadState.IDLE;
 
@@ -121,7 +121,7 @@ export class SharedThread implements Thread {
 
     exit() {
         this.state = ThreadState.INVALID;
-        this.vm.kill(this, this.context.address).fork();
+        this.vm.kill(this, this.address).fork();
     }
 
     kill(address: Address): Future<void> {
@@ -172,13 +172,13 @@ export class SharedThread implements Thread {
                 this,
                 () =>
                     Future.do(async () => {
-                        if (empty(this.context.mailbox)) {
+                        if (empty(this.mailbox)) {
                             this.state = ThreadState.MSG_WAIT;
                             this.vm.scheduler.preemptJob(job);
                             return;
                         }
 
-                        let msg = head(this.context.mailbox);
+                        let msg = head(this.mailbox);
                         if (!match.test(msg)) {
                             //TODO dispatch message dropped event
                             this.state = ThreadState.MSG_WAIT;
@@ -316,11 +316,9 @@ export class SharedThread implements Thread {
 /**
  * makeFrameName produces a suitable name for a Frame given its function
  * name.
+ * @deprecated
  */
 export const makeFrameName = (
     thread: SharedThread,
     funName: string
-): FrameName =>
-    empty(thread.frameStack)
-        ? `${thread.context.template.id}@${thread.context.aid}#${funName}`
-        : `${tail(thread.frameStack).name}/${funName}`;
+): FrameName => `${thread.address}:${funName}`;

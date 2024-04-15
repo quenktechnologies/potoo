@@ -291,8 +291,6 @@ export class StackFrame implements Frame {
     }
 
     resolve(data: Data): Either<Err, Type> {
-        let { context } = this.thread;
-
         let typ = data & DATA_MASK_TYPE;
 
         let value = data & DATA_MASK_VALUE24;
@@ -329,13 +327,13 @@ export class StackFrame implements Frame {
                 return this.resolve(mRef.get());
 
             case DATA_TYPE_MAILBOX:
-                if (context.mailbox.length === 0) return nullErr(data);
+                if (this.thread.mailbox.length === 0) return nullErr(data);
 
                 //messages are always accessed sequentially FIFO
-                return right<Err, PTValue>(context.mailbox.shift());
+                return right<Err, PTValue>(this.thread.mailbox.shift());
 
             case DATA_TYPE_SELF:
-                return right<Err, PTValue>(context.address);
+                return right<Err, PTValue>(this.thread.address);
 
             //TODO: This sometimes results in us treating 0 as a legitimate
             //value whereas it should be an error. However, 0 is a valid value
@@ -370,7 +368,7 @@ export class StackFrame implements Frame {
         } else if (typ === DATA_TYPE_HEAP_STRING) {
             return right(this.thread.vm.registry.getString(data).get());
         } else if (typ === DATA_TYPE_SELF) {
-            return right(this.thread.context.address);
+            return right(this.thread.address);
         } else {
             return wrongType(DATA_TYPE_STRING, typ);
         }

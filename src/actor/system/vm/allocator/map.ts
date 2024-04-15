@@ -9,7 +9,6 @@ import { Address, isRestricted, make } from '../../../address';
 import { Template } from '../../../template';
 import { Thread } from '../thread';
 import { Allocator } from './';
-import { newContext } from '../runtime/context';
 import { SharedThread } from '../thread/shared';
 import { ScriptFactory } from '../scripts/factory';
 import { Platform } from '..';
@@ -32,6 +31,11 @@ export interface ActorTableEntry {
      * No parent indicates the root actor.
      */
     parent: Maybe<ActorTableEntry>;
+
+    /**
+     * template used to create the actor.
+     */
+    template: Template 
 
     /**
      * actor instance for the entry.
@@ -78,7 +82,11 @@ export class MapAllocator implements Allocator {
         return Maybe.nothing();
     }
 
-    allocate(vm: Platform, parent: Thread, tmpl: Template): Future<Address> {
+    getTemplate(address: Address): Maybe<Template> {
+      return Maybe.fromNullable(this.actors.get(address)).map((entry: ActorTableEntry) => entry.template);
+    }
+
+    allocate(vm: Platform, parent: Thread, template: Template): Future<Address> {
         return Future.do(async () => {
             let mparentEntry = this.getEntry(parent);
 
@@ -91,7 +99,7 @@ export class MapAllocator implements Allocator {
 
             let consName = parentEntry.actor.constructor.name.toLowerCase();
 
-            let id = tmpl.id ?? `instance::${consName}::aid::${aid}`;
+            let id = template.id ?? `instance::${consName}::aid::${aid}`;
 
             if (isRestricted(<string>id))
                 return Future.raise(new errors.InvalidIdErr(id));
@@ -101,20 +109,19 @@ export class MapAllocator implements Allocator {
             if (this.actors.has(address))
                 return Future.raise(new errors.DuplicateAddressErr(address));
 
-            let context = newContext(aid, address, tmpl);
-
             let thread = new SharedThread(
                 vm,
                 ScriptFactory.getScript(),
-                context
+                address
             );
 
-            let actor = tmpl.create(thread);
+            let actor = template.create(thread);
 
             let entry = {
                 address,
                 parent: mparentEntry,
                 thread,
+                template,
                 actor,
                 children: []
             };

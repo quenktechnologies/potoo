@@ -64,11 +64,11 @@ export class PPVM extends PVM {
      */
     sendMessage(to: Thread, from: Address, msg: Message) {
         if (
-            !to.context.address.startsWith(
+            !to.address.startsWith(
                 <Address>process.env.POTOO_ACTOR_ADDRESS
             )
         ) {
-            (<Function>process.send)(new Send(to.context.address, from, msg));
+            (<Function>process.send)(new Send(to.address, from, msg));
             //TODO: This is a blatant lie because we have no idea of knowing if
             // the actor exists.
             return true;

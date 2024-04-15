@@ -1,6 +1,5 @@
 import { Future } from '@quenk/noni/lib/control/monad/future';
 
-import { Context } from './system/vm/runtime/context';
 import { Message } from './message';
 
 /**
@@ -46,12 +45,4 @@ export interface Instance {
  * The system expects all actors to satisfy this interface so they
  * can be managed properly.
  */
-export interface Actor extends Instance {
-    /**
-     * init the Actor.
-     *
-     * This method allows an actor to configure its Context just
-     * before it is added to the system.
-     */
-    init(c: Context): Context;
-}
+export interface Actor extends Instance {}

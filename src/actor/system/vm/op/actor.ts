@@ -82,8 +82,8 @@ export const recv = (r: SharedThread, f: Frame, _: Operand) => {
  * Stack:
  *  -> <uint32>
  */
-export const recvcount = (r: SharedThread, f: Frame, _: Operand) => {
-    f.push(r.context.receivers.length);
+export const recvcount = (_r: SharedThread, _f: Frame, _: Operand) => {
+    //f.push(r.context.receivers.length);
 };
 
 /**
@@ -94,7 +94,7 @@ export const recvcount = (r: SharedThread, f: Frame, _: Operand) => {
  *  -> <uint32>
  */
 export const mailcount = (r: SharedThread, f: Frame, _: Operand) => {
-    f.push(r.context.mailbox.length);
+    f.push(r.mailbox.length);
 };
 
 /**

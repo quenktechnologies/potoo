@@ -11,7 +11,6 @@ import { Template } from '../../template';
 import { Message } from '../../message';
 import { Actor } from '../../';
 import { Thread, THREAD_STATE_IDLE } from './thread';
-import { Context } from './runtime/context';
 import { GroupMap } from './groups';
 import { RouterMap } from './routers';
 import { Scheduler } from './scheduler';
@@ -105,10 +104,6 @@ export class PVM implements Platform {
         return new PVM();
     }
 
-    init(c: Context): Context {
-        return c;
-    }
-
     accept() {
         //TODO: events.OnRootMessage.dispatch();
     }
@@ -183,44 +178,44 @@ export class PVM implements Platform {
         );*/
     }
 
-    raise(src: Thread, err: Err): Future<void> {
+    raise(src: Thread, error: Err): Future<void> {
         return Future.do(async () => {
+            let err = error;
+
             let currentThread = src;
 
             loop: while (true) {
+                let mtemplate = this.allocator.getTemplate(currentThread.address);
+
+                if(mtemplate.isNothing())
+                //Suggests actor is not in the system anymore
+                //TODO: dispatch event.
+                break;                
+
                 let mparent = this.allocator.getThread(
-                    getParent(currentThread.context.address)
+                    getParent(currentThread.address)
                 );
 
-                let trap = currentThread.context.template.trap || defaultTrap;
+                let trap = mtemplate.get().trap ?? defaultTrap;
 
                 switch (trap(err)) {
                     case template.ACTION_IGNORE:
-                        // TODO: do this via a method.
+                        // TODO: do this via a method. Like thread.resume()
                         currentThread.state = THREAD_STATE_IDLE;
                         break loop;
 
                     case template.ACTION_RESTART:
-                        await this.kill(
-                            currentThread,
-                            currentThread.context.address
-                        );
-                        if (mparent.isNothing()) return;
-                        this.allocate(
-                            mparent.get(),
-                            currentThread.context.template
+                        await this.allocator.deallocate(currentThread);
+                        await this.allocate(mparent.get(),
+                            this.allocator.getTemplate(currentThread.address).get()
                         );
                         break loop;
 
                     case template.ACTION_STOP:
-                        await this.kill(
-                            currentThread,
-                            currentThread.context.address
-                        );
+                        await this.kill(currentThread, currentThread.address);
                         break loop;
 
-                    default:
-                        if (currentThread.context.address === ADDRESS_SYSTEM) {
+                       if (currentThread.address === ADDRESS_SYSTEM) {
                             // TODO
                             // let action = this.conf.trap(err);
                             // if (action === template.ACTION_IGNORE) break loop;
@@ -241,9 +236,9 @@ export class PVM implements Platform {
 
     kill(src: Thread, target: Address): Future<void> {
         return Future.do(async () => {
-            if (!isChild(src.context.address, target)) {
+            if (!isChild(src.address, target)) {
                 return Future.raise(
-                    new errors.IllegalStopErr(src.context.address, target)
+                    new errors.IllegalStopErr(src.address, target)
                 );
             }
 

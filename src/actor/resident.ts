@@ -4,12 +4,10 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { TypeCase } from '@quenk/noni/lib/control/match/case';
 
-import { Context } from './system/vm/runtime/context';
 import { Runtime } from './system/vm/runtime';
 import { Address, AddressMap } from './address';
 import { Message } from './message';
 import { Templates, Spawnable } from './template';
-import { FLAG_VM_THREAD } from './flags';
 import { Actor } from './';
 import { Api, AsyncTask } from './api';
 
@@ -25,11 +23,6 @@ export abstract class AbstractResident implements Resident {
     constructor(public runtime: Runtime) {}
 
     self = this.runtime.self;
-
-    init(c: Context): Context {
-        c.flags = c.flags | FLAG_VM_THREAD;
-        return c;
-    }
 
     accept(_: Message) {}
 

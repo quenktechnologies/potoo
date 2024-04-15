@@ -17,6 +17,11 @@ export interface Allocator {
     getThread(address: Address): Maybe<Thread>;
 
     /**
+     * getTemplate provides a Template given an Address.
+     */
+    getTemplate(address: Address): Maybe<Template>;
+
+    /**
      * allocate a new thread from a Template.
      */
     allocate(vm: Platform, parent: Thread, tmpl: Template): Future<Address>;

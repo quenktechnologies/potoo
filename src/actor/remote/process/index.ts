@@ -7,12 +7,10 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Type } from '@quenk/noni/lib/data/type';
 import { empty } from '@quenk/noni/lib/data/array';
 
-import { Context } from '../../system/vm/runtime/context';
 import { Runtime } from '../../system/vm/runtime';
 import { Envelope } from '../../mailbox';
 import { Message } from '../../message';
 import { Address, ADDRESS_DISCARD, getId } from '../../address';
-import { FLAG_IMMUTABLE, FLAG_ROUTER } from '../../flags';
 import { Actor } from '../../';
 import { Raise, RemoteError, Send, shapes } from '..';
 
@@ -115,12 +113,6 @@ export class Process implements Actor {
         return handle;
     }
 
-    init(c: Context): Context {
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_ROUTER;
-
-        return c;
-    }
-
     accept(e: Envelope): Process {
         if (this.handle.isJust()) this.handle.get().send(e);
 
@@ -184,12 +176,6 @@ export class VMProcess extends Process {
         public script = SCRIPT_PATH
     ) {
         super(runtime, script);
-    }
-
-    init(c: Context): Context {
-        c.flags = c.flags | FLAG_IMMUTABLE | FLAG_ROUTER;
-
-        return c;
     }
 
     async start() {

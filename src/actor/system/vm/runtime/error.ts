@@ -1,19 +1,23 @@
+import { Err } from '@quenk/noni/lib/control/err';
+
 import { Address, ADDRESS_RESTRICTED } from '../../../address';
 import { TypeInfo } from '../script/info';
 import { DATA_MAX_SAFE_UINT32 } from '../frame';
 import { Thread } from '../thread';
 
 /**
- * Error
+ * ErrorClass
  */
-export class Error {
+export class ErrorClass {
     constructor(public message: string) {}
+
+    stack?: string
 }
 
 /**
  * InvalidIdError indicates an id used in a template is invalid.
  */
-export class InvalidIdErr extends Error {
+export class InvalidIdErr extends ErrorClass {
     constructor(public id: string) {
         super(
             `The id "${id} must not contain` +
@@ -26,7 +30,7 @@ export class InvalidIdErr extends Error {
  * UnknownParentAddressErr indicates the parent address used for
  * spawning an actor does not exist.
  */
-export class UnknownParentAddressErr extends Error {
+export class UnknownParentAddressErr extends ErrorClass {
     constructor(public address: Address) {
         super(`The parent address "${address}" is not part of the system!`);
     }
@@ -36,7 +40,7 @@ export class UnknownParentAddressErr extends Error {
  * DuplicateAddressErr indicates the address of a freshly spawned
  * actor is already in use.
  */
-export class DuplicateAddressErr extends Error {
+export class DuplicateAddressErr extends ErrorClass {
     constructor(public address: Address) {
         super(`Duplicate address "${address}" detected!`);
     }
@@ -46,13 +50,13 @@ export class DuplicateAddressErr extends Error {
  * NullTemplatePointerErr occurs when a reference to a template
  * does not exist in the templates table.
  */
-export class NullTemplatePointerErr extends Error {
+export class NullTemplatePointerErr extends ErrorClass {
     constructor(public index: number) {
         super(`The index "${index}" does not exist in the Template table!`);
     }
 }
 
-export class NullFunctionPointerErr extends Error {
+export class NullFunctionPointerErr extends ErrorClass {
     constructor(public index: number) {
         super(`The index "${index}" does not exist in the function table!`);
     }
@@ -61,7 +65,7 @@ export class NullFunctionPointerErr extends Error {
 /**
  * JumpOutOfBoundsErr
  */
-export class JumpOutOfBoundsErr extends Error {
+export class JumpOutOfBoundsErr extends ErrorClass {
     constructor(
         public location: number,
         public size: number
@@ -73,7 +77,7 @@ export class JumpOutOfBoundsErr extends Error {
 /**
  * NullPointerErr
  */
-export class NullPointerErr extends Error {
+export class NullPointerErr extends ErrorClass {
     constructor(public data: number) {
         super(`Value: [${data.toString(16)}]`);
     }
@@ -82,7 +86,7 @@ export class NullPointerErr extends Error {
 /**
  * UnexpectedDataType
  */
-export class UnexpectedDataType extends Error {
+export class UnexpectedDataType extends ErrorClass {
     constructor(
         public expected: number,
         public got: number
@@ -97,7 +101,7 @@ export class UnexpectedDataType extends Error {
 /**
  * IllegalStopErr
  */
-export class IllegalStopErr extends Error {
+export class IllegalStopErr extends ErrorClass {
     constructor(
         public parent: string,
         public child: string
@@ -109,7 +113,7 @@ export class IllegalStopErr extends Error {
 /**
  * NoReceiverErr
  */
-export class NoReceiverErr extends Error {
+export class NoReceiverErr extends ErrorClass {
     constructor(public actor: string) {
         super(`Actor ${actor} tried to read a message without a receiver!`);
     }
@@ -118,7 +122,7 @@ export class NoReceiverErr extends Error {
 /**
  * NoMailboxErr
  */
-export class NoMailboxErr extends Error {
+export class NoMailboxErr extends ErrorClass {
     constructor(public actor: string) {
         super(`Actor ${actor} has no mailbox!`);
     }
@@ -127,7 +131,7 @@ export class NoMailboxErr extends Error {
 /**
  * EmptyMailboxErr
  */
-export class EmptyMailboxErr extends Error {
+export class EmptyMailboxErr extends ErrorClass {
     constructor() {
         super('Mailbox empty.');
     }
@@ -136,7 +140,7 @@ export class EmptyMailboxErr extends Error {
 /**
  * UnknownAddressErr
  */
-export class UnknownAddressErr extends Error {
+export class UnknownAddressErr extends ErrorClass {
     constructor(public actor: string) {
         super(`The system has no actor for address "${actor}"!`);
     }
@@ -145,7 +149,7 @@ export class UnknownAddressErr extends Error {
 /**
  * MissingSymbolErr
  */
-export class MissingSymbolErr extends Error {
+export class MissingSymbolErr extends ErrorClass {
     constructor(public index: number) {
         super(`Cannot locate symbol at index 0x${index.toString(16)}`);
     }
@@ -154,7 +158,7 @@ export class MissingSymbolErr extends Error {
 /**
  * IntegerOverflowErr
  */
-export class IntegerOverflowErr extends Error {
+export class IntegerOverflowErr extends ErrorClass {
     constructor() {
         super(`DATA_MAX_SAFE_UINT32=${DATA_MAX_SAFE_UINT32}`);
     }
@@ -163,7 +167,7 @@ export class IntegerOverflowErr extends Error {
 /**
  * StackEmptyErr
  */
-export class StackEmptyErr extends Error {
+export class StackEmptyErr extends ErrorClass {
     constructor() {
         super('Stack is empty.');
     }
@@ -172,7 +176,7 @@ export class StackEmptyErr extends Error {
 /**
  * InvalidPropertyIndex
  */
-export class InvalidPropertyIndex extends Error {
+export class InvalidPropertyIndex extends ErrorClass {
     constructor(
         public cons: TypeInfo,
         public idx: number
@@ -184,7 +188,7 @@ export class InvalidPropertyIndex extends Error {
 /**
  * MissingInfoErr
  */
-export class MissingInfoErr extends Error {
+export class MissingInfoErr extends ErrorClass {
     constructor(public idx: number) {
         super(`No info object index: ${idx}!`);
     }
@@ -193,7 +197,7 @@ export class MissingInfoErr extends Error {
 /**
  * InvalidConstructorErr
  */
-export class InvalidConstructorErr extends Error {
+export class InvalidConstructorErr extends ErrorClass {
     constructor(public name: string) {
         super(`Named object "${name}" cannot be used as a constructor!`);
     }
@@ -202,7 +206,7 @@ export class InvalidConstructorErr extends Error {
 /**
  * InvalidFunctionErr
  */
-export class InvalidFunctionErr extends Error {
+export class InvalidFunctionErr extends ErrorClass {
     constructor(public name: string) {
         super(`Named object "${name}" cannot be used as a function!`);
     }
@@ -211,7 +215,7 @@ export class InvalidFunctionErr extends Error {
 /**
  * UnknownInstanceErr
  */
-export class UnknownInstanceErr extends Error {
+export class UnknownInstanceErr extends ErrorClass {
     constructor(public instance: object) {
         super(
             'The instance provided with constructor "' +
@@ -224,7 +228,7 @@ export class UnknownInstanceErr extends Error {
 /**
  * UnknownFuncErr
  */
-export class UnknownFunErr extends Error {
+export class UnknownFunErr extends ErrorClass {
     constructor(public name: string) {
         super(`The function '${name}' does not exist and cannot be executed!`);
     }
@@ -233,8 +237,23 @@ export class UnknownFunErr extends Error {
 /**
  * InvalidThreadErr
  */
-export class InvalidThreadErr extends Error {
+export class InvalidThreadErr extends ErrorClass {
     constructor(public thread: Thread) {
         super('Thread is no longer part of the system or is invalid!');
     }
+}
+
+/**
+ * ActorTerminatedErr
+ *
+ * Note: This signals that an actor has been removed involuntarily due to an
+ * unhandled error.
+ */
+export class ActorTerminatedErr extends Error {
+  constructor(
+    public actor:Address,
+    public origin:Address, 
+    public originalError: Err
+  ) { super('ActorTerminated');}
+
 }
