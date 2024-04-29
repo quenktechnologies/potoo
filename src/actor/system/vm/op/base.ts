@@ -1,10 +1,7 @@
 import * as error from '../runtime/error';
 
-import { make } from '@quenk/noni/lib/data/array';
-
 import { Frame, DATA_MAX_SAFE_UINT32 } from '../frame';
 import { SharedThread } from '../thread/shared';
-import { ForeignFunInfo } from '../script/info';
 import { Operand } from '.';
 
 /**
@@ -158,11 +155,10 @@ export const call = (r: SharedThread, f: Frame, _: Operand) => {
     if (fn.foreign === true) {
         //TODO: This is unsafe but the extent of its effect on overall stability
         // should be compared to the time taken to ensure each value.
-        let args = make(fn.argc || 0, () => f.popValue().takeRight());
-
-        r.invokeForeign(f, <ForeignFunInfo>fn, args);
+        //    let args = make(fn.argc || 0, () => f.popValue().takeRight());
+        //       r.invokeForeign(f, <ForeignFunInfo>fn, args);
     } else {
-        r.invokeVM(f, fn);
+        //      r.invokeVM(f, fn);
     }
 };
 
