@@ -2,7 +2,6 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 
 import { Message } from '../../../message';
 import { Address } from '../../../address';
-import { Job } from '../scheduler';
 import { Runtime } from '../runtime';
 import { Platform } from '../';
 
@@ -58,7 +57,7 @@ export interface Thread extends Runtime {
      * This is called by the scheduler to execute one (and only one) job at a
      * time.
      */
-    resume(job: Job): void;
+    resume(): void;
 
     /**
      * die terminates the Thread.

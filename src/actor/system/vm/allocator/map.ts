@@ -10,7 +10,6 @@ import { Template } from '../../../template';
 import { Thread } from '../thread';
 import { Allocator } from './';
 import { SharedThread } from '../thread/shared';
-import { ScriptFactory } from '../scripts/factory';
 import { Platform } from '..';
 
 const MAX_WORKLOAD = 50;
@@ -35,7 +34,7 @@ export interface ActorTableEntry {
     /**
      * template used to create the actor.
      */
-    template: Template 
+    template: Template;
 
     /**
      * actor instance for the entry.
@@ -83,10 +82,16 @@ export class MapAllocator implements Allocator {
     }
 
     getTemplate(address: Address): Maybe<Template> {
-      return Maybe.fromNullable(this.actors.get(address)).map((entry: ActorTableEntry) => entry.template);
+        return Maybe.fromNullable(this.actors.get(address)).map(
+            (entry: ActorTableEntry) => entry.template
+        );
     }
 
-    allocate(vm: Platform, parent: Thread, template: Template): Future<Address> {
+    allocate(
+        vm: Platform,
+        parent: Thread,
+        template: Template
+    ): Future<Address> {
         return Future.do(async () => {
             let mparentEntry = this.getEntry(parent);
 
@@ -109,11 +114,7 @@ export class MapAllocator implements Allocator {
             if (this.actors.has(address))
                 return Future.raise(new errors.DuplicateAddressErr(address));
 
-            let thread = new SharedThread(
-                vm,
-                ScriptFactory.getScript(),
-                address
-            );
+            let thread = new SharedThread(vm, vm.scheduler, address);
 
             let actor = template.create(thread);
 
