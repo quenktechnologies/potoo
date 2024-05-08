@@ -53,7 +53,13 @@ export class SharedThread implements Thread {
         });
     }
 
+    _assertValid() {
+        if (!this.isValid()) throw new Error('ERR_THREAD_INVALID');
+    }
+
     notify(msg: Message) {
+        this._assertValid();
+
         this.mailbox.push(msg);
 
         if (this.state === ThreadState.MSG_WAIT) this.state = ThreadState.IDLE;
@@ -62,6 +68,8 @@ export class SharedThread implements Thread {
     }
 
     watch<T>(task: AsyncTask<T>) {
+        this._assertValid();
+
         let onError = (e: Error) => {
             this.raise(e);
         };
@@ -70,12 +78,14 @@ export class SharedThread implements Thread {
             // Keep the Scheduler going.
             this.scheduler.run();
         };
+
         Future.do(async () => {
             await (isFunction(task) ? task() : task);
         }).fork(onError, onSuccess);
     }
 
     wait<T>(task: AsyncTask<T>) {
+        this._assertValid();
         this.state = ThreadState.ASYNC_WAIT;
         this.watch(task);
     }
@@ -86,10 +96,12 @@ export class SharedThread implements Thread {
     }
 
     kill(address: Address): Future<void> {
+        this._assertValid();
         return this.vm.kill(this, address);
     }
 
     raise(e: Err) {
+        this._assertValid();
         this.state = ThreadState.ERROR;
         this.vm.raise(this, e).fork();
     }
@@ -152,6 +164,8 @@ export class SharedThread implements Thread {
     }
 
     die(): Future<void> {
+        this._assertValid();
+
         // TODO: dispatch event
         return Future.do(async () => {
             this.state = ThreadState.INVALID;
@@ -171,6 +185,8 @@ export class SharedThread implements Thread {
     }
 
     resume() {
+        this._assertValid();
+
         let task = this.queue.shift();
         if (task) {
             //TODO: dispatch event
