@@ -22,7 +22,7 @@ export const alloc = (thread: SharedThread, frame: Frame, _: Operand) => {
     //TODO: if(!isTemplateLike(tmpl)) return thread.raise(new Error('alloc: Cannot allocate non-template!'));
 
     //TODO: this is async
-    thread.vm.allocate(thread, <Template>tmpl);
+    thread.vm.allocateActor(thread, <Template>tmpl);
 
     /*
     if (eresult.isLeft()) {
@@ -55,7 +55,7 @@ export const send = (r: SharedThread, f: Frame, _: Operand) => {
 
     if (eAddr.isLeft()) return r.raise(eAddr.takeLeft());
 
-    r.vm.sendMessage(r, eAddr.takeRight(), eMsg.takeRight());
+    r.vm.sendActorMessage(r, eAddr.takeRight(), eMsg.takeRight());
 };
 
 /**
@@ -73,7 +73,7 @@ export const recv = (r: SharedThread, f: Frame, _: Operand) => {
 
     if (einfo.isLeft()) return r.raise(einfo.takeLeft());
 
-    r.watch(r.receive());
+    // r.watch(r.receive());
 };
 
 /**
@@ -122,5 +122,5 @@ export const stop = (r: SharedThread, f: Frame, _: Operand) => {
 
     if (eaddr.isLeft()) return r.raise(eaddr.takeLeft());
 
-    r.watch(r.kill(eaddr.takeRight()));
+    // r.watch(r.kill(eaddr.takeRight()));
 };

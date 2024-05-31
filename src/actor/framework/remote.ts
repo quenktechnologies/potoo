@@ -1,7 +1,7 @@
 import { Any } from '@quenk/noni/lib/data/type';
-import { Address } from '../address';
 
-import { Envelope } from '../mailbox';
+import { Address } from '../address';
+import { Message } from '..';
 
 export const CTRL_MSG_RAISE = 9;
 export const CTRL_MSG_SEND = 1;
@@ -37,8 +37,14 @@ export class Raise {
 /**
  * Send indicates a interest in sending a message.
  */
-export class Send extends Envelope {
+export class Send {
     code = CTRL_MSG_SEND;
+
+    constructor(
+        public from: Address,
+        public to: Address,
+        public message: Message
+    ) {}
 }
 
 /**

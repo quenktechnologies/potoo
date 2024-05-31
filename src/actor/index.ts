@@ -1,48 +1,35 @@
-import { Future } from '@quenk/noni/lib/control/monad/future';
-
-import { Message } from './message';
+import { Type } from '@quenk/noni/lib/data/type';
 
 /**
- * Eff is used in various places to represent the potentially sync or async
- * side-effect of an actor operation.
+ * Message is any (ideally wire-safe) value that can be sent between actors.
  */
-export type Eff = void | Future<void>;
+export type Message = Type;
 
 /**
- * Instance of an actor that resides within the system.
- *
- * The interface is implemented by actors to react to the lifecycle the
- * system takes them through.
+ * Actor is the main interface implemented by actors that are part of the system.
  */
-export interface Instance {
+export interface Actor {
     /**
-     * accept a message directly.
+     * start the Actor.
      *
-     * This method is used by actors that skip the mailbox.
-     */
-    accept(m: Message): void;
-
-    /**
-     * start the Instance.
-     *
-     * A Promise is returned here to make the method an async function.
-     * Actual execution will be handled via Futures.
+     * At this point resources have been allocated within the system for the
+     * actor and it can begin sending messages.
      */
     start(): Promise<void>;
 
     /**
-     * stop the Instance.
+     * notify is called when a message is received from another actor.
      *
-     * A Promise is returned here to make the method an async function.
-     * Actual execution will be handled via Futures.
+     * Some actors may process the message immediately, others may store it to
+     * a mailbox for later.
+     */
+    notify(m: Message): Promise<void>;
+
+    /**
+     * stop the Actor.
+     *
+     * A this point resources for the actor have been removed from the system
+     * and any additional clean up needed can be done.
      */
     stop(): Promise<void>;
 }
-
-/**
- * Actor common interface.
- *
- * The system expects all actors to satisfy this interface so they
- * can be managed properly.
- */
-export interface Actor extends Instance {}

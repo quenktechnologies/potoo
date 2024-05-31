@@ -2,22 +2,18 @@ import * as template from '../../template';
 import * as errors from './runtime/error';
 
 import { Err } from '@quenk/noni/lib/control/error';
+import { toError } from '@quenk/noni/lib/control/err';
 import { Future } from '@quenk/noni/lib/control/monad/future';
-import { isFunction } from '@quenk/noni/lib/data/type';
-import { merge, mapTo, isRecord } from '@quenk/noni/lib/data/record';
 
 import { Address, ADDRESS_SYSTEM, getParent, isChild } from '../../address';
-import { Template } from '../../template';
-import { Message } from '../../message';
-import { Actor } from '../../';
+import { fromSpawnable, Template } from '../../template';
+import { Actor, Message } from '../../';
+import { Api, Parent } from '../../api';
+import { MapAllocator } from './allocator/map';
 import { Thread, THREAD_STATE_IDLE } from './thread';
 import { GroupMap } from './groups';
-import { RouterMap } from './routers';
 import { Scheduler } from './scheduler';
 import { RegistrySet } from './registry';
-import { MapAllocator } from './allocator/map';
-
-const ID_RANDOM = `#?POTOORAND?#${Date.now()}`;
 
 export const MAX_WORKLOAD = 25;
 
@@ -27,7 +23,7 @@ export const MAX_WORKLOAD = 25;
  * It provides methods for manipulating the state of the actors of the system.
  * Some opcode handlers depend on this interface to do their work.
  */
-export interface Platform extends Actor {
+export interface Platform extends Actor, Parent, Api {
     /**
      * log service for the VM.
      *
@@ -42,42 +38,32 @@ export interface Platform extends Actor {
      */
     //events: EventSource;
 
-    /**
-     * scheduler used to manage the execution of VM threads.
-     */
-    scheduler: Scheduler;
-
-    /**
-     * registry for VM objects.
-     */
     registry: RegistrySet;
 
     /**
-     * allocate resources for an actor using the template provided.
+     * allocateActor resources for an actor using the template provided.
      */
-    allocate(parent: Thread, tmpl: template.Template): Future<Address>;
+    allocateActor(parent: Thread, tmpl: template.Template): Promise<Address>;
 
     /**
-     * sendMessage to an actor in the system.
+     * sendActorMessage sends a message to the destination actor.
      */
-    sendMessage(from: Thread, to: Address, msg: Message): void;
+    sendActorMessage(from: Thread, to: Address, msg: Message): void;
 
     /**
-     * spawn an top level actor using the system as its parent.
+     * raiseActorError in the target actor.
      */
-    spawn(tmpl: template.Spawnable): Future<Address>;
+    raiseActorError(src: Thread, error: Err): Promise<void>;
 
     /**
-     * kill terminates the actor at the specified address.
-     *
-     * The actor must be a child of parent to succeed.
+     * restartActor at the specified address.
      */
-    kill(src: Thread, target: Address): Future<void>;
+    restartActor(target: Address): Promise<void>;
 
     /**
-     * raise an exception within the system
+     * killActor at the specified address.
      */
-    raise(src: Thread, err: Err): Future<void>;
+    killActor(src: Thread, target: Address): Promise<void>;
 }
 
 /**
@@ -91,61 +77,85 @@ export interface Platform extends Actor {
 export class PVM implements Platform {
     constructor(
         public scheduler: Scheduler = new Scheduler(),
-        public routers = new RouterMap(),
         public groups = new GroupMap(),
         public registry = new RegistrySet(),
-        public allocator = new MapAllocator()
+        public allocator = new MapAllocator(scheduler),
+        public self = ADDRESS_SYSTEM
     ) {}
 
     /**
      * create a new PVM instance using the provided configuration.
      */
     static create(): PVM {
-        return new PVM();
+        return new PVM(); //TODO: add thread for system to allocator.
     }
 
-    accept() {
-        //TODO: events.OnRootMessage.dispatch();
-    }
+    // Actor
 
     async start() {}
 
-    notify() {}
+    //TODO: events.OnRootMessage.dispatch();
+    async notify() {}
 
+    //TODO: stop all actors?
     async stop() {}
 
-    spawn(tmpl: template.Spawnable): Future<Address> {
-        return Future.do(async () => {
-            return this.allocate(
-                this.allocator.getThread(ADDRESS_SYSTEM).get(),
-                normalize(tmpl)
-            );
-        });
+    // Api
+
+    async spawn(tmpl: template.Spawnable): Promise<Address> {
+        return this.allocateActor(
+            this.allocator.getThread(ADDRESS_SYSTEM).get(),
+            fromSpawnable(tmpl)
+        );
     }
 
-    allocate(parent: Thread, tmpl: Template): Future<Address> {
-        return Future.do(async () => {
-            let address = await this.allocator.allocate(this, parent, tmpl);
-
-            //TODO: this.events.actor.onCreated.dispatch(addr)
-            //this.events.publish(addr, events.EVENT_ACTOR_CREATED);
-
-            // TODO: Router support
-            // if (isRouter(thread.context.flags)) this.routers.set(addr, addr);
-
-            //TODO: This should happen before the actor is started.
-            if (tmpl.group) {
-                let groups = Array.isArray(tmpl.group)
-                    ? tmpl.group
-                    : [tmpl.group];
-                groups.forEach(group => this.groups.put(group, address));
-            }
-
-            return address;
-        });
+    async tell(to: Address, msg: Message) {
+        this.sendActorMessage(
+            this.allocator.getThread(ADDRESS_SYSTEM).get(),
+            to,
+            msg
+        );
     }
 
-    sendMessage(_: Thread, to: Address, msg: Message) {
+    async raise(err: Err) {
+        await this.raiseActorError(
+            this.allocator.getThread(ADDRESS_SYSTEM).get(),
+            err
+        );
+    }
+
+    async kill(addr: Address) {
+        await this.killActor(
+            this.allocator.getThread(ADDRESS_SYSTEM).get(),
+            addr
+        );
+    }
+
+    async receive<T>() {
+        return <Promise<T>>Future.raise(new Error('Not implemented'));
+    }
+
+    // Platform
+
+    async allocateActor(parent: Thread, tmpl: Template): Promise<Address> {
+        let address = await this.allocator.allocate(this, parent, tmpl);
+
+        //TODO: this.events.actor.onCreated.dispatch(addr)
+        //this.events.publish(addr, events.EVENT_ACTOR_CREATED);
+
+        // TODO: Router support
+        // if (isRouter(thread.context.flags)) this.routers.set(addr, addr);
+
+        //TODO: This should happen before the actor is started.
+        if (tmpl.group) {
+            let groups = Array.isArray(tmpl.group) ? tmpl.group : [tmpl.group];
+            groups.forEach(group => this.groups.put(group, address));
+        }
+
+        return address;
+    }
+
+    sendActorMessage(from: Thread, to: Address, msg: Message) {
         //TODO: this.events.actor.onSend.dispatch(from.context.address, to, msg);
         /*  this.events.publish(
             from.context.address,
@@ -155,11 +165,14 @@ export class PVM implements Platform {
             msg
         );*/
 
+        let msource = this.allocator.getThread(from.address);
+        if (msource.isNothing() || msource.get() !== from) return; //TODO: dispatch invalid send
+
         let mthread = this.allocator.getThread(to);
 
-        if (mthread.isJust()) {
-            mthread.get().notify(msg);
-        }
+        if (mthread.isNothing()) return; //TODO: dispatch invalid send dest.
+
+        mthread.get().notify(msg);
 
         //TODO: this.events.actor.onSendFailed.dispatch(from.context.address, to, msg);
         /*   this.events.publish(
@@ -178,109 +191,93 @@ export class PVM implements Platform {
         );*/
     }
 
-    raise(src: Thread, error: Err): Future<void> {
-        return Future.do(async () => {
-            let err = error;
+    async raiseActorError(src: Thread, error: Err) {
+        let prevThread;
 
-            let currentThread = src;
+        let err = error;
 
-            loop: while (true) {
-                let mtemplate = this.allocator.getTemplate(currentThread.address);
+        let currentThread = src;
 
-                if(mtemplate.isNothing())
-                //Suggests actor is not in the system anymore
-                //TODO: dispatch event.
-                break;                
+        let action = template.ACTION_RAISE;
 
-                let mparent = this.allocator.getThread(
-                    getParent(currentThread.address)
+        while (action === template.ACTION_RAISE) {
+            if (prevThread) {
+                await this.allocator.deallocate(prevThread);
+
+                prevThread = currentThread;
+
+                let mcurrentThread = this.allocator.getThread(
+                    getParent(prevThread.address)
                 );
 
-                let trap = mtemplate.get().trap ?? defaultTrap;
+                if (mcurrentThread.isNothing()) break;
 
-                switch (trap(err)) {
-                    case template.ACTION_IGNORE:
-                        // TODO: do this via a method. Like thread.resume()
-                        currentThread.state = THREAD_STATE_IDLE;
-                        break loop;
+                currentThread = mcurrentThread.get();
 
-                    case template.ACTION_RESTART:
-                        await this.allocator.deallocate(currentThread);
-                        await this.allocate(mparent.get(),
-                            this.allocator.getTemplate(currentThread.address).get()
-                        );
-                        break loop;
-
-                    case template.ACTION_STOP:
-                        await this.kill(currentThread, currentThread.address);
-                        break loop;
-
-                       if (currentThread.address === ADDRESS_SYSTEM) {
-                            // TODO
-                            // let action = this.conf.trap(err);
-                            // if (action === template.ACTION_IGNORE) break loop;
-
-                            if (err instanceof Error) throw err;
-
-                            throw new Error(err.message);
-                        }
-
-                        if (mparent.isNothing()) return; // parent is dead.
-
-                        currentThread = mparent.get();
-                        break loop;
-                }
-            }
-        });
-    }
-
-    kill(src: Thread, target: Address): Future<void> {
-        return Future.do(async () => {
-            if (!isChild(src.address, target)) {
-                return Future.raise(
-                    new errors.IllegalStopErr(src.address, target)
+                err = new errors.ActorTerminatedErr(
+                    currentThread.address,
+                    src.address,
+                    error
                 );
+            } else {
+                prevThread = currentThread;
             }
 
-            let mtargetThread = this.allocator.getThread(target);
+            let tmpl = this.allocator.getTemplate(currentThread.address).get();
 
-            //TODO: warn thread not found.
-            if (mtargetThread.isNothing()) return;
+            let trap = tmpl.trap ?? defaultTrap;
 
-            await this.allocator.deallocate(mtargetThread.get());
-        });
+            action = trap(err);
+        }
+
+        switch (action) {
+            case template.ACTION_IGNORE:
+                // TODO: do this via a method. Like thread.resume()
+                currentThread.state = THREAD_STATE_IDLE;
+                break;
+
+            case template.ACTION_RESTART:
+                await this.restartActor(currentThread.address);
+                break;
+
+            case template.ACTION_STOP:
+                await this.killActor(currentThread, currentThread.address);
+                break;
+
+            default:
+                throw toError(err);
+        }
     }
 
-    /**
-     * tell allows the VM to send a message to actors within the system.
-     *
-     * This delivers the message immediately to the actor and should not be used
-     * for regular communication. Instead use it to send messages from external
-     * operations such as event handlers etc.
-     */
-    tell<M>(to: Address, msg: M) {
-        this.sendMessage(
-            this.allocator.getThread(ADDRESS_SYSTEM).get(),
-            to,
-            msg
-        );
+    async restartActor(target: Address): Promise<void> {
+        let mtargetThread = this.allocator.getThread(target);
+        let mparent = this.allocator.getThread(getParent(target));
+
+        if (mtargetThread.isNothing())
+            return Future.raise(new errors.UnknownAddressErr(target));
+
+        if (mparent.isNothing())
+            return Future.raise(new errors.UnknownAddressErr(target));
+
+        let tmpl = this.allocator.getTemplate(target).get();
+
+        await this.allocator.deallocate(mtargetThread.get());
+
+        await this.allocateActor(mparent.get(), tmpl);
+    }
+
+    async killActor(src: Thread, target: Address): Promise<void> {
+        if (!isChild(src.address, target)) {
+            return Future.raise(new errors.IllegalStopErr(src.address, target));
+        }
+
+        let mtargetThread = this.allocator.getThread(target);
+
+        //TODO: warn thread not found.
+        if (mtargetThread.isNothing()) return;
+
+        await this.allocator.deallocate(mtargetThread.get());
     }
 }
-
-const normalize = (spawnable: template.Spawnable) => {
-    let tmpl = <Partial<Template>>(
-        (isFunction(spawnable) ? { create: spawnable } : spawnable)
-    );
-
-    tmpl.id = tmpl.id ? tmpl.id : ID_RANDOM;
-
-    return <Template>merge(tmpl, {
-        children: isRecord(tmpl.children)
-            ? mapTo(tmpl.children, (c, k) => merge(c, { id: k }))
-            : tmpl.children
-              ? tmpl.children
-              : []
-    });
-};
 
 const defaultTrap = () => template.ACTION_RAISE;

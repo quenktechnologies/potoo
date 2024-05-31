@@ -11,9 +11,8 @@ import { identity } from '@quenk/noni/lib/data/function';
 
 import { Template } from '../../../template';
 import { Address } from '../../../address';
-import { Message } from '../../../message';
 import { Task, Scheduler } from '../scheduler';
-import { AsyncTask } from '../runtime';
+import { Message } from '../../..';
 import { Platform } from '../';
 import { Thread, ThreadState } from './';
 
@@ -46,7 +45,9 @@ export class SharedThread implements Thread {
         );
     }
 
-    notify(msg: Message) {
+    async start() {}
+
+    async notify(msg: Message) {
         this._assertValid();
 
         this.mailbox.push(msg);
@@ -56,7 +57,9 @@ export class SharedThread implements Thread {
         this.scheduler.run();
     }
 
-    watch<T>(task: AsyncTask<T>) {
+    async stop() {}
+
+    watch<T>(task: () => Promise<T>) {
         this._assertValid();
 
         let onError = (e: Error) => {
@@ -74,43 +77,36 @@ export class SharedThread implements Thread {
         }).fork(onError, onSuccess);
     }
 
-    wait<T>(task: AsyncTask<T>) {
+    wait<T>(task: () => Promise<T>) {
         this._assertValid();
         this.state = ThreadState.ASYNC_WAIT;
         this.watch(task);
     }
 
-    exit() {
-        this.state = ThreadState.INVALID;
-        this.vm.kill(this, this.address).fork();
-    }
-
-    kill(address: Address): Future<void> {
+    async kill(address: Address): Promise<void> {
         this._assertValid();
-        return this.vm.kill(this, address);
+        await this.vm.killActor(this, address);
     }
 
-    die(): Future<void> {
+     die() {
         this._assertValid();
 
         // TODO: dispatch event
-        return Future.do(async () => {
-            this.state = ThreadState.INVALID;
-            this.scheduler.removeTasks(this);
-        });
+        this.state = ThreadState.INVALID;
+        this.scheduler.removeTasks(this);
     }
 
-    raise(e: Err) {
+    async raise(e: Err) {
         this._assertValid();
         this.state = ThreadState.ERROR;
-        this.vm.raise(this, e).fork();
+        await this.vm.raiseActorError(this, e);
     }
 
     spawn(tmpl: Template): Future<Address> {
         return Future.fromCallback(cb => {
             this.scheduler.postTask(
                 new Task(this, cb, async () => {
-                    let address = await this.vm.allocate(this, tmpl);
+                    let address = await this.vm.allocateActor(this, tmpl);
                     cb(null, address);
                 })
             );
@@ -121,7 +117,7 @@ export class SharedThread implements Thread {
         return Future.fromCallback(cb => {
             this.scheduler.postTask(
                 new Task(this, cb, async () => {
-                    await this.vm.sendMessage(this, addr, msg);
+                    await this.vm.sendActorMessage(this, addr, msg);
                     cb(null);
                 })
             );

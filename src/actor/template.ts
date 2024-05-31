@@ -1,13 +1,20 @@
 import { Err } from '@quenk/noni/lib/control/error';
-import { isFunction, Type } from '@quenk/noni/lib/data/type';
+import { isFunction } from '@quenk/noni/lib/data/type';
 
-import { Actor } from './';
 import { Runtime } from './system/vm/runtime';
+import { Actor } from './';
 
 export const ACTION_RAISE = -0x1;
 export const ACTION_IGNORE = 0x0;
 export const ACTION_RESTART = 0x1;
 export const ACTION_STOP = 0x2;
+
+/**
+ * TrapFunc is applied to unhandled errors raised by an actor.
+ *
+ * The result determines the action to take.
+ */
+export type TrapFunc = (e: Err) => TrapAction;
 
 /**
  * TrapAction represents each one of the actions that can be taken after
@@ -23,88 +30,56 @@ export const ACTION_STOP = 0x2;
 export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 
 /**
- * Cons is applied to produce an instance of an actor.
+ * CreateFunc receives a handle to the actor's resources and may optionally
+ * provide an object to serve as the actor within the system.
  */
-export type Cons = (runtime: Runtime) => Actor;
+export type CreateFunc = (runtime: Runtime) => Promise<Actor | void>;
 
 /**
- * DelayMilliseconds type.
+ * Spawnable allows a CreateFunc to be used in place of a Template.
  */
-export type DelayMilliseconds = number;
+export type Spawnable = Template | CreateFunc;
 
 /**
- * TrapFunction is applied to errors raised by an actor
- * to determine the action to take.
- */
-export type TrapFunc = (e: Err) => TrapAction;
-
-/**
- * Spawnable is anything that can be spawned by an actor.
- */
-export type Spawnable = Template | Cons;
-
-/**
- * Templates
- */
-export interface Templates {
-    [key: string]: Spawnable;
-}
-
-/**
- * Template of an actor.
+ * Template is an object that tells the system how to create an manage an
+ * actor.
  *
- * Actors are created using templates that describe how to spawn and manage them
- * to the system.
- *
- * The are the minimum amount of information required to create
- * a new actor instance.
+ * Every actor in the system is created from an initial template that is reused
+ * if the actor needs to be restarted.
  */
 export interface Template {
     /**
      * id of the actor used when constructing its address.
-     * If none is supplied, the system will generate one.
+     *
+     * Ids must be unique among the children of an actor but not necessary at
+     * the system level.
+     *
+     * If no id is supplied the system will generate one.
      */
     id?: string;
 
     /**
      * group assignment for the actor.
+     *
+     * Including an actor in a group allows for messages to be sent to one
+     * address but received by multiple actors.
      */
     group?: string | string[];
 
     /**
-     * create function.
-     */
-    create: Cons;
-
-    /**
-     * args are passed to the create function when creating a new instance.
+     * create is called at the point the actor's resources have been allocated.
      *
-     * This method of passing arguments is not type safe and care should be
-     * taken to ensure they are used properly in the create function.
+     * If an implementer of Actor is returned, it is used as the actor in the
+     * system.
      */
-    args?: Type[];
+    create: CreateFunc;
 
     /**
-     * trap is used to take action when the spanwed
-     * action encounters an error.
+     * trap is called when unhandled errors are detected.
+     *
+     * The result of this function determines the next action to take.
      */
     trap?: TrapFunc;
-
-    /**
-     * delay before invoking the actor's run method in milliseconds.
-     */
-    delay?: DelayMilliseconds;
-
-    /**
-     * restart flag indicates whether an actor should be automatically
-     * restarted after a normal exit.
-     */
-    restart?: boolean;
-
-    /**
-     * children is list of child actors that will automatically be spawned.
-     */
-    children?: Templates | Template[];
 }
 
 /**

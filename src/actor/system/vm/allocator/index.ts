@@ -1,4 +1,3 @@
-import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 
 import { Platform } from '..';
@@ -24,10 +23,10 @@ export interface Allocator {
     /**
      * allocate a new thread from a Template.
      */
-    allocate(vm: Platform, parent: Thread, tmpl: Template): Future<Address>;
+    allocate(vm: Platform, parent: Thread, tmpl: Template): Promise<Address>;
 
     /**
      * deallocate resources for a Thread.
      */
-    deallocate(target: Thread): Future<void>;
+    deallocate(target: Thread): Promise<void>;
 }

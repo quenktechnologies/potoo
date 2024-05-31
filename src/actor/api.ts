@@ -1,29 +1,28 @@
 import { Err } from '@quenk/noni/lib/control/error';
-import { Future, Task } from '@quenk/noni/lib/control/monad/future';
 
 import { Address } from './address';
 import { Spawnable } from './template';
+import { Message } from '.';
+import { TypeCase } from '@quenk/noni/lib/control/match/case';
 
 /**
- * Parent is anything that can spawn an actor.
+ * Parent is any object capable of spawning a child actor.
  */
 export interface Parent {
     /**
      * spawn an actor give its template.
      */
-    spawn(t: Spawnable): Future<Address>;
+    spawn(t: Spawnable): Promise<Address>;
 }
 
 /**
- * AsyncTask is an operation that will be executed asynchronously.
- */
-export type AsyncTask<T> = Future<T> | Task<T>;
-
-/**
- * Api is the interface used by actors to interact with the rest of the system.
+ * Api is the interface provided by objects that can send/receive messages to
+ * actors within the system.
  *
- * The three main methods here are the spawn(), tell(), and receive()
- * methods that form the basis of message processing and communication.
+ * This interface is separate from the Actor interface because the system is
+ * not directly concerned with their implementation. Instead, they exist to
+ * provide a way for user land code to interact with other actors within the
+ * system.
  */
 export interface Api extends Parent {
     /*
@@ -32,31 +31,27 @@ export interface Api extends Parent {
     self: Address;
 
     /**
-     * tell a message to an actor address.
+     * raise an error triggering the system's error handling machinery.
      */
-    tell<M>(ref: string, m: M): Future<void>;
-
-    /**
-     * watch an asynchronous task feeding any errors into the VM's
-     * error handling machinery.
-     *
-     * This method exists to allow async operations to trigger the Thread's
-     * error handling code. It does not block the execution of the Thread.
-     */
-    watch<T>(task: AsyncTask<T>): void;
-
-    /**
-     * raise an error triggering the systems error handling mechanism.
-     */
-    raise(e: Err): void;
+    raise(e: Err): Promise<void>;
 
     /**
      * kill sends a stop signal to a child actor.
+     *
+     * An actor can only specify itself or a child as the target.
      */
-    kill(addr: Address): Future<void>;
+    kill(target: Address): Promise<void>;
 
     /**
-     * exit the actor from the system.
+     * tell a message to an actor address.
      */
-    exit(): void;
+    tell(ref: string, msg: Message): Promise<void>;
+
+    /**
+     * receive a message from the actor's mailbox.
+     *
+     * If TypeCases are provided, the message will be matched against them
+     * first and the result provided.
+     */
+    receive<T>(cases?: TypeCase<T>[]): Promise<T>;
 }

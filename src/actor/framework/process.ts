@@ -1,25 +1,19 @@
 import { resolve } from 'path';
 import { ChildProcess, fork } from 'child_process';
 
+import { Path } from '@quenk/noni/lib/data/record/path';
 import { match } from '@quenk/noni/lib/control/match';
 import { just, Maybe, nothing } from '@quenk/noni/lib/data/maybe';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { Type } from '@quenk/noni/lib/data/type';
 import { empty } from '@quenk/noni/lib/data/array';
 
-import { Runtime } from '../../system/vm/runtime';
-import { Envelope } from '../../mailbox';
-import { Message } from '../../message';
-import { Address, ADDRESS_DISCARD, getId } from '../../address';
-import { Actor } from '../../';
-import { Raise, RemoteError, Send, shapes } from '..';
+import { Address, ADDRESS_DISCARD, getId } from '../address';
+import { Actor, Message } from '../';
+import { Runtime } from '../system/vm/runtime';
+import { Raise, RemoteError, Send, shapes } from './remote';
 
-export const SCRIPT_PATH = `${__dirname}/../../../actor/remote/process/script.js`;
-
-/**
- * Path to the actor process.
- */
-export type Path = string;
+export const SCRIPT_PATH = `${__dirname}/../../actor/remote/process/script.js`;
 
 /**
  * Handle to a node process.
@@ -93,7 +87,7 @@ export class Process implements Actor {
                     this.runtime.raise(err);
                 })
 
-                .caseOf(shapes.send, (m: Envelope) => {
+                .caseOf(shapes.send, (m: { to: Address; message: Message }) => {
                     this.runtime.watch(() =>
                         this.runtime.tell(m.to, m.message)
                     );
@@ -107,19 +101,15 @@ export class Process implements Actor {
 
         handle.on('exit', () => {
             this.handle = nothing();
-            this.runtime.exit();
+            this.runtime.kill(this.runtime.self);
         });
 
         return handle;
     }
 
-    accept(e: Envelope): Process {
-        if (this.handle.isJust()) this.handle.get().send(e);
-
-        return this;
+    async notify(msg: Message) {
+        if (this.handle.isJust()) this.handle.get().send(msg);
     }
-
-    notify() {}
 
     async stop() {
         if (this.handle.isJust()) this.handle.get().kill();
@@ -133,63 +123,6 @@ export class Process implements Actor {
                     POTOO_ACTOR_ID: getId(addr),
 
                     POTOO_ACTOR_ADDRESS: addr
-                }
-            })
-        );
-    }
-}
-
-/**
- * VMProcess spawns a child VM in a new Node.js process.
- *
- * This is different to the [[Process]] actor because it allows the child
- * process to maintain its own tree of actors, routing messaging between
- * it and the main process's VM.
- *
- * The sub-VM is created and setup via a script file local to this module.
- *
- * The child process will have access to the following environment variables:
- *
- * 1. POTOO_ACTOR_ID -      The id of the VMProcess actor's template. This
- *                          should be used as the id for the actor first actor
- *                          spawned.
- *
- * 2. POTOO_ACTOR_ADDRESS   The full address of the VMProcess in the parent VM.
- * 3. POTOO_ACTOR_MODULE    The path to a node module whose default export is a
- *                          function receiving a vm instance that produces a
- *                          template or list of templates to spawn.
- * 4. POTOO_PVM_CONF        A JSON.stringify() version of the main VM's conf.
- */
-export class VMProcess extends Process {
-    /**
-     * @param runtime    - The actor runtime.
-     * @param module     - A path to a module that exports a system() function
-     *                     that provides the System instance and a property
-     *                     "spawnable" that is a Spawnable that will be spawned.
-     *                     that will be spawned serving as the first actor.
-     * @param [script]   - This is the script used to setup the child VM, it can
-     *                     be overridden for a custom implementation.
-     */
-    constructor(
-        public runtime: Runtime,
-        public module: Path,
-        public script = SCRIPT_PATH
-    ) {
-        super(runtime, script);
-    }
-
-    async start() {
-        let addr = this.runtime.self;
-        this.handle = just(
-            this.spawnChildProcess({
-                env: {
-                    POTOO_ACTOR_ID: getId(addr),
-
-                    POTOO_ACTOR_ADDRESS: addr,
-
-                    POTOO_ACTOR_MODULE: this.module,
-
-                    POTOO_PVM_CONF: process.env.POTOO_PVM_CONF
                 }
             })
         );
@@ -233,7 +166,7 @@ export const self = process.env.POTOO_ACTOR_ADDRESS || ADDRESS_DISCARD;
  * parent process.
  */
 export const tell = <M>(to: Address, msg: M) =>
-    (<Function>process.send)(new Send(to, self, msg));
+    (<Function>process.send)(new Send(self, to, msg));
 
 type Handler = (value: Type) => void;
 

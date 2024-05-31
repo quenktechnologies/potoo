@@ -11,7 +11,7 @@ import { Thread } from '../thread';
 export class ErrorClass {
     constructor(public message: string) {}
 
-    stack?: string
+    stack?: string;
 }
 
 /**
@@ -250,10 +250,11 @@ export class InvalidThreadErr extends ErrorClass {
  * unhandled error.
  */
 export class ActorTerminatedErr extends Error {
-  constructor(
-    public actor:Address,
-    public origin:Address, 
-    public originalError: Err
-  ) { super('ActorTerminated');}
-
+    constructor(
+        public actor: Address,
+        public origin: Address,
+        public originalError: Err
+    ) {
+        super('ActorTerminated');
+    }
 }

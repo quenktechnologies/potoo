@@ -1,21 +1,12 @@
-import { TypeCase } from '@quenk/noni/lib/control/match/case';
-import { Future, Task } from '@quenk/noni/lib/control/monad/future';
-import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Platform } from '.';
-
 import { Api } from '../../api';
-import { Data } from './frame';
-
-/**
- * AsyncTask is an operation that will be executed asynchronously.
- */
-export type AsyncTask<T> = Future<T> | Task<T>;
+import { Actor } from '../..';
+import { Platform } from '.';
 
 /**
  * Runtime is the interface used by the outside world (JS) to execute code
  * in the VM.
  */
-export interface Runtime extends Api {
+export interface Runtime extends Actor, Api {
     /**
      * vm the Runtime belongs to.
      */
@@ -30,19 +21,11 @@ export interface Runtime extends Api {
     isValid(): boolean;
 
     /**
-     * receive a message from the actor's mailbox.
+     * watch an asynchronous task, feeding any errors into the VM's
+     * error handling machinery.
      *
-     * If TypeCases are provided, the message will be matched against them
-     * first and the result provided.
+     * This method exists to allow async operations to trigger the error
+     * handling machinery built into the VM.
      */
-    receive<T>(cases?: TypeCase<T>[]): Future<T>;
-
-    /**
-     * exec a function by name within the Runtime.
-     *
-     * A FunInfo with a corresponding name must already exist within the
-     * actor's script. The results are provided wrapped in a Maybe with a
-     * Nothing value meaning no value was returned.
-     */
-    exec<T>(name: string, args?: Data[]): Future<Maybe<T>>;
+    watch<T>(task: () => Promise<T>): void;
 }

@@ -1,9 +1,7 @@
-import { Future } from '@quenk/noni/lib/control/monad/future';
-
-import { Message } from '../../../message';
 import { Address } from '../../../address';
 import { Runtime } from '../runtime';
 import { Platform } from '../';
+import { Actor } from '../../..';
 
 export const THREAD_STATE_IDLE = 0;
 export const THREAD_STATE_RUN = 1;
@@ -28,9 +26,10 @@ export enum ThreadState {
  * Thread is an execution context for a single actor.
  *
  * These are not actual OS or green threads but rather an abstraction simulating
+ * k
  * one.
  */
-export interface Thread extends Runtime {
+export interface Thread extends Actor, Runtime {
     /**
      * vm the Thread belongs to.
      */
@@ -47,20 +46,7 @@ export interface Thread extends Runtime {
     state: ThreadState;
 
     /**
-     * notify the Thread of a new message.
+     * die terminates the Thread by marking it invalid.
      */
-    notify(msg: Message): void;
-
-    /**
-     * resume executes a Job on the Thread.
-     *
-     * This is called by the scheduler to execute one (and only one) job at a
-     * time.
-     */
-    resume(): void;
-
-    /**
-     * die terminates the Thread.
-     */
-    die(): Future<void>;
+    die(): void
 }

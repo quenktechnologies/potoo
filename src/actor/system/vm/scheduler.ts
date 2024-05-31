@@ -1,67 +1,109 @@
-import { remove } from '@quenk/noni/lib/data/array';
-
 import { Thread, ThreadState } from './thread';
+
+export const ERR_THREAD_DEQUEUED = 'ERR_THREAD_DEQUEUED';
+
+/**
+ * PendingTask tuple type.
+ */
+export type PendingTask = [Thread, (err?: Error) => void];
+
+export class Task {
+    constructor(
+        public thread: Thread,
+        public abort: (err: Error) => void,
+        public exec: () => Promise<void>
+    ) {}
+}
 
 /**
  * Scheduler provides a mechanism for cooperative execution between Thread
  * instances within the VM.
  *
- * Each Thread enqueues itself one or more times when it has work to do. The
- * Scheduler then calls the resume() method of each in a round-robin fashion
- * until the queue is either empty or has no idle Threads.
- *
- * The Scheduler does not wait on a Thread to finish before moving on to the
- * next one. Instead it only calls resulme() on Threads that are in the IDLE
- * state.
+ * Each Thread enqueues a Task to be executed each time it has work to do.
+ * The Scheduler.run() method will execute each of these tasks in a round-robin
+ * fashion until the queue is empty or no Threads are in the IDLE state.
  *
  * In prior versions, Threads executed code at will which made it possible
- * for actor state to be mutated while still depended on (when an actor sends a
- * message to itself for example). This created hard to debug errors.
+ * for a single actor's state to be mutated while a previous tasks still executed
+ * (when an actor sends a  message to itself for example).
  *
- * By using a scheduler we can ensure that a thread does not ever preempt itself.
+ * This led to errors and bugs that were hard to track down. By using scheduling
+ * execution we ensure threads do not preempt themselves.
  */
 export class Scheduler {
-    constructor(public queue: Thread[] = []) {}
-
-    _running = false;
+    constructor(
+        public queue: Task[] = [],
+        public isRunning = false
+    ) {}
 
     /**
-     * enqueue a Thread for future execution.
+     * postTask a Task for future execution.
+     * @param task    - The Task to post.
+     * @param preempt - If true, the task will be executed before any other
+     *                  tasks in the queue belonging to the Thread.
      */
-    enqueue(thread: Thread) {
-        this.queue.push(thread);
+    postTask(task: Task, preempt = false) {
+        if (preempt) {
+            let idx = this.queue.findIndex(
+                ({ thread }) => thread === task.thread
+            );
+            if (idx != -1) {
+                this.queue.splice(idx, 0, task);
+            } else {
+                this.queue.push(task);
+            }
+        } else {
+            this.queue.push(task);
+        }
+
         this.run();
     }
 
     /**
-     * dequeue a Thread removing all positions it held in the queue.
+     * removeTasks for a Thread.
+     *
+     * The Tasks will be terminated with an ERR_THREAD_DEQUEUED error.
      */
-    dequeue(thread: Thread) {
-        this.queue = remove(this.queue, thread);
-        // TODO: dispatch event? callback into thread?
+    removeTasks(thread: Thread) {
+        this.queue = this.queue.filter(task => {
+            if (task.thread != thread) return true;
+            // TODO: dispatch event? callback into thread?
+            task.abort(new Error(ERR_THREAD_DEQUEUED));
+        });
     }
 
     /**
-     * run resumes each idle thread in the queue in order.
+     * run queued pending tasks for idle threads.
      *
-     * This method is idempotent and can be called as many times as needed.
+     * This method only executes if the scheduler is not already running. It
+     * does not wait for tasks to be completed before moving on to the next
+     * however once a thread is not in the idle state no other tasks will
+     * be executed for it.
      */
     run() {
-        if (this._running) return;
+        if (this.isRunning) return;
 
-        this._running = true;
+        this.isRunning = true;
 
         let idx;
         while (
             (idx = this.queue.findIndex(
-                thread => thread.state === ThreadState.IDLE
-            )) !== -1
+                task => task.thread.state === ThreadState.IDLE
+            ))
         ) {
-            //TODO: dispatch event.
-            this.queue[idx].resume();
-            this.queue.splice(idx, 1);
+            let task = this.queue.splice(idx, 1)[0];
+
+            task.thread.state = ThreadState.RUNNING;
+
+            // TODO: disatch event
+            task.exec()
+                .then(() => {
+                    if (task.thread.state === ThreadState.RUNNING)
+                        task.thread.state = ThreadState.IDLE;
+                })
+                .catch(err => task.abort(err));
         }
 
-        this._running = false;
+        this.isRunning = false;
     }
 }

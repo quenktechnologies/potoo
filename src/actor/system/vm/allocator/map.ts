@@ -4,15 +4,16 @@ import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { distribute, empty } from '@quenk/noni/lib/data/array';
 
-import { Instance } from '../../..';
 import { Address, isRestricted, make } from '../../../address';
 import { Template } from '../../../template';
-import { Thread } from '../thread';
-import { Allocator } from './';
 import { SharedThread } from '../thread/shared';
+import { Thread } from '../thread';
+import { Actor } from '../../..';
 import { Platform } from '..';
+import { Allocator } from './';
+import { Scheduler } from '../scheduler';
 
-const MAX_WORKLOAD = 50;
+const MAX_THREAD_KILL_PER_CYCLE = 25;
 
 /**
  * ActorTableEntry is the bookkeeping record for exactly one actor within the
@@ -39,7 +40,7 @@ export interface ActorTableEntry {
     /**
      * actor instance for the entry.
      */
-    actor: Instance;
+    actor: Actor;
 
     /**
      * thread for the entry.
@@ -58,6 +59,7 @@ export interface ActorTableEntry {
  */
 export class MapAllocator implements Allocator {
     constructor(
+        public scheduler: Scheduler,
         public actors = new Map(),
         public nextAID = 1
     ) {}
@@ -87,99 +89,96 @@ export class MapAllocator implements Allocator {
         );
     }
 
-    allocate(
+    async allocate(
         vm: Platform,
         parent: Thread,
         template: Template
-    ): Future<Address> {
-        return Future.do(async () => {
-            let mparentEntry = this.getEntry(parent);
+    ): Promise<Address> {
+        let mparentEntry = this.getEntry(parent);
 
-            if (mparentEntry.isNothing())
-                return Future.raise(new errors.InvalidThreadErr(parent));
+        if (mparentEntry.isNothing())
+            return Future.raise(new errors.InvalidThreadErr(parent));
 
-            let parentEntry = mparentEntry.get();
+        let parentEntry = mparentEntry.get();
 
-            let aid = this.nextAID++;
+        let aid = this.nextAID++;
 
-            let consName = parentEntry.actor.constructor.name.toLowerCase();
+        let consName = parentEntry.actor.constructor.name.toLowerCase();
 
-            let id = template.id ?? `instance::${consName}::aid::${aid}`;
+        let id = template.id ?? `instance::${consName}::aid::${aid}`;
 
-            if (isRestricted(<string>id))
-                return Future.raise(new errors.InvalidIdErr(id));
+        if (isRestricted(<string>id))
+            return Future.raise(new errors.InvalidIdErr(id));
 
-            let address = make(parentEntry.address, id);
+        let address = make(parentEntry.address, id);
 
-            if (this.actors.has(address))
-                return Future.raise(new errors.DuplicateAddressErr(address));
+        if (this.actors.has(address))
+            return Future.raise(new errors.DuplicateAddressErr(address));
 
-            let thread = new SharedThread(vm, vm.scheduler, address);
+        let thread = new SharedThread(vm, this.scheduler, address);
 
-            let actor = template.create(thread);
+        // XXX: Note a rejected promise here will crash the system.
+        let returnedActor = await template.create(thread);
 
-            let entry = {
-                address,
-                parent: mparentEntry,
-                thread,
-                template,
-                actor,
-                children: []
-            };
+        let actor = returnedActor ?? thread;
 
-            this.actors.set(address, entry);
+        let entry = {
+            address,
+            parent: mparentEntry,
+            thread,
+            template,
+            actor: actor ?? thread,
+            children: []
+        };
 
-            parentEntry.children.push(entry);
+        this.actors.set(address, entry);
 
-            thread.watch(() => actor.start());
+        parentEntry.children.push(entry);
 
-            return address;
-        });
+        thread.watch(() => actor.start());
+
+        return address;
     }
 
-    deallocate(target: Thread): Future<void> {
-        return Future.do(async () => {
-            let mentry = this.getEntry(target);
+    async deallocate(target: Thread): Promise<void> {
+        let mentry = this.getEntry(target);
 
-            if (mentry.isNothing()) return;
+        if (mentry.isNothing()) return; //TODO: dispatch event
 
-            let entry = mentry.get();
+        let entry = mentry.get();
 
-            // Remove the subtree from the system.
-            entry.parent.map(parent => {
-                parent.children = parent.children.filter(
-                    child => child !== entry
-                );
-            });
-
-            let targets = [entry];
-
-            let pending = entry.children.slice();
-
-            while (!empty(pending)) {
-                let target = <ActorTableEntry>pending.shift();
-
-                pending = [...pending, ...target.children];
-
-                targets.unshift(target);
-            }
-
-            await Future.batch(
-                distribute(
-                    targets.map(target =>
-                        Future.do(async () => {
-                            target.thread.die();
-
-                            await target.actor.stop();
-
-                            this.actors.delete(target.address);
-
-                            // TODO: dispatch event
-                        })
-                    ),
-                    MAX_WORKLOAD
-                )
-            );
+        // Remove the subtree from the system.
+        entry.parent.map(parent => {
+            parent.children = parent.children.filter(child => child !== entry);
         });
+
+        let targets = [entry];
+
+        let pending = entry.children.slice();
+
+        while (!empty(pending)) {
+            let target = <ActorTableEntry>pending.shift();
+
+            pending = [...pending, ...target.children];
+
+            targets.unshift(target);
+        }
+
+        await Future.batch(
+            distribute(
+                targets.map(target =>
+                    Future.do(async () => {
+                        await target.actor.stop();
+
+                         target.thread.die();
+
+                        this.actors.delete(target.address);
+
+                        // TODO: dispatch event
+                    })
+                ),
+                MAX_THREAD_KILL_PER_CYCLE
+            )
+        );
     }
 }
