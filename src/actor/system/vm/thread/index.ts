@@ -48,5 +48,5 @@ export interface Thread extends Actor, Runtime {
     /**
      * die terminates the Thread by marking it invalid.
      */
-    die(): void
+    die(): void;
 }

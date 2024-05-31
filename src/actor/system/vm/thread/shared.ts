@@ -88,9 +88,7 @@ export class SharedThread implements Thread {
         await this.vm.killActor(this, address);
     }
 
-     die() {
-        this._assertValid();
-
+    die() {
         // TODO: dispatch event
         this.state = ThreadState.INVALID;
         this.scheduler.removeTasks(this);

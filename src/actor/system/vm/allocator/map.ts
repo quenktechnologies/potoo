@@ -170,7 +170,7 @@ export class MapAllocator implements Allocator {
                     Future.do(async () => {
                         await target.actor.stop();
 
-                         target.thread.die();
+                        target.thread.die();
 
                         this.actors.delete(target.address);
 
