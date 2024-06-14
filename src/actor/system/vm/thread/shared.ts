@@ -1,7 +1,6 @@
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { empty } from '@quenk/noni/lib/data/array';
-import { isFunction } from '@quenk/noni/lib/data/type';
 import {
     CaseFunction,
     Default,
@@ -17,6 +16,8 @@ import { Platform } from '../';
 import { Thread, ThreadState } from './';
 
 const defaultCases = [new Default(identity)];
+
+export const E_INVALID = 'ERR_THREAD_INVALID';
 
 /**
  * SharedThread is used by actors that run in the same event loop as the VM.
@@ -35,7 +36,7 @@ export class SharedThread implements Thread {
     readonly self = this.address;
 
     _assertValid() {
-        if (!this.isValid()) throw new Error('ERR_THREAD_INVALID');
+        if (!this.isValid()) throw new Error(E_INVALID);
     }
 
     isValid() {
@@ -59,32 +60,14 @@ export class SharedThread implements Thread {
 
     async stop() {}
 
-    watch<T>(task: () => Promise<T>) {
+    async watch<T>(task: () => Promise<T>) {
         this._assertValid();
-
-        let onError = (e: Error) => {
-            this.raise(e);
-        };
-
-        let onSuccess = () => {
-            this.state = ThreadState.IDLE;
-            // Keep the Scheduler going.
-            this.scheduler.run();
-        };
-
-        Future.do(async () => {
-            await (isFunction(task) ? task() : task);
-        }).fork(onError, onSuccess);
-    }
-
-    wait<T>(task: () => Promise<T>) {
-        this._assertValid();
-        this.state = ThreadState.ASYNC_WAIT;
-        this.watch(task);
+        await Future.do(task).catch(err => this.raise(err));
     }
 
     async kill(address: Address): Promise<void> {
         this._assertValid();
+        this.state = ThreadState.INVALID;
         await this.vm.killActor(this, address);
     }
 
@@ -100,8 +83,9 @@ export class SharedThread implements Thread {
         await this.vm.raiseActorError(this, e);
     }
 
-    spawn(tmpl: Template): Future<Address> {
-        return Future.fromCallback(cb => {
+    async spawn(tmpl: Template): Promise<Address> {
+        this._assertValid();
+        let result = await Future.fromCallback<Address>(cb => {
             this.scheduler.postTask(
                 new Task(this, cb, async () => {
                     let address = await this.vm.allocateActor(this, tmpl);
@@ -109,10 +93,12 @@ export class SharedThread implements Thread {
                 })
             );
         });
+        return result;
     }
 
-    tell(addr: Address, msg: Message): Future<void> {
-        return Future.fromCallback(cb => {
+    async tell(addr: Address, msg: Message): Promise<void> {
+        this._assertValid();
+        await Future.fromCallback(cb => {
             this.scheduler.postTask(
                 new Task(this, cb, async () => {
                     await this.vm.sendActorMessage(this, addr, msg);
@@ -122,8 +108,9 @@ export class SharedThread implements Thread {
         });
     }
 
-    receive<T = Message>(cases: TypeCase<T>[] = []): Future<T> {
-        return Future.fromCallback<T>(cb => {
+    async receive<T = Message>(cases: TypeCase<T>[] = []): Promise<T> {
+        this._assertValid();
+        let msg = await Future.fromCallback<T>(cb => {
             // TODO dispatch message received / wait event
             let matcher = new CaseFunction(empty(cases) ? defaultCases : cases);
             let task = new Task(this, cb, async () => {
@@ -145,5 +132,6 @@ export class SharedThread implements Thread {
 
             this.scheduler.postTask(task);
         });
+        return msg;
     }
 }

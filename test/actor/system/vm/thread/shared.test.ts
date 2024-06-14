@@ -2,12 +2,13 @@ import { expect, jest } from '@jest/globals';
 
 import { mockDeep } from 'jest-mock-extended';
 
-import { delay, Future, wait } from '@quenk/noni/lib/control/monad/future';
+import { Future, wait } from '@quenk/noni/lib/control/monad/future';
 
 import { Platform } from '../../../../../lib/actor/system/vm';
 import { Scheduler } from '../../../../../lib/actor/system/vm/scheduler';
 import { ThreadState } from '../../../../../lib/actor/system/vm/thread';
 import { SharedThread } from '../../../../../lib/actor/system/vm/thread/shared';
+import { Actor } from '../../../../../lib/actor';
 
 describe('shared', () => {
     let platform = mockDeep<Platform>();
@@ -17,8 +18,8 @@ describe('shared', () => {
         jest.resetAllMocks();
     });
 
-    beforeEach(()=> {
-      scheduler.postTask.mockImplementation((task) => task.exec())
+    beforeEach(() => {
+        scheduler.postTask.mockImplementation(task => task.exec());
     });
 
     describe('notify', () => {
@@ -48,25 +49,17 @@ describe('shared', () => {
     });
 
     describe('watch', () => {
-        it('should run the task', async () => {
-            let thread = new SharedThread(platform, scheduler, '/');
-
-            let value = await new Promise(resolve =>
-                thread.watch(delay(() => resolve(12)))
-            );
-
-            expect(value).toBe(12);
-            expect(thread.state).toBe(ThreadState.IDLE);
-        });
-
         it('should work with async functions', async () => {
             let thread = new SharedThread(platform, scheduler, '/');
 
-            let value = await new Promise(resolve =>
-                thread.watch(async () => resolve(12))
-            );
+            let value = 0;
+
+            await thread.watch(async () => {
+                value = 12;
+            });
 
             expect(value).toBe(12);
+
             expect(thread.state).toBe(ThreadState.IDLE);
         });
 
@@ -77,24 +70,21 @@ describe('shared', () => {
                     throw error;
                 },
                 () => Promise.reject(error),
-                Future.raise(error)
+                () => Future.raise(error)
             ]) {
                 let thread = new SharedThread(platform, scheduler, '/');
                 let threadReceived;
                 let errorReceived;
-                await new Promise<void>(resolve => {
-                    platform.raise.mockImplementation((thread, error) => {
+
+                platform.raiseActorError.mockImplementation(
+                    async (thread, error) => {
                         threadReceived = thread;
                         errorReceived = error;
-                        let mockFuture = mockDeep<Future<void>>();
-                        mockFuture.fork.mockImplementation(() => {
-                            resolve();
-                        });
-                        return mockFuture;
-                    });
+                    }
+                );
 
-                    thread.watch(spec);
-                });
+                await thread.watch(spec);
+
                 expect(threadReceived).toBe(thread);
                 expect(errorReceived).toBe(error);
                 expect(thread.state).toBe(ThreadState.ERROR);
@@ -102,25 +92,18 @@ describe('shared', () => {
         });
     });
 
-    describe('exit', () => {
+    describe('kill', () => {
         it('should kill the thread', async () => {
             let thread = new SharedThread(platform, scheduler, '/');
             let threadReceived;
             let targetReceived;
 
-            await new Promise<void>(resolve => {
-                platform.kill.mockImplementation((thread, target) => {
-                    threadReceived = thread;
-                    targetReceived = target;
-
-                    let mockFuture = mockDeep<Future<void>>();
-                    mockFuture.fork.mockImplementation(() => {
-                        resolve();
-                    });
-                    return mockFuture;
-                });
-              thread.exit();
+            platform.killActor.mockImplementation(async (thread, target) => {
+                threadReceived = thread;
+                targetReceived = target;
             });
+
+            await thread.kill('/');
 
             expect(thread.state).toBe(ThreadState.INVALID);
             expect(threadReceived).toBe(thread);
@@ -128,92 +111,102 @@ describe('shared', () => {
         });
     });
 
-  describe('raise',  () => {
-    it('should raise an error', async () => {
-      let thread = new SharedThread(platform, scheduler, '/');
-      let threadReceived;
-      let errorReceived;
+    describe('raise', () => {
+        it('should raise an error', async () => {
+            let thread = new SharedThread(platform, scheduler, '/');
+            let threadReceived;
+            let errorReceived;
 
-      await new Promise<void>(resolve => {
-        platform.raise.mockImplementation((thread, error) => {
-          threadReceived = thread;
-          errorReceived = error;
+            platform.raiseActorError.mockImplementation(
+                async (thread, error) => {
+                    threadReceived = thread;
+                    errorReceived = error;
+                }
+            );
 
-          let mockFuture = mockDeep<Future<void>>();
-          mockFuture.fork.mockImplementation(() => {
-            resolve();
-          });
-          return mockFuture;
+            await thread.raise(new Error('fail'));
+
+            expect(threadReceived).toBe(thread);
+            expect(errorReceived).toBeInstanceOf(Error);
+            expect(thread.state).toBe(ThreadState.ERROR);
         });
-        thread.raise(new Error('fail'));
-      });
-
-      expect(threadReceived).toBe(thread);
-      expect(errorReceived).toBeInstanceOf(Error);
-      expect(thread.state).toBe(ThreadState.ERROR);
     });
-  })
 
-  describe('spawn', () => {
-      it('should allocate from a template', async () => {
-          //TODO: enable test after template refactor.
-          let thread = new SharedThread(platform, scheduler, '/');
+    describe('spawn', () => {
+        it('should allocate from a template', async () => {
+            //TODO: enable test after template refactor.
+            let thread = new SharedThread(platform, scheduler, '/');
 
-          let tmpl = { id:'child', create: () => {} }
-          
-          platform.allocate.mockResolvedValue('/child');
+            let tmpl = { id: 'child', create: () => {} };
 
-          let result = await thread.spawn(tmpl);
+            platform.allocateActor.mockResolvedValue('/child');
 
-          expect(platform.allocate).toBeCalledWith(thread,tmpl);
+            let result = await thread.spawn(tmpl);
 
-          expect(result).toBe('/child');
-      });
-  });
+            expect(platform.allocateActor).toBeCalledWith(thread, tmpl);
 
-    describe('tell',  () => {
-        it('should send a message ', async () => {
-          let thread = new SharedThread(platform, scheduler, '/');
-
-          await thread.tell('/foo', 'hello');
-
-          expect(platform.sendMessage).toBeCalledWith(thread, '/foo', 'hello');
-          
+            expect(result).toBe('/child');
         });
-      
+    });
+
+    describe('tell', () => {
+        it('should send a message ', async () => {
+            let thread = new SharedThread(platform, scheduler, '/');
+
+            await thread.tell('/foo', 'hello');
+
+            expect(platform.sendActorMessage).toBeCalledWith(
+                thread,
+                '/foo',
+                'hello'
+            );
+        });
     });
 
     describe('receive', () => {
         it('should provide messages from the mailbox', async () => {
-          let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, scheduler, '/');
 
-          thread.mailbox.push('hello');
+            thread.mailbox.push('hello');
 
-          let result = await thread.receive();
+            let result = await thread.receive();
 
-          expect(scheduler.postTask).toBeCalledTimes(1);
+            expect(scheduler.postTask).toBeCalledTimes(1);
 
-          expect(result).toBe('hello');
+            expect(result).toBe('hello');
         });
 
         it('should MSG_WAIT if there are no messages', async () => {
-          let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, scheduler, '/');
 
-          thread.receive().fork();
+            thread.receive();
 
-          await wait(100);
+            await wait(100);
 
-          expect(thread.state).toBe(ThreadState.MSG_WAIT);
+            expect(thread.state).toBe(ThreadState.MSG_WAIT);
 
-          thread.mailbox.push('hello');
+            thread.mailbox.push('hello');
 
-          await thread.receive();
+            await thread.receive();
 
-          expect(thread.state).toBe(ThreadState.IDLE);
-          
+            expect(thread.state).toBe(ThreadState.IDLE);
         });
-      
     });
 
+    describe('_assertValid', () => {
+        it('should reject when the thread is invalid', () => {
+            let childActor = mockDeep<Actor>();
 
+            let thread = new SharedThread(platform, scheduler, '/');
+            thread.state = ThreadState.INVALID;
+
+            for (let func of [
+                () => thread.spawn({ create: () => childActor }),
+                () => thread.tell('/foo', 'hello'),
+                () => thread.receive()
+            ]) {
+                expect(func()).rejects.toThrowError('ERR_THREAD_INVALID');
+            }
+        });
+    });
 });
