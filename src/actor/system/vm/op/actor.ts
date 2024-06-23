@@ -55,7 +55,7 @@ export const send = (r: SharedThread, f: Frame, _: Operand) => {
 
     if (eAddr.isLeft()) return r.raise(eAddr.takeLeft());
 
-    r.vm.sendActorMessage(r, eAddr.takeRight(), eMsg.takeRight());
+    r.vm.sendMessage(r, eAddr.takeRight(), eMsg.takeRight());
 };
 
 /**

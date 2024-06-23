@@ -5,9 +5,9 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 
 import { Address, ADDRESS_SYSTEM,  isChild, isGroup } from '../../address';
-import { fromSpawnable, Template } from '../../template';
+import { fromSpawnable } from '../../template';
 import { Actor, Message } from '../../';
-import { Api, Parent } from '../../api';
+import { Parent } from '../../api';
 import { MapAllocator } from './allocator/map';
 import { ErrorStrategy, SupervisorErrorStrategy } from './strategy/error';
 import { Thread } from './thread';
@@ -16,15 +16,13 @@ import { Scheduler } from './scheduler';
 import { RegistrySet } from './registry';
 import { Allocator } from './allocator';
 
-export const MAX_WORKLOAD = 25;
-
 /**
  * Platform is the interface for a virtual machine.
  *
  * It provides methods for manipulating the state of the actors of the system.
  * Some opcode handlers depend on this interface to do their work.
  */
-export interface Platform extends Actor, Parent, Api {
+export interface Platform extends Actor, Parent {
     /**
      * allocator used to manage thread resources for an actor.
      */
@@ -62,14 +60,19 @@ export interface Platform extends Actor, Parent, Api {
     groups: GroupMap 
 
     /**
-     * sendActorMessage sends a message to the destination actor.
+     * sendMessage to the actor act the destination address.
+     *
+     * This is used by the threads to communicate.
      */
-    sendActorMessage(from: Thread, to: Address, msg: Message): void;
+    sendMessage(from: Thread, to: Address, msg: Message): void;
 
     /**
-     * killActor at the specified address.
+     * sendKillSignal initiates the deallocation of the actor at the 
+     * specified address.
+     *
+     * Actual deallocation only occurs if the source thread is allowed to.
      */
-    killActor(src: Thread, target: Address): Promise<void>;
+    sendKillSignal(src: Thread, target: Address): Promise<void>;
 }
 
 /**
@@ -117,7 +120,7 @@ export class PVM implements Platform {
     }
 
     async tell(to: Address, msg: Message) {
-        this.sendActorMessage(
+        this.sendMessage(
             this.allocator.getThread(ADDRESS_SYSTEM).get(),
             to,
             msg
@@ -132,7 +135,7 @@ export class PVM implements Platform {
     }
 
     async kill(addr: Address) {
-        await this.killActor(
+        await this.sendKillSignal(
             this.allocator.getThread(ADDRESS_SYSTEM).get(),
             addr
         );
@@ -142,9 +145,7 @@ export class PVM implements Platform {
         return <Promise<T>>Future.raise(new Error('Not implemented'));
     }
 
-    // Platform
-
-    sendActorMessage(_from: Thread, to: Address, msg: Message) {
+    sendMessage(_from: Thread, to: Address, msg: Message) {
         //TODO: this.events.actor.onSend.dispatch(from.context.address, to, msg);
         /*  this.events.publish(
             from.context.address,
@@ -177,14 +178,14 @@ export class PVM implements Platform {
         );*/
     }
 
-    async killActor(src: Thread, target: Address): Promise<void> {
+    async sendKillSignal(src: Thread, target: Address): Promise<void> {
         if (src.address !== target && !isChild(src.address, target)) {
             return Future.raise(new errors.IllegalStopErr(src.address, target));
         }
 
         let mtargetThread = this.allocator.getThread(target);
 
-        //TODO: warn thread not found.ct No 15 of 1978
+        //TODO: warn thread not found.
         if (mtargetThread.isNothing()) return;
 
         await this.allocator.deallocate(mtargetThread.get());

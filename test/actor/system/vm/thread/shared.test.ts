@@ -98,7 +98,7 @@ describe('shared', () => {
             let threadReceived;
             let targetReceived;
 
-            platform.killActor.mockImplementation(async (thread, target) => {
+            platform.sendKillSignal.mockImplementation(async (thread, target) => {
                 threadReceived = thread;
                 targetReceived = target;
             });
@@ -155,7 +155,7 @@ describe('shared', () => {
 
             await thread.tell('/foo', 'hello');
 
-            expect(platform.sendActorMessage).toBeCalledWith(
+            expect(platform.sendMessage).toBeCalledWith(
                 thread,
                 '/foo',
                 'hello'
@@ -193,6 +193,15 @@ describe('shared', () => {
         });
     });
 
+    describe('resume', () => {
+        it('should make the thread idle', () => {
+            let thread = new SharedThread(platform, scheduler, '/');
+            thread.state = ThreadState.MSG_WAIT;
+            thread.resume();
+            expect(thread.state).toBe(ThreadState.IDLE);
+        });
+    });
+
     describe('_assertValid', () => {
         it('should reject when the thread is invalid', () => {
             let childActor = mockDeep<Actor>();
@@ -203,7 +212,8 @@ describe('shared', () => {
             for (let func of [
                 () => thread.spawn({ create: () => childActor }),
                 () => thread.tell('/foo', 'hello'),
-                () => thread.receive()
+                () => thread.receive(),
+                () => thread.resume()
             ]) {
                 expect(func()).rejects.toThrowError('ERR_THREAD_INVALID');
             }

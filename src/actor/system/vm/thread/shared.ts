@@ -67,7 +67,7 @@ export class SharedThread implements Thread {
     async kill(address: Address): Promise<void> {
         this._assertValid();
         this.state = ThreadState.INVALID;
-        await this.vm.killActor(this, address);
+        await this.vm.sendKillSignal(this, address);
     }
 
     die() {
@@ -92,7 +92,7 @@ export class SharedThread implements Thread {
         let result = await Future.fromCallback<Address>(cb => {
             this.vm.scheduler.postTask(
                 new Task(this, cb, async () => {
-                    let address = await this.vm.allocateActor(this, tmpl);
+                    let address = await this.vm.allocator.allocate(this, tmpl);
                     cb(null, address);
                 })
             );
@@ -105,7 +105,7 @@ export class SharedThread implements Thread {
         await Future.fromCallback(cb => {
             this.vm.scheduler.postTask(
                 new Task(this, cb, async () => {
-                    await this.vm.sendActorMessage(this, addr, msg);
+                    await this.vm.sendMessage(this, addr, msg);
                     cb(null);
                 })
             );
