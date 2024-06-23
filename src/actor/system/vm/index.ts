@@ -62,11 +62,6 @@ export interface Platform extends Actor, Parent, Api {
     groups: GroupMap 
 
     /**
-     * allocateActor resources for an actor using the template provided.
-     */
-    allocateActor(parent: Thread, tmpl: template.Template): Promise<Address>;
-
-    /**
      * sendActorMessage sends a message to the destination actor.
      */
     sendActorMessage(from: Thread, to: Address, msg: Message): void;
@@ -115,7 +110,7 @@ export class PVM implements Platform {
     // Api
 
     async spawn(tmpl: template.Spawnable): Promise<Address> {
-        return this.allocateActor(
+        return this.allocator.allocate(
             this.allocator.getThread(ADDRESS_SYSTEM).get(),
             fromSpawnable(tmpl)
         );
@@ -148,20 +143,6 @@ export class PVM implements Platform {
     }
 
     // Platform
-
-    async allocateActor(parent: Thread, tmpl: Template): Promise<Address> {
-        let address = await this.allocator.allocate(parent, tmpl);
-
-        //TODO: this.events.actor.onCreated.dispatch(addr)
-        //this.events.publish(addr, events.EVENT_ACTOR_CREATED);
-
-        // TODO: Router support
-        // if (isRouter(thread.context.flags)) this.routers.set(addr, addr);
-
-        //TODO: This should happen before the actor is started.
-
-        return address;
-    }
 
     sendActorMessage(_from: Thread, to: Address, msg: Message) {
         //TODO: this.events.actor.onSend.dispatch(from.context.address, to, msg);
@@ -203,7 +184,7 @@ export class PVM implements Platform {
 
         let mtargetThread = this.allocator.getThread(target);
 
-        //TODO: warn thread not found.
+        //TODO: warn thread not found.ct No 15 of 1978
         if (mtargetThread.isNothing()) return;
 
         await this.allocator.deallocate(mtargetThread.get());

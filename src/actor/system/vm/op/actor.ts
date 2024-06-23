@@ -22,7 +22,7 @@ export const alloc = (thread: SharedThread, frame: Frame, _: Operand) => {
     //TODO: if(!isTemplateLike(tmpl)) return thread.raise(new Error('alloc: Cannot allocate non-template!'));
 
     //TODO: this is async
-    thread.vm.allocateActor(thread, <Template>tmpl);
+    thread.spawn(<Template>tmpl);
 
     /*
     if (eresult.isLeft()) {

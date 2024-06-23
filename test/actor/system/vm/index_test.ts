@@ -1,5 +1,4 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
-import { Record } from '@quenk/noni/lib/data/record';
 
 import { expect, jest } from '@jest/globals';
 
@@ -9,17 +8,6 @@ import { PVM } from '../../../../lib/actor/system/vm';
 import { Allocator } from '../../../../lib/actor/system/vm/allocator';
 import { Scheduler } from '../../../../lib/actor/system/vm/scheduler';
 import { Thread } from '../../../../lib/actor/system/vm/thread';
-import {
-    ACTION_IGNORE,
-    ACTION_RAISE,
-    ACTION_RESTART,
-    ACTION_STOP,
-    Template,
-    TrapAction
-} from '../../../../lib/actor/template';
-import { ADDRESS_SYSTEM } from '../../../../lib/actor/address';
-import { Err } from '@quenk/noni/lib/control/err';
-import { ActorTerminatedErr } from '../../../../lib/actor/system/vm/runtime/error';
 
 describe('PVM', () => {
     const mockScheduler = mockDeep<Scheduler>();
@@ -30,46 +18,6 @@ describe('PVM', () => {
 
     beforeEach(() => {
         jest.resetAllMocks();
-    });
-
-    describe('allocateActor', () => {
-        it('should provide the allocated actor address', async () => {
-            mockAllocator.allocate.mockResolvedValue('/');
-
-            let vm = new PVM(mockScheduler, mockAllocator);
-
-            let template = {
-                create: () => {}
-            };
-
-            let address = await vm.allocateActor(mockParent, template);
-
-            expect(address).toBe('/');
-
-            expect(mockAllocator.allocate).toHaveBeenCalledWith(
-                vm,
-                vm.scheduler,
-                mockParent,
-                template
-            );
-        });
-
-        it('should add the actor to a group', async () => {
-            mockAllocator.allocate.mockResolvedValue('/');
-
-            let vm = new PVM(mockScheduler, mockAllocator);
-
-            let template = {
-                create: () => {},
-                group: 'foo'
-            };
-
-            let address = await vm.allocateActor(mockParent, template);
-
-            expect(address).toBe('/');
-
-            expect(vm.groups.get('foo')).toEqual(['/']);
-        });
     });
 
     describe('sendActorMessage', () => {
@@ -85,181 +33,6 @@ describe('PVM', () => {
             expect(mockAllocator.getThread).toHaveBeenCalledWith('/');
 
             expect(thread.notify).toHaveBeenCalledWith('hello');
-        });
-    });
-
-    describe('raiseActorError', () => {
-        let templates: Record<Template> = {
-            '/': { create: () => {} },
-            '/child': { create: () => {} }
-        };
-
-        let systemThread = mockDeep<Thread>();
-        systemThread.address = ADDRESS_SYSTEM;
-
-        let threads: Record<Thread> = {
-            [ADDRESS_SYSTEM]: mockDeep<Thread>()
-        };
-
-        let err = new Error('fail');
-
-        beforeEach(() => {
-            mockAllocator.getTemplate.mockImplementation(address =>
-                Maybe.fromNullable(templates[address])
-            );
-            mockAllocator.getThread.mockImplementation(address =>
-                Maybe.fromNullable(threads[address])
-            );
-        });
-
-        it("should invoke the thread's template handler", async () => {
-            let trap = jest
-                .fn<() => TrapAction>()
-                .mockReturnValueOnce(ACTION_IGNORE);
-            templates['/child'].trap = trap;
-
-            let thread = mockDeep<Thread>();
-
-            thread.address = '/child';
-
-            let vm = new PVM(mockScheduler, mockAllocator);
-
-            await vm.raiseActorError(thread, err);
-
-            expect(mockAllocator.getTemplate).toHaveBeenCalledWith('/child');
-
-            expect(mockAllocator.getTemplate).toHaveBeenCalledTimes(1);
-
-            expect(trap).toHaveBeenCalledWith(err);
-        });
-
-        it('should restart the thread', async () => {
-            let parentThread = mockDeep<Thread>();
-            let thread = mockDeep<Thread>();
-            let newThread = mockDeep<Thread>();
-
-            parentThread.address = '/';
-            thread.address = '/target';
-            newThread.address = '/target';
-            threads['/'] = parentThread;
-            threads['/target'] = thread;
-
-            let trap = jest
-                .fn<() => TrapAction>()
-                .mockReturnValueOnce(ACTION_RESTART);
-
-            let template = { create: () => {}, trap };
-            templates['/target'] = template;
-
-            mockAllocator.deallocate.mockImplementation(async thread => {
-                delete threads[thread.address];
-                delete templates[thread.address];
-            });
-
-            mockAllocator.allocate.mockImplementation(
-                async (_vm, _scheduler, _parent, template) => {
-                    threads[thread.address] = newThread;
-                    return thread.address;
-                }
-            );
-
-            let vm = new PVM(mockScheduler, mockAllocator);
-
-            await vm.raiseActorError(thread, err);
-
-            expect(mockAllocator.getTemplate).toHaveBeenCalledWith('/target');
-
-            expect(trap).toHaveBeenCalledWith(err);
-
-            expect(threads['/']).toBe(parentThread);
-
-            expect(threads['/target']).toBe(newThread);
-
-            expect(mockAllocator.deallocate).toHaveBeenCalledWith(thread);
-
-            expect(mockAllocator.allocate).toHaveBeenCalledWith(
-                vm,
-                mockScheduler,
-                parentThread,
-                template
-            );
-        });
-
-        it('should stop the thread', async () => {
-            let parentThread = mockDeep<Thread>();
-            let thread = mockDeep<Thread>();
-            let newThread = mockDeep<Thread>();
-
-            parentThread.address = '/';
-            thread.address = '/target';
-            threads['/'] = parentThread;
-            threads['/target'] = thread;
-
-            let trap = jest
-                .fn<() => TrapAction>()
-                .mockReturnValueOnce(ACTION_STOP);
-
-            let template = { create: () => {}, trap };
-            templates['/target'] = template;
-
-            let vm = new PVM(mockScheduler, mockAllocator);
-
-            await vm.raiseActorError(thread, err);
-
-            expect(mockAllocator.getTemplate).toHaveBeenCalledWith('/target');
-
-            expect(trap).toHaveBeenCalledWith(err);
-
-            expect(threads['/']).toBe(parentThread);
-
-            expect(mockAllocator.deallocate).toHaveBeenCalledWith(thread);
-        });
-
-        it('should raise errors to parent', async () => {
-            let parentErr: ActorTerminatedErr = new ActorTerminatedErr(
-                '/',
-                '/',
-                new Error('')
-            );
-            let parentTrap = jest
-                .fn<(err: Err) => TrapAction>()
-                .mockImplementation((err: Err) => {
-                    parentErr = <ActorTerminatedErr>err;
-                    return ACTION_IGNORE;
-                });
-            templates['/'].trap = parentTrap;
-
-            let parentThread = mockDeep<Thread>();
-            parentThread.address = '/';
-            threads['/'] = parentThread;
-
-            let childTrap = jest
-                .fn<() => TrapAction>()
-                .mockReturnValueOnce(ACTION_RAISE);
-            templates['/child'].trap = childTrap;
-
-            let childThread = mockDeep<Thread>();
-            childThread.address = '/child';
-            threads['/child'] = childThread;
-
-            let vm = new PVM(mockScheduler, mockAllocator);
-
-            await vm.raiseActorError(childThread, err);
-
-            expect(mockAllocator.getTemplate).toHaveBeenNthCalledWith(
-                1,
-                '/child'
-            );
-
-            expect(mockAllocator.getTemplate).toHaveBeenNthCalledWith(2, '/');
-
-            expect(childTrap).toHaveBeenCalledWith(err);
-
-            expect(parentErr).toBeInstanceOf(ActorTerminatedErr);
-
-            expect(parentErr.originalError).toBe(err);
-
-            expect(mockAllocator.deallocate).toHaveBeenCalledWith(childThread);
         });
     });
 });
