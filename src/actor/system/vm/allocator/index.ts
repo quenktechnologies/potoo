@@ -12,7 +12,12 @@ export interface Allocator {
     /**
      * getThread provides a Thread given an Address.
      */
-    getThread(address: Address): Maybe<Thread>;
+    getThread(target: Address): Maybe<Thread>;
+
+    /**
+     * getThreads provides a list of Threads given a list of Addresses.
+     */
+    getThreads(targets: Address[]): Thread[];
 
     /**
      * getTemplate provides a Template given an Address.

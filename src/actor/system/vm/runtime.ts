@@ -27,5 +27,5 @@ export interface Runtime extends Actor, Api {
      * This method exists to allow async operations to trigger the error
      * handling machinery built into the VM.
      */
-    watch<T>(task: () => Promise<T>): void;
+    watch<T>(task: () => Promise<T>): Promise<void>;
 }

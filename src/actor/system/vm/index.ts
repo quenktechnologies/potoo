@@ -2,18 +2,19 @@ import * as template from '../../template';
 import * as errors from './runtime/error';
 
 import { Err } from '@quenk/noni/lib/control/error';
-import { toError } from '@quenk/noni/lib/control/err';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 
-import { Address, ADDRESS_SYSTEM, getParent, isChild } from '../../address';
+import { Address, ADDRESS_SYSTEM,  isChild, isGroup } from '../../address';
 import { fromSpawnable, Template } from '../../template';
 import { Actor, Message } from '../../';
 import { Api, Parent } from '../../api';
 import { MapAllocator } from './allocator/map';
-import { Thread, THREAD_STATE_IDLE } from './thread';
-import { GroupMap } from './groups';
+import { ErrorStrategy, SupervisorErrorStrategy } from './strategy/error';
+import { Thread } from './thread';
+import { GroupMap } from './group';
 import { Scheduler } from './scheduler';
 import { RegistrySet } from './registry';
+import { Allocator } from './allocator';
 
 export const MAX_WORKLOAD = 25;
 
@@ -24,6 +25,21 @@ export const MAX_WORKLOAD = 25;
  * Some opcode handlers depend on this interface to do their work.
  */
 export interface Platform extends Actor, Parent, Api {
+    /**
+     * allocator used to manage thread resources for an actor.
+     */
+    allocator: Allocator;
+
+    /**
+     * scheduler used for co-ordinating actor thread execution.
+     */
+    scheduler: Scheduler;
+
+    /**
+     * errors strategy used to handle errors that occur within the system.
+     */
+    errors: ErrorStrategy;
+
     /**
      * log service for the VM.
      *
@@ -41,6 +57,11 @@ export interface Platform extends Actor, Parent, Api {
     registry: RegistrySet;
 
     /**
+     * groups holds the mapping of group names to actor addresses.
+     */
+    groups: GroupMap 
+
+    /**
      * allocateActor resources for an actor using the template provided.
      */
     allocateActor(parent: Thread, tmpl: template.Template): Promise<Address>;
@@ -49,16 +70,6 @@ export interface Platform extends Actor, Parent, Api {
      * sendActorMessage sends a message to the destination actor.
      */
     sendActorMessage(from: Thread, to: Address, msg: Message): void;
-
-    /**
-     * raiseActorError in the target actor.
-     */
-    raiseActorError(src: Thread, error: Err): Promise<void>;
-
-    /**
-     * restartActor at the specified address.
-     */
-    restartActor(target: Address): Promise<void>;
 
     /**
      * killActor at the specified address.
@@ -76,10 +87,11 @@ export interface Platform extends Actor, Parent, Api {
  */
 export class PVM implements Platform {
     constructor(
+        public allocator: Allocator = new MapAllocator(() => this),
         public scheduler: Scheduler = new Scheduler(),
-        public groups = new GroupMap(),
+        public errors: ErrorStrategy = new SupervisorErrorStrategy(() => this),
         public registry = new RegistrySet(),
-        public allocator = new MapAllocator(scheduler),
+        public groups:GroupMap = new GroupMap(),
         public self = ADDRESS_SYSTEM
     ) {}
 
@@ -118,7 +130,7 @@ export class PVM implements Platform {
     }
 
     async raise(err: Err) {
-        await this.raiseActorError(
+        await this.errors.raise(
             this.allocator.getThread(ADDRESS_SYSTEM).get(),
             err
         );
@@ -138,7 +150,7 @@ export class PVM implements Platform {
     // Platform
 
     async allocateActor(parent: Thread, tmpl: Template): Promise<Address> {
-        let address = await this.allocator.allocate(this, parent, tmpl);
+        let address = await this.allocator.allocate(parent, tmpl);
 
         //TODO: this.events.actor.onCreated.dispatch(addr)
         //this.events.publish(addr, events.EVENT_ACTOR_CREATED);
@@ -147,15 +159,11 @@ export class PVM implements Platform {
         // if (isRouter(thread.context.flags)) this.routers.set(addr, addr);
 
         //TODO: This should happen before the actor is started.
-        if (tmpl.group) {
-            let groups = Array.isArray(tmpl.group) ? tmpl.group : [tmpl.group];
-            groups.forEach(group => this.groups.put(group, address));
-        }
 
         return address;
     }
 
-    sendActorMessage(from: Thread, to: Address, msg: Message) {
+    sendActorMessage(_from: Thread, to: Address, msg: Message) {
         //TODO: this.events.actor.onSend.dispatch(from.context.address, to, msg);
         /*  this.events.publish(
             from.context.address,
@@ -165,14 +173,11 @@ export class PVM implements Platform {
             msg
         );*/
 
-        let msource = this.allocator.getThread(from.address);
-        if (msource.isNothing() || msource.get() !== from) return; //TODO: dispatch invalid send
-
-        let mthread = this.allocator.getThread(to);
-
-        if (mthread.isNothing()) return; //TODO: dispatch invalid send dest.
-
-        mthread.get().notify(msg);
+      let targets = isGroup(to) ? this.groups.getMembers(to) : [to];
+          let threads = this.allocator.getThreads(targets);
+          for(let thread of threads) {
+            thread.notify(msg).catch(err => thread.raise(err));
+          }
 
         //TODO: this.events.actor.onSendFailed.dispatch(from.context.address, to, msg);
         /*   this.events.publish(
@@ -191,83 +196,8 @@ export class PVM implements Platform {
         );*/
     }
 
-    async raiseActorError(src: Thread, error: Err) {
-        let prevThread;
-
-        let err = error;
-
-        let currentThread = src;
-
-        let action = template.ACTION_RAISE;
-
-        while (action === template.ACTION_RAISE) {
-            if (prevThread) {
-                await this.allocator.deallocate(prevThread);
-
-                prevThread = currentThread;
-
-                let mcurrentThread = this.allocator.getThread(
-                    getParent(prevThread.address)
-                );
-
-                if (mcurrentThread.isNothing()) break;
-
-                currentThread = mcurrentThread.get();
-
-                err = new errors.ActorTerminatedErr(
-                    currentThread.address,
-                    src.address,
-                    error
-                );
-            } else {
-                prevThread = currentThread;
-            }
-
-            let tmpl = this.allocator.getTemplate(currentThread.address).get();
-
-            let trap = tmpl.trap ?? defaultTrap;
-
-            action = trap(err);
-        }
-
-        switch (action) {
-            case template.ACTION_IGNORE:
-                // TODO: do this via a method. Like thread.resume()
-                currentThread.state = THREAD_STATE_IDLE;
-                break;
-
-            case template.ACTION_RESTART:
-                await this.restartActor(currentThread.address);
-                break;
-
-            case template.ACTION_STOP:
-                await this.killActor(currentThread, currentThread.address);
-                break;
-
-            default:
-                throw toError(err);
-        }
-    }
-
-    async restartActor(target: Address): Promise<void> {
-        let mtargetThread = this.allocator.getThread(target);
-        let mparent = this.allocator.getThread(getParent(target));
-
-        if (mtargetThread.isNothing())
-            return Future.raise(new errors.UnknownAddressErr(target));
-
-        if (mparent.isNothing())
-            return Future.raise(new errors.UnknownAddressErr(target));
-
-        let tmpl = this.allocator.getTemplate(target).get();
-
-        await this.allocator.deallocate(mtargetThread.get());
-
-        await this.allocateActor(mparent.get(), tmpl);
-    }
-
     async killActor(src: Thread, target: Address): Promise<void> {
-        if (!isChild(src.address, target)) {
+        if (src.address !== target && !isChild(src.address, target)) {
             return Future.raise(new errors.IllegalStopErr(src.address, target));
         }
 
@@ -279,5 +209,3 @@ export class PVM implements Platform {
         await this.allocator.deallocate(mtargetThread.get());
     }
 }
-
-const defaultTrap = () => template.ACTION_RAISE;

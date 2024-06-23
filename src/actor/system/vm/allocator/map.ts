@@ -82,6 +82,15 @@ export class MapAllocator implements Allocator {
         return Maybe.nothing();
     }
 
+    getThreads(targets: Address[]): Thread[] {
+        let hits = [];
+        for (let entry of this.actors.values()) {
+            if (targets.includes(entry.address))
+            hits.push(entry.thread);
+        }
+      return hits;
+    }
+
     getTemplate(address: Address): Maybe<Template> {
         return Maybe.fromNullable(this.actors.get(address)).map(
             (entry: ActorTableEntry) => entry.template
@@ -110,7 +119,9 @@ export class MapAllocator implements Allocator {
         if (this.actors.has(address))
             return Future.raise(new errors.DuplicateAddressErr(address));
 
-        let thread = new SharedThread(this.platform(), address);
+        let vm = this.platform();
+
+        let thread = new SharedThread(vm, address);
 
         // XXX: Note a rejected promise here will crash the system.
         let returnedActor = template.create && (await template.create(thread));
@@ -130,6 +141,10 @@ export class MapAllocator implements Allocator {
 
         parentEntry.children.push(entry);
 
+        if(template.group) 
+          vm.groups.enroll(address, template.group);
+
+        // TODO: dispatch event
         thread.watch(() => actor.start());
 
         return address;
@@ -186,6 +201,8 @@ export class MapAllocator implements Allocator {
                         await target.actor.stop();
 
                         target.thread.die();
+
+                        this.platform().groups.unenroll(target.address);
 
                         this.actors.delete(target.address);
 

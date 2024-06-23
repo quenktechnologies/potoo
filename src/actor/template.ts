@@ -30,10 +30,17 @@ export type TrapFunc = (e: Err) => TrapAction;
 export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 
 /**
+ * ActorOption is a type that may contain an Actor or not.
+ */
+export type ActorOption = Actor | void;
+
+/**
  * CreateFunc receives a handle to the actor's resources and may optionally
  * provide an object to serve as the actor within the system.
  */
-export type CreateFunc = (runtime: Runtime) => Promise<Actor | void>;
+export type CreateFunc = (
+    runtime: Runtime
+) => ActorOption | Promise<ActorOption>;
 
 /**
  * Spawnable allows a CreateFunc to be used in place of a Template.

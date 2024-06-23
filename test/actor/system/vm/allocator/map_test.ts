@@ -12,11 +12,17 @@ import {
 } from '../../../../../lib/actor/system/vm/allocator/map';
 import { Thread } from '../../../../../lib/actor/system/vm/thread';
 import { SharedThread } from '../../../../../lib/actor/system/vm/thread/shared';
+import { GroupMap } from '../../../../../lib/actor/system/vm/group';
 
 describe('MapAllocator', () => {
+
+    let mockGroups = mockDeep<GroupMap>();
+
     let parent = mockDeep<Thread>();
 
     let platform = mockDeep<Platform>();
+
+    platform.groups = mockGroups;
 
     let getPlatform = () => platform;
 
@@ -68,6 +74,33 @@ describe('MapAllocator', () => {
             let mthread = map.getThread('/');
             expect(mthread.isJust()).toBe(false);
         });
+    });
+
+    describe('getThreads', () => {
+
+        it('should return all matching threads', () => {
+
+          let threadOne = mockDeep<Thread>();
+          threadOne.address = '/one';
+
+          let threadTwo = mockDeep<Thread>();
+          threadTwo.address = '/two';
+
+          let threadThree = mockDeep<Thread>();
+          threadThree.address = '/three';
+
+          let map = new MapAllocator(getPlatform);
+
+          map.actors.set('/one', { address: '/one', thread: threadOne });
+          map.actors.set('/two', { address: '/two', thread: threadTwo });
+          map.actors.set('/three', { address: '/three', thread: threadThree });
+
+          let threads = map.getThreads(['/one', '/three']);
+
+          expect(threads).toEqual([threadOne, threadThree]);
+          
+        });
+      
     });
 
     describe('allocate', () => {
@@ -140,6 +173,23 @@ describe('MapAllocator', () => {
                         create: () => childActor
                     })
             ).rejects.toThrowError();
+        });
+
+        it('should assign actors to groups', async () => {
+            let map = new MapAllocator(getPlatform);
+
+            map.actors.set('/', parentEntry);
+
+            let addr = await map.allocate(parent, {
+                id: 'test',
+                group: 'test',
+                create: () => childActor
+            });
+
+            await wait(100);
+
+            expect(mockGroups.enroll).toBeCalledWith(addr, 'test');
+
         });
     });
 
@@ -272,5 +322,16 @@ describe('MapAllocator', () => {
             expect(order).toEqual(expect.arrayContaining([2, 1, 0]));
             expect(parentEntry.children).toEqual([]);
         });
+
+      it('should unenroll the actor from its group', async () => {
+            let map = new MapAllocator(getPlatform);
+            map.actors.set('/', parentEntry);
+
+            await map.deallocate(parent);
+            expect(mockGroups.unenroll).toBeCalledWith('/');
+
+        });
+
+
+      })
     });
-});
