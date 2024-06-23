@@ -46,6 +46,11 @@ export interface Thread extends Actor, Runtime {
     state: ThreadState;
 
     /**
+     * resume marks the Thread as ready to run again.
+     */
+    resume(): void;
+
+    /**
      * die terminates the Thread by marking it invalid.
      */
     die(): void;

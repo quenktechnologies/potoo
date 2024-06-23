@@ -1,6 +1,5 @@
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 
-import { Platform } from '..';
 import { Address } from '../../../address';
 import { Template } from '../../../template';
 import { Thread } from '../thread';
@@ -23,7 +22,14 @@ export interface Allocator {
     /**
      * allocate a new thread from a Template.
      */
-    allocate(vm: Platform, parent: Thread, tmpl: Template): Promise<Address>;
+    allocate(parent: Thread, tmpl: Template): Promise<Address>;
+
+    /**
+     * reallocate resources for a Thread.
+     *
+     * This essentially means the Thread has been restarted.
+     */
+    reallocate(target: Thread): Promise<void>;
 
     /**
      * deallocate resources for a Thread.

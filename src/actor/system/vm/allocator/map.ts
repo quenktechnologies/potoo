@@ -11,7 +11,6 @@ import { Thread } from '../thread';
 import { Actor } from '../../..';
 import { Platform } from '..';
 import { Allocator } from './';
-import { Scheduler } from '../scheduler';
 
 const MAX_THREAD_KILL_PER_CYCLE = 25;
 
@@ -59,7 +58,7 @@ export interface ActorTableEntry {
  */
 export class MapAllocator implements Allocator {
     constructor(
-        public scheduler: Scheduler,
+        public platform: () => Platform,
         public actors = new Map(),
         public nextAID = 1
     ) {}
@@ -89,11 +88,7 @@ export class MapAllocator implements Allocator {
         );
     }
 
-    async allocate(
-        vm: Platform,
-        parent: Thread,
-        template: Template
-    ): Promise<Address> {
+    async allocate(parent: Thread, template: Template): Promise<Address> {
         let mparentEntry = this.getEntry(parent);
 
         if (mparentEntry.isNothing())
@@ -115,10 +110,10 @@ export class MapAllocator implements Allocator {
         if (this.actors.has(address))
             return Future.raise(new errors.DuplicateAddressErr(address));
 
-        let thread = new SharedThread(vm, this.scheduler, address);
+        let thread = new SharedThread(this.platform(), address);
 
         // XXX: Note a rejected promise here will crash the system.
-        let returnedActor = await template.create(thread);
+        let returnedActor = template.create && (await template.create(thread));
 
         let actor = returnedActor ?? thread;
 
@@ -138,6 +133,26 @@ export class MapAllocator implements Allocator {
         thread.watch(() => actor.start());
 
         return address;
+    }
+
+    async reallocate(target: Thread): Promise<void> {
+        let mentry = this.getEntry(target);
+
+        //TODO: dispatch event and ignore?
+        if (mentry.isNothing())
+            return Future.raise(new errors.InvalidThreadErr(target));
+
+        let entry = mentry.get();
+
+        await this.deallocate(entry.thread);
+
+        let mparent = entry.parent;
+
+        // TODO: dispatch event and ignore instead?
+        if (mparent.isNothing())
+            return Future.raise(new errors.UnknownAddressErr(target.address));
+
+        await this.allocate(mparent.get().thread, entry.template);
     }
 
     async deallocate(target: Thread): Promise<void> {

@@ -10,7 +10,7 @@ import { identity } from '@quenk/noni/lib/data/function';
 
 import { Template } from '../../../template';
 import { Address } from '../../../address';
-import { Task, Scheduler } from '../scheduler';
+import { Task } from '../scheduler';
 import { Message } from '../../..';
 import { Platform } from '../';
 import { Thread, ThreadState } from './';
@@ -27,7 +27,6 @@ export const E_INVALID = 'ERR_THREAD_INVALID';
 export class SharedThread implements Thread {
     constructor(
         public vm: Platform,
-        public scheduler: Scheduler,
         public address: Address,
         public mailbox: Message[] = [],
         public state: ThreadState = ThreadState.IDLE
@@ -53,9 +52,9 @@ export class SharedThread implements Thread {
 
         this.mailbox.push(msg);
 
-        if (this.state === ThreadState.MSG_WAIT) this.state = ThreadState.IDLE;
+        if (this.state === ThreadState.MSG_WAIT) this.resume();
 
-        this.scheduler.run();
+        this.vm.scheduler.run();
     }
 
     async stop() {}
@@ -74,19 +73,24 @@ export class SharedThread implements Thread {
     die() {
         // TODO: dispatch event
         this.state = ThreadState.INVALID;
-        this.scheduler.removeTasks(this);
+        this.vm.scheduler.removeTasks(this);
+    }
+
+    resume() {
+        this._assertValid();
+        this.state = ThreadState.IDLE;
     }
 
     async raise(e: Err) {
         this._assertValid();
         this.state = ThreadState.ERROR;
-        await this.vm.raiseActorError(this, e);
+        await this.vm.errors.raise(this, e);
     }
 
     async spawn(tmpl: Template): Promise<Address> {
         this._assertValid();
         let result = await Future.fromCallback<Address>(cb => {
-            this.scheduler.postTask(
+            this.vm.scheduler.postTask(
                 new Task(this, cb, async () => {
                     let address = await this.vm.allocateActor(this, tmpl);
                     cb(null, address);
@@ -99,7 +103,7 @@ export class SharedThread implements Thread {
     async tell(addr: Address, msg: Message): Promise<void> {
         this._assertValid();
         await Future.fromCallback(cb => {
-            this.scheduler.postTask(
+            this.vm.scheduler.postTask(
                 new Task(this, cb, async () => {
                     await this.vm.sendActorMessage(this, addr, msg);
                     cb(null);
@@ -120,17 +124,17 @@ export class SharedThread implements Thread {
                     if (matcher.test(msg)) {
                         //XXX: Setting the state to idle here allows for
                         // nested tasks.
-                        this.state = ThreadState.IDLE;
+                        this.resume();
                         let result = await matcher.apply(msg);
                         return cb(null, result);
                     }
                     // TODO: dispatch message dropped event
                 }
                 this.state = ThreadState.MSG_WAIT;
-                this.scheduler.postTask(task, true);
+                this.vm.scheduler.postTask(task, true);
             });
 
-            this.scheduler.postTask(task);
+            this.vm.scheduler.postTask(task);
         });
         return msg;
     }
