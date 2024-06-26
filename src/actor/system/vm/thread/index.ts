@@ -1,6 +1,6 @@
+import { Err } from '@quenk/noni/lib/control/err';
+
 import { Address } from '../../../address';
-import { Runtime } from '../runtime';
-import { Platform } from '../';
 import { Actor } from '../../..';
 
 export const THREAD_STATE_IDLE = 0;
@@ -26,32 +26,21 @@ export enum ThreadState {
  * Thread is an execution context for a single actor.
  *
  * These are not actual OS or green threads but rather an abstraction simulating
- * k
  * one.
  */
-export interface Thread extends Actor, Runtime {
-    /**
-     * vm the Thread belongs to.
-     */
-    vm: Platform;
-
+export interface Thread extends Actor {
     /**
      * address for the Thread (actor) within the system.
      */
     address: Address;
 
     /**
-     * state indicates what state the Thread is currently in.
+     * raise an error triggering the system's error handling machinery.
      */
-    state: ThreadState;
+    raise(e: Err): Promise<void>;
 
     /**
      * resume marks the Thread as ready to run again.
      */
     resume(): void;
-
-    /**
-     * die terminates the Thread by marking it invalid.
-     */
-    die(): void;
 }

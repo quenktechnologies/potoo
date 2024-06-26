@@ -17,31 +17,30 @@ export class GroupMap {
      *
      * If the target group(s) do not exist, they are created.
      */
-enroll (actor:Address,  target: GroupName|GroupName[])   {
-       let targets = Array.isArray(target) ? target : [target];
-        for(let target of targets) {
-        let group = this.groups.get(target) ?? new Set();
-        group.add(actor);
-        this.groups.set(target, group);
+    enroll(actor: Address, target: GroupName | GroupName[]) {
+        let targets = Array.isArray(target) ? target : [target];
+        for (let target of targets) {
+            let group = this.groups.get(target) ?? new Set();
+            group.add(actor);
+            this.groups.set(target, group);
         }
         return this;
     }
 
-/**
- * getMembers returns the addresses for members of a group.
- */
- getMembers (key: GroupName): Address[] {
-    return [...(this.groups.get(key) ?? []  )]
-}
+    /**
+     * getMembers returns the addresses for members of a group.
+     */
+    getMembers(key: GroupName): Address[] {
+        return [...(this.groups.get(key) ?? [])];
+    }
 
-/**
- * unenroll removes an actor address from any groups it is a member of.
- */
-unenroll(actor:Address) {
-  for(let group of this.groups.values()) {
-    if(group.has(actor))
-    group.delete(actor);
-  }
-  return this;
-}
+    /**
+     * unenroll removes an actor address from any groups it is a member of.
+     */
+    unenroll(actor: Address) {
+        for (let group of this.groups.values()) {
+            if (group.has(actor)) group.delete(actor);
+        }
+        return this;
+    }
 }

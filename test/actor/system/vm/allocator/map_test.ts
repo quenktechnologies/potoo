@@ -13,9 +13,9 @@ import {
 import { Thread } from '../../../../../lib/actor/system/vm/thread';
 import { SharedThread } from '../../../../../lib/actor/system/vm/thread/shared';
 import { GroupMap } from '../../../../../lib/actor/system/vm/group';
+import { ADDRESS_SYSTEM } from '../../../../../lib/actor/address';
 
 describe('MapAllocator', () => {
-
     let mockGroups = mockDeep<GroupMap>();
 
     let parent = mockDeep<Thread>();
@@ -23,6 +23,8 @@ describe('MapAllocator', () => {
     let platform = mockDeep<Platform>();
 
     platform.groups = mockGroups;
+
+    platform.address = ADDRESS_SYSTEM;
 
     let getPlatform = () => platform;
 
@@ -33,6 +35,7 @@ describe('MapAllocator', () => {
     let parentEntry: ActorTableEntry;
 
     beforeEach(() => {
+        parent.address = '/';
         parentEntry = {
             address: '/',
             parent: Maybe.nothing(),
@@ -77,30 +80,29 @@ describe('MapAllocator', () => {
     });
 
     describe('getThreads', () => {
-
         it('should return all matching threads', () => {
+            let threadOne = mockDeep<Thread>();
+            threadOne.address = '/one';
 
-          let threadOne = mockDeep<Thread>();
-          threadOne.address = '/one';
+            let threadTwo = mockDeep<Thread>();
+            threadTwo.address = '/two';
 
-          let threadTwo = mockDeep<Thread>();
-          threadTwo.address = '/two';
+            let threadThree = mockDeep<Thread>();
+            threadThree.address = '/three';
 
-          let threadThree = mockDeep<Thread>();
-          threadThree.address = '/three';
+            let map = new MapAllocator(getPlatform);
 
-          let map = new MapAllocator(getPlatform);
+            map.actors.set('/one', { address: '/one', thread: threadOne });
+            map.actors.set('/two', { address: '/two', thread: threadTwo });
+            map.actors.set('/three', {
+                address: '/three',
+                thread: threadThree
+            });
 
-          map.actors.set('/one', { address: '/one', thread: threadOne });
-          map.actors.set('/two', { address: '/two', thread: threadTwo });
-          map.actors.set('/three', { address: '/three', thread: threadThree });
+            let threads = map.getThreads(['/one', '/three']);
 
-          let threads = map.getThreads(['/one', '/three']);
-
-          expect(threads).toEqual([threadOne, threadThree]);
-          
+            expect(threads).toEqual([threadOne, threadThree]);
         });
-      
     });
 
     describe('allocate', () => {
@@ -189,7 +191,31 @@ describe('MapAllocator', () => {
             await wait(100);
 
             expect(mockGroups.enroll).toBeCalledWith(addr, 'test');
+        });
 
+        it('should recognize the vm when spawning from root', async () => {
+            let map = new MapAllocator(getPlatform);
+
+            map.actors.set('/', parentEntry);
+
+            let addr = await map.allocate(platform, {
+                id: 'root',
+                create: () => childActor
+            });
+
+            await wait(100);
+
+            expect(childActor.start).toBeCalledTimes(1);
+
+            let entry = map.actors.get('root');
+
+            expect(entry.thread).toBeInstanceOf(SharedThread);
+
+            expect(entry.parent.isNothing()).toBe(true);
+
+            expect(parentEntry.children.length).toBe(0);
+
+            expect(addr).toBe('root');
         });
     });
 
@@ -234,7 +260,7 @@ describe('MapAllocator', () => {
             await map.deallocate(parent);
 
             expect(map.actors.has('/')).toBe(false);
-            expect(parent.die).toBeCalledTimes(1);
+            expect(parent.stop).toBeCalledTimes(1);
         });
 
         it('should remove the actor from its parent', async () => {
@@ -256,9 +282,9 @@ describe('MapAllocator', () => {
 
             expect(map.actors.has('/child')).toBe(false);
             expect(map.actors.get('/').children).toEqual([]);
-            expect(thread.die).toBeCalledTimes(1);
+            expect(thread.stop).toBeCalledTimes(1);
             expect(map.actors.get('/')).toBe(parentEntry);
-            expect(parent.die).not.toBeCalled();
+            expect(parent.stop).not.toBeCalled();
         });
 
         it('should remove the children of the actor', async () => {
@@ -299,15 +325,21 @@ describe('MapAllocator', () => {
             childEntry1.children.push(childEntry2);
 
             let order: number[] = [];
-            childEntry0.thread.die
+            childEntry0.thread.stop
                 .calledWith()
-                .mockImplementation(() => order.push(0));
-            childEntry1.thread.die
+                .mockImplementation(async () => {
+                    order.push(0);
+                });
+            childEntry1.thread.stop
                 .calledWith()
-                .mockImplementation(() => order.push(1));
-            childEntry2.thread.die
+                .mockImplementation(async () => {
+                    order.push(1);
+                });
+            childEntry2.thread.stop
                 .calledWith()
-                .mockImplementation(() => order.push(2));
+                .mockImplementation(async () => {
+                    order.push(2);
+                });
 
             await map.deallocate(childEntry0.thread);
 
@@ -316,22 +348,19 @@ describe('MapAllocator', () => {
             expect(map.actors.has('/a/b')).toBe(false);
             expect(map.actors.has('/a/b/c')).toBe(false);
             expect(parentEntry.children).toEqual([]);
-            expect(childEntry0.thread.die).toBeCalledTimes(1);
-            expect(childEntry1.thread.die).toBeCalledTimes(1);
-            expect(childEntry2.thread.die).toBeCalledTimes(1);
+            expect(childEntry0.thread.stop).toBeCalledTimes(1);
+            expect(childEntry1.thread.stop).toBeCalledTimes(1);
+            expect(childEntry2.thread.stop).toBeCalledTimes(1);
             expect(order).toEqual(expect.arrayContaining([2, 1, 0]));
             expect(parentEntry.children).toEqual([]);
         });
 
-      it('should unenroll the actor from its group', async () => {
+        it('should unenroll the actor from its group', async () => {
             let map = new MapAllocator(getPlatform);
             map.actors.set('/', parentEntry);
 
             await map.deallocate(parent);
             expect(mockGroups.unenroll).toBeCalledWith('/');
-
         });
-
-
-      })
     });
+});

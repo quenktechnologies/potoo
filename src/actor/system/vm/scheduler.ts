@@ -1,15 +1,16 @@
-import { Thread, ThreadState } from './thread';
+import { ThreadState } from './thread';
+import { SharedThread } from './thread/shared';
 
 export const ERR_THREAD_DEQUEUED = 'ERR_THREAD_DEQUEUED';
 
 /**
  * PendingTask tuple type.
  */
-export type PendingTask = [Thread, (err?: Error) => void];
+export type PendingTask = [SharedThread, (err?: Error) => void];
 
 export class Task {
     constructor(
-        public thread: Thread,
+        public thread: SharedThread,
         public abort: (err: Error) => void,
         public exec: () => Promise<void>
     ) {}
@@ -64,7 +65,7 @@ export class Scheduler {
      *
      * The Tasks will be terminated with an ERR_THREAD_DEQUEUED error.
      */
-    removeTasks(thread: Thread) {
+    removeTasks(thread: SharedThread) {
         this.queue = this.queue.filter(task => {
             if (task.thread != thread) return true;
             // TODO: dispatch event? callback into thread?

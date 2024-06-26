@@ -3,7 +3,7 @@ import * as errors from '../runtime/error';
 
 import { Err, toError } from '@quenk/noni/lib/control/err';
 
-import { ADDRESS_SYSTEM, getParent } from '../../../address';
+import {  getParent } from '../../../address';
 import { Thread } from '../thread';
 import { Platform } from '..';
 
@@ -38,9 +38,9 @@ export class SupervisorErrorStrategy implements ErrorStrategy {
 
         let currentThread = src;
 
-        let { allocator } = this.platform();
+        let platform = this.platform();
 
-        let systemThread = allocator.getThread(ADDRESS_SYSTEM).get();
+        let { allocator } = platform;
 
         while (true) {
             if (prevThread) {
@@ -76,7 +76,7 @@ export class SupervisorErrorStrategy implements ErrorStrategy {
             } else if (action === template.ACTION_STOP) {
                 await allocator.deallocate(currentThread);
                 return;
-            } else if (currentThread === systemThread) {
+            } else if (currentThread === platform) {
                 break;
             }
 

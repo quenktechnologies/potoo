@@ -76,6 +76,9 @@ export class SharedThread implements Thread {
         this.vm.scheduler.removeTasks(this);
     }
 
+    /**
+     * resume marks the Thread as ready to run again.
+     */
     resume() {
         this._assertValid();
         this.state = ThreadState.IDLE;

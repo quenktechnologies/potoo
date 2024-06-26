@@ -13,8 +13,6 @@ import { Actor, Message } from '../';
 import { Runtime } from '../system/vm/runtime';
 import { Raise, RemoteError, Send, shapes } from './remote';
 
-export const SCRIPT_PATH = `${__dirname}/../../actor/remote/process/script.js`;
-
 /**
  * Handle to a node process.
  *

@@ -85,10 +85,9 @@ export class MapAllocator implements Allocator {
     getThreads(targets: Address[]): Thread[] {
         let hits = [];
         for (let entry of this.actors.values()) {
-            if (targets.includes(entry.address))
-            hits.push(entry.thread);
+            if (targets.includes(entry.address)) hits.push(entry.thread);
         }
-      return hits;
+        return hits;
     }
 
     getTemplate(address: Address): Maybe<Template> {
@@ -98,30 +97,38 @@ export class MapAllocator implements Allocator {
     }
 
     async allocate(parent: Thread, template: Template): Promise<Address> {
-        let mparentEntry = this.getEntry(parent);
+        let platform = this.platform();
 
-        if (mparentEntry.isNothing())
-            return Future.raise(new errors.InvalidThreadErr(parent));
+        let isRoot = parent === platform;
 
-        let parentEntry = mparentEntry.get();
+        let parentCons = 'vm';
+
+        let mparentEntry = Maybe.nothing<ActorTableEntry>();
+
+        if (!isRoot) {
+            mparentEntry = this.getEntry(parent);
+
+            if (mparentEntry.isNothing())
+                return Future.raise(new errors.InvalidThreadErr(parent));
+
+            parentCons = mparentEntry
+                .get()
+                .actor.constructor.name.toLowerCase();
+        }
 
         let aid = this.nextAID++;
 
-        let consName = parentEntry.actor.constructor.name.toLowerCase();
-
-        let id = template.id ?? `instance::${consName}::aid::${aid}`;
+        let id = template.id ?? `instance::${parentCons}::aid::${aid}`;
 
         if (isRestricted(<string>id))
             return Future.raise(new errors.InvalidIdErr(id));
 
-        let address = make(parentEntry.address, id);
+        let address = make(parent.address, id);
 
         if (this.actors.has(address))
             return Future.raise(new errors.DuplicateAddressErr(address));
 
-        let vm = this.platform();
-
-        let thread = new SharedThread(vm, address);
+        let thread = new SharedThread(platform, address);
 
         // XXX: Note a rejected promise here will crash the system.
         let returnedActor = template.create && (await template.create(thread));
@@ -139,10 +146,9 @@ export class MapAllocator implements Allocator {
 
         this.actors.set(address, entry);
 
-        parentEntry.children.push(entry);
+        mparentEntry.map(parentEntry => parentEntry.children.push(entry));
 
-        if(template.group) 
-          vm.groups.enroll(address, template.group);
+        if (template.group) platform.groups.enroll(address, template.group);
 
         // TODO: dispatch event
         thread.watch(() => actor.start());
@@ -200,7 +206,7 @@ export class MapAllocator implements Allocator {
                     Future.do(async () => {
                         await target.actor.stop();
 
-                        target.thread.die();
+                        await target.thread.stop();
 
                         this.platform().groups.unenroll(target.address);
 

@@ -4,10 +4,9 @@ import * as errors from './runtime/error';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 
-import { Address, ADDRESS_SYSTEM,  isChild, isGroup } from '../../address';
+import { Address, ADDRESS_SYSTEM, isChild, isGroup } from '../../address';
 import { fromSpawnable } from '../../template';
 import { Actor, Message } from '../../';
-import { Parent } from '../../api';
 import { MapAllocator } from './allocator/map';
 import { ErrorStrategy, SupervisorErrorStrategy } from './strategy/error';
 import { Thread } from './thread';
@@ -15,6 +14,7 @@ import { GroupMap } from './group';
 import { Scheduler } from './scheduler';
 import { RegistrySet } from './registry';
 import { Allocator } from './allocator';
+import { Api } from '../../api';
 
 /**
  * Platform is the interface for a virtual machine.
@@ -22,7 +22,7 @@ import { Allocator } from './allocator';
  * It provides methods for manipulating the state of the actors of the system.
  * Some opcode handlers depend on this interface to do their work.
  */
-export interface Platform extends Actor, Parent {
+export interface Platform extends Actor, Thread, Api {
     /**
      * allocator used to manage thread resources for an actor.
      */
@@ -57,7 +57,7 @@ export interface Platform extends Actor, Parent {
     /**
      * groups holds the mapping of group names to actor addresses.
      */
-    groups: GroupMap 
+    groups: GroupMap;
 
     /**
      * sendMessage to the actor act the destination address.
@@ -67,7 +67,7 @@ export interface Platform extends Actor, Parent {
     sendMessage(from: Thread, to: Address, msg: Message): void;
 
     /**
-     * sendKillSignal initiates the deallocation of the actor at the 
+     * sendKillSignal initiates the deallocation of the actor at the
      * specified address.
      *
      * Actual deallocation only occurs if the source thread is allowed to.
@@ -89,7 +89,8 @@ export class PVM implements Platform {
         public scheduler: Scheduler = new Scheduler(),
         public errors: ErrorStrategy = new SupervisorErrorStrategy(() => this),
         public registry = new RegistrySet(),
-        public groups:GroupMap = new GroupMap(),
+        public groups: GroupMap = new GroupMap(),
+        public address = ADDRESS_SYSTEM,
         public self = ADDRESS_SYSTEM
     ) {}
 
@@ -112,38 +113,34 @@ export class PVM implements Platform {
 
     // Api
 
+    get vm() {
+        return this;
+    }
+
     async spawn(tmpl: template.Spawnable): Promise<Address> {
-        return this.allocator.allocate(
-            this.allocator.getThread(ADDRESS_SYSTEM).get(),
-            fromSpawnable(tmpl)
-        );
+        return this.allocator.allocate(this, fromSpawnable(tmpl));
     }
 
     async tell(to: Address, msg: Message) {
-        this.sendMessage(
-            this.allocator.getThread(ADDRESS_SYSTEM).get(),
-            to,
-            msg
-        );
+        this.sendMessage(this, to, msg);
     }
 
     async raise(err: Err) {
-        await this.errors.raise(
-            this.allocator.getThread(ADDRESS_SYSTEM).get(),
-            err
-        );
+        await this.errors.raise(this, err);
     }
 
     async kill(addr: Address) {
-        await this.sendKillSignal(
-            this.allocator.getThread(ADDRESS_SYSTEM).get(),
-            addr
-        );
+        await this.sendKillSignal(this, addr);
     }
 
     async receive<T>() {
         return <Promise<T>>Future.raise(new Error('Not implemented'));
     }
+
+    // Thread
+    resume() {}
+
+    // Platform
 
     sendMessage(_from: Thread, to: Address, msg: Message) {
         //TODO: this.events.actor.onSend.dispatch(from.context.address, to, msg);
@@ -155,11 +152,11 @@ export class PVM implements Platform {
             msg
         );*/
 
-      let targets = isGroup(to) ? this.groups.getMembers(to) : [to];
-          let threads = this.allocator.getThreads(targets);
-          for(let thread of threads) {
+        let targets = isGroup(to) ? this.groups.getMembers(to) : [to];
+        let threads = this.allocator.getThreads(targets);
+        for (let thread of threads) {
             thread.notify(msg).catch(err => thread.raise(err));
-          }
+        }
 
         //TODO: this.events.actor.onSendFailed.dispatch(from.context.address, to, msg);
         /*   this.events.publish(
