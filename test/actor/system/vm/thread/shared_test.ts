@@ -9,10 +9,17 @@ import { Scheduler } from '../../../../../lib/actor/system/vm/scheduler';
 import { ThreadState } from '../../../../../lib/actor/system/vm/thread';
 import { SharedThread } from '../../../../../lib/actor/system/vm/thread/shared';
 import { Actor } from '../../../../../lib/actor';
+import { ErrorStrategy } from '../../../../../lib/actor/system/vm/strategy/error';
+import { Allocator } from '../../../../../lib/actor/system/vm/allocator';
 
 describe('shared', () => {
     let platform = mockDeep<Platform>();
     let scheduler = mockDeep<Scheduler>();
+    let errors = mockDeep<ErrorStrategy>();
+    let allocator = mockDeep<Allocator>();
+    platform.scheduler = scheduler;
+    platform.errors = errors;
+    platform.allocator = allocator;
 
     beforeEach(() => {
         jest.resetAllMocks();
@@ -24,7 +31,7 @@ describe('shared', () => {
 
     describe('notify', () => {
         it('should enqueue new messages', () => {
-            let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, '/');
             thread.notify('1');
             thread.notify('2');
             thread.notify('3');
@@ -38,7 +45,6 @@ describe('shared', () => {
         it('should move from MSG_WAIT to IDLE', () => {
             let thread = new SharedThread(
                 platform,
-                scheduler,
                 '/',
                 [],
                 ThreadState.MSG_WAIT
@@ -50,7 +56,7 @@ describe('shared', () => {
 
     describe('watch', () => {
         it('should work with async functions', async () => {
-            let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, '/');
 
             let value = 0;
 
@@ -72,11 +78,11 @@ describe('shared', () => {
                 () => Promise.reject(error),
                 () => Future.raise(error)
             ]) {
-                let thread = new SharedThread(platform, scheduler, '/');
+                let thread = new SharedThread(platform, '/');
                 let threadReceived;
                 let errorReceived;
 
-                platform.raiseActorError.mockImplementation(
+                platform.errors.raise.mockImplementation(
                     async (thread, error) => {
                         threadReceived = thread;
                         errorReceived = error;
@@ -94,14 +100,16 @@ describe('shared', () => {
 
     describe('kill', () => {
         it('should kill the thread', async () => {
-            let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, '/');
             let threadReceived;
             let targetReceived;
 
-            platform.sendKillSignal.mockImplementation(async (thread, target) => {
-                threadReceived = thread;
-                targetReceived = target;
-            });
+            platform.sendKillSignal.mockImplementation(
+                async (thread, target) => {
+                    threadReceived = thread;
+                    targetReceived = target;
+                }
+            );
 
             await thread.kill('/');
 
@@ -113,11 +121,11 @@ describe('shared', () => {
 
     describe('raise', () => {
         it('should raise an error', async () => {
-            let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, '/');
             let threadReceived;
             let errorReceived;
 
-            platform.raiseActorError.mockImplementation(
+            platform.errors.raise.mockImplementation(
                 async (thread, error) => {
                     threadReceived = thread;
                     errorReceived = error;
@@ -135,15 +143,15 @@ describe('shared', () => {
     describe('spawn', () => {
         it('should allocate from a template', async () => {
             //TODO: enable test after template refactor.
-            let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, '/');
 
             let tmpl = { id: 'child', create: () => {} };
 
-            platform.allocateActor.mockResolvedValue('/child');
+            platform.allocator.allocate.mockResolvedValue('/child');
 
             let result = await thread.spawn(tmpl);
 
-            expect(platform.allocateActor).toBeCalledWith(thread, tmpl);
+            expect(platform.allocator.allocate).toBeCalledWith(thread, tmpl);
 
             expect(result).toBe('/child');
         });
@@ -151,7 +159,7 @@ describe('shared', () => {
 
     describe('tell', () => {
         it('should send a message ', async () => {
-            let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, '/');
 
             await thread.tell('/foo', 'hello');
 
@@ -165,7 +173,7 @@ describe('shared', () => {
 
     describe('receive', () => {
         it('should provide messages from the mailbox', async () => {
-            let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, '/');
 
             thread.mailbox.push('hello');
 
@@ -177,7 +185,7 @@ describe('shared', () => {
         });
 
         it('should MSG_WAIT if there are no messages', async () => {
-            let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, '/');
 
             thread.receive();
 
@@ -195,7 +203,7 @@ describe('shared', () => {
 
     describe('resume', () => {
         it('should make the thread idle', () => {
-            let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform, '/');
             thread.state = ThreadState.MSG_WAIT;
             thread.resume();
             expect(thread.state).toBe(ThreadState.IDLE);
@@ -206,14 +214,14 @@ describe('shared', () => {
         it('should reject when the thread is invalid', () => {
             let childActor = mockDeep<Actor>();
 
-            let thread = new SharedThread(platform, scheduler, '/');
+            let thread = new SharedThread(platform,  '/');
             thread.state = ThreadState.INVALID;
 
             for (let func of [
                 () => thread.spawn({ create: () => childActor }),
                 () => thread.tell('/foo', 'hello'),
                 () => thread.receive(),
-                () => thread.resume()
+                async () => thread.resume()
             ]) {
                 expect(func()).rejects.toThrowError('ERR_THREAD_INVALID');
             }
