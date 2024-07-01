@@ -1,5 +1,7 @@
+import { Path } from '@quenk/noni/lib/data/record/path';
 import { Err } from '@quenk/noni/lib/control/error';
 import { isFunction } from '@quenk/noni/lib/data/type';
+import { Option } from '@quenk/noni/lib/data/option';
 
 import { Runtime } from './system/vm/runtime';
 import { Actor } from './';
@@ -8,6 +10,14 @@ export const ACTION_RAISE = -0x1;
 export const ACTION_IGNORE = 0x0;
 export const ACTION_RESTART = 0x1;
 export const ACTION_STOP = 0x2;
+
+ /**
+  * TemplateType is the type of actor to create.
+  */
+export enum TemplateType {
+  shared = 'shared',
+  process = 'process'
+}
 
 /**
  * TrapFunc is applied to unhandled errors raised by an actor.
@@ -30,31 +40,17 @@ export type TrapFunc = (e: Err) => TrapAction;
 export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 
 /**
- * ActorOption is a type that may contain an Actor or not.
+ * BaseTemplate holds the common properties for all templates.
  */
-export type ActorOption = Actor | void;
+export interface BaseTemplate {
+    /**
+     * type indicates the type of template and thus the type of thread that
+     * will be allocated for the actor.
+     *
+     * Defaults to 'shared' if not specified.
+     */
+    type?: TemplateType
 
-/**
- * CreateFunc receives a handle to the actor's resources and may optionally
- * provide an object to serve as the actor within the system.
- */
-export type CreateFunc = (
-    runtime: Runtime
-) => ActorOption | Promise<ActorOption>;
-
-/**
- * Spawnable allows a CreateFunc to be used in place of a Template.
- */
-export type Spawnable = Template | CreateFunc;
-
-/**
- * Template is an object that tells the system how to create an manage an
- * actor.
- *
- * Every actor in the system is created from an initial template that is reused
- * if the actor needs to be restarted.
- */
-export interface Template {
     /**
      * id of the actor used when constructing its address.
      *
@@ -74,14 +70,6 @@ export interface Template {
     group?: string | string[];
 
     /**
-     * create is called at the point the actor's resources have been allocated.
-     *
-     * If an implementer of Actor is returned, it is used as the actor in the
-     * system.
-     */
-    create: CreateFunc;
-
-    /**
      * trap is called when unhandled errors are detected.
      *
      * The result of this function determines the next action to take.
@@ -90,7 +78,63 @@ export interface Template {
 }
 
 /**
+ * CreateFunc receives a handle to the actor's resources and may optionally
+ * provide an object to serve as the actor within the system.
+ */
+export type CreateFunc = (
+    runtime: Runtime
+) => Option<Actor> | Promise<Option<Actor>>;
+
+/**
+ * Spawnable allows a CreateFunc to be used in place of a Template.
+ */
+export type Spawnable = Template | CreateFunc;
+
+/**
+ * Template is an object that tells the system how to create an manage an
+ * actor.
+ *
+ * Every actor in the system is created from an initial template that is reused
+ * if the actor needs to be restarted. The type of template determines the 
+ * type of thread that will be allocated for the actor.
+ */
+export type Template = SharedTemplate | ProcessTemplate;
+
+/**
+ * SharedTemplate is used for resident actors that require a SharedThread to
+ * be allocated.
+ */
+export interface SharedTemplate extends BaseTemplate {
+
+    type?: TemplateType.shared;
+  
+    /**
+     * create is called at the point the actor's resources have been allocated.
+     *
+     * If an implementer of Actor is returned, it is used as the actor in the
+     * system.
+     */
+    create: CreateFunc;
+ }
+
+/**
+ * ProcessTemplate is used for creating child process actors.
+ */
+export interface ProcessTemplate extends BaseTemplate {
+  
+      type?: TemplateType.process;
+  
+      /**
+      * script is the path to the script that will be executed in the child
+      * process.
+      */
+      script: Path;
+  }
+
+/**
  * fromSpawnable converts a Spawnable to a Template.
+ *
+ * If a function is supplied we assume a SharedTemplate is desired.
  */
 export const fromSpawnable = (create: Spawnable): Template =>
     isFunction(create) ? { create } : create;

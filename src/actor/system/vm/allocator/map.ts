@@ -5,8 +5,8 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 import { distribute, empty } from '@quenk/noni/lib/data/array';
 
 import { Address, isRestricted, make } from '../../../address';
-import { Template } from '../../../template';
-import { SharedThread } from '../thread/shared';
+import { SharedTemplate, Template, TemplateType } from '../../../template';
+import { ThreadFactory } from '../thread/factory';
 import { Thread } from '../thread';
 import { Actor } from '../../..';
 import { Platform } from '..';
@@ -128,10 +128,13 @@ export class MapAllocator implements Allocator {
         if (this.actors.has(address))
             return Future.raise(new errors.DuplicateAddressErr(address));
 
-        let thread = new SharedThread(platform, address);
+        let thread = ThreadFactory.create(template.type ?? TemplateType.shared, platform, address);
 
         // XXX: Note a rejected promise here will crash the system.
-        let returnedActor = template.create && (await template.create(thread));
+        let returnedActor;
+        if((<SharedTemplate>template).create) {
+          returnedActor = await (<SharedTemplate>template).create(thread);
+        }
 
         let actor = returnedActor ?? thread;
 

@@ -1,5 +1,4 @@
-import { ThreadState } from './thread';
-import { SharedThread } from './thread/shared';
+import { SharedThread, ThreadState } from './thread/shared';
 
 export const ERR_THREAD_DEQUEUED = 'ERR_THREAD_DEQUEUED';
 
@@ -90,7 +89,7 @@ export class Scheduler {
         while (
             (idx = this.queue.findIndex(
                 task => task.thread.state === ThreadState.IDLE
-            ))
+            )) !== -1
         ) {
             let task = this.queue.splice(idx, 1)[0];
 
@@ -102,7 +101,9 @@ export class Scheduler {
                     if (task.thread.state === ThreadState.RUNNING)
                         task.thread.state = ThreadState.IDLE;
                 })
-                .catch(err => task.abort(err));
+                .catch(err => {  
+                  task.abort(err)
+                });
         }
 
         this.isRunning = false;

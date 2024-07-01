@@ -8,23 +8,21 @@ import {
 } from '@quenk/noni/lib/control/match/case';
 import { identity } from '@quenk/noni/lib/data/function';
 
-import { Template } from '../../../template';
-import { Address } from '../../../address';
-import { Task } from '../scheduler';
-import { Message } from '../../..';
-import { Platform } from '../';
-import { Thread, ThreadState } from './';
+import { Template } from '../../../../template';
+import { Address } from '../../../../address';
+import { Task } from '../../scheduler';
+import { Message } from '../../../..';
+import { Platform } from '../../';
+import { SharedThread, ThreadState } from '.';
 
 const defaultCases = [new Default(identity)];
 
-export const E_INVALID = 'ERR_THREAD_INVALID';
+export const ERR_THREAD_INVALID = 'ERR_THREAD_INVALID';
 
 /**
- * SharedThread is used by actors that run in the same event loop as the VM.
- *
- * Code execution takes place on the Scheduler using the Task type.
+ * JSThread is used by actors that run in the same event loop as the VM.
  */
-export class SharedThread implements Thread {
+export class JSThread implements SharedThread {
     constructor(
         public vm: Platform,
         public address: Address,
@@ -35,7 +33,7 @@ export class SharedThread implements Thread {
     readonly self = this.address;
 
     _assertValid() {
-        if (!this.isValid()) throw new Error(E_INVALID);
+        if (!this.isValid()) throw new Error(ERR_THREAD_INVALID);
     }
 
     isValid() {
