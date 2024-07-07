@@ -5,8 +5,9 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 import { distribute, empty } from '@quenk/noni/lib/data/array';
 
 import { Address, isRestricted, make } from '../../../address';
-import { SharedTemplate, Template, TemplateType } from '../../../template';
+import { SharedCreateTemplate, SharedRunTemplate, Template } from '../../../template';
 import { ThreadFactory } from '../thread/factory';
+import { JSThread } from '../thread/shared/js';
 import { Thread } from '../thread';
 import { Actor } from '../../..';
 import { Platform } from '..';
@@ -128,15 +129,9 @@ export class MapAllocator implements Allocator {
         if (this.actors.has(address))
             return Future.raise(new errors.DuplicateAddressErr(address));
 
-        let thread = ThreadFactory.create(template.type ?? TemplateType.shared, platform, address);
+        let thread = ThreadFactory.create(platform, address, template);
 
-        // XXX: Note a rejected promise here will crash the system.
-        let returnedActor;
-        if((<SharedTemplate>template).create) {
-          returnedActor = await (<SharedTemplate>template).create(thread);
-        }
-
-        let actor = returnedActor ?? thread;
+        let actor = (<SharedCreateTemplate>template).create ? (<SharedCreateTemplate>template).create(<JSThread>thread) : thread;
 
         let entry = {
             address,
@@ -154,7 +149,11 @@ export class MapAllocator implements Allocator {
         if (template.group) platform.groups.enroll(address, template.group);
 
         // TODO: dispatch event
-        thread.watch(() => actor.start());
+        platform.runTask(thread, async () =>{
+          await actor.start();
+          if((<SharedRunTemplate>template).run)
+            await (<SharedRunTemplate>template).run(<JSThread>thread);
+        })
 
         return address;
     }

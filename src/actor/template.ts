@@ -1,7 +1,6 @@
 import { Path } from '@quenk/noni/lib/data/record/path';
 import { Err } from '@quenk/noni/lib/control/error';
 import { isFunction } from '@quenk/noni/lib/data/type';
-import { Option } from '@quenk/noni/lib/data/option';
 
 import { Runtime } from './system/vm/runtime';
 import { Actor } from './';
@@ -11,12 +10,15 @@ export const ACTION_IGNORE = 0x0;
 export const ACTION_RESTART = 0x1;
 export const ACTION_STOP = 0x2;
 
- /**
-  * TemplateType is the type of actor to create.
-  */
+/**
+ * TemplateType is the type of actor to create.
+ */
 export enum TemplateType {
-  shared = 'shared',
-  process = 'process'
+
+  PROCESS = 'process',
+
+  SHARED = 'shared'
+
 }
 
 /**
@@ -49,7 +51,7 @@ export interface BaseTemplate {
      *
      * Defaults to 'shared' if not specified.
      */
-    type?: TemplateType
+    type?: TemplateType;
 
     /**
      * id of the actor used when constructing its address.
@@ -78,24 +80,27 @@ export interface BaseTemplate {
 }
 
 /**
- * CreateFunc receives a handle to the actor's resources and may optionally
- * provide an object to serve as the actor within the system.
+ * CreateFunc is a function that creates an actor given the handle the system
+ * has generated.
+ *
+ * Use it when a class based actor implementation is preffered.
  */
-export type CreateFunc = (
-    runtime: Runtime
-) => Option<Actor> | Promise<Option<Actor>>;
+export type CreateFunc = (runtime: Runtime) => Actor;
 
 /**
- * Spawnable allows a CreateFunc to be used in place of a Template.
+ * RunFunc serves as the main function for function based actors.
+ *
+ * This should only ever be a function declared with the "async" keyword and
+ * not just a function that returns a Promise.
  */
-export type Spawnable = Template | CreateFunc;
+export type RunFunc = (runtime: Runtime) => Promise<void>;
 
 /**
  * Template is an object that tells the system how to create an manage an
  * actor.
  *
  * Every actor in the system is created from an initial template that is reused
- * if the actor needs to be restarted. The type of template determines the 
+ * if the actor needs to be restarted. The type of template determines the
  * type of thread that will be allocated for the actor.
  */
 export type Template = SharedTemplate | ProcessTemplate;
@@ -104,37 +109,61 @@ export type Template = SharedTemplate | ProcessTemplate;
  * SharedTemplate is used for resident actors that require a SharedThread to
  * be allocated.
  */
-export interface SharedTemplate extends BaseTemplate {
+export type SharedTemplate = SharedCreateTemplate | SharedRunTemplate;
 
-    type?: TemplateType.shared;
-  
+/**
+ * SharedCreateTemplate is used for class based actors.
+ */
+export interface SharedCreateTemplate extends BaseTemplate {
     /**
-     * create is called at the point the actor's resources have been allocated.
-     *
-     * If an implementer of Actor is returned, it is used as the actor in the
-     * system.
+     * create an instance of the actor to be used within the system.
      */
     create: CreateFunc;
- }
+}
+
+/**
+ * SharedRunTemplate is used for function based actors.
+ */
+export interface SharedRunTemplate extends BaseTemplate {
+    /**
+     * run is called to run a function based actor.
+     */
+    run: RunFunc;
+}
 
 /**
  * ProcessTemplate is used for creating child process actors.
  */
 export interface ProcessTemplate extends BaseTemplate {
-  
-      type?: TemplateType.process;
-  
-      /**
-      * script is the path to the script that will be executed in the child
-      * process.
-      */
-      script: Path;
-  }
+    type?: TemplateType.PROCESS;
+
+    /**
+     * script is the path to the script that will be executed in the child
+     * process.
+     */
+    script: Path;
+}
+
+/**
+ * Spawnable allows a CreateFunc to be used in place of a Template.
+ */
+export type Spawnable = Template | CreateFunc | RunFunc;
+
+const AsyncFunction = (async () => {}).constructor;
+
+const isAsyncFunction = (func: Function) => func.constructor === AsyncFunction;
 
 /**
  * fromSpawnable converts a Spawnable to a Template.
  *
  * If a function is supplied we assume a SharedTemplate is desired.
  */
-export const fromSpawnable = (create: Spawnable): Template =>
-    isFunction(create) ? { create } : create;
+export const fromSpawnable = (tmpl: Spawnable): Template => {
+    if (isFunction(tmpl)) {
+        return isAsyncFunction(tmpl)
+            ? {   run: <RunFunc>tmpl }
+            : {  create: <CreateFunc>tmpl };
+    } else {
+        return tmpl;
+    }
+};
