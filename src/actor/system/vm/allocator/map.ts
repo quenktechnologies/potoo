@@ -157,8 +157,10 @@ export class MapAllocator implements Allocator {
         // TODO: dispatch event
         platform.runTask(thread, async () => {
             await actor.start();
-            if ((<SharedRunTemplate>template).run)
+            if ((<SharedRunTemplate>template).run) {
                 await (<SharedRunTemplate>template).run(<JSThread>thread);
+                await this.deallocate(thread);
+            }
         });
 
         return address;

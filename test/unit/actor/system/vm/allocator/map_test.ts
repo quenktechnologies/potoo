@@ -222,6 +222,19 @@ describe('MapAllocator', () => {
 
             expect(addr).toBe('root');
         });
+
+        it('should deallocate function actors when they complete', async () => {
+            let map = new MapAllocator(getPlatform);
+
+            let addr = await map.allocate(platform, {
+                id: '/',
+                run: async () => {}
+            });
+
+            await wait(500);
+
+            expect(map.actors.has(addr)).toBe(false);
+        });
     });
 
     describe('reallocate', () => {
