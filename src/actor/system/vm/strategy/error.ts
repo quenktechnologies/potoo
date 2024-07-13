@@ -3,7 +3,7 @@ import * as errors from '../runtime/error';
 
 import { Err, toError } from '@quenk/noni/lib/control/err';
 
-import {  getParent } from '../../../address';
+import { getParent } from '../../../address';
 import { Thread } from '../thread';
 import { Platform } from '..';
 
@@ -68,7 +68,7 @@ export class SupervisorErrorStrategy implements ErrorStrategy {
             let action = trap(err);
 
             if (action === template.ACTION_IGNORE) {
-                currentThread.resume();
+                //TODO: Should the thread be put back in the idle state?
                 return;
             } else if (action === template.ACTION_RESTART) {
                 await allocator.reallocate(currentThread);

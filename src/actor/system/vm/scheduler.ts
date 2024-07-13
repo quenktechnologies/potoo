@@ -101,8 +101,8 @@ export class Scheduler {
                     if (task.thread.state === ThreadState.RUNNING)
                         task.thread.state = ThreadState.IDLE;
                 })
-                .catch(err => {  
-                  task.abort(err)
+                .catch(err => {
+                    task.abort(err);
                 });
         }
 

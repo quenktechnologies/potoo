@@ -1,7 +1,7 @@
-import { SharedThread } from '../thread/shared';
 import { Frame } from '../frame';
 import { Template } from '../../../template';
 import { Operand } from '.';
+import { JSThread } from '../thread/shared/js';
 
 /**
  * alloc allocates resources for a new child actor.
@@ -12,7 +12,7 @@ import { Operand } from '.';
  * Stack:
  * <template> -> <address>
  */
-export const alloc = (thread: SharedThread, frame: Frame, _: Operand) => {
+export const alloc = (thread: JSThread, frame: Frame, _: Operand) => {
     let eTemp = frame.popObject();
 
     if (eTemp.isLeft()) return thread.raise(eTemp.takeLeft());
@@ -36,7 +36,7 @@ export const alloc = (thread: SharedThread, frame: Frame, _: Operand) => {
  * self puts the address of the current actor on to the stack.
  * TODO: make self an automatic variable
  */
-export const self = (_: SharedThread, f: Frame, __: Operand) => {
+export const self = (_: JSThread, f: Frame, __: Operand) => {
     f.pushSelf();
 };
 
@@ -46,7 +46,7 @@ export const self = (_: SharedThread, f: Frame, __: Operand) => {
  * Stack:
  * <message>,<address> -> <uint8>
  */
-export const send = (r: SharedThread, f: Frame, _: Operand) => {
+export const send = (r: JSThread, f: Frame, _: Operand) => {
     let eMsg = f.popValue();
 
     if (eMsg.isLeft()) return r.raise(eMsg.takeLeft());
@@ -68,7 +68,7 @@ export const send = (r: SharedThread, f: Frame, _: Operand) => {
  * Stack:
  * <function> ->
  */
-export const recv = (r: SharedThread, f: Frame, _: Operand) => {
+export const recv = (r: JSThread, f: Frame, _: Operand) => {
     let einfo = f.popFunction();
 
     if (einfo.isLeft()) return r.raise(einfo.takeLeft());
@@ -82,7 +82,7 @@ export const recv = (r: SharedThread, f: Frame, _: Operand) => {
  * Stack:
  *  -> <uint32>
  */
-export const recvcount = (_r: SharedThread, _f: Frame, _: Operand) => {
+export const recvcount = (_r: JSThread, _f: Frame, _: Operand) => {
     //f.push(r.context.receivers.length);
 };
 
@@ -93,7 +93,7 @@ export const recvcount = (_r: SharedThread, _f: Frame, _: Operand) => {
  * Stack:
  *  -> <uint32>
  */
-export const mailcount = (r: SharedThread, f: Frame, _: Operand) => {
+export const mailcount = (r: JSThread, f: Frame, _: Operand) => {
     f.push(r.mailbox.length);
 };
 
@@ -104,7 +104,7 @@ export const mailcount = (r: SharedThread, f: Frame, _: Operand) => {
  *
  *  -> <message>?
  */
-export const maildq = (_: SharedThread, f: Frame, __: Operand) => {
+export const maildq = (_: JSThread, f: Frame, __: Operand) => {
     f.pushMessage();
 };
 
@@ -117,7 +117,7 @@ export const maildq = (_: SharedThread, f: Frame, __: Operand) => {
  *
  * <address> ->
  */
-export const stop = (r: SharedThread, f: Frame, _: Operand) => {
+export const stop = (r: JSThread, f: Frame, _: Operand) => {
     let eaddr = f.popString();
 
     if (eaddr.isLeft()) return r.raise(eaddr.takeLeft());

@@ -7,7 +7,7 @@ import { Either } from '@quenk/noni/lib/data/either';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Type } from '@quenk/noni/lib/data/type';
 
-import { SharedThread } from '../thread/shared';
+import { JSThread } from '../thread/shared/js';
 import {
     Frame,
     DATA_TYPE_INFO,
@@ -77,7 +77,7 @@ export type Instruction = number;
 /**
  * OpcodeHandler
  */
-export type OpcodeHandler = (r: SharedThread, f: Frame, o: Operand) => void;
+export type OpcodeHandler = (r: JSThread, f: Frame, o: Operand) => void;
 
 /**
  * OpcodeInfo provides needed details of a single opcode.
@@ -97,7 +97,7 @@ export interface OpcodeInfo {
      * log is a function that is applied to convert the op into an op log
      * entry.
      */
-    log: (r: SharedThread, f: Frame, oper: Operand) => Type[];
+    log: (r: JSThread, f: Frame, oper: Operand) => Type[];
 }
 
 /**
@@ -129,7 +129,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.pushui8,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['pushui8', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['pushui8', oper]
     },
 
     [PUSHUI16]: {
@@ -137,7 +137,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.pushui16,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['pushui16', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['pushui16', oper]
     },
 
     [PUSHUI32]: {
@@ -145,7 +145,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.pushui32,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['pushui32', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['pushui32', oper]
     },
 
     [LDS]: {
@@ -153,7 +153,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.lds,
 
-        log: (_: SharedThread, f: Frame, oper: Operand) => [
+        log: (_: JSThread, f: Frame, oper: Operand) => [
             'lds',
             oper,
             eToLog(f.resolve(DATA_TYPE_STRING | oper))
@@ -165,7 +165,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ldn,
 
-        log: (_: SharedThread, f: Frame, oper: Operand) => [
+        log: (_: JSThread, f: Frame, oper: Operand) => [
             'ldn',
             oper,
             eToLog(f.resolve(DATA_TYPE_INFO | oper))
@@ -177,7 +177,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.dup,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['dup']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['dup']
     },
 
     [STORE]: {
@@ -185,7 +185,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.store,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['store', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['store', oper]
     },
 
     [LOAD]: {
@@ -193,7 +193,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.load,
 
-        log: (_: SharedThread, f: Frame, oper: Operand) => [
+        log: (_: JSThread, f: Frame, oper: Operand) => [
             'load',
             oper,
             eToLog(f.resolve(DATA_TYPE_LOCAL | oper))
@@ -205,7 +205,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ceq,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['ceq']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['ceq']
     },
 
     [ADDUI32]: {
@@ -213,7 +213,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.addui32,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['addui32']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['addui32']
     },
 
     [CALL]: {
@@ -221,7 +221,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.call,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['call']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['call']
     },
 
     [RAISE]: {
@@ -229,7 +229,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.raise,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['raise']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['raise']
     },
 
     [JMP]: {
@@ -237,7 +237,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.jmp,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['jmp', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['jmp', oper]
     },
 
     [IFZJMP]: {
@@ -245,7 +245,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ifzjmp,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['ifzjmp', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['ifzjmp', oper]
     },
 
     [IFNZJMP]: {
@@ -253,7 +253,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ifnzjmp,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['ifnzjmp', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['ifnzjmp', oper]
     },
 
     [IFEQJMP]: {
@@ -261,7 +261,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ifeqjmp,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['ifeqjmp', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['ifeqjmp', oper]
     },
 
     [IFNEQJMP]: {
@@ -269,7 +269,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: base.ifneqjmp,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['ifneqjmp', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['ifneqjmp', oper]
     },
 
     [ALLOC]: {
@@ -277,7 +277,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.alloc,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['alloc']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['alloc']
     },
 
     [SEND]: {
@@ -285,7 +285,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.send,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['send']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['send']
     },
 
     [RECV]: {
@@ -293,7 +293,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.recv,
 
-        log: (_: SharedThread, f: Frame, oper: Operand) => [
+        log: (_: JSThread, f: Frame, oper: Operand) => [
             'recv',
             oper,
             eToLog(f.resolve(DATA_TYPE_INFO | oper))
@@ -305,7 +305,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.recvcount,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['recvcount']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['recvcount']
     },
 
     [MAILCOUNT]: {
@@ -313,7 +313,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.mailcount,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['mailcount']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['mailcount']
     },
 
     [MAILDQ]: {
@@ -321,7 +321,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.maildq,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['maildq']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['maildq']
     },
 
     [SELF]: {
@@ -329,7 +329,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.self,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['self']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['self']
     },
 
     [STOP]: {
@@ -337,7 +337,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: actor.stop,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['stop']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['stop']
     },
 
     [GETPROP]: {
@@ -345,7 +345,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: obj.getprop,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['getprop', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['getprop', oper]
     },
 
     [ARELM]: {
@@ -353,7 +353,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: obj.arelm,
 
-        log: (_: SharedThread, __: Frame, oper: Operand) => ['arelm', oper]
+        log: (_: JSThread, __: Frame, oper: Operand) => ['arelm', oper]
     },
 
     [ARLENGTH]: {
@@ -361,7 +361,7 @@ export const opcodes: OpcodeInfos = {
 
         handler: obj.arlength,
 
-        log: (_: SharedThread, __: Frame, ___: Operand) => ['arlength']
+        log: (_: JSThread, __: Frame, ___: Operand) => ['arlength']
     }
 };
 
@@ -384,5 +384,5 @@ export const toName = (op: Opcode) =>
  *
  * If the op is invalid an empty line is produced.
  */
-export const toLog = (op: Opcode, r: SharedThread, f: Frame, oper: Operand) =>
+export const toLog = (op: Opcode, r: JSThread, f: Frame, oper: Operand) =>
     opcodes.hasOwnProperty(op) ? opcodes[op].log(r, f, oper) : [];

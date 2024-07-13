@@ -3,7 +3,7 @@
         "baseUrl": "src",
         "lib": ["es5", "ES2015", "DOM"],
         "module": "commonjs",
-        "target": "es6",
+        "target": "ES2017",
         "rootDir": ".",
         "outDir": "../lib",
         "moduleResolution": "node",

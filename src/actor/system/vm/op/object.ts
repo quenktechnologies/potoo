@@ -1,4 +1,4 @@
-import { SharedThread } from '../thread/shared';
+import { JSThread } from '../thread/shared/js';
 import { Frame } from '../frame';
 import { Operand } from '.';
 
@@ -8,7 +8,7 @@ import { Operand } from '.';
  * Stack:
  *  <objectref> -> <value>
  */
-export const getprop = (_r: SharedThread, f: Frame, _idx: Operand) => {
+export const getprop = (_r: JSThread, f: Frame, _idx: Operand) => {
     // TODO: This needs to be re-implemented to support user space objects.
 
     //This should really push the void value instead of 0.
@@ -41,7 +41,7 @@ export const getprop = (_r: SharedThread, f: Frame, _idx: Operand) => {
  * Stack:
  * <arrayref> -> <uint32>
  */
-export const arlength = (r: SharedThread, f: Frame, _: Operand) => {
+export const arlength = (r: JSThread, f: Frame, _: Operand) => {
     let eobj = f.popObject();
 
     if (eobj.isLeft()) return r.raise(eobj.takeLeft());
@@ -61,7 +61,7 @@ export const arlength = (r: SharedThread, f: Frame, _: Operand) => {
  *
  * <arrayref>,<index> -> <element>
  */
-export const arelm = (_r: SharedThread, f: Frame, _: Operand) => {
+export const arelm = (_r: JSThread, f: Frame, _: Operand) => {
     //TOOO: Same as getprop.
     f.push(0);
     /*

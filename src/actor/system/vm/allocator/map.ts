@@ -5,7 +5,11 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 import { distribute, empty } from '@quenk/noni/lib/data/array';
 
 import { Address, isRestricted, make } from '../../../address';
-import { SharedCreateTemplate, SharedRunTemplate, Template } from '../../../template';
+import {
+    SharedCreateTemplate,
+    SharedRunTemplate,
+    Template
+} from '../../../template';
 import { ThreadFactory } from '../thread/factory';
 import { JSThread } from '../thread/shared/js';
 import { Thread } from '../thread';
@@ -131,7 +135,9 @@ export class MapAllocator implements Allocator {
 
         let thread = ThreadFactory.create(platform, address, template);
 
-        let actor = (<SharedCreateTemplate>template).create ? (<SharedCreateTemplate>template).create(<JSThread>thread) : thread;
+        let actor = (<SharedCreateTemplate>template).create
+            ? (<SharedCreateTemplate>template).create(<JSThread>thread)
+            : thread;
 
         let entry = {
             address,
@@ -149,11 +155,11 @@ export class MapAllocator implements Allocator {
         if (template.group) platform.groups.enroll(address, template.group);
 
         // TODO: dispatch event
-        platform.runTask(thread, async () =>{
-          await actor.start();
-          if((<SharedRunTemplate>template).run)
-            await (<SharedRunTemplate>template).run(<JSThread>thread);
-        })
+        platform.runTask(thread, async () => {
+            await actor.start();
+            if ((<SharedRunTemplate>template).run)
+                await (<SharedRunTemplate>template).run(<JSThread>thread);
+        });
 
         return address;
     }

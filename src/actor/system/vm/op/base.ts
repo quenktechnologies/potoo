@@ -1,7 +1,7 @@
 import * as error from '../runtime/error';
 
+import { JSThread } from '../thread/shared/js';
 import { Frame, DATA_MAX_SAFE_UINT32 } from '../frame';
-import { SharedThread } from '../thread/shared';
 import { Operand } from '.';
 
 /**
@@ -10,7 +10,7 @@ import { Operand } from '.';
  * Stack:
  *  ->
  */
-export const nop = (_: SharedThread, __: Frame, ___: Operand) => {};
+export const nop = (_: JSThread, __: Frame, ___: Operand) => {};
 
 /**
  * pushui8 pushes an unsigned 8bit integer onto the stack.
@@ -18,7 +18,7 @@ export const nop = (_: SharedThread, __: Frame, ___: Operand) => {};
  * Stack:
  * -> <uint8>
  */
-export const pushui8 = (_: SharedThread, f: Frame, oper: Operand) => {
+export const pushui8 = (_: JSThread, f: Frame, oper: Operand) => {
     f.pushUInt8(oper);
 };
 
@@ -28,7 +28,7 @@ export const pushui8 = (_: SharedThread, f: Frame, oper: Operand) => {
  * Stack:
  *  -> <uint16>
  */
-export const pushui16 = (_: SharedThread, f: Frame, oper: Operand) => {
+export const pushui16 = (_: JSThread, f: Frame, oper: Operand) => {
     f.pushUInt16(oper);
 };
 
@@ -39,7 +39,7 @@ export const pushui16 = (_: SharedThread, f: Frame, oper: Operand) => {
  * Stack:
  *  -> <uint32>
  */
-export const pushui32 = (_: SharedThread, f: Frame, oper: Operand) => {
+export const pushui32 = (_: JSThread, f: Frame, oper: Operand) => {
     f.pushUInt32(oper);
 };
 
@@ -49,7 +49,7 @@ export const pushui32 = (_: SharedThread, f: Frame, oper: Operand) => {
  * Stack:
  *  -> <string>
  */
-export const lds = (_: SharedThread, f: Frame, idx: Operand) => {
+export const lds = (_: JSThread, f: Frame, idx: Operand) => {
     f.pushString(idx);
 };
 
@@ -58,7 +58,7 @@ export const lds = (_: SharedThread, f: Frame, idx: Operand) => {
  *
  * -> <value>
  */
-export const ldn = (_: SharedThread, f: Frame, idx: Operand) => {
+export const ldn = (_: JSThread, f: Frame, idx: Operand) => {
     f.pushName(idx);
 };
 
@@ -68,7 +68,7 @@ export const ldn = (_: SharedThread, f: Frame, idx: Operand) => {
  * Stack:
  * <any> -> <any>,<any>
  */
-export const dup = (_: SharedThread, f: Frame, __: Operand) => {
+export const dup = (_: JSThread, f: Frame, __: Operand) => {
     f.duplicate();
 };
 
@@ -79,7 +79,7 @@ export const dup = (_: SharedThread, f: Frame, __: Operand) => {
  * Stack:
  * <any> ->
  */
-export const store = (_: SharedThread, f: Frame, idx: Operand) => {
+export const store = (_: JSThread, f: Frame, idx: Operand) => {
     f.locals[idx] = f.pop();
 };
 
@@ -92,7 +92,7 @@ export const store = (_: SharedThread, f: Frame, idx: Operand) => {
  * Stack:
  *  -> <any>
  */
-export const load = (_: SharedThread, f: Frame, idx: Operand) => {
+export const load = (_: JSThread, f: Frame, idx: Operand) => {
     let d = f.locals[idx];
 
     f.push(d == null ? 0 : d);
@@ -107,7 +107,7 @@ export const load = (_: SharedThread, f: Frame, idx: Operand) => {
  *
  * <val1>,<val2> -> <unint32>
  */
-export const ceq = (r: SharedThread, f: Frame, __: Operand) => {
+export const ceq = (r: JSThread, f: Frame, __: Operand) => {
     //TODO: Should null == null or raise an error?
 
     let eLhs = f.popValue();
@@ -129,7 +129,7 @@ export const ceq = (r: SharedThread, f: Frame, __: Operand) => {
  * The result is a 32 bit value. If the result is more than MAX_SAFE_INTEGER an
  * IntergerOverflowErr will be raised.
  */
-export const addui32 = (r: SharedThread, f: Frame, _: Operand) => {
+export const addui32 = (r: JSThread, f: Frame, _: Operand) => {
     let val = f.pop() + f.pop();
 
     if (val > DATA_MAX_SAFE_UINT32)
@@ -145,7 +145,7 @@ export const addui32 = (r: SharedThread, f: Frame, _: Operand) => {
  *
  * <arg>...? -> <result>
  */
-export const call = (r: SharedThread, f: Frame, _: Operand) => {
+export const call = (r: JSThread, f: Frame, _: Operand) => {
     let einfo = f.popFunction();
 
     if (einfo.isLeft()) return r.raise(einfo.takeLeft());
@@ -169,7 +169,7 @@ export const call = (r: SharedThread, f: Frame, _: Operand) => {
  *
  * <message> ->
  */
-export const raise = (r: SharedThread, f: Frame, _: Operand) => {
+export const raise = (r: JSThread, f: Frame, _: Operand) => {
     let emsg = f.popString();
 
     r.raise(new Error(emsg.takeRight()));
@@ -181,7 +181,7 @@ export const raise = (r: SharedThread, f: Frame, _: Operand) => {
  * Stack:
  *  ->
  */
-export const jmp = (_: SharedThread, f: Frame, oper: Operand) => {
+export const jmp = (_: JSThread, f: Frame, oper: Operand) => {
     f.seek(oper);
 };
 
@@ -193,7 +193,7 @@ export const jmp = (_: SharedThread, f: Frame, oper: Operand) => {
  *
  * <uint32> ->
  */
-export const ifzjmp = (_: SharedThread, f: Frame, oper: Operand) => {
+export const ifzjmp = (_: JSThread, f: Frame, oper: Operand) => {
     let eValue = f.popValue();
 
     if (eValue.isLeft() || eValue.takeRight() === 0) f.seek(oper);
@@ -206,7 +206,7 @@ export const ifzjmp = (_: SharedThread, f: Frame, oper: Operand) => {
  * Stack:
  * <uint32> ->
  */
-export const ifnzjmp = (_: SharedThread, f: Frame, oper: Operand) => {
+export const ifnzjmp = (_: JSThread, f: Frame, oper: Operand) => {
     let eValue = f.popValue();
 
     if (eValue.isRight() && eValue.takeRight() !== 0) f.seek(oper);
@@ -218,7 +218,7 @@ export const ifnzjmp = (_: SharedThread, f: Frame, oper: Operand) => {
  * Stack:
  * <any><any> ->
  */
-export const ifeqjmp = (r: SharedThread, f: Frame, oper: Operand) => {
+export const ifeqjmp = (r: JSThread, f: Frame, oper: Operand) => {
     let eLhs = f.popValue();
     let eRhs = f.popValue();
 
@@ -233,7 +233,7 @@ export const ifeqjmp = (r: SharedThread, f: Frame, oper: Operand) => {
  * Stack:
  * <any><any> ->
  */
-export const ifneqjmp = (r: SharedThread, f: Frame, oper: Operand) => {
+export const ifneqjmp = (r: JSThread, f: Frame, oper: Operand) => {
     let eLhs = f.popValue();
     let eRhs = f.popValue();
 

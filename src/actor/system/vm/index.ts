@@ -73,6 +73,13 @@ export interface Platform extends Actor, Thread, Api {
      * Actual deallocation only occurs if the source thread is allowed to.
      */
     sendKillSignal(src: Thread, target: Address): Promise<void>;
+
+    /**
+     * runTask allows an async function to be executed on behalf of a Thread.
+     *
+     * If the Promise rejects, the error is raised with the Thread.
+     */
+    runTask(thread: Thread, task: () => Promise<void>): Promise<void>;
 }
 
 /**
@@ -186,5 +193,9 @@ export class PVM implements Platform {
         if (mtargetThread.isNothing()) return;
 
         await this.allocator.deallocate(mtargetThread.get());
+    }
+
+    runTask(thread: Thread, task: () => Promise<void>): Promise<void> {
+        return Future.do(task).catch(err => thread.raise(err));
     }
 }

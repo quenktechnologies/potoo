@@ -1,14 +1,12 @@
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
-import { TypeCase, Case, Default } from '@quenk/noni/lib/control/match/case';
 
 import { Runtime } from '../system/vm/runtime';
 import { Address } from '../address';
 import { Spawnable } from '../template';
 import { Api } from '../api';
 import { Message, Actor } from '../';
-
-export { Case, Default };
+import { TypeCase } from '.';
 
 /**
  * Resident is an actor that exists in the current runtime.

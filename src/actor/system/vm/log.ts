@@ -3,10 +3,10 @@ import * as events from './event';
 import { Type } from '@quenk/noni/lib/data/type';
 import { Record } from '@quenk/noni/lib/data/record';
 
+import { JSThread } from './thread/shared/js';
 import { Address } from '../../address';
 import { Opcode, Operand, toLog } from './op';
 import { Frame } from './frame';
-import { SharedThread } from './thread/shared';
 
 export const LOG_LEVEL_TRACE = 8;
 export const LOG_LEVEL_DEBUG = 7;
@@ -69,7 +69,7 @@ export interface LogWritable {
      * opcode logs the execution of an opcode once the log level is >=
      * [[LOG_LEVEL_TRACE]].
      */
-    opcode(thr: SharedThread, frame: Frame, op: Opcode, operand: Operand): void;
+    opcode(thr: JSThread, frame: Frame, op: Opcode, operand: Operand): void;
 
     /**
      * event outputs a system event to the log if predefined [[LogLevel]] for
@@ -87,7 +87,7 @@ export class LogWriter implements LogWritable {
         public level: LogLevel
     ) {}
 
-    opcode(thr: SharedThread, frame: Frame, op: Opcode, operand: Operand) {
+    opcode(thr: JSThread, frame: Frame, op: Opcode, operand: Operand) {
         if (this.level >= LOG_LEVEL_TRACE)
             this.sink.debug.apply(this.sink, [
                 `[${thr.address}]`,

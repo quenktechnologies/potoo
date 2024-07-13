@@ -1,6 +1,6 @@
 import { Path } from '@quenk/noni/lib/data/record/path';
 import { Err } from '@quenk/noni/lib/control/error';
-import { isFunction } from '@quenk/noni/lib/data/type';
+import { isFunction, isString } from '@quenk/noni/lib/data/type';
 
 import { Runtime } from './system/vm/runtime';
 import { Actor } from './';
@@ -13,13 +13,7 @@ export const ACTION_STOP = 0x2;
 /**
  * TemplateType is the type of actor to create.
  */
-export enum TemplateType {
-
-  PROCESS = 'process',
-
-  SHARED = 'shared'
-
-}
+export type TemplateType = string;
 
 /**
  * TrapFunc is applied to unhandled errors raised by an actor.
@@ -135,8 +129,6 @@ export interface SharedRunTemplate extends BaseTemplate {
  * ProcessTemplate is used for creating child process actors.
  */
 export interface ProcessTemplate extends BaseTemplate {
-    type?: TemplateType.PROCESS;
-
     /**
      * script is the path to the script that will be executed in the child
      * process.
@@ -154,6 +146,12 @@ const AsyncFunction = (async () => {}).constructor;
 const isAsyncFunction = (func: Function) => func.constructor === AsyncFunction;
 
 /**
+ * isProcessTemplate test.
+ */
+export const isProcessTemplate = (tmpl: Template): tmpl is ProcessTemplate =>
+    isString((<ProcessTemplate>tmpl).script);
+
+/**
  * fromSpawnable converts a Spawnable to a Template.
  *
  * If a function is supplied we assume a SharedTemplate is desired.
@@ -161,8 +159,8 @@ const isAsyncFunction = (func: Function) => func.constructor === AsyncFunction;
 export const fromSpawnable = (tmpl: Spawnable): Template => {
     if (isFunction(tmpl)) {
         return isAsyncFunction(tmpl)
-            ? {   run: <RunFunc>tmpl }
-            : {  create: <CreateFunc>tmpl };
+            ? { run: <RunFunc>tmpl }
+            : { create: <CreateFunc>tmpl };
     } else {
         return tmpl;
     }

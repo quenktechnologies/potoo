@@ -26,7 +26,7 @@ export const ERR_THREAD_INVALID = 'ERR_THREAD_INVALID';
 /**
  * SharedThread is one that shares the JavaScript event loop with other threads.
  *
- * Due to the design of JavaScript engines, only one of these threads can 
+ * Due to the design of JavaScript engines, only one of these threads can
  * actively execute at a time meaning the actors have to share execution time
  * via the Scheduler.
  */

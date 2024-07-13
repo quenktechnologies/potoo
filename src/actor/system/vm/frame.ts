@@ -6,11 +6,11 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Type } from '@quenk/noni/lib/data/type';
 import { Maybe, fromNullable, nothing } from '@quenk/noni/lib/data/maybe';
 
-import { Instruction, Operand } from './op';
-import { SharedThread } from './thread/shared';
 import { FunInfo, Info } from './script/info';
+import { JSThread } from './thread/shared/js';
 import { Script } from './script';
 import { PTObject } from './object';
+import { Instruction, Operand } from './op';
 import { PTValue, BYTE_TYPE, TYPE_FUN } from './type';
 
 export const DATA_RANGE_TYPE_HIGH = 0xf0000000;
@@ -89,7 +89,7 @@ export interface Frame {
     /**
      * thread for the actor.
      */
-    thread: SharedThread;
+    thread: JSThread;
 
     /**
      * parent Frame that created this Frame (if any).
@@ -241,7 +241,7 @@ export class StackFrame implements Frame {
     constructor(
         public name: string,
         public script: Script,
-        public thread: SharedThread,
+        public thread: JSThread,
         public parent: Maybe<Frame> = nothing(),
         public code: Instruction[] = [],
         public data: Data[] = [],
