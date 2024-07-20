@@ -15,6 +15,8 @@ import { Scheduler } from './scheduler';
 import { RegistrySet } from './registry';
 import { Allocator } from './allocator';
 import { Api } from '../../api';
+import { LogWritable, LogWriter } from './log/writer';
+import { EventCentral } from './event';
 
 /**
  * Platform is the interface for a virtual machine.
@@ -43,15 +45,18 @@ export interface Platform extends Actor, Thread, Api {
      *
      * Used to access the internal logging API.
      */
-    //log: LogWritable;
+    log: LogWritable;
 
     /**
      * events service for the VM.
      *
      * Used to publish VM events to interested listeners.
      */
-    //events: EventSource;
+    events: EventCentral;
 
+    /**
+     * registry used to store internal VM objects.
+     */
     registry: RegistrySet;
 
     /**
@@ -95,6 +100,8 @@ export class PVM implements Platform {
         public allocator: Allocator = new MapAllocator(() => this),
         public scheduler: Scheduler = new Scheduler(),
         public errors: ErrorStrategy = new SupervisorErrorStrategy(() => this),
+        public log: LogWritable = new LogWriter(console),
+        public events = new EventCentral(() => this.log),
         public registry = new RegistrySet(),
         public groups: GroupMap = new GroupMap(),
         public address = ADDRESS_SYSTEM,
@@ -143,9 +150,6 @@ export class PVM implements Platform {
     async receive<T>() {
         return <Promise<T>>Future.raise(new Error('Not implemented'));
     }
-
-    // Thread
-    resume() {}
 
     // Platform
 

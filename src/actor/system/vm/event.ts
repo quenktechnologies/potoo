@@ -1,7 +1,8 @@
-import { Type } from '@quenk/noni/lib/data/type';
+import { evaluate, Lazy } from '@quenk/noni/lib/data/lazy';
 
 import { Address } from '../../address';
-import { LogWritable } from './log';
+import { Message } from '../..';
+import { LogWritable } from './log/writer';
 
 export const EVENT_SEND_START = 'message-send-start';
 export const EVENT_SEND_OK = 'message-send-ok';
@@ -16,62 +17,124 @@ export const EVENT_ACTOR_STARTED = 'actor-started';
 export const EVENT_ACTOR_STOPPED = 'actor-stopped';
 
 /**
- * EventName identifying an event that occurred.
+ * EventType identifying an event that occurred.
  */
-export type EventName = string;
+export type EventType = string;
 
 /**
- * Handler for events.
+ * Handler is the type of function that receives events.
  */
-export type Handler = (addr: Address, evt: string, ...args: Type[]) => void;
+export type Handler<E> = (event: E) => void;
 
 /**
- * Handlers is a map of even Handler functions.
- */
-export interface Handlers {
-    [key: string]: Handler[];
-}
-
-/**
- * EventSource is an interface used by the VM to broadcast various events as
- * they occur.
+ * EventDispatcher is an interface used by the internal VM components to
+ * broadcast interesting events when they occur.
  *
- * External code can use this interface to hook into these events.
+ * Each EventDispatcher is responsible for a specific type of event and contains
+ * the listeners that are interested in that event. This interface is not meant
+ * to be used for business logic in an application but rather provides a way to
+ * inspect and troubleshoot the system.
+ *
+ * @typeparam T type of arguments the event dispatcher accepts.
+ * @typeparam E type of event the dispatcher dispatches.
  */
-export interface EventSource {
+export interface EventDispatcher<T, E> {
     /**
-     * on queues an event handler for the target event.
+     * dispatch is a generic function that when called will create and dispatch
+     * the event the EventDispatcher is responsible for.
      */
-    on(evt: EventName, handler: Handler): void;
+    dispatch: (...args: T[]) => void;
 
     /**
-     * publish an event (used internally).
+     * addListener to the EventDispatcher.
      */
-    publish(addr: Address, evt: string, ...args: Type[]): void;
+    addListener(h: Handler<E>): void;
 }
 
 /**
- * Publisher serves as the EventSource implementation for the VM.
+ * InternalEvent is the base class for all potoo events.
  */
-export class Publisher implements EventSource {
-    constructor(
-        public log: LogWritable,
-        public handlers: Handlers = {}
-    ) {}
+export interface InternalEvent {
+    /**
+     * type of event.
+     */
+    type: EventType;
 
-    on(evt: EventName, handler: Handler) {
-        let handlers = this.handlers[evt] || [];
+    /**
+     * source of the event.
+     *
+     * All events are associated with either an actor or the system itself.
+     */
+    source: Address;
+}
 
-        handlers.push(handler);
+/**
+ * MessageDroppedEvent is dispatched when the destination address for a message
+ * cannot be found.
+ */
+class MessageDroppedEvent implements InternalEvent {
+    type = EVENT_MESSAGE_DROPPED;
 
-        this.handlers[evt] = handlers;
+    get source(): Address {
+        return this.from;
     }
 
-    publish(addr: Address, evt: string, ...args: Type[]) {
-        let handlers = this.handlers[evt];
+    constructor(
+        public from: Address,
+        public to: Address,
+        public message: Message
+    ) {}
+}
 
-        if (handlers) handlers.forEach(handler => handler(addr, evt, ...args));
+/**
+ * @private
+ */
+export class InternalEventDispatcher<T, E> implements EventDispatcher<T, E> {
+    constructor(
+        public dispatch: (...args: T[]) => void,
+        public handlers: Handler<E>[] = []
+    ) {}
 
-        this.log.event(addr, evt, ...args);
+    addListener(h: Handler<E>) {
+        this.handlers.push(h);
+    }
+}
+
+/**
+ * EventCentral holds all of the vm's event dispatchers.
+ *
+ * Event dispatch is centralized here to make it clearer what events the system
+ * is capable of dispatching as well as the ability to prevent some events
+ * from ever being generated (TODO). The latter may arise for perf reasons where
+ * we may need to avoid creating too many unnecessary GC collected objects.
+ *
+ * @param log - LogWritable to use for logging events.
+ */
+export class EventCentral {
+    constructor(public _log: Lazy<LogWritable>) {}
+
+    get log(): LogWritable {
+        return evaluate(this.log);
+    }
+
+    onMessageDropped = new InternalEventDispatcher<
+        Address,
+        MessageDroppedEvent
+    >((from: Address, to: Address, msg: Message) => {
+        this.trigger(
+            this.onMessageDropped,
+            new MessageDroppedEvent(from, to, msg)
+        );
+    });
+
+    /**
+     * @private
+     */
+    trigger<T, E extends InternalEvent>(
+        dispatcher: InternalEventDispatcher<T, E>,
+        event: E
+    ) {
+        this.log.writeEvent(event);
+        for (let handler of dispatcher.handlers) handler(event);
     }
 }
