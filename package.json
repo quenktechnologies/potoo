@@ -28,6 +28,6 @@
   "author": "Quenk Technologies Limited",
   "license": "Apache-2.0",
   "dependencies": {
-    "@quenk/noni": "^1.52.8"
+    "@quenk/noni": "^1.52.11"
   }
 }
