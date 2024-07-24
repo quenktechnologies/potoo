@@ -155,6 +155,9 @@ export const isProcessTemplate = (tmpl: Template): tmpl is ProcessTemplate =>
  * fromSpawnable converts a Spawnable to a Template.
  *
  * If a function is supplied we assume a SharedTemplate is desired.
+ *
+ * NOTE: That this requires a runtime that has an AsyncFunction constructor
+ * in global scope in order to work properly.
  */
 export const fromSpawnable = (tmpl: Spawnable): Template => {
     if (isFunction(tmpl)) {

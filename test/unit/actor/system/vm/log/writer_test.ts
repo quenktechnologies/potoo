@@ -76,20 +76,30 @@ describe('LogWriter', () => {
     });
 
     describe('writeEvent', () => {
-
         it('should use templates', () => {
+            let sink = mockDeep<LogSink>();
 
-          let sink = mockDeep<LogSink>();
+            let writer = new LogWriter(sink, LogLevel.TRACE, {
+                test: { level: LogLevel.DEBUG, message: '{type} message' }
+            });
 
-          let writer = new LogWriter(sink, LogLevel.TRACE, {
-              'test': { level: LogLevel.DEBUG, message: '{type} message' }
-          });
+            writer.writeEvent({ type: 'test', source: '/' });
 
-          writer.writeEvent({ type: 'test', source:'/' });
-
-          expect(sink.debug).toHaveBeenCalledWith('test message');
-          
+            expect(sink.debug).toHaveBeenCalledWith('test message');
         });
-      
+
+        it('should default to info if no template found', () => {
+            let sink = mockDeep<LogSink>();
+
+            let writer = new LogWriter(sink, LogLevel.TRACE, {});
+
+            let evt = { type: 'test', source: '/' };
+
+            writer.writeEvent(evt);
+
+            expect(sink.info).toHaveBeenCalledWith(evt);
+
+            expect(sink.debug).not.toHaveBeenCalled();
+        });
     });
 });

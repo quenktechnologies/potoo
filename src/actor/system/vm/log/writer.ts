@@ -1,23 +1,12 @@
 import * as events from '../event';
 
-import { Type } from '@quenk/noni/lib/data/type';
+import { isString, Type } from '@quenk/noni/lib/data/type';
 import { Record } from '@quenk/noni/lib/data/record';
 import { interpolate } from '@quenk/noni/lib/data/string';
 
 import { InternalEvent } from '../event';
 import { LogSink } from './sink';
-
-/**
- * LogLevel numbers.
- */
-export enum LogLevel {
-    TRACE = 8,
-    DEBUG = 7,
-    INFO = 6,
-    NOTICE = 5,
-    WARN = 4,
-    ERROR = 3
-}
+import { LogLevel } from '.';
 
 /**
  * LogWritable is the interface used by the VM for logging.
@@ -43,13 +32,13 @@ export interface LogWritable {
 /**
  * LogTemplate used to format event log messages.
  */
-export type LogTemplates = Record<{ level: LogLevel; message: string }>;
+export type LogTemplates = Record<string>;
 
 const defaultTemplates: LogTemplates = {
-    [events.EVENT_MESSAGE_DROPPED]: {
-        level: LogLevel.WARN,
-        message: 'Message from {from} to {to} dropped!'
-    }
+    [events.EVENT_MESSAGE_BOUNCE]: 'Message from {from} to {to} bounced!',
+
+    [events.EVENT_MESSGAE_SEND]:
+        'Message from {from} to {to} delivered successfully!'
 };
 
 /**
@@ -89,10 +78,10 @@ export class LogWriter implements LogWritable {
     }
 
     writeEvent(evt: InternalEvent) {
-        let { level, message } = this.templates[evt.type] || {
-            level: LogLevel.INFO,
-            message: evt
-        };
-        this.write(level, interpolate(message, evt ));
+        let message = this.templates[evt.type] || evt;
+        this.write(
+            evt.level,
+            isString(message) ? interpolate(message, evt) : message
+        );
     }
 }

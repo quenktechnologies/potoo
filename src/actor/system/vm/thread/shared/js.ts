@@ -9,11 +9,12 @@ import {
 import { identity } from '@quenk/noni/lib/data/function';
 
 import { Template } from '../../../../template';
-import { Address } from '../../../../address';
+import { Address, ADDRESS_DISCARD } from '../../../../address';
 import { Task } from '../../scheduler';
 import { Message } from '../../../..';
 import { Platform } from '../../';
 import { SharedThread, ThreadState } from '.';
+import { EVENT_ACTOR_RECEIVE, EVENT_MESSAGE_DROPPED } from '../../event';
 
 const defaultCases = [new Default(identity)];
 
@@ -116,7 +117,10 @@ export class JSThread implements SharedThread {
     async receive<T = Message>(cases: TypeCase<T>[] = []): Promise<T> {
         this._assertValid();
         let msg = await Future.fromCallback<T>(cb => {
-            // TODO dispatch message received / wait event
+            this.vm.events.dispatchActorEvent(
+                EVENT_ACTOR_RECEIVE,
+                this.address
+            );
             let matcher = new CaseFunction(empty(cases) ? defaultCases : cases);
             let task = new Task(this, cb, async () => {
                 this._assertValid();
@@ -129,7 +133,12 @@ export class JSThread implements SharedThread {
                         let result = await matcher.apply(msg);
                         return cb(null, result);
                     }
-                    // TODO: dispatch message dropped event
+                    this.vm.events.dispatchMessageEvent(
+                        EVENT_MESSAGE_DROPPED,
+                        ADDRESS_DISCARD,
+                        this.address,
+                        msg
+                    );
                 }
                 this.state = ThreadState.MSG_WAIT;
                 this.vm.scheduler.postTask(task, true);

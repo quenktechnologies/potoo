@@ -3,6 +3,7 @@ import * as errors from '../runtime/error';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { distribute, empty } from '@quenk/noni/lib/data/array';
+import { evaluate, Lazy } from '@quenk/noni/lib/data/lazy';
 
 import { Address, isRestricted, make } from '../../../address';
 import {
@@ -10,6 +11,12 @@ import {
     SharedRunTemplate,
     Template
 } from '../../../template';
+import {
+    EVENT_ACTOR_ALLOCATED,
+    EVENT_ACTOR_DEALLOCATED,
+    EVENT_ACTOR_STARTED,
+    EVENT_ACTOR_STOPPED
+} from '../event';
 import { ThreadFactory } from '../thread/factory';
 import { JSThread } from '../thread/shared/js';
 import { Thread } from '../thread';
@@ -63,7 +70,7 @@ export interface ActorTableEntry {
  */
 export class MapAllocator implements Allocator {
     constructor(
-        public platform: () => Platform,
+        public platform: Lazy<Platform>,
         public actors = new Map(),
         public nextAID = 1
     ) {}
@@ -102,7 +109,7 @@ export class MapAllocator implements Allocator {
     }
 
     async allocate(parent: Thread, template: Template): Promise<Address> {
-        let platform = this.platform();
+        let platform = evaluate(this.platform);
 
         let isRoot = parent === platform;
 
@@ -154,9 +161,16 @@ export class MapAllocator implements Allocator {
 
         if (template.group) platform.groups.enroll(address, template.group);
 
-        // TODO: dispatch event
+        platform.events.dispatchActorEvent(EVENT_ACTOR_ALLOCATED, address);
+
         platform.runTask(thread, async () => {
+            platform.events.dispatchActorEvent(
+                EVENT_ACTOR_STARTED,
+                thread.address
+            );
+
             await actor.start();
+
             if ((<SharedRunTemplate>template).run) {
                 await (<SharedRunTemplate>template).run(<JSThread>thread);
                 await this.deallocate(thread);
@@ -210,6 +224,8 @@ export class MapAllocator implements Allocator {
             targets.unshift(target);
         }
 
+        let platform = evaluate(this.platform);
+
         await Future.batch(
             distribute(
                 targets.map(target =>
@@ -218,11 +234,19 @@ export class MapAllocator implements Allocator {
 
                         await target.thread.stop();
 
-                        this.platform().groups.unenroll(target.address);
+                        platform.events.dispatchActorEvent(
+                            EVENT_ACTOR_STOPPED,
+                            target.address
+                        );
+
+                        platform.groups.unenroll(target.address);
 
                         this.actors.delete(target.address);
 
-                        // TODO: dispatch event
+                        platform.events.dispatchActorEvent(
+                            EVENT_ACTOR_DEALLOCATED,
+                            target.address
+                        );
                     })
                 ),
                 MAX_THREAD_KILL_PER_CYCLE

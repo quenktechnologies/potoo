@@ -1,8 +1,10 @@
 import * as template from '../../template';
 import * as errors from './runtime/error';
+import * as events from './event';
 
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
+import { diff, empty } from '@quenk/noni/lib/data/array';
 
 import { Address, ADDRESS_SYSTEM, isChild, isGroup } from '../../address';
 import { fromSpawnable } from '../../template';
@@ -16,7 +18,7 @@ import { RegistrySet } from './registry';
 import { Allocator } from './allocator';
 import { Api } from '../../api';
 import { LogWritable, LogWriter } from './log/writer';
-import { EventCentral } from './event';
+import { EventDispatcher } from './event/dispatcher';
 
 /**
  * Platform is the interface for a virtual machine.
@@ -52,7 +54,7 @@ export interface Platform extends Actor, Thread, Api {
      *
      * Used to publish VM events to interested listeners.
      */
-    events: EventCentral;
+    events: EventDispatcher;
 
     /**
      * registry used to store internal VM objects.
@@ -101,7 +103,7 @@ export class PVM implements Platform {
         public scheduler: Scheduler = new Scheduler(),
         public errors: ErrorStrategy = new SupervisorErrorStrategy(() => this),
         public log: LogWritable = new LogWriter(console),
-        public events = new EventCentral(() => this.log),
+        public events = new EventDispatcher(() => this.log),
         public registry = new RegistrySet(),
         public groups: GroupMap = new GroupMap(),
         public address = ADDRESS_SYSTEM,
@@ -153,37 +155,35 @@ export class PVM implements Platform {
 
     // Platform
 
-    sendMessage(_from: Thread, to: Address, msg: Message) {
-        //TODO: this.events.actor.onSend.dispatch(from.context.address, to, msg);
-        /*  this.events.publish(
-            from.context.address,
-            events.EVENT_SEND_START,
-            to,
-            from,
-            msg
-        );*/
-
+    sendMessage(from: Thread, to: Address, msg: Message) {
         let targets = isGroup(to) ? this.groups.getMembers(to) : [to];
+
         let threads = this.allocator.getThreads(targets);
-        for (let thread of threads) {
-            thread.notify(msg).catch(err => thread.raise(err));
+
+        let missing = diff(
+            targets,
+            threads.map(t => t.address)
+        );
+
+        if (!empty(missing)) {
+            for (let address of missing)
+                this.events.dispatchMessageEvent(
+                    events.EVENT_MESSAGE_BOUNCE,
+                    from.address,
+                    address,
+                    msg
+                );
         }
 
-        //TODO: this.events.actor.onSendFailed.dispatch(from.context.address, to, msg);
-        /*   this.events.publish(
-                from.context.address,
-                events.EVENT_SEND_FAILED,
+        for (let thread of threads) {
+            this.events.dispatchMessageEvent(
+                events.EVENT_MESSGAE_SEND,
+                from.address,
                 to,
                 msg
-            );*/
-
-        //TODO: this.events.actor.onSendOk.dispatch(from.context.address, to, msg);
-        /* this.events.publish(
-            from.context.address,
-            events.EVENT_SEND_OK,
-            to,
-            msg
-        );*/
+            );
+            thread.notify(msg).catch(err => thread.raise(err));
+        }
     }
 
     async sendKillSignal(src: Thread, target: Address): Promise<void> {
@@ -193,8 +193,9 @@ export class PVM implements Platform {
 
         let mtargetThread = this.allocator.getThread(target);
 
-        //TODO: warn thread not found.
-        if (mtargetThread.isNothing()) return;
+        if (mtargetThread.isNothing()) {
+            return;
+        }
 
         await this.allocator.deallocate(mtargetThread.get());
     }
