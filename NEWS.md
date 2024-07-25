@@ -1,5 +1,23 @@
 # Potoo News
 
+## 2024-07-25
+
+Potoo 4 rewrite is finished!
+
+Ok not completely finished but this is as far as I can go in one attempt given
+that I have a full-time job now.
+
+More real-world testing is needed to weed out bugs and determine if the new APIs
+are the way to go however that can be accomplished post release.
+
+The removal of the internal op code based system was meant to be temporary (so
+I could get back to using this library in side projects) however I think the 
+energy spent on reimplementation may be better used on making a native Potoo.
+
+I have not decided yet and given the limited time I have these days, it's likely
+I won't do either. Regardless potoo 4 is here and represents the latest iteration
+in a concept that has made building complicated web application much easier.
+
 ## 2024-05-31
 
 Potoo 4 refactor 70% done. Most of the op code execution code has been disabled
