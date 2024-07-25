@@ -5,6 +5,7 @@ import * as events from './event';
 import { Err } from '@quenk/noni/lib/control/error';
 import { Future } from '@quenk/noni/lib/control/monad/future';
 import { diff, empty } from '@quenk/noni/lib/data/array';
+import { merge } from '@quenk/noni/lib/data/record';
 
 import { Address, ADDRESS_SYSTEM, isChild, isGroup } from '../../address';
 import { fromSpawnable } from '../../template';
@@ -19,6 +20,8 @@ import { Allocator } from './allocator';
 import { Api } from '../../api';
 import { LogWritable, LogWriter } from './log/writer';
 import { EventDispatcher } from './event/dispatcher';
+import { Config, PartialConfig } from './conf';
+import { toLogLevelValue } from './log';
 
 /**
  * Platform is the interface for a virtual machine.
@@ -101,9 +104,9 @@ export class PVM implements Platform {
     constructor(
         public allocator: Allocator = new MapAllocator(() => this),
         public scheduler: Scheduler = new Scheduler(),
-        public errors: ErrorStrategy = new SupervisorErrorStrategy(() => this),
+        public errors: ErrorStrategy = new SupervisorErrorStrategy(allocator),
         public log: LogWritable = new LogWriter(console),
-        public events = new EventDispatcher(() => this.log),
+        public events = new EventDispatcher(log),
         public registry = new RegistrySet(),
         public groups: GroupMap = new GroupMap(),
         public address = ADDRESS_SYSTEM,
@@ -113,8 +116,29 @@ export class PVM implements Platform {
     /**
      * create a new PVM instance using the provided configuration.
      */
-    static create(): PVM {
-        return new PVM(); //TODO: add thread for system to allocator.
+    static create(conf: PartialConfig = {}): PVM {
+        let config: Config = {
+            log: merge({ level: 'info', sink: console }, conf.log ?? {})
+        };
+
+        let vm: PVM;
+
+        let allocator = new MapAllocator(() => vm);
+        let log = new LogWriter(
+            config.log.sink,
+            toLogLevelValue(config.log.level)
+        );
+
+        vm = new PVM(
+            allocator,
+            new Scheduler(),
+            new SupervisorErrorStrategy(allocator),
+            log,
+            new EventDispatcher(log),
+            new RegistrySet(),
+            new GroupMap()
+        );
+        return vm;
     }
 
     // Actor

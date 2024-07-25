@@ -3,9 +3,9 @@ import * as errors from '../runtime/error';
 
 import { Err, toError } from '@quenk/noni/lib/control/err';
 
-import { getParent } from '../../../address';
+import { ADDRESS_SYSTEM, getParent } from '../../../address';
 import { Thread } from '../thread';
-import { Platform } from '..';
+import { Allocator } from '../allocator';
 
 /**
  * ErrorStrategy is the interface used by threads to communicate errors that
@@ -29,7 +29,7 @@ export interface ErrorStrategy {
  * if no trap function is specified.
  */
 export class SupervisorErrorStrategy implements ErrorStrategy {
-    constructor(public platform: () => Platform) {}
+    constructor(public allocator: Allocator) {}
 
     async raise(src: Thread, error: Err) {
         let prevThread;
@@ -38,9 +38,7 @@ export class SupervisorErrorStrategy implements ErrorStrategy {
 
         let currentThread = src;
 
-        let platform = this.platform();
-
-        let { allocator } = platform;
+        let allocator = this.allocator;
 
         while (true) {
             if (prevThread) {
@@ -76,7 +74,7 @@ export class SupervisorErrorStrategy implements ErrorStrategy {
             } else if (action === template.ACTION_STOP) {
                 await allocator.deallocate(currentThread);
                 return;
-            } else if (currentThread === platform) {
+            } else if (currentThread.address === ADDRESS_SYSTEM) {
                 break;
             }
 

@@ -6,6 +6,7 @@ import { PVM } from '../../../../../lib/actor/system/vm';
 import { Allocator } from '../../../../../lib/actor/system/vm/allocator';
 import { Scheduler } from '../../../../../lib/actor/system/vm/scheduler';
 import { Thread } from '../../../../../lib/actor/system/vm/thread';
+import { LogLevelValue, LogSink } from '../../../../../lib/actor/system/vm/log';
 
 describe('PVM', () => {
     const mockScheduler = mockDeep<Scheduler>();
@@ -16,6 +17,22 @@ describe('PVM', () => {
 
     beforeEach(() => {
         jest.resetAllMocks();
+    });
+
+    describe('create', () => {
+        it('should work', () => {
+            let sink = mockDeep<LogSink>();
+
+            let vm = PVM.create({
+                log: {
+                    level: 'warn',
+                    sink
+                }
+            });
+
+            expect(vm.log.sink).toBe(sink);
+            expect(vm.log.level).toBe(LogLevelValue.warn);
+        });
     });
 
     describe('sendMessage', () => {

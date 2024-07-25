@@ -5,8 +5,7 @@ import { Record } from '@quenk/noni/lib/data/record';
 import { interpolate } from '@quenk/noni/lib/data/string';
 
 import { InternalEvent } from '../event';
-import { LogSink } from './sink';
-import { LogLevel } from '.';
+import { LogLevelValue, LogSink } from '.';
 
 /**
  * LogWritable is the interface used by the VM for logging.
@@ -16,10 +15,20 @@ import { LogLevel } from '.';
  */
 export interface LogWritable {
     /**
+     * level is the current log level.
+     */
+    level: LogLevelValue;
+
+    /**
+     * sink is the destination logs will be written to.
+     */
+    sink: LogSink;
+
+    /**
      * write a message to the log if the level is less than or equal to the
      * current log level.
      */
-    write(level: LogLevel, ...args: Type[]): void;
+    write(level: LogLevelValue, ...args: Type[]): void;
 
     /**
      * writeEvent writes an InternalEvent to the log.
@@ -47,27 +56,27 @@ const defaultTemplates: LogTemplates = {
 export class LogWriter implements LogWritable {
     constructor(
         public sink: LogSink,
-        public logLevel: LogLevel = LogLevel.ERROR,
+        public level: LogLevelValue = LogLevelValue.error,
         public templates: LogTemplates = defaultTemplates
     ) {}
 
-    write(level: LogLevel, ...args: Type[]) {
-        if (level > this.logLevel) return;
+    write(level: LogLevelValue, ...args: Type[]) {
+        if (level > this.level) return;
 
         let { sink } = this;
 
         switch (level) {
-            case LogLevel.DEBUG:
-            case LogLevel.TRACE:
+            case LogLevelValue.debug:
+            case LogLevelValue.trace:
                 sink.debug(...args);
                 break;
 
-            case LogLevel.NOTICE:
-            case LogLevel.WARN:
+            case LogLevelValue.notice:
+            case LogLevelValue.warn:
                 sink.warn(...args);
                 break;
 
-            case LogLevel.ERROR:
+            case LogLevelValue.error:
                 sink.error(...args);
                 break;
 

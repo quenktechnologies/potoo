@@ -1,6 +1,6 @@
 import { Address } from '../../../address';
 import { Message } from '../../..';
-import { LogLevel } from '../log';
+import { LogLevelValue } from '../log';
 
 export const EVENT_MESSGAE_SEND = 'message-send';
 export const EVENT_MESSAGE_BOUNCE = 'message-bounce';
@@ -30,7 +30,7 @@ export interface InternalEvent {
      *
      * Used by the log writer to determine when to write the event.
      */
-    level: LogLevel;
+    level: LogLevelValue;
 
     /**
      * source of the event.
@@ -46,7 +46,7 @@ export interface InternalEvent {
 export abstract class VMEvent implements InternalEvent {
     abstract type: EventType;
 
-    abstract level: LogLevel;
+    abstract level: LogLevelValue;
 
     constructor(public source: Address) {}
 }
@@ -71,7 +71,7 @@ export abstract class MessageEvent extends VMEvent {
 export class MessageSendEvent extends MessageEvent {
     type = EVENT_MESSGAE_SEND;
 
-    level = LogLevel.INFO;
+    level = LogLevelValue.info;
 }
 
 /**
@@ -81,7 +81,7 @@ export class MessageSendEvent extends MessageEvent {
 export class MessageBounceEvent extends MessageEvent {
     type = EVENT_MESSAGE_BOUNCE;
 
-    level = LogLevel.WARN;
+    level = LogLevelValue.warn;
 }
 
 /**
@@ -91,14 +91,14 @@ export class MessageBounceEvent extends MessageEvent {
 export class MessageDropEvent extends MessageEvent {
     type = EVENT_MESSAGE_DROPPED;
 
-    level = LogLevel.WARN;
+    level = LogLevelValue.warn;
 }
 
 /**
  * ActorEvent are events related toe the lifecycle of an actor.
  */
 export abstract class ActorEvent extends VMEvent {
-    level = LogLevel.INFO;
+    level = LogLevelValue.info;
 
     constructor(public address: Address) {
         super(address);

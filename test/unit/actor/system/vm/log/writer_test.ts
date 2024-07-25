@@ -1,40 +1,35 @@
 import { expect } from '@jest/globals';
 
 import { mockDeep } from 'jest-mock-extended';
-import { LogSink } from '../../../../../../lib/actor/system/vm/log/sink';
-
 import {
-    LogWriter,
-    LogLevel
-} from '../../../../../../lib/actor/system/vm/log/writer';
-
-const getLevelString = (level: LogLevel) => {
-    let entry = Object.entries(LogLevel).find(([, v]) => v === level);
-    return entry ? entry[0] : '<void>';
-};
+    LogLevelValue,
+    toLogLevel
+} from '../../../../../../lib/actor/system/vm/log';
+import { LogSink } from '../../../../../../lib/actor/system/vm/log';
+import { LogWriter } from '../../../../../../lib/actor/system/vm/log/writer';
 
 describe('LogWriter', () => {
     describe('write', () => {
-        let debugs = [LogLevel.DEBUG, LogLevel.TRACE];
+        let debugs = [LogLevelValue.debug, LogLevelValue.trace];
 
-        let infos = [LogLevel.INFO];
+        let infos = [LogLevelValue.info];
 
-        let warns = [LogLevel.NOTICE, LogLevel.WARN];
+        let warns = [LogLevelValue.notice, LogLevelValue.warn];
 
-        let errors = [LogLevel.ERROR];
+        let errors = [LogLevelValue.error];
 
         for (let level of [
-            LogLevel.TRACE,
-            LogLevel.DEBUG,
-            LogLevel.INFO,
-            LogLevel.NOTICE,
-            LogLevel.WARN,
-            LogLevel.WARN
+            LogLevelValue.trace,
+            LogLevelValue.debug,
+            LogLevelValue.info,
+            LogLevelValue.notice,
+            LogLevelValue.warn,
+            LogLevelValue.warn
         ]) {
-            it(`should call the correct method for ${getLevelString(level)}`, () => {
+            it(`should call the correct method for ${toLogLevel(level)}`, () => {
                 let sink = mockDeep<LogSink>();
 
-                let writer = new LogWriter(sink, LogLevel.TRACE);
+                let writer = new LogWriter(sink, LogLevelValue.trace);
 
                 writer.write(level, 'test');
 
@@ -54,15 +49,15 @@ describe('LogWriter', () => {
             it('should only log levels <= to the current level', () => {
                 let sink = mockDeep<LogSink>();
 
-                let writer = new LogWriter(sink, LogLevel.ERROR);
+                let writer = new LogWriter(sink, LogLevelValue.error);
 
                 for (let level of [
-                    LogLevel.TRACE,
-                    LogLevel.DEBUG,
-                    LogLevel.INFO,
-                    LogLevel.NOTICE,
-                    LogLevel.WARN,
-                    LogLevel.ERROR
+                    LogLevelValue.trace,
+                    LogLevelValue.debug,
+                    LogLevelValue.info,
+                    LogLevelValue.notice,
+                    LogLevelValue.warn,
+                    LogLevelValue.error
                 ]) {
                     writer.write(level, 'test');
                 }
@@ -79,8 +74,8 @@ describe('LogWriter', () => {
         it('should use templates', () => {
             let sink = mockDeep<LogSink>();
 
-            let writer = new LogWriter(sink, LogLevel.TRACE, {
-                test: { level: LogLevel.DEBUG, message: '{type} message' }
+            let writer = new LogWriter(sink, LogLevelValue.trace, {
+                test: { level: LogLevelValue.debug, message: '{type} message' }
             });
 
             writer.writeEvent({ type: 'test', source: '/' });
@@ -91,7 +86,7 @@ describe('LogWriter', () => {
         it('should default to info if no template found', () => {
             let sink = mockDeep<LogSink>();
 
-            let writer = new LogWriter(sink, LogLevel.TRACE, {});
+            let writer = new LogWriter(sink, LogLevelValue.trace, {});
 
             let evt = { type: 'test', source: '/' };
 
