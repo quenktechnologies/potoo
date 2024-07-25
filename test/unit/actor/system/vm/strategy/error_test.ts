@@ -6,7 +6,7 @@ import { Record } from '@quenk/noni/lib/data/record';
 import { Err } from '@quenk/noni/lib/control/err';
 import { identity } from '@quenk/noni/lib/data/function';
 
-import { Platform } from '../../../../../../lib/actor/system/vm';
+import { VM } from '../../../../../../lib/actor/system/vm';
 import {
     ACTION_IGNORE,
     ACTION_RAISE,
@@ -25,9 +25,7 @@ import { SharedThread } from '../../../../../../lib/actor/system/vm/thread/share
 describe('SupervisorErrorStrategy', () => {
     const mockAllocator = mockDeep<Allocator>();
 
-    const mockPlatform = mockDeep<Platform>();
-
-    const getPlatform = () => mockPlatform;
+    const mockPlatform = mockDeep<VM>();
 
     mockPlatform.allocator = mockAllocator;
 
@@ -66,7 +64,7 @@ describe('SupervisorErrorStrategy', () => {
 
             thread.address = '/child';
 
-            let stategy = new SupervisorErrorStrategy(getPlatform);
+            let stategy = new SupervisorErrorStrategy(mockAllocator);
 
             await stategy.raise(thread, err);
 
@@ -101,7 +99,7 @@ describe('SupervisorErrorStrategy', () => {
                 }
             );
 
-            let strategy = new SupervisorErrorStrategy(getPlatform);
+            let strategy = new SupervisorErrorStrategy(mockAllocator);
 
             await strategy.raise(thread, err);
 
@@ -132,7 +130,7 @@ describe('SupervisorErrorStrategy', () => {
             let template = { create: identity, trap };
             templates['/target'] = template;
 
-            let strategy = new SupervisorErrorStrategy(getPlatform);
+            let strategy = new SupervisorErrorStrategy(mockAllocator);
 
             await strategy.raise(thread, err);
 
@@ -172,7 +170,7 @@ describe('SupervisorErrorStrategy', () => {
             childThread.address = '/child';
             threads['/child'] = childThread;
 
-            let strategy = new SupervisorErrorStrategy(getPlatform);
+            let strategy = new SupervisorErrorStrategy(mockAllocator);
 
             await strategy.raise(childThread, err);
 

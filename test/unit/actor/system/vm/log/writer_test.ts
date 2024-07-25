@@ -75,10 +75,14 @@ describe('LogWriter', () => {
             let sink = mockDeep<LogSink>();
 
             let writer = new LogWriter(sink, LogLevelValue.trace, {
-                test: { level: LogLevelValue.debug, message: '{type} message' }
+                test: '{type} message'
             });
 
-            writer.writeEvent({ type: 'test', source: '/' });
+            writer.writeEvent({
+                type: 'test',
+                level: LogLevelValue.debug,
+                source: '/'
+            });
 
             expect(sink.debug).toHaveBeenCalledWith('test message');
         });
@@ -88,7 +92,7 @@ describe('LogWriter', () => {
 
             let writer = new LogWriter(sink, LogLevelValue.trace, {});
 
-            let evt = { type: 'test', source: '/' };
+            let evt = { type: 'test', level: LogLevelValue.info, source: '/' };
 
             writer.writeEvent(evt);
 

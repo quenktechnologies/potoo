@@ -6,7 +6,7 @@ import { wait } from '@quenk/noni/lib/control/monad/future';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 
 import { Actor } from '../../../../../../lib/actor';
-import { Platform } from '../../../../../../lib/actor/system/vm';
+import { VM } from '../../../../../../lib/actor/system/vm';
 import {
     ActorTableEntry,
     MapAllocator
@@ -21,7 +21,7 @@ describe('MapAllocator', () => {
 
     let parent = mockDeep<Thread>();
 
-    let platform = mockDeep<Platform>();
+    let platform = mockDeep<VM>();
 
     platform.groups = mockGroups;
 

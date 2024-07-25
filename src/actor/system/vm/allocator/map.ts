@@ -21,7 +21,7 @@ import { ThreadFactory } from '../thread/factory';
 import { JSThread } from '../thread/shared/js';
 import { Thread } from '../thread';
 import { Actor } from '../../..';
-import { Platform } from '..';
+import { VM } from '..';
 import { Allocator } from './';
 
 const MAX_THREAD_KILL_PER_CYCLE = 25;
@@ -70,7 +70,7 @@ export interface ActorTableEntry {
  */
 export class MapAllocator implements Allocator {
     constructor(
-        public platform: Lazy<Platform>,
+        public platform: Lazy<VM>,
         public actors = new Map(),
         public nextAID = 1
     ) {}

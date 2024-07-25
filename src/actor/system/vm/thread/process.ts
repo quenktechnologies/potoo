@@ -7,7 +7,7 @@ import { Any, test } from '@quenk/noni/lib/data/type';
 
 import { Address } from '../../../address';
 import { Message } from '../../..';
-import { Platform } from '../';
+import { VM } from '../';
 import { Thread } from '.';
 
 export const CTRL_MSG_RAISE = 9;
@@ -54,7 +54,7 @@ const shapes = {
  */
 export class ProcessThread implements Thread {
     constructor(
-        public vm: Platform,
+        public vm: VM,
         public process: ChildProcess,
         public address: Address
     ) {}
@@ -67,7 +67,7 @@ export class ProcessThread implements Thread {
      *
      * 1. POTOO_ACTOR_ADDRESS   The full address of the actor in the parent VM.
      */
-    static create(vm: Platform, address: Address, script: Path): ProcessThread {
+    static create(vm: VM, address: Address, script: Path): ProcessThread {
         let cp = fork(resolve(script), {
             env: { POTOO_ACTOR_ADDRESS: address }
         });

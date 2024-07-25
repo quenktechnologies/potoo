@@ -4,7 +4,7 @@ import { mockDeep } from 'jest-mock-extended';
 
 import { Future, wait } from '@quenk/noni/lib/control/monad/future';
 
-import { Platform } from '../../../../../../lib/actor/system/vm';
+import { VM } from '../../../../../../lib/actor/system/vm';
 import {
     Scheduler,
     Task
@@ -20,7 +20,7 @@ import { JSThread } from '../../../../../../lib/actor/system/vm/thread/shared/js
 import { identity } from '@quenk/noni/lib/data/function';
 
 describe('shared', () => {
-    let platform = mockDeep<Platform>();
+    let platform = mockDeep<VM>();
     let scheduler = mockDeep<Scheduler>();
     let errors = mockDeep<ErrorStrategy>();
     let allocator = mockDeep<Allocator>();

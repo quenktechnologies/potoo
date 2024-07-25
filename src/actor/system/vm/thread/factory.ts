@@ -4,7 +4,7 @@ import {
     ProcessTemplate,
     Template
 } from '../../../template';
-import { Platform } from '..';
+import { VM } from '..';
 import { JSThread } from './shared/js';
 import { ProcessThread } from './process';
 
@@ -16,7 +16,7 @@ export class ThreadFactory {
     /**
      * create a new instance of a Thread for the given TemplateType.
      */
-    static create(vm: Platform, address: Address, template: Template) {
+    static create(vm: VM, address: Address, template: Template) {
         if (isProcessTemplate(template))
             return ProcessThread.create(
                 vm,

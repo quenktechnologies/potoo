@@ -12,7 +12,7 @@ import { Template } from '../../../../template';
 import { Address, ADDRESS_DISCARD } from '../../../../address';
 import { Task } from '../../scheduler';
 import { Message } from '../../../..';
-import { Platform } from '../../';
+import { VM } from '../../';
 import { SharedThread, ThreadState } from '.';
 import { EVENT_ACTOR_RECEIVE, EVENT_MESSAGE_DROPPED } from '../../event';
 
@@ -25,7 +25,7 @@ export const ERR_THREAD_INVALID = 'ERR_THREAD_INVALID';
  */
 export class JSThread implements SharedThread {
     constructor(
-        public vm: Platform,
+        public vm: VM,
         public address: Address,
         public mailbox: Message[] = [],
         public state: ThreadState = ThreadState.IDLE

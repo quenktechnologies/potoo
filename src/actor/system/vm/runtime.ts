@@ -1,6 +1,6 @@
 import { Api } from '../../api';
 import { Actor } from '../..';
-import { Platform } from '.';
+import { VM } from '.';
 
 /**
  * Runtime is the interface used by the outside world (JS) to execute code
@@ -10,7 +10,7 @@ export interface Runtime extends Actor, Api {
     /**
      * vm the Runtime belongs to.
      */
-    vm: Platform;
+    vm: VM;
 
     /**
      * isValid indicates whether the Runtime is still valid.

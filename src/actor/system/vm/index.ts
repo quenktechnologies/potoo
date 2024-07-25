@@ -24,12 +24,12 @@ import { Config, PartialConfig } from './conf';
 import { toLogLevelValue } from './log';
 
 /**
- * Platform is the interface for a virtual machine.
+ * VM is the interface for a virtual machine.
  *
  * It provides methods for manipulating the state of the actors of the system.
  * Some opcode handlers depend on this interface to do their work.
  */
-export interface Platform extends Actor, Thread, Api {
+export interface VM extends Actor, Thread, Api {
     /**
      * allocator used to manage thread resources for an actor.
      */
@@ -100,7 +100,7 @@ export interface Platform extends Actor, Thread, Api {
  * not reside on the same process/worker/thread depending on the underlying
  * platform and individual actor implementations.
  */
-export class PVM implements Platform {
+export class PVM implements VM {
     constructor(
         public allocator: Allocator = new MapAllocator(() => this),
         public scheduler: Scheduler = new Scheduler(),
