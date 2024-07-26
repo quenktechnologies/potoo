@@ -1,13 +1,26 @@
+import { Path } from '@quenk/noni/lib/data/record/path';
 import { Err } from '@quenk/noni/lib/control/error';
-import { Type } from '@quenk/noni/lib/data/type';
+import { isFunction, isString } from '@quenk/noni/lib/data/type';
 
-import { System } from './system';
+import { Runtime } from './system/vm/runtime';
 import { Actor } from './';
 
 export const ACTION_RAISE = -0x1;
 export const ACTION_IGNORE = 0x0;
 export const ACTION_RESTART = 0x1;
 export const ACTION_STOP = 0x2;
+
+/**
+ * TemplateType is the type of actor to create.
+ */
+export type TemplateType = string;
+
+/**
+ * TrapFunc is applied to unhandled errors raised by an actor.
+ *
+ * The result determines the action to take.
+ */
+export type TrapFunc = (e: Err) => TrapAction;
 
 /**
  * TrapAction represents each one of the actions that can be taken after
@@ -23,90 +36,135 @@ export const ACTION_STOP = 0x2;
 export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 
 /**
- * Cons is applied to produce an instance of an actor.
+ * BaseTemplate holds the common properties for all templates.
  */
-export type Cons = (s: System, t: Template, ...args: Type[]) => Actor;
-
-/**
- * DelayMilliseconds type.
- */
-export type DelayMilliseconds = number;
-
-/**
- * TrapFunction is applied to errors raised by an actor
- * to determine the action to take.
- */
-export type TrapFunc = (e: Err) => TrapAction;
-
-/**
- * Spawnable is anything that can be spawned by an actor.
- */
-export type Spawnable = Template | Cons;
-
-/**
- * Templates
- */
-export interface Templates {
-
-    [key: string]: Spawnable
-
-}
-
-/**
- * Template of an actor.
- *
- * Actors are created using templates that describe how to spawn and manage them
- * to the system.
- *
- * The are the minimum amount of information required to create
- * a new actor instance.
- */
-export interface Template {
+export interface BaseTemplate {
+    /**
+     * type indicates the type of template and thus the type of thread that
+     * will be allocated for the actor.
+     *
+     * Defaults to 'shared' if not specified.
+     */
+    type?: TemplateType;
 
     /**
      * id of the actor used when constructing its address.
-     * If none is supplied, the system will generate one.
+     *
+     * Ids must be unique among the children of an actor but not necessary at
+     * the system level.
+     *
+     * If no id is supplied the system will generate one.
      */
     id?: string;
 
-    /** 
+    /**
      * group assignment for the actor.
-     */
-    group?: string | string[],
-
-    /**
-     * create function.
-     */
-    create: Cons;
-
-    /**
-     * args are passed to the create function when creating a new instance.
      *
-     * This method of passing arguments is not type safe and care should be
-     * taken to ensure they are used properly in the create function.
+     * Including an actor in a group allows for messages to be sent to one
+     * address but received by multiple actors.
      */
-    args?: Type[],
+    group?: string | string[];
 
     /**
-     * trap is used to take action when the spanwed
-     * action encounters an error.
+     * trap is called when unhandled errors are detected.
+     *
+     * The result of this function determines the next action to take.
      */
     trap?: TrapFunc;
-
-    /**
-     * delay before invoking the actor's run method in milliseconds.
-     */
-    delay?: DelayMilliseconds;
-
-    /**
-     * restart flag indicates whether an actor should be automatically
-     * restarted after a normal exit.
-     */
-    restart?: boolean
-
-    /**
-     * children is list of child actors that will automatically be spawned.
-     */
-    children?: Templates | Template[]
-
 }
+
+/**
+ * CreateFunc is a function that creates an actor given the handle the system
+ * has generated.
+ *
+ * Use it when a class based actor implementation is preffered.
+ */
+export type CreateFunc = (runtime: Runtime) => Actor;
+
+/**
+ * RunFunc serves as the main function for function based actors.
+ *
+ * This should only ever be a function declared with the "async" keyword and
+ * not just a function that returns a Promise.
+ */
+export type RunFunc = (runtime: Runtime) => Promise<void>;
+
+/**
+ * Template is an object that tells the system how to create an manage an
+ * actor.
+ *
+ * Every actor in the system is created from an initial template that is reused
+ * if the actor needs to be restarted. The type of template determines the
+ * type of thread that will be allocated for the actor.
+ */
+export type Template = SharedTemplate | ProcessTemplate;
+
+/**
+ * SharedTemplate is used for resident actors that require a SharedThread to
+ * be allocated.
+ */
+export type SharedTemplate = SharedCreateTemplate | SharedRunTemplate;
+
+/**
+ * SharedCreateTemplate is used for class based actors.
+ */
+export interface SharedCreateTemplate extends BaseTemplate {
+    /**
+     * create an instance of the actor to be used within the system.
+     */
+    create: CreateFunc;
+}
+
+/**
+ * SharedRunTemplate is used for function based actors.
+ */
+export interface SharedRunTemplate extends BaseTemplate {
+    /**
+     * run is called to run a function based actor.
+     */
+    run: RunFunc;
+}
+
+/**
+ * ProcessTemplate is used for creating child process actors.
+ */
+export interface ProcessTemplate extends BaseTemplate {
+    /**
+     * script is the path to the script that will be executed in the child
+     * process.
+     */
+    script: Path;
+}
+
+/**
+ * Spawnable allows a CreateFunc to be used in place of a Template.
+ */
+export type Spawnable = Template | CreateFunc | RunFunc;
+
+const AsyncFunction = (async () => {}).constructor;
+
+const isAsyncFunction = (func: Function) => func.constructor === AsyncFunction;
+
+/**
+ * isProcessTemplate test.
+ */
+export const isProcessTemplate = (tmpl: Template): tmpl is ProcessTemplate =>
+    isString((<ProcessTemplate>tmpl).script);
+
+/**
+ * fromSpawnable converts a Spawnable to a Template.
+ *
+ * If a function is supplied we assume a SharedTemplate is desired.
+ *
+ * NOTE: That this requires a runtime that has an AsyncFunction constructor
+ * in global scope in order to work properly.
+ */
+export const fromSpawnable = (tmpl: Spawnable): Template => {
+    if (isFunction(tmpl)) {
+        return isAsyncFunction(tmpl)
+            ? { run: <RunFunc>tmpl }
+            : { create: <CreateFunc>tmpl };
+    } else {
+        return tmpl;
+    }
+};

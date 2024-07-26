@@ -1,29 +1,27 @@
 import * as types from '../type';
 
-import { Instruction } from '../runtime';
 import { ForeignFun, TypeDescriptor } from '../type';
+import { Instruction } from '../op';
 
 /**
  * Info objects provide important information about named identifiers appearing
  * in the compiled source.
  */
 export interface Info {
-
     /**
      * type is the TypeInfo object of the indentifier.
      */
-    type: TypeInfo,
+    type: TypeInfo;
 
     /**
      * name of the identifier as it appears in source text.
      */
-    name: string,
+    name: string;
 
     /**
      * descriptor
      */
-    descriptor: TypeDescriptor
-
+    descriptor: TypeDescriptor;
 }
 
 /**
@@ -32,13 +30,11 @@ export interface Info {
  * In effect, it describes the constructor of a symbol and is itself a symbol.
  */
 export interface TypeInfo extends Info {
-
     /**
-     * properties is an array of property info objects that describe the 
+     * properties is an array of property info objects that describe the
      * properties of objects created with this constructor.
      */
-    properties: PropInfo[]
-
+    properties: PropInfo[];
 }
 
 /**
@@ -48,232 +44,204 @@ export interface TypeInfo extends Info {
  * retain nested type information on their elements.
  */
 export interface ArrayTypeInfo extends TypeInfo {
-
     /**
      * elements indicates the type of the array's elements.
      */
-    elements: TypeInfo
-
+    elements: TypeInfo;
 }
 
 /**
  * FunInfo maintains information about compiled functions.
  */
 export interface FunInfo extends Info {
-
     /**
      * argc is the argument count of the function.
      */
-    argc: number,
+    argc: number;
 
     /**
      * code section.
      */
-    code: Instruction[],
+    code: Instruction[];
 
     /**
      * foreign indicates whether the function is implemented using a JS
      * function.
      * If so, the exec property must be provided.
      */
-    foreign: boolean
-
+    foreign: boolean;
 }
 
 /**
  * ForeignFunInfo maintains information about foreigin functions.
  */
 export interface ForeignFunInfo extends FunInfo {
-
     /**
      * exec (foreign only).
      */
-    exec: ForeignFun
-
+    exec: ForeignFun;
 }
 
 /**
  * PropInfo holds information about a property on an object.
  */
 export interface PropInfo {
-
     /**
      * name of the property.
      */
-    name: string,
+    name: string;
 
     /**
      * type information about the property.
      */
-    type: TypeInfo
-
+    type: TypeInfo;
 }
 
 /**
  * NewInfo
  */
 export abstract class NewInfo implements Info {
-
-    constructor(public name: string) { }
+    constructor(public name: string) {}
 
     abstract type: TypeInfo;
 
     abstract descriptor: number;
-
 }
 
 /**
  * VoidInfo
  */
 export class VoidInfo extends NewInfo {
-
     type = voidType;
 
     descriptor = types.TYPE_VOID;
-
 }
 
 /**
  * NewUInt8Info
  */
 export class NewUInt8Info extends NewInfo {
-
     type = uint8Type;
 
     descriptor = types.TYPE_UINT8;
-
 }
 
 /**
  * NewUInt16Info
  */
 export class NewUInt16Info extends NewInfo {
-
     type = uint16Type;
 
     descriptor = types.TYPE_UINT16;
-
 }
 
 /**
  * NewUInt32Info
  */
 export class NewUInt32Info extends NewInfo {
-
     type = uint32Type;
 
     descriptor = types.TYPE_UINT32;
-
 }
 
 /**
  * NewInt8Info
  */
 export class NewInt8Info extends NewInfo {
-
     type = int8Type;
 
     descriptor = types.TYPE_INT8;
-
 }
 
 /**
  * NewInt16Info
  */
 export class NewInt16Info extends NewInfo {
-
     type = int16Type;
 
     descriptor = types.TYPE_INT16;
-
 }
 
 /**
  * NewInt32Info
  */
 export class NewInt32Info extends NewInfo {
-
     type = int32Type;
 
     descriptor = types.TYPE_INT32;
-
 }
 
 /**
  * NewBooleanInfo
  */
 export class NewBooleanInfo extends NewInfo {
-
     type = booleanType;
 
     descriptor = types.TYPE_BOOLEAN;
-
 }
 
 /**
  * NewStringInfo
  */
 export class NewStringInfo extends NewInfo {
-
     type = stringType;
 
     descriptor = types.TYPE_STRING;
-
 }
 
 /**
  * NewObjectInfo
  */
 export class NewObjectInfo extends NewInfo {
-
     type = objectType;
 
     descriptor = types.TYPE_OBJECT;
-
 }
 
 /**
  * NewArrayInfo
  */
 export class NewArrayInfo extends NewInfo {
-
-    constructor(public name: string, public type: ArrayTypeInfo) {
-
+    constructor(
+        public name: string,
+        public type: ArrayTypeInfo
+    ) {
         super(name);
-
     }
 
-    descriptor = types.TYPE_ARRAY;
-
+    descriptor = types.TYPE_LIST;
 }
 
 /**
  * NewFunInfo
  */
-export class NewFunInfo extends NewInfo implements FunInfo  {
-
+export class NewFunInfo extends NewInfo implements FunInfo {
     constructor(
         public name: string,
         public argc: number,
-        public code: Instruction[]) { super(name); }
+        public code: Instruction[]
+    ) {
+        super(name);
+    }
 
     type = funType;
 
     descriptor = types.TYPE_FUN;
 
     foreign = false;
-
 }
 
 /**
  * NewForeignFunInfo
  */
 export class NewForeignFunInfo extends NewInfo implements FunInfo {
-
     constructor(
         public name: string,
         public argc: number,
-        public exec: ForeignFun) { super(name); }
+        public exec: ForeignFun
+    ) {
+        super(name);
+    }
 
     type = funType;
 
@@ -282,34 +250,36 @@ export class NewForeignFunInfo extends NewInfo implements FunInfo {
     foreign = true;
 
     code = [];
-
 }
 
 /**
  * NewTypeInfo
  */
 export class NewTypeInfo extends NewInfo implements TypeInfo {
-
     constructor(
         public name: string,
         public argc: number,
         public properties: PropInfo[],
-        public descriptor = types.TYPE_OBJECT) { super(name);  }
+        public descriptor = types.TYPE_OBJECT
+    ) {
+        super(name);
+    }
 
     type = funType;
 
     code = [];
-
 }
 
 /**
  * NewArrayTypeInfo
  */
 export class NewArrayTypeInfo extends NewInfo implements ArrayTypeInfo {
-
     constructor(
         public name: string,
-        public elements: TypeInfo) { super(name); }
+        public elements: TypeInfo
+    ) {
+        super(name);
+    }
 
     type = funType;
 
@@ -319,17 +289,17 @@ export class NewArrayTypeInfo extends NewInfo implements ArrayTypeInfo {
 
     code = [];
 
-    descriptor = types.TYPE_ARRAY;
-
+    descriptor = types.TYPE_LIST;
 }
 
 /**
  * NewPropInfo
  */
 export class NewPropInfo implements PropInfo {
-
-    constructor(public name: string, public type: TypeInfo) { }
-
+    constructor(
+        public name: string,
+        public type: TypeInfo
+    ) {}
 }
 
 /**
@@ -370,7 +340,12 @@ export const uint32Type = new NewTypeInfo('uint32', 1, [], types.TYPE_UINT32);
 /**
  * booleanType constructor.
  */
-export const booleanType = new NewTypeInfo('boolean', 1, [], types.TYPE_BOOLEAN);
+export const booleanType = new NewTypeInfo(
+    'boolean',
+    1,
+    [],
+    types.TYPE_BOOLEAN
+);
 
 /**
  * stringType constructor.
@@ -380,7 +355,7 @@ export const stringType = new NewTypeInfo('string', 1, [], types.TYPE_STRING);
 /**
  * arrayType constructor.
  */
-export const arrayType = new NewTypeInfo('array', 0, [], types.TYPE_ARRAY);
+export const arrayType = new NewTypeInfo('array', 0, [], types.TYPE_LIST);
 
 /**
  * objectCons

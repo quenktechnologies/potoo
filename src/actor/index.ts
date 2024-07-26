@@ -1,66 +1,35 @@
-import { Future } from '@quenk/noni/lib/control/monad/future';
-
-import { Context } from './system/vm/runtime/context';
-import { Message } from './message';
-import { Address } from './address';
+import { Type } from '@quenk/noni/lib/data/type';
 
 /**
- * Eff is used in various places to represent the potentially sync or async
- * side-effect of an actor operation.
+ * Message is any (ideally wire-safe) value that can be sent between actors.
  */
-export type Eff = void | Future<void>;
+export type Message = Type;
 
 /**
- * Instance of an actor that resides within the system.
- *
- * The interface is implemented by actors to react to the lifecycle the 
- * system takes them through.
+ * Actor is the main interface implemented by actors that are part of the system.
  */
-export interface Instance {
-
+export interface Actor {
     /**
-     * accept a message directly.
+     * start the Actor.
      *
-     * This method is used by actors that skip the mailbox.
+     * At this point resources have been allocated within the system for the
+     * actor and it can begin sending messages.
      */
-    accept(m: Message): void;
+    start(): Promise<void>;
 
     /**
-     * start the Instance.
+     * notify is called when a message is received from another actor.
      *
-     * If a Future is returned, the actor will block its thread until it is 
-     * complete.
-     * The address provided is the address of the newly spawned instance.
+     * Some actors may process the message immediately, others may store it to
+     * a mailbox for later.
      */
-    start(addr: Address): Eff;
+    notify(m: Message): Promise<void>;
 
     /**
-     * notify is called by the system to indicate new messages
-     * have been placed in the actor's mailbox.
-     */
-    notify(): void;
-
-    /**
-     * stop the Instance.
-     */
-    stop(): Eff;
-
-}
-
-/**
- * Actor common interface.
- *
- * The system expects all actors to satisfy this interface so they 
- * can be managed properly.
- */
-export interface Actor extends Instance {
-
-    /**
-     * init the Actor.
+     * stop the Actor.
      *
-     * This method allows an actor to configure its Context just
-     * before it is added to the system.
+     * A this point resources for the actor have been removed from the system
+     * and any additional clean up needed can be done.
      */
-    init(c: Context): Context;
-
+    stop(): Promise<void>;
 }

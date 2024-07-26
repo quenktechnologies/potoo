@@ -1,54 +1,33 @@
-import { ACTION_RAISE, TrapFunc } from '../../template';
-import { Message } from '../../message';
-import { Eff } from '../..';
-import { LOG_LEVEL_ERROR, LogLevel, LogSink } from './log';
-import { Handlers } from './event';
+import { LogSink } from './log';
 
 /**
- * Conf represents the configuration of the VM.
+ * PartialConfig allows only some values to be specified in a Config object
+ * instead of all.
  */
-export interface Conf {
-
-    /**
-     * log_level configures the verbosity of internal logging.
-     */
-    log_level: LogLevel,
-
-    /**
-     * long_sink is the [[LogSink]] that messages will be written to.
-     */
-    long_sink: LogSink,
-
-    /**
-     * on event handlers.
-     */
-    on: Handlers,
-
-    /**
-     * accept handles messages sent to the root actor, ie the system.
-     */
-    accept: (m: Message) => Eff
-
-    /**
-     * trap function that intercepts all errors that reach the root actor.
-     */
-    trap: TrapFunc
-
+export interface PartialConfig {
+    log?: Partial<Config['log']>;
 }
 
 /**
- * defaults for VM configuration.
+ * Config objects are used to create and configue various aspects of thhe VM.
  */
-export const defaults = (): Conf => ({
+export interface Config {
+    /**
+     * log configures the logging system.
+     */
+    log: {
+        /**
+         * level sets the maximum log level that will be written.
+         *
+         * Defaults to info.
+         */
+        level: string;
 
-    log_level: LOG_LEVEL_ERROR,
-
-    long_sink: console,
-
-    on: {},
-
-    trap: () => ACTION_RAISE,
-
-    accept: () => { }
-
-});
+        /**
+         * sink is the destination logs will be written to.
+         *
+         * Defaults to the console object.
+         */
+        sink: LogSink;
+    };
+}
