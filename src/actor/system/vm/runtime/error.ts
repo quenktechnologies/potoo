@@ -66,10 +66,7 @@ export class NullFunctionPointerErr extends ErrorClass {
  * JumpOutOfBoundsErr
  */
 export class JumpOutOfBoundsErr extends ErrorClass {
-    constructor(
-        public location: number,
-        public size: number
-    ) {
+    constructor(public location: number, public size: number) {
         super(`Cannot jump to location "${location}"! Max location: ${size}!`);
     }
 }
@@ -87,10 +84,7 @@ export class NullPointerErr extends ErrorClass {
  * UnexpectedDataType
  */
 export class UnexpectedDataType extends ErrorClass {
-    constructor(
-        public expected: number,
-        public got: number
-    ) {
+    constructor(public expected: number, public got: number) {
         super(
             `Expected: ${expected.toString(16)}, ` +
                 `Received: ${got.toString(16)}`
@@ -102,10 +96,7 @@ export class UnexpectedDataType extends ErrorClass {
  * IllegalStopErr
  */
 export class IllegalStopErr extends ErrorClass {
-    constructor(
-        public parent: string,
-        public child: string
-    ) {
+    constructor(public parent: string, public child: string) {
         super(`The actor at address "${parent}" can not kill "${child}"!`);
     }
 }
@@ -177,10 +168,7 @@ export class StackEmptyErr extends ErrorClass {
  * InvalidPropertyIndex
  */
 export class InvalidPropertyIndex extends ErrorClass {
-    constructor(
-        public cons: TypeInfo,
-        public idx: number
-    ) {
+    constructor(public cons: TypeInfo, public idx: number) {
         super(`Constructor: ${cons.name}, index: ${idx}`);
     }
 }

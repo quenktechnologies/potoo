@@ -26,7 +26,9 @@ describe('LogWriter', () => {
             LogLevelValue.warn,
             LogLevelValue.warn
         ]) {
-            it(`should call the correct method for ${toLogLevel(level)}`, () => {
+            it(`should call the correct method for ${toLogLevel(
+                level
+            )}`, () => {
                 let sink = mockDeep<LogSink>();
 
                 let writer = new LogWriter(sink, LogLevelValue.trace);

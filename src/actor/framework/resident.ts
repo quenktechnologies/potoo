@@ -1,5 +1,4 @@
 import { Err } from '@quenk/noni/lib/control/error';
-import { Future } from '@quenk/noni/lib/control/monad/future';
 
 import { Runtime } from '../system/vm/runtime';
 import { Address } from '../address';
@@ -53,7 +52,9 @@ export abstract class AbstractResident implements Resident {
 
     async stop() {}
 
-    abstract receive<T>(cases?: TypeCase<T>[]): Promise<T>;
+    async receive<T>(cases: TypeCase<T>[] = []) {
+        return this.runtime.receive(cases);
+    }
 
     watch<T>(task: () => Promise<T>) {
         return this.runtime.watch(task);
@@ -61,32 +62,29 @@ export abstract class AbstractResident implements Resident {
 }
 
 /**
- * Immutable actors do not change their receiver behaviour after receiving
- * a message. The same receiver is applied to each and every message.
+ * Mutable actors can change their behaviour after message processing.
+ */
+export abstract class Mutable extends AbstractResident {}
+
+/**
+ * Immutable is an actor whose behaviour does not change when a message is
+ * received.
+ *
+ * For each message received, the same set of TypeCase classes are applied.
+ * This class is useful for simple request/response style actors that do
+ * not require much complicated logic.
  */
 export abstract class Immutable<T> extends AbstractResident {
     /**
-     * match provides the list of Case classes that the actor will be used
-     * to process incoming messages.
+     * selectors provides the list of TypeCase classes that will be applied to
+     * all incoming messages.
      */
-    match(): TypeCase<T>[] {
+    selectors(): TypeCase<T>[] {
         return [];
     }
 
     async start() {
         await this.run();
-        while (this.runtime.isValid()) await this.runtime.receive(this.match());
-    }
-}
-
-/**
- * Mutable actors can change their behaviour after message processing.
- */
-export abstract class Mutable extends AbstractResident {
-    /**
-     * receive a message from the actor's mailbox.
-     */
-    receive<T>(cases: TypeCase<T>[] = []): Future<T> {
-        return Future.do(async () => this.runtime.receive(cases));
+        while (this.runtime.isValid()) await this.receive(this.selectors());
     }
 }

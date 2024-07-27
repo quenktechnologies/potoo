@@ -202,10 +202,7 @@ export class NewObjectInfo extends NewInfo {
  * NewArrayInfo
  */
 export class NewArrayInfo extends NewInfo {
-    constructor(
-        public name: string,
-        public type: ArrayTypeInfo
-    ) {
+    constructor(public name: string, public type: ArrayTypeInfo) {
         super(name);
     }
 
@@ -274,10 +271,7 @@ export class NewTypeInfo extends NewInfo implements TypeInfo {
  * NewArrayTypeInfo
  */
 export class NewArrayTypeInfo extends NewInfo implements ArrayTypeInfo {
-    constructor(
-        public name: string,
-        public elements: TypeInfo
-    ) {
+    constructor(public name: string, public elements: TypeInfo) {
         super(name);
     }
 
@@ -296,10 +290,7 @@ export class NewArrayTypeInfo extends NewInfo implements ArrayTypeInfo {
  * NewPropInfo
  */
 export class NewPropInfo implements PropInfo {
-    constructor(
-        public name: string,
-        public type: TypeInfo
-    ) {}
+    constructor(public name: string, public type: TypeInfo) {}
 }
 
 /**
