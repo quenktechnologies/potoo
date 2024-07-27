@@ -12,12 +12,11 @@ import {
 import { Actor } from '../../../../../../lib/actor';
 import { ErrorStrategy } from '../../../../../../lib/actor/system/vm/strategy/error';
 import { Allocator } from '../../../../../../lib/actor/system/vm/allocator';
-import {
-    SharedThread,
-    ThreadState
-} from '../../../../../../lib/actor/system/vm/thread/shared';
+import { ThreadState } from '../../../../../../lib/actor/system/vm/thread/shared';
 import { JSThread } from '../../../../../../lib/actor/system/vm/thread/shared/js';
 import { identity } from '@quenk/noni/lib/data/function';
+import { Thread } from '../../../../../../lib/actor/system/vm/thread';
+import { Err } from '@quenk/noni/lib/control/err';
 
 describe('shared', () => {
     let platform = mockDeep<VM>();
@@ -85,7 +84,7 @@ describe('shared', () => {
                 let errorReceived;
 
                 platform.errors.raise.mockImplementation(
-                    async (thread: SharedThread, error: Error) => {
+                    async (thread: Thread, error: Err) => {
                         threadReceived = thread;
                         errorReceived = error;
                     }
@@ -107,7 +106,7 @@ describe('shared', () => {
             let targetReceived;
 
             platform.sendKillSignal.mockImplementation(
-                async (thread: SharedThread, target: string) => {
+                async (thread: Thread, target: string) => {
                     threadReceived = thread;
                     targetReceived = target;
                 }
@@ -128,7 +127,7 @@ describe('shared', () => {
             let errorReceived;
 
             platform.errors.raise.mockImplementation(
-                async (thread: SharedThread, error: Error) => {
+                async (thread: Thread, error: Err) => {
                     threadReceived = thread;
                     errorReceived = error;
                 }

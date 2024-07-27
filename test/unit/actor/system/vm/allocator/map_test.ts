@@ -343,21 +343,15 @@ describe('MapAllocator', () => {
             childEntry1.children.push(childEntry2);
 
             let order: number[] = [];
-            childEntry0.thread.stop
-                .calledWith()
-                .mockImplementation(async () => {
-                    order.push(0);
-                });
-            childEntry1.thread.stop
-                .calledWith()
-                .mockImplementation(async () => {
-                    order.push(1);
-                });
-            childEntry2.thread.stop
-                .calledWith()
-                .mockImplementation(async () => {
-                    order.push(2);
-                });
+            childEntry0.thread.stop.mockImplementation(async () => {
+                order.push(0);
+            });
+            childEntry1.thread.stop.mockImplementation(async () => {
+                order.push(1);
+            });
+            childEntry2.thread.stop.mockImplementation(async () => {
+                order.push(2);
+            });
 
             await map.deallocate(childEntry0.thread);
 

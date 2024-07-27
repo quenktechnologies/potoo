@@ -1,12 +1,15 @@
 import { assert as expect } from '@quenk/test/lib/assert';
 
-import { Registry } from '../../../../../lib/actor/system/vm/registry';
+import {
+    Registry,
+    RegistryType
+} from '../../../../../lib/actor/system/vm/registry';
 
 // TODO: Disabled until op codes are re-implemented.
 xdescribe('Registry', () => {
     describe('add', () => {
         it('should create an address using the type', () => {
-            let reg = new Registry(100);
+            let reg = new Registry(RegistryType.object);
             let addr = reg.add('test');
             expect(addr).equal(101);
             expect(reg.values.get(addr)).equal('test');
@@ -17,21 +20,21 @@ xdescribe('Registry', () => {
 
     describe('get', () => {
         it('should provide the value stored in the registry', () => {
-            let reg = new Registry(100);
+            let reg = new Registry(RegistryType.object);
             let value = { n: 1 };
             let addr = reg.add(value);
             expect(reg.get(addr).get()).equal(value);
         });
 
         it('should not provide non-existant values', () => {
-            let reg = new Registry(100);
+            let reg = new Registry(RegistryType.object);
             expect(reg.get(100).isNothing()).true();
         });
     });
 
     describe('increment', () => {
         it('should increment the ref count', () => {
-            let reg = new Registry(100);
+            let reg = new Registry(RegistryType.object);
             let value = { n: 1 };
             let addr = reg.add(value);
             expect(reg.refCounts.get(addr)).equal(0);
@@ -42,7 +45,7 @@ xdescribe('Registry', () => {
 
     describe('decrement', () => {
         it('should decrease the ref count', () => {
-            let reg = new Registry(100);
+            let reg = new Registry(RegistryType.object);
             let value = { n: 1 };
             let addr = reg.add(value);
             reg.increment(addr);
@@ -52,7 +55,7 @@ xdescribe('Registry', () => {
         });
 
         it('should mark dead objects', () => {
-            let reg = new Registry(100);
+            let reg = new Registry(RegistryType.object);
             let addr = reg.add({ n: 1 });
             reg.increment(addr);
             reg.increment(addr);
@@ -66,7 +69,7 @@ xdescribe('Registry', () => {
         });
 
         it('should not decrease past zero', () => {
-            let reg = new Registry(100);
+            let reg = new Registry(RegistryType.object);
             let addr = reg.add('test');
             reg.decrement(addr);
             expect(reg.refCounts.get(addr)).equal(0);
@@ -75,7 +78,7 @@ xdescribe('Registry', () => {
 
     describe('flush', () => {
         it('should remove dead objects', () => {
-            let reg = new Registry(100);
+            let reg = new Registry(RegistryType.object);
 
             let addr1 = reg.add({ n: 1 });
             reg.increment(addr1);

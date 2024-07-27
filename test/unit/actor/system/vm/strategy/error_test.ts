@@ -15,12 +15,12 @@ import {
     Template,
     TrapAction
 } from '../../../../../../lib/actor/template';
-import { Thread } from '../../../../../../lib/actor/system/vm/thread';
 import { ADDRESS_SYSTEM } from '../../../../../../lib/actor/address';
 import { SupervisorErrorStrategy } from '../../../../../../lib/actor/system/vm/strategy/error';
 import { ActorTerminatedErr } from '../../../../../../lib/actor/system/vm/runtime/error';
 import { Allocator } from '../../../../../../lib/actor/system/vm/allocator';
 import { SharedThread } from '../../../../../../lib/actor/system/vm/thread/shared';
+import { Thread } from '../../../../../../lib/actor/system/vm/thread';
 
 describe('SupervisorErrorStrategy', () => {
     const mockAllocator = mockDeep<Allocator>();
@@ -39,8 +39,8 @@ describe('SupervisorErrorStrategy', () => {
             '/child': { create: identity }
         };
 
-        let threads: Record<Thread> = {
-            [ADDRESS_SYSTEM]: mockDeep<Thread>()
+        let threads: Record<SharedThread> = {
+            [ADDRESS_SYSTEM]: mockDeep<SharedThread>()
         };
 
         let err = new Error('fail');
@@ -60,7 +60,7 @@ describe('SupervisorErrorStrategy', () => {
                 .mockReturnValueOnce(ACTION_IGNORE);
             templates['/child'].trap = trap;
 
-            let thread = mockDeep<Thread>();
+            let thread = mockDeep<SharedThread>();
 
             thread.address = '/child';
 
@@ -76,9 +76,9 @@ describe('SupervisorErrorStrategy', () => {
         });
 
         it('should restart the thread', async () => {
-            let parentThread = mockDeep<Thread>();
-            let thread = mockDeep<Thread>();
-            let newThread = mockDeep<Thread>();
+            let parentThread = mockDeep<SharedThread>();
+            let thread = mockDeep<SharedThread>();
+            let newThread = mockDeep<SharedThread>();
 
             parentThread.address = '/';
             thread.address = '/target';
@@ -94,7 +94,7 @@ describe('SupervisorErrorStrategy', () => {
             templates['/target'] = template;
 
             mockAllocator.reallocate.mockImplementation(
-                async (thread: SharedThread) => {
+                async (thread: Thread) => {
                     threads[thread.address] = newThread;
                 }
             );
@@ -115,8 +115,8 @@ describe('SupervisorErrorStrategy', () => {
         });
 
         it('should stop the thread', async () => {
-            let parentThread = mockDeep<Thread>();
-            let thread = mockDeep<Thread>();
+            let parentThread = mockDeep<SharedThread>();
+            let thread = mockDeep<SharedThread>();
 
             parentThread.address = '/';
             thread.address = '/target';
@@ -157,7 +157,7 @@ describe('SupervisorErrorStrategy', () => {
                 });
             templates['/'].trap = parentTrap;
 
-            let parentThread = mockDeep<Thread>();
+            let parentThread = mockDeep<SharedThread>();
             parentThread.address = '/';
             threads['/'] = parentThread;
 
@@ -166,7 +166,7 @@ describe('SupervisorErrorStrategy', () => {
                 .mockReturnValueOnce(ACTION_RAISE);
             templates['/child'].trap = childTrap;
 
-            let childThread = mockDeep<Thread>();
+            let childThread = mockDeep<SharedThread>();
             childThread.address = '/child';
             threads['/child'] = childThread;
 
