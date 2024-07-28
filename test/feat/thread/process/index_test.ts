@@ -7,7 +7,7 @@ import { PVM } from '../../../../lib/actor/system/vm';
 
 describe('process', () => {
     it('should work', async () => {
-        let vm = PVM.create({log: {level:'error' }});
+        let vm = PVM.create({ log: { level: 'error' } });
 
         let success = false;
 
