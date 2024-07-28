@@ -20,7 +20,7 @@ import { Allocator } from './allocator';
 import { Api } from '../../api';
 import { LogWritable, LogWriter } from './log/writer';
 import { EventDispatcher } from './event/dispatcher';
-import { Config, PartialConfig } from './conf';
+import { Conf, PartialConf } from './conf';
 import { toLogLevelValue } from './log';
 
 /**
@@ -116,8 +116,8 @@ export class PVM implements VM {
     /**
      * create a new PVM instance using the provided configuration.
      */
-    static create(conf: PartialConfig = {}): PVM {
-        let config: Config = {
+    static create(conf: PartialConf = {}): PVM {
+        let config: Conf = {
             log: merge({ level: 'info', sink: console }, conf.log ?? {})
         };
 

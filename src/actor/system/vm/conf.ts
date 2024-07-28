@@ -1,17 +1,17 @@
 import { LogSink } from './log';
 
 /**
- * PartialConfig allows only some values to be specified in a Config object
+ * PartialConf allows only some values to be specified in a Conf object
  * instead of all.
  */
-export interface PartialConfig {
-    log?: Partial<Config['log']>;
+export interface PartialConf {
+    log?: Partial<Conf['log']>;
 }
 
 /**
- * Config objects are used to create and configue various aspects of thhe VM.
+ * Conf objects are used to create and configue various aspects of thhe VM.
  */
-export interface Config {
+export interface Conf {
     /**
      * log configures the logging system.
      */
