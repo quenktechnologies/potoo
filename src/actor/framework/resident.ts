@@ -74,12 +74,12 @@ export abstract class Mutable extends AbstractResident {}
  * This class is useful for simple request/response style actors that do
  * not require much complicated logic.
  */
-export abstract class Immutable<T> extends AbstractResident {
+export abstract class Immutable extends AbstractResident {
     /**
      * selectors provides the list of TypeCase classes that will be applied to
      * all incoming messages.
      */
-    selectors(): TypeCase<T>[] {
+    selectors<T>(): TypeCase<T>[] {
         return [];
     }
 

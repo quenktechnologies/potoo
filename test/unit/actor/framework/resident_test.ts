@@ -15,7 +15,7 @@ class Act extends AbstractResident {
     }
 }
 
-class ImAct extends Immutable<void> {
+class ImAct extends Immutable {
     selectors = jest.fn();
 
     isRunning = false;

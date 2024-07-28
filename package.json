@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "lint": "./node_modules/.bin/eslint src/**/*.ts test/**/*.ts",
+    "format": "./node_modules/.bin/prettier --write src test",
     "build": "make",
     "test": "./node_modules/.bin/jest --config jest.config.ts --runInBand test"
   },
