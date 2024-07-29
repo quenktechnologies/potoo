@@ -18,7 +18,7 @@
     "@quenk/test": "^2.5.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.12",
-    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
     "eslint": "^8.34.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
