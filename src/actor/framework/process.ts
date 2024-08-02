@@ -3,7 +3,7 @@ import { empty } from '@quenk/noni/lib/data/array';
 import {
     CaseFunction,
     Default,
-    TypeCase
+    Case
 } from '@quenk/noni/lib/control/match/case';
 import { identity } from '@quenk/noni/lib/data/function';
 
@@ -59,7 +59,7 @@ const defaultCases = [new Default(identity)];
  * TODO: drop messages that do not match any cases.
  */
 export const receive = async <T>(
-    cases: TypeCase<T>[] = defaultCases
+    cases: Case<Message, T>[] = defaultCases
 ): Promise<T> =>
     new Promise(resolve => {
         let matcher = new CaseFunction(cases || defaultCases);

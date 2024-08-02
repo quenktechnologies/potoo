@@ -3,7 +3,7 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { Address } from './address';
 import { Spawnable } from './template';
 import { Message } from '.';
-import { TypeCase } from '@quenk/noni/lib/control/match/case';
+import { Case } from '@quenk/noni/lib/control/match/case';
 
 /**
  * Parent is any object capable of spawning a child actor.
@@ -53,5 +53,5 @@ export interface Api extends Parent {
      * If TypeCases are provided, the message will be matched against them
      * first and the result provided.
      */
-    receive<T>(cases?: TypeCase<T>[]): Promise<T>;
+    receive<T>(cases?: Case<Message, T>[]): Promise<T>;
 }

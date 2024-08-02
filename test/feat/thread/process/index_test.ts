@@ -1,6 +1,6 @@
 import { expect } from '@jest/globals';
 
-import { Case } from '@quenk/noni/lib/control/match/case';
+import { TypeCase } from '@quenk/noni/lib/control/match/case';
 import { wait } from '@quenk/noni/lib/control/monad/future';
 
 import { PVM } from '../../../../lib/actor/system/vm';
@@ -21,23 +21,23 @@ describe('process', () => {
 
             while (actor.isValid()) {
                 await actor.receive([
-                    new Case('started', async () => {
+                    new TypeCase('started', async () => {
                         await actor.tell(process, 'ping');
                     }),
 
-                    new Case('pong', async () => {
+                    new TypeCase('pong', async () => {
                         await actor.tell(process, 'self');
                     }),
 
-                    new Case(process, async () => {
+                    new TypeCase(process, async () => {
                         await actor.tell(process, 'parent');
                     }),
 
-                    new Case(actor.self, async () => {
+                    new TypeCase(actor.self, async () => {
                         await actor.tell(process, 'exit');
                     }),
 
-                    new Case('exiting', async () => {
+                    new TypeCase('exiting', async () => {
                         await actor.kill(actor.self);
                         success = true;
                     })

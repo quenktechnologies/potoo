@@ -5,7 +5,7 @@ import { Address } from '../address';
 import { Spawnable } from '../template';
 import { Api } from '../api';
 import { Message, Actor } from '../';
-import { TypeCase } from '.';
+import { Case } from '.';
 
 /**
  * Resident is an actor that exists in the current runtime.
@@ -52,7 +52,7 @@ export abstract class AbstractResident implements Resident {
 
     async stop() {}
 
-    async receive<T>(cases: TypeCase<T>[] = []) {
+    async receive<T>(cases: Case<Message, T>[] = []) {
         return this.runtime.receive(cases);
     }
 
@@ -73,13 +73,15 @@ export abstract class Mutable extends AbstractResident {}
  * For each message received, the same set of TypeCase classes are applied.
  * This class is useful for simple request/response style actors that do
  * not require much complicated logic.
+ *
+ * @typeparam T - The type of messages the actor is interested in receiving.
  */
-export abstract class Immutable extends AbstractResident {
+export abstract class Immutable<T> extends AbstractResident {
     /**
      * selectors provides the list of TypeCase classes that will be applied to
      * all incoming messages.
      */
-    selectors<T>(): TypeCase<T>[] {
+    selectors(): Case<T, Promise<void> | void>[] {
         return [];
     }
 

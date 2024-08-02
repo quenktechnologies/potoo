@@ -1,4 +1,4 @@
-import { Case } from '@quenk/noni/lib/control/match/case';
+import { TypeCase } from '@quenk/noni/lib/control/match/case';
 import { mockDeep } from 'jest-mock-extended';
 
 import {
@@ -7,25 +7,15 @@ import {
 } from '../../../../lib/actor/framework/resident';
 import { Runtime } from '../../../../lib/actor/system/vm/runtime';
 
-class Act extends AbstractResident {
-    isRunning = false;
-
-    async run() {
-        this.isRunning = true;
-    }
-}
-
-class ImAct extends Immutable {
-    selectors = jest.fn();
-
-    isRunning = false;
-
-    async run() {
-        this.isRunning = true;
-    }
-}
-
 describe('resident', () => {
+    class Act extends AbstractResident {
+        isRunning = false;
+
+        async run() {
+            this.isRunning = true;
+        }
+    }
+
     let runtime = mockDeep<Runtime>();
     let resident: Act;
 
@@ -90,7 +80,7 @@ describe('resident', () => {
 
         describe('receive', () => {
             it('should call runtime.receive', async () => {
-                let cases = [new Case('test', () => 'test')];
+                let cases = [new TypeCase('test', () => 'test')];
 
                 await resident.receive(cases);
 
@@ -106,6 +96,16 @@ describe('resident', () => {
             });
         });
     });
+
+    class ImAct extends Immutable<Number> {
+        isRunning = false;
+
+        selectors = jest.fn(() => [new TypeCase(Number, () => {})]);
+
+        async run() {
+            this.isRunning = true;
+        }
+    }
 
     describe('Immutable', () => {
         describe('start', () => {

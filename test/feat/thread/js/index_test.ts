@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals';
-import { Case } from '@quenk/noni/lib/control/match/case';
+import { TypeCase } from '@quenk/noni/lib/control/match/case';
 
 import { wait } from '@quenk/noni/lib/control/monad/future';
 
@@ -31,7 +31,7 @@ describe('js', () => {
             run: async actor => {
                 await actor.tell('receiver', 'syn');
                 await actor.receive([
-                    new Case('ack', () => {
+                    new TypeCase('ack', () => {
                         success = true;
                     })
                 ]);
@@ -42,7 +42,7 @@ describe('js', () => {
             id: 'receiver',
             run: async actor => {
                 await actor.receive([
-                    new Case('syn', async () => {
+                    new TypeCase('syn', async () => {
                         await actor.tell('sender', 'ack');
                     })
                 ]);
@@ -68,7 +68,7 @@ describe('js', () => {
                     }
                 });
                 await parent.receive([
-                    new Case('hello', () => {
+                    new TypeCase('hello', () => {
                         success = true;
                     })
                 ]);
