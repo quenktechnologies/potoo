@@ -117,10 +117,7 @@ export class JSThread implements SharedThread {
     async receive<T = Message>(cases: Case<Message, T>[] = []): Promise<T> {
         this._assertValid();
         let msg = await Future.fromCallback<T>(cb => {
-            this.vm.events.dispatchActorEvent(
-                EVENT_ACTOR_RECEIVE,
-                this.address
-            );
+            this.vm.events.dispatchActorEvent(this, EVENT_ACTOR_RECEIVE);
             let matcher = new CaseFunction(empty(cases) ? defaultCases : cases);
             let task = new Task(this, cb, async () => {
                 this._assertValid();
@@ -134,9 +131,9 @@ export class JSThread implements SharedThread {
                         return cb(null, result);
                     }
                     this.vm.events.dispatchMessageEvent(
+                        this,
                         EVENT_MESSAGE_DROPPED,
                         ADDRESS_DISCARD,
-                        this.address,
                         msg
                     );
                 }

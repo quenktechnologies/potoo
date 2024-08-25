@@ -161,13 +161,10 @@ export class MapAllocator implements Allocator {
 
         if (template.group) platform.groups.enroll(address, template.group);
 
-        platform.events.dispatchActorEvent(EVENT_ACTOR_ALLOCATED, address);
+        platform.events.dispatchActorEvent(thread, EVENT_ACTOR_ALLOCATED);
 
         platform.runTask(thread, async () => {
-            platform.events.dispatchActorEvent(
-                EVENT_ACTOR_STARTED,
-                thread.address
-            );
+            platform.events.dispatchActorEvent(thread, EVENT_ACTOR_STARTED);
 
             await actor.start();
 
@@ -235,8 +232,8 @@ export class MapAllocator implements Allocator {
                         await target.thread.stop();
 
                         platform.events.dispatchActorEvent(
-                            EVENT_ACTOR_STOPPED,
-                            target.address
+                            target.thread,
+                            EVENT_ACTOR_STOPPED
                         );
 
                         platform.groups.unenroll(target.address);
@@ -244,8 +241,8 @@ export class MapAllocator implements Allocator {
                         this.actors.delete(target.address);
 
                         platform.events.dispatchActorEvent(
-                            EVENT_ACTOR_DEALLOCATED,
-                            target.address
+                            target.thread,
+                            EVENT_ACTOR_DEALLOCATED
                         );
                     })
                 ),

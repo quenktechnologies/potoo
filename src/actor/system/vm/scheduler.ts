@@ -31,7 +31,10 @@ export class Task {
  * execution we ensure threads do not preempt themselves.
  */
 export class Scheduler {
-    constructor(public queue: Task[] = [], public isRunning = false) {}
+    constructor(
+        public queue: Task[] = [],
+        public isRunning = false
+    ) {}
 
     /**
      * postTask a Task for future execution.

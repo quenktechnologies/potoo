@@ -5,12 +5,8 @@ import { evaluate, Lazy } from '@quenk/noni/lib/data/lazy';
 import { LogWritable } from '../log/writer';
 import { Address } from '../../../address';
 import { Message } from '../../..';
+import { Thread } from '../thread';
 import { EventType, InternalEvent } from './';
-
-/**
- * Handler is the type of function that receives events.
- */
-export type Handler = (event: InternalEvent) => void;
 
 const eventMap = {
     message: new Map([
@@ -24,6 +20,18 @@ const eventMap = {
         [events.EVENT_ACTOR_DEALLOCATED, events.ActorDeallocatedEvent]
     ])
 };
+
+export const ADDRESS_WILDCARD = '*';
+
+/**
+ * Listener is the signature of functions that receive VM events.
+ */
+export type Listener = (event: InternalEvent) => void;
+
+/**
+ * ListenerMap maps event types to a list of listeners.
+ */
+export type ListenerMap = Map<EventType, Listener[]>;
 
 /**
  * EventDispatcher is an interface used by the internal VM components to
@@ -41,45 +49,87 @@ const eventMap = {
 export class EventDispatcher {
     constructor(
         public log: Lazy<LogWritable>,
-        public handlers: Map<EventType, Handler[]> = new Map()
+        public maps: Map<Address, ListenerMap> = new Map()
     ) {}
 
     /**
-     * addListener to the EventDispatcher.
+     * addListener queues a callback to be executed when the specified event
+     * type occurs for the actor with the target address.
      */
-    addEventListener(type: EventType, handler: Handler) {
-        let handlers = this.handlers.get(type) || [];
-        handlers.push(handler);
-        this.handlers.set(type, handlers);
+    addListener(actor: Address, type: EventType, listener: Listener) {
+        let target = this.maps.get(actor) || new Map();
+        let listeners = target.get(type) || [];
+        listeners.push(listener);
+        target.set(type, listeners);
+        this.maps.set(actor, target);
+    }
+
+    /**
+     * waitListener blocks the caller until the next occurrence of the event
+     * type for the target actor.
+     */
+    async waitListener(
+        actor: Address,
+        type: EventType
+    ): Promise<InternalEvent> {
+        return new Promise(resolve => {
+            let listener = (e: InternalEvent) => {
+                this.removeListener(actor, type, listener);
+                resolve(e);
+            };
+            this.addListener(actor, type, listener);
+        });
+    }
+
+    /**
+     * removeListener removes a previously installed listener.
+     */
+    removeListener(actor: Address, type: EventType, listener: Listener) {
+        let target = this.maps.get(actor);
+        if (target) {
+            let listeners = target.get(type);
+            if (listeners) {
+                target.set(
+                    type,
+                    listeners.filter(target => target !== listener)
+                );
+            }
+        }
+    }
+
+    /**
+     * dispatchActorEvent dispatches events related to actor lifecycle.
+     */
+    dispatchActorEvent(thread: Thread, type: EventType) {
+        let Cons = eventMap.actor.get(type);
+        if (Cons) this.dispatch(thread, new Cons(thread.address));
     }
 
     /**
      * dispatchMessageEvent dispatches events related to message sending.
      */
     dispatchMessageEvent(
+        from: Thread,
         type: EventType,
-        from: Address,
         to: Address,
         message: Message
     ) {
         let Cons = eventMap.message.get(type);
-        if (Cons) this.dispatch(new Cons(from, to, message));
+        if (Cons) this.dispatch(from, new Cons(from.address, to, message));
     }
 
     /**
-     * dispatchActorEvent dispatches events related to actor lifecycle.
+     * dispatch is a generic function that when called dispatchs the supplied
+     * event to all installed listeners.
      */
-    dispatchActorEvent(type: EventType, actor: Address) {
-        let Cons = eventMap.actor.get(type);
-        if (Cons) this.dispatch(new Cons(actor));
-    }
-
-    /**
-     * dispatch is a generic function that when called will create and dispatch
-     * the event the EventDispatcher is responsible for.
-     */
-    dispatch(event: events.InternalEvent) {
+    dispatch(thread: Thread, event: events.InternalEvent) {
         evaluate(this.log).writeEvent(event);
-        for (let handler of this.handlers.get(event.type) || []) handler(event);
+
+        let listeners = [
+            ...(this.maps.get(thread.address)?.get(event.type) ?? []),
+            ...(this.maps.get(ADDRESS_WILDCARD)?.get(event.type) ?? [])
+        ];
+
+        for (let listener of listeners) listener(event);
     }
 }

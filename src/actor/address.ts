@@ -37,8 +37,8 @@ export const make = (parent: Address, id: string): Address => {
     return parent === SEPERATOR || parent === ADDRESS_EMPTY
         ? `${parent}${id}`
         : parent === ADDRESS_SYSTEM
-        ? id
-        : `${parent}${SEPERATOR}${id}`;
+          ? id
+          : `${parent}${SEPERATOR}${id}`;
 };
 
 /**

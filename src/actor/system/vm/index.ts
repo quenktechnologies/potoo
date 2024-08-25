@@ -192,8 +192,8 @@ export class PVM implements VM {
         if (!empty(missing)) {
             for (let address of missing)
                 this.events.dispatchMessageEvent(
+                    from,
                     events.EVENT_MESSAGE_BOUNCE,
-                    from.address,
                     address,
                     msg
                 );
@@ -201,8 +201,8 @@ export class PVM implements VM {
 
         for (let thread of threads) {
             this.events.dispatchMessageEvent(
+                from,
                 events.EVENT_MESSGAE_SEND,
-                from.address,
                 to,
                 msg
             );
