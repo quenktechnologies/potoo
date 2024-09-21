@@ -14,7 +14,11 @@ import { Task } from '../../scheduler';
 import { Message } from '../../../..';
 import { VM } from '../../';
 import { SharedThread, ThreadState } from '.';
-import { EVENT_ACTOR_RECEIVE, EVENT_MESSAGE_DROPPED } from '../../event';
+import {
+    EVENT_ACTOR_RECEIVE,
+    EVENT_ACTOR_STOPPED,
+    EVENT_MESSAGE_DROPPED
+} from '../../event';
 
 const defaultCases = [new Default(identity)];
 
@@ -70,9 +74,9 @@ export class JSThread implements SharedThread {
     }
 
     die() {
-        // TODO: dispatch event
         this.state = ThreadState.INVALID;
         this.vm.scheduler.removeTasks(this);
+        this.vm.events.dispatchActorEvent(this, EVENT_ACTOR_STOPPED);
     }
 
     /**

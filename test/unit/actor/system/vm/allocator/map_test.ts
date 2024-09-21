@@ -15,6 +15,7 @@ import { JSThread } from '../../../../../../lib/actor/system/vm/thread/shared/js
 import { Thread } from '../../../../../../lib/actor/system/vm/thread';
 import { GroupMap } from '../../../../../../lib/actor/system/vm/group';
 import { ADDRESS_SYSTEM } from '../../../../../../lib/actor/address';
+import { EventDispatcher } from '../../../../../../lib/actor/system/vm/event/dispatcher';
 
 describe('MapAllocator', () => {
     let mockGroups = mockDeep<GroupMap>();
@@ -30,6 +31,12 @@ describe('MapAllocator', () => {
     platform.runTask.mockImplementation((_: Thread, t: () => Promise<void>) =>
         t()
     );
+
+    let events = mockDeep<EventDispatcher>();
+
+    events.monitor.mockImplementation(async () => {});
+
+    platform.events = events;
 
     let getPlatform = () => platform;
 
@@ -134,6 +141,8 @@ describe('MapAllocator', () => {
             expect(entry.parent.get()).toBe(parentEntry);
 
             expect(addr).toBe('/test');
+
+            expect(events.monitor).toBeCalledTimes(1);
         });
 
         it('should auto assign an id if non specified', async () => {

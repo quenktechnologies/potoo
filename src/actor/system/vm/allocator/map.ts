@@ -7,6 +7,7 @@ import { evaluate, Lazy } from '@quenk/noni/lib/data/lazy';
 
 import { Address, isRestricted, make } from '../../../address';
 import {
+    spawnConcern2Event,
     SharedCreateTemplate,
     SharedRunTemplate,
     Template
@@ -161,6 +162,11 @@ export class MapAllocator implements Allocator {
 
         if (template.group) platform.groups.enroll(address, template.group);
 
+        let concernPromise = platform.events.monitor(
+            thread,
+            spawnConcern2Event(template.spawnConcern)
+        );
+
         platform.events.dispatchActorEvent(thread, EVENT_ACTOR_ALLOCATED);
 
         platform.runTask(thread, async () => {
@@ -173,6 +179,8 @@ export class MapAllocator implements Allocator {
                 await this.deallocate(thread);
             }
         });
+
+        await concernPromise;
 
         return address;
     }

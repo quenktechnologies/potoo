@@ -130,6 +130,40 @@ describe('EventDispatcher', () => {
         });
     });
 
+    describe('monitor', () => {
+        it('should block for the event', async () => {
+            let dispatcher = new EventDispatcher(log);
+
+            let event = { type: 'test', level: 1, source: '/' };
+
+            setTimeout(() => {
+                dispatcher.dispatch(mockDeep<Thread>({ address: '/' }), event);
+            });
+
+            let received = await dispatcher.monitor('/', 'test');
+
+            expect(received).toBe(event);
+        });
+
+        it('should reject if the actor stopped', () => {
+            let dispatcher = new EventDispatcher(log);
+
+            let event = { type: 'test', level: 1, source: '/' };
+
+            let thread = mockDeep<Thread>({ address: '/' });
+
+            let promise = dispatcher.monitor(thread, 'test');
+
+            expect(dispatcher.maps.entries()).toHaveLength(1);
+
+            dispatcher.dispatchActorEvent(thread, EVENT_ACTOR_STOPPED);
+
+            expect(dispatcher.maps.entries()).toHaveLength(0);
+
+            expect(promise).rejects.toThrowError('ERR_ACTOR_STOPPED');
+        });
+    });
+
     describe('removeListener', () => {
         it('should remove the type listener', () => {
             let listener = jest.fn();

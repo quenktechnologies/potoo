@@ -16,6 +16,7 @@ const eventMap = {
     actor: new Map([
         [events.EVENT_ACTOR_ALLOCATED, events.ActorAllocatedEvent],
         [events.EVENT_ACTOR_STARTED, events.ActorStartedEvent],
+        [events.EVENT_ACTOR_RECEIVE, events.ActorReceiveEvent],
         [events.EVENT_ACTOR_STOPPED, events.ActorStoppedEvent],
         [events.EVENT_ACTOR_DEALLOCATED, events.ActorDeallocatedEvent]
     ])
@@ -65,23 +66,6 @@ export class EventDispatcher {
     }
 
     /**
-     * waitListener blocks the caller until the next occurrence of the event
-     * type for the target actor.
-     */
-    async waitListener(
-        actor: Address,
-        type: EventType
-    ): Promise<InternalEvent> {
-        return new Promise(resolve => {
-            let listener = (e: InternalEvent) => {
-                this.removeListener(actor, type, listener);
-                resolve(e);
-            };
-            this.addListener(actor, type, listener);
-        });
-    }
-
-    /**
      * removeListener removes a previously installed listener.
      */
     removeListener(actor: Address, type: EventType, listener: Listener) {
@@ -95,6 +79,42 @@ export class EventDispatcher {
                 );
             }
         }
+    }
+
+    /**
+     * monitor a Thread waiting for a specific event to occur.
+     *
+     * Where the event is not of type EVENT_ACTOR_STOPPED, the returned promise
+     * will reject when the thread stops. This prevents the promise from blocking
+     * forever when the actor is killed or runs into an error.
+     */
+    async monitor(thread: Thread, type: events.EventType) {
+        return new Promise<events.InternalEvent>((resolve, reject) => {
+            let handler = (event: events.InternalEvent) => {
+                this.removeListener(
+                    thread.address,
+                    events.EVENT_ACTOR_STOPPED,
+                    handler
+                );
+
+                this.removeListener(thread.address, type, handler);
+
+                if (event.type === type) {
+                    resolve(event);
+                } else if (event.type === events.EVENT_ACTOR_STOPPED) {
+                    reject(new Error('ERR_ACTOR_STOPPED'));
+                }
+            };
+
+            if (type !== events.EVENT_ACTOR_STOPPED)
+                this.addListener(
+                    thread.address,
+                    events.EVENT_ACTOR_STOPPED,
+                    handler
+                );
+
+            this.addListener(thread.address, type, handler);
+        });
     }
 
     /**

@@ -1,9 +1,17 @@
 import { Path } from '@quenk/noni/lib/data/record/path';
+import { Record } from '@quenk/noni/lib/data/record';
 import { Err } from '@quenk/noni/lib/control/error';
 import { isFunction, isString } from '@quenk/noni/lib/data/type';
 
 import { Runtime } from './system/vm/runtime';
 import { Actor } from './';
+import {
+    EventType,
+    EVENT_ACTOR_ALLOCATED,
+    EVENT_ACTOR_RECEIVE,
+    EVENT_ACTOR_STARTED,
+    EVENT_ACTOR_STOPPED
+} from './system/vm/event';
 
 export const ACTION_RAISE = -0x1;
 export const ACTION_IGNORE = 0x0;
@@ -36,6 +44,11 @@ export type TrapFunc = (e: Err) => TrapAction;
 export type TrapAction = -0x1 | 0x0 | 0x1 | 0x2;
 
 /**
+ * SpawnConcernLevel is one of the CONCERN_LEVEL_* constants.
+ */
+export type SpawnConcernLevel = string;
+
+/**
  * BaseTemplate holds the common properties for all templates.
  */
 export interface BaseTemplate {
@@ -64,6 +77,14 @@ export interface BaseTemplate {
      * address but received by multiple actors.
      */
     group?: string | string[];
+
+    /**
+     * spawnConcern indicates which event from the actor should be waited
+     * on before the parent considers it spawned.
+     *
+     * If not specified, the default is to wait for the allocated event.
+     */
+    spawnConcern?: SpawnConcernLevel;
 
     /**
      * trap is called when unhandled errors are detected.
@@ -168,3 +189,22 @@ export const fromSpawnable = (tmpl: Spawnable): Template => {
         return tmpl;
     }
 };
+
+export const SPAWN_CONCERN_ALLOCATED = 'allocated';
+export const SPAWN_CONCERN_STARTED = 'started';
+export const SPAWN_CONCERN_RECEIVING = 'receiving';
+export const SPAWN_CONCERN_STOPPED = 'stopped';
+
+const spawnConcerns: Record<EventType> = {
+    [SPAWN_CONCERN_ALLOCATED]: EVENT_ACTOR_ALLOCATED,
+    [SPAWN_CONCERN_STARTED]: EVENT_ACTOR_STARTED,
+    [SPAWN_CONCERN_RECEIVING]: EVENT_ACTOR_RECEIVE,
+    [SPAWN_CONCERN_STOPPED]: EVENT_ACTOR_STOPPED
+};
+
+/**
+ * spawnConcern2Event converts a SpawnConcernLevel to an EventType.
+ */
+export const spawnConcern2Event = (
+    level: SpawnConcernLevel = 'allocated'
+): EventType => spawnConcerns[level] ?? EVENT_ACTOR_ALLOCATED;
