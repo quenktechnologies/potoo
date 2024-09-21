@@ -16,6 +16,7 @@ import { Thread } from '../../../../../../lib/actor/system/vm/thread';
 import { GroupMap } from '../../../../../../lib/actor/system/vm/group';
 import { ADDRESS_SYSTEM } from '../../../../../../lib/actor/address';
 import { EventDispatcher } from '../../../../../../lib/actor/system/vm/event/dispatcher';
+import { LogLevelValue } from '../../../../../../lib/actor/system/vm/log';
 
 describe('MapAllocator', () => {
     let mockGroups = mockDeep<GroupMap>();
@@ -34,7 +35,11 @@ describe('MapAllocator', () => {
 
     let events = mockDeep<EventDispatcher>();
 
-    events.monitor.mockImplementation(async () => {});
+    events.monitor.mockImplementation(async () => ({
+        type: 'test',
+        level: LogLevelValue.debug,
+        source: '/'
+    }));
 
     platform.events = events;
 

@@ -72,12 +72,15 @@ export class EventDispatcher {
         let target = this.maps.get(actor);
         if (target) {
             let listeners = target.get(type);
+
             if (listeners) {
-                target.set(
-                    type,
-                    listeners.filter(target => target !== listener)
+                let newListeners = listeners.filter(
+                    target => target !== listener
                 );
+                if (newListeners.length === 0) target.delete(type);
+                else target.set(type, newListeners);
             }
+            if (target.size === 0) this.maps.delete(actor);
         }
     }
 

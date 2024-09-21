@@ -136,31 +136,31 @@ describe('EventDispatcher', () => {
 
             let event = { type: 'test', level: 1, source: '/' };
 
+            let thread = mockDeep<Thread>({ address: '/' });
+
             setTimeout(() => {
-                dispatcher.dispatch(mockDeep<Thread>({ address: '/' }), event);
+                dispatcher.dispatch(thread, event);
             });
 
-            let received = await dispatcher.monitor('/', 'test');
+            let received = await dispatcher.monitor(thread, 'test');
 
             expect(received).toBe(event);
         });
 
-        it('should reject if the actor stopped', () => {
+        it('should reject if the actor stopped', async () => {
             let dispatcher = new EventDispatcher(log);
-
-            let event = { type: 'test', level: 1, source: '/' };
 
             let thread = mockDeep<Thread>({ address: '/' });
 
-            let promise = dispatcher.monitor(thread, 'test');
+            setTimeout(() =>
+                dispatcher.dispatchActorEvent(thread, EVENT_ACTOR_STOPPED)
+            );
 
-            expect(dispatcher.maps.entries()).toHaveLength(1);
+            await expect(
+                dispatcher.monitor(thread, 'test')
+            ).rejects.toThrowError('ERR_ACTOR_STOPPED');
 
-            dispatcher.dispatchActorEvent(thread, EVENT_ACTOR_STOPPED);
-
-            expect(dispatcher.maps.entries()).toHaveLength(0);
-
-            expect(promise).rejects.toThrowError('ERR_ACTOR_STOPPED');
+            expect(dispatcher.maps.get('/')).toBeUndefined();
         });
     });
 
@@ -192,7 +192,7 @@ describe('EventDispatcher', () => {
 
             expect(
                 (<ListenerMap>dispatcher.maps.get('a')).get('test')
-            ).not.toContain(listener);
+            ).toBeUndefined();
             expect(
                 (<ListenerMap>dispatcher.maps.get('a')).get('test1')
             ).toContain(listener);
