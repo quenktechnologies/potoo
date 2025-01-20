@@ -170,9 +170,9 @@ export class MapAllocator implements Allocator {
         platform.events.dispatchActorEvent(thread, EVENT_ACTOR_ALLOCATED);
 
         platform.runTask(thread, async () => {
-            platform.events.dispatchActorEvent(thread, EVENT_ACTOR_STARTED);
-
             await actor.start();
+
+            platform.events.dispatchActorEvent(thread, EVENT_ACTOR_STARTED);
 
             if ((<SharedRunTemplate>template).run) {
                 await (<SharedRunTemplate>template).run(<JSThread>thread);
