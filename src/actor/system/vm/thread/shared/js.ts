@@ -8,7 +8,7 @@ import {
 } from '@quenk/noni/lib/control/match/case';
 import { identity } from '@quenk/noni/lib/data/function';
 
-import { Template } from '../../../../template';
+import { fromSpawnable, Spawnable } from '../../../../template';
 import { Address, ADDRESS_DISCARD } from '../../../../address';
 import { Task } from '../../scheduler';
 import { Message } from '../../../..';
@@ -93,12 +93,15 @@ export class JSThread implements SharedThread {
         await this.vm.errors.raise(this, e);
     }
 
-    async spawn(tmpl: Template): Promise<Address> {
+    async spawn(tmpl: Spawnable): Promise<Address> {
         this._assertValid();
         let result = await Future.fromCallback<Address>(cb => {
             this.vm.scheduler.postTask(
                 new Task(this, cb, async () => {
-                    let address = await this.vm.allocator.allocate(this, tmpl);
+                    let address = await this.vm.allocator.allocate(
+                        this,
+                        fromSpawnable(tmpl)
+                    );
                     cb(null, address);
                 })
             );
