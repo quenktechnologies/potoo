@@ -8,7 +8,7 @@ import {
 } from '@quenk/noni/lib/control/match/case';
 import { identity } from '@quenk/noni/lib/data/function';
 
-import { fromSpawnable, Spawnable } from '../../../../template';
+import { fromSpawnable, Spawnable, Template } from '../../../../template';
 import { Address, ADDRESS_DISCARD } from '../../../../address';
 import { Task } from '../../scheduler';
 import { Message } from '../../../..';
@@ -30,6 +30,7 @@ export const ERR_THREAD_INVALID = 'ERR_THREAD_INVALID';
 export class JSThread implements SharedThread {
     constructor(
         public vm: VM,
+        public template: Template,
         public address: Address,
         public mailbox: Message[] = [],
         public state: ThreadState = ThreadState.IDLE
@@ -76,7 +77,11 @@ export class JSThread implements SharedThread {
     die() {
         this.state = ThreadState.INVALID;
         this.vm.scheduler.removeTasks(this);
-        this.vm.events.dispatchActorEvent(this, EVENT_ACTOR_STOPPED);
+        this.vm.events.dispatchActorEvent(
+            this.address,
+            this.address,
+            EVENT_ACTOR_STOPPED
+        );
     }
 
     /**
@@ -124,7 +129,11 @@ export class JSThread implements SharedThread {
     async receive<T = Message>(cases: Case<Message, T>[] = []): Promise<T> {
         this._assertValid();
         let msg = await Future.fromCallback<T>(cb => {
-            this.vm.events.dispatchActorEvent(this, EVENT_ACTOR_RECEIVE);
+            this.vm.events.dispatchActorEvent(
+                this.address,
+                this.address,
+                EVENT_ACTOR_RECEIVE
+            );
             let matcher = new CaseFunction(empty(cases) ? defaultCases : cases);
             let task = new Task(this, cb, async () => {
                 this._assertValid();
@@ -138,7 +147,7 @@ export class JSThread implements SharedThread {
                         return cb(null, result);
                     }
                     this.vm.events.dispatchMessageEvent(
-                        this,
+                        this.address,
                         EVENT_MESSAGE_DROPPED,
                         ADDRESS_DISCARD,
                         msg

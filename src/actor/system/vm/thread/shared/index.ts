@@ -1,5 +1,6 @@
 import { Err } from '@quenk/noni/lib/control/error';
 
+import { Template } from '../../../../template';
 import { Thread } from '../';
 
 export const THREAD_STATE_IDLE = 0;
@@ -31,6 +32,11 @@ export const ERR_THREAD_INVALID = 'ERR_THREAD_INVALID';
  * via the Scheduler.
  */
 export interface SharedThread extends Thread {
+    /**
+     * template used to create the Thread,
+     */
+    template: Template;
+
     /**
      * state of the Thread.
      *
