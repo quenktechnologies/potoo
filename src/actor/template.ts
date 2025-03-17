@@ -1,17 +1,9 @@
 import { Path } from '@quenk/noni/lib/data/record/path';
-import { Record } from '@quenk/noni/lib/data/record';
 import { Err } from '@quenk/noni/lib/control/error';
 import { isFunction, isString } from '@quenk/noni/lib/data/type';
 
 import { Runtime } from './system/vm/runtime';
 import { Actor } from './';
-import {
-    EventType,
-    EVENT_ACTOR_ALLOCATED,
-    EVENT_ACTOR_RECEIVE,
-    EVENT_ACTOR_STARTED,
-    EVENT_ACTOR_STOPPED
-} from './system/vm/event';
 
 export const ACTION_RAISE = -0x1;
 export const ACTION_IGNORE = 0x0;
@@ -194,17 +186,3 @@ export const SPAWN_CONCERN_ALLOCATED = 'allocated';
 export const SPAWN_CONCERN_STARTED = 'started';
 export const SPAWN_CONCERN_RECEIVING = 'receiving';
 export const SPAWN_CONCERN_STOPPED = 'stopped';
-
-const spawnConcerns: Record<EventType> = {
-    [SPAWN_CONCERN_ALLOCATED]: EVENT_ACTOR_ALLOCATED,
-    [SPAWN_CONCERN_STARTED]: EVENT_ACTOR_STARTED,
-    [SPAWN_CONCERN_RECEIVING]: EVENT_ACTOR_RECEIVE,
-    [SPAWN_CONCERN_STOPPED]: EVENT_ACTOR_STOPPED
-};
-
-/**
- * spawnConcern2Event converts a SpawnConcernLevel to an EventType.
- */
-export const spawnConcern2Event = (
-    level: SpawnConcernLevel = 'allocated'
-): EventType => spawnConcerns[level] ?? EVENT_ACTOR_ALLOCATED;

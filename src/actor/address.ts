@@ -30,7 +30,7 @@ export const isRestricted = (id: string) =>
     ADDRESS_RESTRICTED.some(a => id.indexOf(a) > -1) && id !== SEPERATOR;
 
 /**
- * make a child address given its id and parent address.
+ * make a childaddress given its id and parent address.
  */
 export const make = (parent: Address, id: string): Address => {
     id = id.trim();
@@ -64,6 +64,12 @@ export const getParent = (addr: Address): Address => {
         }
     }
 };
+
+/**
+ * isRootLevel tests whether an address is a child of the root actor.
+ */
+export const isRootLevel = (addr: Address): boolean =>
+    getParent(addr) === ADDRESS_SYSTEM;
 
 /**
  * getId provides the id part of an actor address.

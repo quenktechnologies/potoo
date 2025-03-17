@@ -24,6 +24,6 @@ export class ThreadFactory {
                 (<ProcessTemplate>template).script
             );
 
-        return new JSThread(vm, address);
+        return new JSThread(vm, template, address);
     }
 }

@@ -95,7 +95,7 @@ export class MessageDropEvent extends MessageEvent {
 }
 
 /**
- * ActorEvent are events related toe the lifecycle of an actor.
+ * ActorEvent are events related to the lifecycle of an actor.
  */
 export abstract class ActorEvent extends VMEvent {
     level = LogLevelValue.info;

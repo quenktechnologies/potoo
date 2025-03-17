@@ -27,7 +27,7 @@ export const ADDRESS_WILDCARD = '*';
 /**
  * Listener is the signature of functions that receive VM events.
  */
-export type Listener = (event: InternalEvent) => void;
+export type Listener = (event: InternalEvent) => Promise<void>;
 
 /**
  * ListenerMap maps event types to a list of listeners.
@@ -93,7 +93,7 @@ export class EventDispatcher {
      */
     async monitor(thread: Thread, type: events.EventType) {
         return new Promise<events.InternalEvent>((resolve, reject) => {
-            let handler = (event: events.InternalEvent) => {
+            let handler = async (event: events.InternalEvent) => {
                 this.removeListener(
                     thread.address,
                     events.EVENT_ACTOR_STOPPED,
@@ -105,7 +105,11 @@ export class EventDispatcher {
                 if (event.type === type) {
                     resolve(event);
                 } else if (event.type === events.EVENT_ACTOR_STOPPED) {
-                    reject(new Error('ERR_ACTOR_STOPPED'));
+                    reject(
+                        new Error(
+                            `[${thread.address}]: ERR_MONITOR_ACTOR_STOPPED`
+                        )
+                    );
                 }
             };
 
@@ -123,36 +127,34 @@ export class EventDispatcher {
     /**
      * dispatchActorEvent dispatches events related to actor lifecycle.
      */
-    dispatchActorEvent(thread: Thread, type: EventType) {
+    async dispatchActorEvent(target: Address, actor: Address, type: EventType) {
         let Cons = eventMap.actor.get(type);
-        if (Cons) this.dispatch(thread, new Cons(thread.address));
+        if (Cons) return this.dispatch(target, new Cons(actor));
     }
 
     /**
      * dispatchMessageEvent dispatches events related to message sending.
      */
-    dispatchMessageEvent(
-        from: Thread,
+    async dispatchMessageEvent(
+        from: Address,
         type: EventType,
         to: Address,
         message: Message
     ) {
         let Cons = eventMap.message.get(type);
-        if (Cons) this.dispatch(from, new Cons(from.address, to, message));
+        if (Cons) return this.dispatch(from, new Cons(from, to, message));
     }
 
     /**
      * dispatch is a generic function that when called dispatchs the supplied
      * event to all installed listeners.
      */
-    dispatch(thread: Thread, event: events.InternalEvent) {
+    async dispatch(target: Address, event: events.InternalEvent) {
         evaluate(this.log).writeEvent(event);
-
         let listeners = [
-            ...(this.maps.get(thread.address)?.get(event.type) ?? []),
+            ...(this.maps.get(target)?.get(event.type) ?? []),
             ...(this.maps.get(ADDRESS_WILDCARD)?.get(event.type) ?? [])
         ];
-
-        for (let listener of listeners) listener(event);
+        for (let listener of listeners) await listener(event);
     }
 }

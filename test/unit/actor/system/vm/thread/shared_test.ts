@@ -23,6 +23,7 @@ describe('shared', () => {
     let scheduler = mockDeep<Scheduler>();
     let errors = mockDeep<ErrorStrategy>();
     let allocator = mockDeep<Allocator>();
+    let template = { id: 'test', create: () => mockDeep<JSThread>() };
     platform.scheduler = scheduler;
     platform.errors = errors;
     platform.allocator = allocator;
@@ -37,7 +38,7 @@ describe('shared', () => {
 
     describe('notify', () => {
         it('should enqueue new messages', () => {
-            let thread = new JSThread(platform, '/');
+            let thread = new JSThread(platform, template, '/');
             thread.notify('1');
             thread.notify('2');
             thread.notify('3');
@@ -49,7 +50,13 @@ describe('shared', () => {
         });
 
         it('should move from MSG_WAIT to IDLE', () => {
-            let thread = new JSThread(platform, '/', [], ThreadState.MSG_WAIT);
+            let thread = new JSThread(
+                platform,
+                template,
+                '/',
+                [],
+                ThreadState.MSG_WAIT
+            );
             thread.notify('1');
             expect(thread.state).toBe(ThreadState.IDLE);
         });
@@ -57,7 +64,7 @@ describe('shared', () => {
 
     describe('watch', () => {
         it('should work with async functions', async () => {
-            let thread = new JSThread(platform, '/');
+            let thread = new JSThread(platform, template, '/');
 
             let value = 0;
 
@@ -79,7 +86,7 @@ describe('shared', () => {
                 () => Promise.reject(error),
                 () => Future.raise(error)
             ]) {
-                let thread = new JSThread(platform, '/');
+                let thread = new JSThread(platform, template, '/');
                 let threadReceived;
                 let errorReceived;
 
@@ -101,7 +108,7 @@ describe('shared', () => {
 
     describe('kill', () => {
         it('should kill the thread', async () => {
-            let thread = new JSThread(platform, '/');
+            let thread = new JSThread(platform, template, '/');
             let threadReceived;
             let targetReceived;
 
@@ -122,7 +129,7 @@ describe('shared', () => {
 
     describe('raise', () => {
         it('should raise an error', async () => {
-            let thread = new JSThread(platform, '/');
+            let thread = new JSThread(platform, template, '/');
             let threadReceived;
             let errorReceived;
 
@@ -144,7 +151,7 @@ describe('shared', () => {
     describe('spawn', () => {
         it('should allocate from a template', async () => {
             //TODO: enable test after template refactor.
-            let thread = new JSThread(platform, '/');
+            let thread = new JSThread(platform, template, '/');
 
             let tmpl = { id: 'child', create: identity };
 
@@ -160,7 +167,7 @@ describe('shared', () => {
 
     describe('tell', () => {
         it('should send a message ', async () => {
-            let thread = new JSThread(platform, '/');
+            let thread = new JSThread(platform, template, '/');
 
             await thread.tell('/foo', 'hello');
 
@@ -174,7 +181,7 @@ describe('shared', () => {
 
     describe('receive', () => {
         it('should provide messages from the mailbox', async () => {
-            let thread = new JSThread(platform, '/');
+            let thread = new JSThread(platform, template, '/');
 
             thread.mailbox.push('hello');
 
@@ -186,7 +193,7 @@ describe('shared', () => {
         });
 
         it('should MSG_WAIT if there are no messages', async () => {
-            let thread = new JSThread(platform, '/');
+            let thread = new JSThread(platform, template, '/');
 
             thread.receive();
 
@@ -204,7 +211,7 @@ describe('shared', () => {
 
     describe('resume', () => {
         it('should make the thread idle', () => {
-            let thread = new JSThread(platform, '/');
+            let thread = new JSThread(platform, template, '/');
             thread.state = ThreadState.MSG_WAIT;
             thread.resume();
             expect(thread.state).toBe(ThreadState.IDLE);
@@ -215,7 +222,7 @@ describe('shared', () => {
         it('should reject when the thread is invalid', () => {
             let childActor = mockDeep<Actor>();
 
-            let thread = new JSThread(platform, '/');
+            let thread = new JSThread(platform, template, '/');
             thread.state = ThreadState.INVALID;
 
             for (let func of [

@@ -7,7 +7,13 @@ import { Future } from '@quenk/noni/lib/control/monad/future';
 import { diff, empty } from '@quenk/noni/lib/data/array';
 import { merge } from '@quenk/noni/lib/data/record';
 
-import { Address, ADDRESS_SYSTEM, isChild, isGroup } from '../../address';
+import {
+    Address,
+    ADDRESS_SYSTEM,
+    isChild,
+    isGroup,
+    isRootLevel
+} from '../../address';
 import { fromSpawnable } from '../../template';
 import { Actor, Message } from '../../';
 import { MapAllocator } from './allocator/map';
@@ -15,13 +21,14 @@ import { ErrorStrategy, SupervisorErrorStrategy } from './strategy/error';
 import { Thread } from './thread';
 import { GroupMap } from './group';
 import { Scheduler } from './scheduler';
-import { RegistrySet } from './registry';
 import { Allocator } from './allocator';
 import { Api } from '../../api';
 import { LogWritable, LogWriter } from './log/writer';
 import { EventDispatcher } from './event/dispatcher';
+import { ThreadRunner } from './thread/runner';
 import { Conf, PartialConf } from './conf';
 import { toLogLevelValue } from './log';
+import { ThreadCollector } from './thread/collector';
 
 /**
  * VM is the interface for a virtual machine.
@@ -36,9 +43,19 @@ export interface VM extends Actor, Thread, Api {
     allocator: Allocator;
 
     /**
+     * runner used to start up threads.
+     */
+    runner: ThreadRunner;
+
+    /**
      * scheduler used for co-ordinating actor thread execution.
      */
     scheduler: Scheduler;
+
+    /**
+     * collector used to remove dead actor threads.
+     */
+    collector: ThreadCollector;
 
     /**
      * errors strategy used to handle errors that occur within the system.
@@ -60,11 +77,6 @@ export interface VM extends Actor, Thread, Api {
     events: EventDispatcher;
 
     /**
-     * registry used to store internal VM objects.
-     */
-    registry: RegistrySet;
-
-    /**
      * groups holds the mapping of group names to actor addresses.
      */
     groups: GroupMap;
@@ -74,7 +86,7 @@ export interface VM extends Actor, Thread, Api {
      *
      * This is used by the threads to communicate.
      */
-    sendMessage(from: Thread, to: Address, msg: Message): void;
+    sendMessage(from: Thread, to: Address, msg: Message): Promise<void>;
 
     /**
      * sendKillSignal initiates the deallocation of the actor at the
@@ -104,10 +116,11 @@ export class PVM implements VM {
     constructor(
         public allocator: Allocator = new MapAllocator(() => this),
         public scheduler: Scheduler = new Scheduler(),
+        public collector: ThreadCollector = new ThreadCollector(() => this),
         public errors: ErrorStrategy = new SupervisorErrorStrategy(allocator),
         public log: LogWritable = new LogWriter(console),
         public events = new EventDispatcher(log),
-        public registry = new RegistrySet(),
+        public runner: ThreadRunner = new ThreadRunner(() => this),
         public groups: GroupMap = new GroupMap(),
         public address = ADDRESS_SYSTEM,
         public self = ADDRESS_SYSTEM
@@ -132,10 +145,11 @@ export class PVM implements VM {
         vm = new PVM(
             allocator,
             new Scheduler(),
+            new ThreadCollector(() => vm),
             new SupervisorErrorStrategy(allocator),
             log,
             new EventDispatcher(log),
-            new RegistrySet(),
+            new ThreadRunner(() => vm),
             new GroupMap()
         );
         return vm;
@@ -148,8 +162,13 @@ export class PVM implements VM {
     //TODO: events.OnRootMessage.dispatch();
     async notify() {}
 
-    //TODO: stop all actors?
-    async stop() {}
+    async stop() {
+        let threads = this.allocator.getThreads();
+        for (let thread of threads) {
+            if (isRootLevel(thread.address))
+                await this.allocator.deallocate(thread);
+        }
+    }
 
     // Api
 
@@ -179,7 +198,7 @@ export class PVM implements VM {
 
     // Platform
 
-    sendMessage(from: Thread, to: Address, msg: Message) {
+    async sendMessage(from: Thread, to: Address, msg: Message) {
         let targets = isGroup(to) ? this.groups.getMembers(to) : [to];
 
         let threads = this.allocator.getThreads(targets);
@@ -191,8 +210,8 @@ export class PVM implements VM {
 
         if (!empty(missing)) {
             for (let address of missing)
-                this.events.dispatchMessageEvent(
-                    from,
+                await this.events.dispatchMessageEvent(
+                    from.address,
                     events.EVENT_MESSAGE_BOUNCE,
                     address,
                     msg
@@ -200,8 +219,8 @@ export class PVM implements VM {
         }
 
         for (let thread of threads) {
-            this.events.dispatchMessageEvent(
-                from,
+            await this.events.dispatchMessageEvent(
+                from.address,
                 events.EVENT_MESSGAE_SEND,
                 to,
                 msg

@@ -6,16 +6,10 @@ import { distribute, empty } from '@quenk/noni/lib/data/array';
 import { evaluate, Lazy } from '@quenk/noni/lib/data/lazy';
 
 import { Address, isRestricted, make } from '../../../address';
-import {
-    spawnConcern2Event,
-    SharedCreateTemplate,
-    SharedRunTemplate,
-    Template
-} from '../../../template';
+import { SharedCreateTemplate, Template } from '../../../template';
 import {
     EVENT_ACTOR_ALLOCATED,
     EVENT_ACTOR_DEALLOCATED,
-    EVENT_ACTOR_STARTED,
     EVENT_ACTOR_STOPPED
 } from '../event';
 import { ThreadFactory } from '../thread/factory';
@@ -95,9 +89,12 @@ export class MapAllocator implements Allocator {
         return Maybe.nothing();
     }
 
-    getThreads(targets: Address[]): Thread[] {
+    getThreads(targets?: Address[]): Thread[] {
+        let values = this.actors.values();
+        if (!targets) return Array.from(values).map(entry => entry.thread);
         let hits = [];
-        for (let entry of this.actors.values()) {
+
+        for (let entry of values) {
             if (targets.includes(entry.address)) hits.push(entry.thread);
         }
         return hits;
@@ -107,6 +104,14 @@ export class MapAllocator implements Allocator {
         return Maybe.fromNullable(this.actors.get(address)).map(
             (entry: ActorTableEntry) => entry.template
         );
+    }
+
+    getChildren(parent: Thread): Thread[] {
+        let mentry = this.getEntry(parent);
+
+        if (mentry.isNothing()) return [];
+
+        return mentry.get().children.map(entry => entry.thread);
     }
 
     async allocate(parent: Thread, template: Template): Promise<Address> {
@@ -162,23 +167,20 @@ export class MapAllocator implements Allocator {
 
         if (template.group) platform.groups.enroll(address, template.group);
 
-        let concernPromise = platform.events.monitor(
+        let concernPromise = platform.runner.waitForConcern(
+            parent,
             thread,
-            spawnConcern2Event(template.spawnConcern)
+            template.spawnConcern
         );
 
-        platform.events.dispatchActorEvent(thread, EVENT_ACTOR_ALLOCATED);
+        await platform.events.dispatchActorEvent(
+            parent.address,
+            thread.address,
+            EVENT_ACTOR_ALLOCATED
+        );
 
-        platform.runTask(thread, async () => {
-            await actor.start();
-
-            platform.events.dispatchActorEvent(thread, EVENT_ACTOR_STARTED);
-
-            if ((<SharedRunTemplate>template).run) {
-                await (<SharedRunTemplate>template).run(<JSThread>thread);
-                await this.deallocate(thread);
-            }
-        });
+        //NOTE: unhandled promise
+        platform.runner.runThread(template, thread);
 
         await concernPromise;
 
@@ -222,40 +224,49 @@ export class MapAllocator implements Allocator {
         let pending = entry.children.slice();
 
         while (!empty(pending)) {
-            let target = <ActorTableEntry>pending.shift();
+            let current = <ActorTableEntry>pending.shift(); //TODO, do not use shift(), slow
 
-            pending = [...pending, ...target.children];
+            pending = [...pending, ...current.children];
 
-            targets.unshift(target);
+            targets.unshift(current); //TODO: do not use unshift(), slow
         }
 
-        let platform = evaluate(this.platform);
+        let { events, collector, groups } = evaluate(this.platform);
 
         await Future.batch(
             distribute(
-                targets.map(target =>
+                targets.map(current =>
                     Future.do(async () => {
-                        await target.actor.stop();
+                        await current.actor.stop();
 
-                        await target.thread.stop();
+                        await current.thread.stop();
 
-                        platform.events.dispatchActorEvent(
-                            target.thread,
+                        await collector.unmark(current.thread);
+
+                        await events.dispatchActorEvent(
+                            current.thread.address,
+                            current.thread.address,
                             EVENT_ACTOR_STOPPED
                         );
 
-                        platform.groups.unenroll(target.address);
+                        groups.unenroll(current.address);
 
-                        this.actors.delete(target.address);
+                        this.actors.delete(current.address);
 
-                        platform.events.dispatchActorEvent(
-                            target.thread,
-                            EVENT_ACTOR_DEALLOCATED
-                        );
+                        if (current.parent.isJust())
+                            await events.dispatchActorEvent(
+                                current.parent.get().thread.address,
+                                current.thread.address,
+                                EVENT_ACTOR_DEALLOCATED
+                            );
                     })
                 ),
                 MAX_THREAD_KILL_PER_CYCLE
             )
         );
+
+        // Clean up parent function actors.
+        if (entry.parent.isJust())
+            await collector.collect(entry.parent.get().thread);
     }
 }

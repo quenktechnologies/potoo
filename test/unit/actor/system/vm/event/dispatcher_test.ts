@@ -28,10 +28,7 @@ const dispatchTests = {
             type: EVENT_ACTOR_ALLOCATED,
 
             dispatch: (dispatcher: EventDispatcher) => {
-                dispatcher.dispatchActorEvent(
-                    mockDeep<Thread>({ address: 'a' }),
-                    EVENT_ACTOR_ALLOCATED
-                );
+                dispatcher.dispatchActorEvent('a', 'a', EVENT_ACTOR_ALLOCATED);
             },
 
             event: new ActorAllocatedEvent('a')
@@ -41,10 +38,7 @@ const dispatchTests = {
             type: EVENT_ACTOR_STARTED,
 
             dispatch: (dispatcher: EventDispatcher) => {
-                dispatcher.dispatchActorEvent(
-                    mockDeep<Thread>({ address: 'a' }),
-                    EVENT_ACTOR_STARTED
-                );
+                dispatcher.dispatchActorEvent('a', 'a', EVENT_ACTOR_STARTED);
             },
 
             event: new ActorStartedEvent('a')
@@ -53,10 +47,7 @@ const dispatchTests = {
             type: EVENT_ACTOR_STOPPED,
 
             dispatch: (dispatcher: EventDispatcher) => {
-                dispatcher.dispatchActorEvent(
-                    mockDeep<Thread>({ address: 'a' }),
-                    EVENT_ACTOR_STOPPED
-                );
+                dispatcher.dispatchActorEvent('a', 'a', EVENT_ACTOR_STOPPED);
             },
 
             event: new ActorStoppedEvent('a')
@@ -67,7 +58,8 @@ const dispatchTests = {
 
             dispatch: (dispatcher: EventDispatcher) => {
                 dispatcher.dispatchActorEvent(
-                    mockDeep<Thread>({ address: 'a' }),
+                    'a',
+                    'a',
                     EVENT_ACTOR_DEALLOCATED
                 );
             },
@@ -81,7 +73,7 @@ const dispatchTests = {
 
             dispatch: (dispatcher: EventDispatcher) => {
                 dispatcher.dispatchMessageEvent(
-                    mockDeep<Thread>({ address: 'a' }),
+                    'a',
                     EVENT_MESSAGE_BOUNCE,
                     'b',
                     'message'
@@ -95,7 +87,7 @@ const dispatchTests = {
 
             dispatch: (dispatcher: EventDispatcher) => {
                 dispatcher.dispatchMessageEvent(
-                    mockDeep<Thread>({ address: 'a' }),
+                    'a',
                     EVENT_MESSGAE_SEND,
                     'b',
                     'message'
@@ -116,7 +108,7 @@ describe('EventDispatcher', () => {
 
     describe('addListener', () => {
         it('should store listeners actor addresses', () => {
-            let listener = jest.fn();
+            let listener = jest.fn(() => Promise.resolve());
 
             let dispatcher = new EventDispatcher(log);
 
@@ -138,11 +130,11 @@ describe('EventDispatcher', () => {
 
             let thread = mockDeep<Thread>({ address: '/' });
 
-            setTimeout(() => {
-                dispatcher.dispatch(thread, event);
-            });
+            let promise = dispatcher.monitor(thread, 'test');
 
-            let received = await dispatcher.monitor(thread, 'test');
+            await dispatcher.dispatch(thread.address, event);
+
+            let received = await promise;
 
             expect(received).toBe(event);
         });
@@ -152,13 +144,17 @@ describe('EventDispatcher', () => {
 
             let thread = mockDeep<Thread>({ address: '/' });
 
-            setTimeout(() =>
-                dispatcher.dispatchActorEvent(thread, EVENT_ACTOR_STOPPED)
+            let promise = dispatcher.monitor(thread, 'test');
+
+            await dispatcher.dispatchActorEvent(
+                thread.address,
+                thread.address,
+                EVENT_ACTOR_STOPPED
             );
 
-            await expect(
-                dispatcher.monitor(thread, 'test')
-            ).rejects.toThrowError('ERR_ACTOR_STOPPED');
+            await expect(promise).rejects.toThrowError(
+                'ERR_MONITOR_ACTOR_STOPPED'
+            );
 
             expect(dispatcher.maps.get('/')).toBeUndefined();
         });
@@ -166,7 +162,7 @@ describe('EventDispatcher', () => {
 
     describe('removeListener', () => {
         it('should remove the type listener', () => {
-            let listener = jest.fn();
+            let listener = jest.fn(() => Promise.resolve());
 
             let dispatcher = new EventDispatcher(
                 log,
@@ -206,8 +202,8 @@ describe('EventDispatcher', () => {
     });
 
     describe('dispatch', () => {
-        it('should dispatch events for a thread', () => {
-            let listener = jest.fn();
+        it('should dispatch events for a thread', async () => {
+            let listener = jest.fn(() => Promise.resolve());
 
             let dispatcher = new EventDispatcher(
                 log,
@@ -218,15 +214,15 @@ describe('EventDispatcher', () => {
 
             let thread = mockDeep<Thread>({ address: '/' });
 
-            dispatcher.dispatch(thread, event);
+            await dispatcher.dispatch(thread.address, event);
 
             expect(listener).toHaveBeenCalledWith(event);
         });
 
-        it('should not dispatch events for other threads', () => {
-            let listener = jest.fn();
+        it('should not dispatch events for other threads', async () => {
+            let listener = jest.fn(() => Promise.resolve());
 
-            let listener2 = jest.fn();
+            let listener2 = jest.fn(() => Promise.resolve());
 
             let dispatcher = new EventDispatcher(
                 log,
@@ -240,19 +236,19 @@ describe('EventDispatcher', () => {
 
             let thread = mockDeep<Thread>({ address: 'a' });
 
-            dispatcher.dispatch(thread, event);
+            await dispatcher.dispatch(thread.address, event);
 
             expect(listener).toHaveBeenCalledWith(event);
 
             expect(listener2).not.toHaveBeenCalled();
         });
 
-        it('should dispatch to wildcard address, listeners', () => {
-            let listener = jest.fn();
+        it('should dispatch to wildcard address, listeners', async () => {
+            let listener = jest.fn(() => Promise.resolve());
 
-            let listener2 = jest.fn();
+            let listener2 = jest.fn(() => Promise.resolve());
 
-            let listener3 = jest.fn();
+            let listener3 = jest.fn(() => Promise.resolve());
 
             let dispatcher = new EventDispatcher(
                 log,
@@ -267,7 +263,7 @@ describe('EventDispatcher', () => {
 
             let thread = mockDeep<Thread>({ address: 'a' });
 
-            dispatcher.dispatch(thread, event);
+            await dispatcher.dispatch(thread.address, event);
 
             expect(listener).toHaveBeenCalledWith(event);
 
@@ -280,15 +276,15 @@ describe('EventDispatcher', () => {
     for (let [suite, tests] of Object.entries(dispatchTests)) {
         describe(suite, () => {
             for (let [name, conf] of Object.entries(tests)) {
-                it(name, () => {
-                    let listener = jest.fn();
+                it(name, async () => {
+                    let listener = jest.fn(() => Promise.resolve());
 
                     let dispatcher = new EventDispatcher(
                         log,
                         new Map([['a', new Map([[conf.type, [listener]]])]])
                     );
 
-                    conf.dispatch(dispatcher);
+                    await conf.dispatch(dispatcher);
 
                     expect(listener).toHaveBeenCalledWith(conf.event);
                 });

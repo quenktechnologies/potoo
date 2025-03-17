@@ -16,7 +16,6 @@ import { Thread } from '../../../../../../lib/actor/system/vm/thread';
 import { GroupMap } from '../../../../../../lib/actor/system/vm/group';
 import { ADDRESS_SYSTEM } from '../../../../../../lib/actor/address';
 import { EventDispatcher } from '../../../../../../lib/actor/system/vm/event/dispatcher';
-import { LogLevelValue } from '../../../../../../lib/actor/system/vm/log';
 
 describe('MapAllocator', () => {
     let mockGroups = mockDeep<GroupMap>();
@@ -35,15 +34,7 @@ describe('MapAllocator', () => {
 
     let events = mockDeep<EventDispatcher>();
 
-    events.monitor.mockImplementation(async () => ({
-        type: 'test',
-        level: LogLevelValue.debug,
-        source: '/'
-    }));
-
     platform.events = events;
-
-    let getPlatform = () => platform;
 
     let actor = mockDeep<Actor>();
 
@@ -65,7 +56,7 @@ describe('MapAllocator', () => {
 
     describe('getTemplate', () => {
         it('should provide the template', () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
             map.actors.set('/', parentEntry);
 
             let mtemplate = map.getTemplate('/');
@@ -74,7 +65,7 @@ describe('MapAllocator', () => {
         });
 
         it('should not provide a template when it does not exists', () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
             let mtemplate = map.getTemplate('/');
             expect(mtemplate.isJust()).toBe(false);
         });
@@ -82,7 +73,7 @@ describe('MapAllocator', () => {
 
     describe('getThread', () => {
         it('should provide a thread when it exists', () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
             map.actors.set('/', parentEntry);
             let mthread = map.getThread('/');
             expect(mthread.isJust()).toBe(true);
@@ -90,7 +81,7 @@ describe('MapAllocator', () => {
         });
 
         it('should not provide a thread when it does not exists', () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
             let mthread = map.getThread('/');
             expect(mthread.isJust()).toBe(false);
         });
@@ -107,7 +98,7 @@ describe('MapAllocator', () => {
             let threadThree = mockDeep<Thread>();
             threadThree.address = '/three';
 
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
 
             map.actors.set('/one', { address: '/one', thread: threadOne });
             map.actors.set('/two', { address: '/two', thread: threadTwo });
@@ -122,20 +113,72 @@ describe('MapAllocator', () => {
         });
     });
 
+    describe('getChildren', () => {
+        it('should return all the child threads', () => {
+            let childOne = mockDeep<Thread>();
+            childOne.address = '/child/one';
+
+            let childTwo = mockDeep<Thread>();
+            childTwo.address = '/child/two';
+
+            let childThree = mockDeep<Thread>();
+            childThree.address = '/child/three';
+
+            let map = new MapAllocator(platform);
+
+            parentEntry.children = [
+                {
+                    address: '/child/one',
+                    thread: childOne,
+                    parent: Maybe.nothing(),
+                    template: { create: () => childOne },
+                    actor: childActor,
+                    children: []
+                },
+                {
+                    address: '/child/two',
+                    thread: childTwo,
+                    parent: Maybe.nothing(),
+                    template: { create: () => childTwo },
+                    actor: childActor,
+                    children: []
+                },
+                {
+                    address: '/child/three',
+                    thread: childThree,
+                    parent: Maybe.nothing(),
+                    template: { create: () => childThree },
+                    actor: childActor,
+                    children: []
+                }
+            ];
+
+            map.actors.set('/child', parentEntry);
+            map.actors.set('/child/one', parentEntry.children[0]);
+            map.actors.set('/child/two', parentEntry.children[1]);
+            map.actors.set('/child/three', parentEntry.children[2]);
+
+            let threads = map.getChildren(parent);
+            expect(threads).toEqual([childOne, childTwo, childThree]);
+        });
+    });
+
     describe('allocate', () => {
         it('should allocate threads for actors', async () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
 
             map.actors.set('/', parentEntry);
 
-            let addr = await map.allocate(parent, {
+            let tmpl = {
                 id: 'test',
                 create: () => childActor
-            });
+            };
+
+            let addr = await map.allocate(parent, tmpl);
 
             await wait(100);
 
-            expect(childActor.start).toBeCalledTimes(1);
+            expect(platform.runner.runThread).toBeCalledTimes(1);
 
             let entry = map.actors.get('/test');
 
@@ -146,12 +189,10 @@ describe('MapAllocator', () => {
             expect(entry.parent.get()).toBe(parentEntry);
 
             expect(addr).toBe('/test');
-
-            expect(events.monitor).toBeCalledTimes(1);
         });
 
         it('should auto assign an id if non specified', async () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
 
             map.actors.set('/', parentEntry);
 
@@ -164,7 +205,7 @@ describe('MapAllocator', () => {
 
         it('should raise on a restricted character in the id', async () => {
             for (let id of ['', ' ', '$', '?', '$test']) {
-                let map = new MapAllocator(getPlatform);
+                let map = new MapAllocator(platform);
 
                 map.actors.set('/', parentEntry);
 
@@ -180,7 +221,7 @@ describe('MapAllocator', () => {
         });
 
         it('should raise on a duplicated id', async () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
             map.actors.set('/', parentEntry);
 
             await map.allocate(parent, {
@@ -197,7 +238,7 @@ describe('MapAllocator', () => {
         });
 
         it('should assign actors to groups', async () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
 
             map.actors.set('/', parentEntry);
 
@@ -213,7 +254,7 @@ describe('MapAllocator', () => {
         });
 
         it('should recognize the vm when spawning from root', async () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
 
             map.actors.set('/', parentEntry);
 
@@ -224,7 +265,7 @@ describe('MapAllocator', () => {
 
             await wait(100);
 
-            expect(childActor.start).toBeCalledTimes(1);
+            expect(platform.runner.runThread).toBeCalledTimes(1);
 
             let entry = map.actors.get('root');
 
@@ -236,24 +277,11 @@ describe('MapAllocator', () => {
 
             expect(addr).toBe('root');
         });
-
-        it('should deallocate function actors when they complete', async () => {
-            let map = new MapAllocator(getPlatform);
-
-            let addr = await map.allocate(platform, {
-                id: '/',
-                run: async () => {}
-            });
-
-            await wait(500);
-
-            expect(map.actors.has(addr)).toBe(false);
-        });
     });
 
     describe('reallocate', () => {
         it('should reallocate actors', async () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
 
             map.actors.set('/', parentEntry);
 
@@ -264,7 +292,7 @@ describe('MapAllocator', () => {
 
             await wait(100);
 
-            expect(childActor.start).toBeCalledTimes(1);
+            expect(platform.runner.runThread).toBeCalledTimes(1);
 
             expect(childActor.stop).toBeCalledTimes(0);
 
@@ -274,7 +302,7 @@ describe('MapAllocator', () => {
 
             await wait(100);
 
-            expect(childActor.start).toBeCalledTimes(2);
+            expect(platform.runner.runThread).toBeCalledTimes(2);
 
             expect(childActor.stop).toBeCalledTimes(1);
 
@@ -286,7 +314,7 @@ describe('MapAllocator', () => {
 
     describe('deallocate', () => {
         it('should remove an entry for an actor', async () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
             map.actors.set('/', parentEntry);
 
             await map.deallocate(parent);
@@ -296,7 +324,7 @@ describe('MapAllocator', () => {
         });
 
         it('should remove the actor from its parent', async () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
             map.actors.set('/', parentEntry);
 
             let thread = mockDeep<Thread>();
@@ -320,7 +348,7 @@ describe('MapAllocator', () => {
         });
 
         it('should remove the children of the actor', async () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
             map.actors.set('/', parentEntry);
 
             let childEntry0 = {
@@ -382,7 +410,7 @@ describe('MapAllocator', () => {
         });
 
         it('should unenroll the actor from its group', async () => {
-            let map = new MapAllocator(getPlatform);
+            let map = new MapAllocator(platform);
             map.actors.set('/', parentEntry);
 
             await map.deallocate(parent);

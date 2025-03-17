@@ -15,14 +15,22 @@ export interface Allocator {
     getThread(target: Address): Maybe<Thread>;
 
     /**
-     * getThreads provides a list of Threads given a list of Addresses.
+     * getThreads provides a list of all the Threads that are currently
+     * allocated.
+     *
+     * If targets is supplied, only those Threads will be returned.
      */
-    getThreads(targets: Address[]): Thread[];
+    getThreads(targets?: Address[]): Thread[];
 
     /**
      * getTemplate provides a Template given an Address.
      */
     getTemplate(address: Address): Maybe<Template>;
+
+    /**
+     * getChildren returns the child threads of a parent thread.
+     */
+    getChildren(parent: Thread): Thread[];
 
     /**
      * allocate a new thread from a Template.
