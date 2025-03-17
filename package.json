@@ -1,6 +1,6 @@
 {
   "name": "@quenk/potoo",
-  "version": "4.0.12",
+  "version": "4.0.13",
   "description": "Message passing virtual machine.",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
