@@ -161,8 +161,8 @@ describe('vm', () => {
                         spawnConcern: SPAWN_CONCERN_STOPPED,
                         run: async child => {
                             packs.push(2);
-                            spawnConcern: SPAWN_CONCERN_STOPPED;
                             await child.spawn({
+                                spawnConcern: SPAWN_CONCERN_STOPPED,
                                 run: async () => {
                                     packs.push(3);
                                 }
