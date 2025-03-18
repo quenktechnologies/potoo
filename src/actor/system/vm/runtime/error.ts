@@ -1,8 +1,6 @@
 import { Err } from '@quenk/noni/lib/control/err';
 
 import { Address, ADDRESS_RESTRICTED } from '../../../address';
-import { TypeInfo } from '../script/info';
-import { DATA_MAX_SAFE_UINT32 } from '../frame';
 import { Thread } from '../thread';
 
 /**
@@ -143,63 +141,6 @@ export class EmptyMailboxErr extends ErrorClass {
 export class UnknownAddressErr extends ErrorClass {
     constructor(public actor: string) {
         super(`The system has no actor for address "${actor}"!`);
-    }
-}
-
-/**
- * MissingSymbolErr
- */
-export class MissingSymbolErr extends ErrorClass {
-    constructor(public index: number) {
-        super(`Cannot locate symbol at index 0x${index.toString(16)}`);
-    }
-}
-
-/**
- * IntegerOverflowErr
- */
-export class IntegerOverflowErr extends ErrorClass {
-    constructor() {
-        super(`DATA_MAX_SAFE_UINT32=${DATA_MAX_SAFE_UINT32}`);
-    }
-}
-
-/**
- * StackEmptyErr
- */
-export class StackEmptyErr extends ErrorClass {
-    constructor() {
-        super('Stack is empty.');
-    }
-}
-
-/**
- * InvalidPropertyIndex
- */
-export class InvalidPropertyIndex extends ErrorClass {
-    constructor(
-        public cons: TypeInfo,
-        public idx: number
-    ) {
-        super(`Constructor: ${cons.name}, index: ${idx}`);
-    }
-}
-
-/**
- * MissingInfoErr
- */
-export class MissingInfoErr extends ErrorClass {
-    constructor(public idx: number) {
-        super(`No info object index: ${idx}!`);
-    }
-}
-
-/**
- * InvalidConstructorErr
- */
-export class InvalidConstructorErr extends ErrorClass {
-    constructor(public name: string) {
-        super(`Named object "${name}" cannot be used as a constructor!`);
     }
 }
 
