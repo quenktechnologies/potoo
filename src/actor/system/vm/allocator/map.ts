@@ -180,7 +180,7 @@ export class MapAllocator implements Allocator {
         );
 
         //NOTE: unhandled promise
-        platform.runner.runThread(template, thread);
+        platform.runner.runThread(thread);
 
         await concernPromise;
 

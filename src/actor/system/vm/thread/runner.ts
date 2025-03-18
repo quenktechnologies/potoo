@@ -7,8 +7,7 @@ import {
     SPAWN_CONCERN_ALLOCATED,
     SPAWN_CONCERN_RECEIVING,
     SPAWN_CONCERN_STARTED,
-    SPAWN_CONCERN_STOPPED,
-    Template
+    SPAWN_CONCERN_STOPPED
 } from '../../../template';
 import {
     EventType,
@@ -19,7 +18,6 @@ import {
     EVENT_ACTOR_STOPPED
 } from '../event';
 import { VM } from '..';
-import { JSThread } from './shared/js';
 import { Thread } from '.';
 
 const parentEvents = [EVENT_ACTOR_ALLOCATED, EVENT_ACTOR_DEALLOCATED];
@@ -73,11 +71,8 @@ export class ThreadRunner {
      * In that case we wait until the child threads have been removed.
      * This will not hinder intentional exits.
      */
-    async runThread(template: Template, child: Thread) {
+    async runThread(child: Thread) {
         let { events, collector } = evaluate(this.vm);
-
-        // TODO function thread
-        await child.start();
 
         // Ideally this should be done in the thread itself
         await events.dispatchActorEvent(
@@ -86,10 +81,9 @@ export class ThreadRunner {
             EVENT_ACTOR_STARTED
         );
 
-        if ((<SharedRunTemplate>template).run) {
-            collector.mark(child);
-            await (<SharedRunTemplate>template).run(<JSThread>child);
-            await collector.collect(child);
-        }
+        if ((<SharedRunTemplate>child.template).run) collector.mark(child);
+
+        await child.start();
+        await collector.collect(child);
     }
 }

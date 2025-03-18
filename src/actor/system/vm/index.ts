@@ -123,7 +123,8 @@ export class PVM implements VM {
         public runner: ThreadRunner = new ThreadRunner(() => this),
         public groups: GroupMap = new GroupMap(),
         public address = ADDRESS_SYSTEM,
-        public self = ADDRESS_SYSTEM
+        public self = ADDRESS_SYSTEM,
+        public template: template.Template = { create: () => this }
     ) {}
 
     /**

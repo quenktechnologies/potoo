@@ -20,6 +20,7 @@ export class ThreadFactory {
         if (isProcessTemplate(template))
             return ProcessThread.create(
                 vm,
+                template,
                 address,
                 (<ProcessTemplate>template).script
             );

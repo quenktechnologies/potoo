@@ -8,7 +8,13 @@ import {
 } from '@quenk/noni/lib/control/match/case';
 import { identity } from '@quenk/noni/lib/data/function';
 
-import { fromSpawnable, Spawnable, Template } from '../../../../template';
+import {
+    fromSpawnable,
+    SharedCreateTemplate,
+    SharedRunTemplate,
+    SharedTemplate,
+    Spawnable
+} from '../../../../template';
 import { Address, ADDRESS_DISCARD } from '../../../../address';
 import { Task } from '../../scheduler';
 import { Message } from '../../../..';
@@ -19,6 +25,7 @@ import {
     EVENT_ACTOR_STOPPED,
     EVENT_MESSAGE_DROPPED
 } from '../../event';
+import { isFunction } from '@quenk/noni/lib/data/type';
 
 const defaultCases = [new Default(identity)];
 
@@ -30,7 +37,7 @@ export const ERR_THREAD_INVALID = 'ERR_THREAD_INVALID';
 export class JSThread implements SharedThread {
     constructor(
         public vm: VM,
-        public template: Template,
+        public template: SharedTemplate,
         public address: Address,
         public mailbox: Message[] = [],
         public state: ThreadState = ThreadState.IDLE
@@ -49,7 +56,16 @@ export class JSThread implements SharedThread {
         );
     }
 
-    async start() {}
+    async start() {
+        let { run } = <SharedRunTemplate>this.template;
+        let { create } = <SharedCreateTemplate>this.template;
+
+        if (isFunction(run)) {
+            await run(this);
+        } else if (isFunction(create)) {
+            await create(this).start();
+        }
+    }
 
     async notify(msg: Message) {
         this._assertValid();

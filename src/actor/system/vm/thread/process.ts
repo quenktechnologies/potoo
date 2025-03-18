@@ -9,6 +9,7 @@ import { Address } from '../../../address';
 import { Message } from '../../..';
 import { VM } from '../';
 import { Thread } from '.';
+import { Template } from 'actor/template';
 
 export const CTRL_MSG_RAISE = 9;
 export const CTRL_MSG_SEND = 1;
@@ -55,6 +56,7 @@ const shapes = {
 export class ProcessThread implements Thread {
     constructor(
         public vm: VM,
+        public template: Template,
         public process: ChildProcess,
         public address: Address
     ) {}
@@ -67,12 +69,17 @@ export class ProcessThread implements Thread {
      *
      * 1. POTOO_ACTOR_ADDRESS   The full address of the actor in the parent VM.
      */
-    static create(vm: VM, address: Address, script: Path): ProcessThread {
+    static create(
+        vm: VM,
+        template: Template,
+        address: Address,
+        script: Path
+    ): ProcessThread {
         let cp = fork(resolve(script), {
             env: { POTOO_ACTOR_ADDRESS: address }
         });
 
-        let thread = new ProcessThread(vm, cp, address);
+        let thread = new ProcessThread(vm, template, cp, address);
 
         return thread;
     }

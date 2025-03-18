@@ -2,6 +2,7 @@ import { Err } from '@quenk/noni/lib/control/err';
 
 import { Address } from '../../../address';
 import { Actor } from '../../..';
+import { Template } from 'actor/template';
 
 export const ERR_THREAD_INVALID = 'ERR_THREAD_INVALID';
 
@@ -17,6 +18,11 @@ export const ERR_THREAD_INVALID = 'ERR_THREAD_INVALID';
  * VM used to make managing actors easier.
  */
 export interface Thread extends Actor {
+    /**
+     * template used to configure the Thread.
+     */
+    template: Template;
+
     /**
      * address for the Thread (actor) within the system.
      */
