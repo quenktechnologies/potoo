@@ -2,7 +2,7 @@ import { Err } from '@quenk/noni/lib/control/err';
 
 import { Address } from '../../../address';
 import { Actor } from '../../..';
-import { Template } from 'actor/template';
+import { Template } from '../../../template';
 
 export const ERR_THREAD_INVALID = 'ERR_THREAD_INVALID';
 
