@@ -74,16 +74,16 @@ export class ThreadRunner {
     async runThread(thread: Thread) {
         let { events, collector } = evaluate(this.vm);
 
-        // Ideally this should be done in the thread itself
+        if ((<SharedRunTemplate>thread.template).run) collector.mark(thread);
+
+        await thread.start();
+
         await events.dispatchActorEvent(
             thread.address,
             thread.address,
             EVENT_ACTOR_STARTED
         );
 
-        if ((<SharedRunTemplate>thread.template).run) collector.mark(thread);
-
-        await thread.start();
         await collector.collect(thread);
     }
 }

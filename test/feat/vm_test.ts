@@ -52,28 +52,30 @@ describe('vm', () => {
         it('should allow send, receive, reply', async () => {
             let success = false;
 
-            await vm.spawn({
-                id: 'sender',
-                run: async actor => {
-                    await actor.tell('receiver', 'syn');
-                    await actor.receive([
-                        new TypeCase('ack', () => {
-                            success = true;
-                        })
-                    ]);
-                }
-            });
+            await Promise.allSettled([
+                vm.spawn({
+                    id: 'sender',
+                    run: async actor => {
+                        await actor.tell('receiver', 'syn');
+                        await actor.receive([
+                            new TypeCase('ack', () => {
+                                success = true;
+                            })
+                        ]);
+                    }
+                }),
 
-            await vm.spawn({
-                id: 'receiver',
-                run: async actor => {
-                    await actor.receive([
-                        new TypeCase('syn', async () => {
-                            await actor.tell('sender', 'ack');
-                        })
-                    ]);
-                }
-            });
+                vm.spawn({
+                    id: 'receiver',
+                    run: async actor => {
+                        await actor.receive([
+                            new TypeCase('syn', async () => {
+                                await actor.tell('sender', 'ack');
+                            })
+                        ]);
+                    }
+                })
+            ]);
 
             await wait(100);
             expect(success).toBe(true);
@@ -147,7 +149,7 @@ describe('vm', () => {
 
             await wait(0);
 
-            expect(packs).toEqual([1, 2, 4, 3]);
+            expect(packs).toEqual([1, 2, 3, 4]);
         });
 
         it('should not auto exit if there are children (concern=stopped)', async () => {
