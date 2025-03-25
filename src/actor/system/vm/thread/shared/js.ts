@@ -67,6 +67,7 @@ export class JSThread implements SharedThread {
         } else if (isFunction(create)) {
             let actor = await create(this);
             this.actor = Maybe.just(actor);
+            await actor.start();
         }
     }
 

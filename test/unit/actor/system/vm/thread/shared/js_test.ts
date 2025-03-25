@@ -3,22 +3,23 @@ import { expect, jest } from '@jest/globals';
 import { mockDeep } from 'jest-mock-extended';
 
 import { Future, wait } from '@quenk/noni/lib/control/monad/future';
+import { identity } from '@quenk/noni/lib/data/function';
+import { Err } from '@quenk/noni/lib/control/err';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
 
-import { VM } from '../../../../../../lib/actor/system/vm';
+import { VM } from '../../../../../../../lib/actor/system/vm';
 import {
     Scheduler,
     Task
-} from '../../../../../../lib/actor/system/vm/scheduler';
-import { Actor } from '../../../../../../lib/actor';
-import { ErrorStrategy } from '../../../../../../lib/actor/system/vm/strategy/error';
-import { Allocator } from '../../../../../../lib/actor/system/vm/allocator';
-import { ThreadState } from '../../../../../../lib/actor/system/vm/thread/shared';
-import { JSThread } from '../../../../../../lib/actor/system/vm/thread/shared/js';
-import { identity } from '@quenk/noni/lib/data/function';
-import { Thread } from '../../../../../../lib/actor/system/vm/thread';
-import { Err } from '@quenk/noni/lib/control/err';
+} from '../../../../../../../lib/actor/system/vm/scheduler';
+import { Actor } from '../../../../../../../lib/actor';
+import { ErrorStrategy } from '../../../../../../../lib/actor/system/vm/strategy/error';
+import { Allocator } from '../../../../../../../lib/actor/system/vm/allocator';
+import { ThreadState } from '../../../../../../../lib/actor/system/vm/thread/shared';
+import { JSThread } from '../../../../../../../lib/actor/system/vm/thread/shared/js';
+import { Thread } from '../../../../../../../lib/actor/system/vm/thread';
 
-describe('shared', () => {
+describe('JSThread', () => {
     let platform = mockDeep<VM>();
     let scheduler = mockDeep<Scheduler>();
     let errors = mockDeep<ErrorStrategy>();
@@ -233,6 +234,29 @@ describe('shared', () => {
             ]) {
                 expect(func()).rejects.toThrowError('ERR_THREAD_INVALID');
             }
+        });
+    });
+
+    describe('start', () => {
+        it('should start the actor', async () => {
+            let actor = mockDeep<Actor>();
+            let thread = new JSThread(platform, { create: () => actor }, '/');
+            await thread.start();
+
+            expect(thread.actor.isJust()).toBe(true);
+            expect(actor.start).toBeCalled();
+        });
+    });
+
+    describe('stop', () => {
+        it('should stop the actor', async () => {
+            let actor = mockDeep<Actor>();
+            let thread = new JSThread(platform, template, '/');
+            thread.actor = Maybe.just(actor);
+
+            await thread.stop();
+
+            expect(actor.stop).toBeCalled();
         });
     });
 });

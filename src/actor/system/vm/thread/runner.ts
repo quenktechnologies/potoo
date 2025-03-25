@@ -71,19 +71,19 @@ export class ThreadRunner {
      * In that case we wait until the child threads have been removed.
      * This will not hinder intentional exits.
      */
-    async runThread(child: Thread) {
+    async runThread(thread: Thread) {
         let { events, collector } = evaluate(this.vm);
 
         // Ideally this should be done in the thread itself
         await events.dispatchActorEvent(
-            child.address,
-            child.address,
+            thread.address,
+            thread.address,
             EVENT_ACTOR_STARTED
         );
 
-        if ((<SharedRunTemplate>child.template).run) collector.mark(child);
+        if ((<SharedRunTemplate>thread.template).run) collector.mark(thread);
 
-        await child.start();
-        await collector.collect(child);
+        await thread.start();
+        await collector.collect(thread);
     }
 }
