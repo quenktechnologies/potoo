@@ -17,7 +17,7 @@ import {
 } from '../../../../template';
 import { Address, ADDRESS_DISCARD } from '../../../../address';
 import { Task } from '../../scheduler';
-import { Message } from '../../../..';
+import { Actor, Message } from '../../../..';
 import { VM } from '../../';
 import { SharedThread, ThreadState } from '.';
 import {
@@ -26,6 +26,7 @@ import {
     EVENT_MESSAGE_DROPPED
 } from '../../event';
 import { isFunction } from '@quenk/noni/lib/data/type';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
 
 const defaultCases = [new Default(identity)];
 
@@ -40,7 +41,8 @@ export class JSThread implements SharedThread {
         public template: SharedTemplate,
         public address: Address,
         public mailbox: Message[] = [],
-        public state: ThreadState = ThreadState.IDLE
+        public state: ThreadState = ThreadState.IDLE,
+        public actor: Maybe<Actor> = Maybe.nothing()
     ) {}
 
     readonly self = this.address;
@@ -63,7 +65,8 @@ export class JSThread implements SharedThread {
         if (isFunction(run)) {
             await run(this);
         } else if (isFunction(create)) {
-            await create(this).start();
+            let actor = await create(this);
+            this.actor = Maybe.just(actor);
         }
     }
 
@@ -77,7 +80,9 @@ export class JSThread implements SharedThread {
         this.vm.scheduler.run();
     }
 
-    async stop() {}
+    async stop() {
+        if (this.actor.isJust()) await this.actor.get().stop();
+    }
 
     async watch<T>(task: () => Promise<T>) {
         this._assertValid();

@@ -47,8 +47,7 @@ describe('MapAllocator', () => {
         parentEntry = {
             address: '/',
             parent: Maybe.nothing(),
-            actor,
-            template: { create: () => parentEntry.actor },
+            template: { create: () => actor },
             thread: parent,
             children: []
         };
@@ -132,7 +131,6 @@ describe('MapAllocator', () => {
                     thread: childOne,
                     parent: Maybe.nothing(),
                     template: { create: () => childOne },
-                    actor: childActor,
                     children: []
                 },
                 {
@@ -140,7 +138,6 @@ describe('MapAllocator', () => {
                     thread: childTwo,
                     parent: Maybe.nothing(),
                     template: { create: () => childTwo },
-                    actor: childActor,
                     children: []
                 },
                 {
@@ -148,7 +145,6 @@ describe('MapAllocator', () => {
                     thread: childThree,
                     parent: Maybe.nothing(),
                     template: { create: () => childThree },
-                    actor: childActor,
                     children: []
                 }
             ];
@@ -200,7 +196,7 @@ describe('MapAllocator', () => {
                 create: () => childActor
             });
 
-            expect(addr).toBe('/instance::object::aid::1');
+            expect(addr).toBe('/instance::vm::aid::1');
         });
 
         it('should raise on a restricted character in the id', async () => {
@@ -294,9 +290,9 @@ describe('MapAllocator', () => {
 
             expect(platform.runner.runThread).toBeCalledTimes(1);
 
-            expect(childActor.stop).toBeCalledTimes(0);
-
             let thread = map.getThread(addr).get();
+
+            let stopSpy = jest.spyOn(thread, 'stop');
 
             await map.reallocate(thread);
 
@@ -304,7 +300,7 @@ describe('MapAllocator', () => {
 
             expect(platform.runner.runThread).toBeCalledTimes(2);
 
-            expect(childActor.stop).toBeCalledTimes(1);
+            expect(stopSpy).toBeCalledTimes(1);
 
             let newThread = map.getThread(addr).get();
 

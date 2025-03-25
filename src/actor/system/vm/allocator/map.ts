@@ -6,7 +6,7 @@ import { distribute, empty } from '@quenk/noni/lib/data/array';
 import { evaluate, Lazy } from '@quenk/noni/lib/data/lazy';
 
 import { Address, isRestricted, make } from '../../../address';
-import { SharedCreateTemplate, Template } from '../../../template';
+import { Template } from '../../../template';
 import {
     EVENT_ACTOR_ALLOCATED,
     EVENT_ACTOR_DEALLOCATED,
@@ -15,7 +15,6 @@ import {
 import { ThreadFactory } from '../thread/factory';
 import { JSThread } from '../thread/shared/js';
 import { Thread } from '../thread';
-import { Actor } from '../../..';
 import { VM } from '..';
 import { Allocator } from './';
 
@@ -42,11 +41,6 @@ export interface ActorTableEntry {
      * template used to create the actor.
      */
     template: Template;
-
-    /**
-     * actor instance for the entry.
-     */
-    actor: Actor;
 
     /**
      * thread for the entry.
@@ -129,9 +123,12 @@ export class MapAllocator implements Allocator {
             if (mparentEntry.isNothing())
                 return Future.raise(new errors.InvalidThreadErr(parent));
 
-            parentCons = mparentEntry
-                .get()
-                .actor.constructor.name.toLowerCase();
+            let parentThread = mparentEntry.get().thread;
+            if (parentThread instanceof JSThread) {
+                parentCons = parentThread.actor.isJust()
+                    ? parentThread.actor.get().constructor.name.toLowerCase()
+                    : 'js';
+            }
         }
 
         let aid = this.nextAID++;
@@ -148,16 +145,11 @@ export class MapAllocator implements Allocator {
 
         let thread = ThreadFactory.create(platform, address, template);
 
-        let actor = (<SharedCreateTemplate>template).create
-            ? (<SharedCreateTemplate>template).create(<JSThread>thread)
-            : thread;
-
         let entry = {
             address,
             parent: mparentEntry,
             thread,
             template,
-            actor: actor ?? thread,
             children: []
         };
 
@@ -237,8 +229,6 @@ export class MapAllocator implements Allocator {
             distribute(
                 targets.map(current =>
                     Future.do(async () => {
-                        await current.actor.stop();
-
                         await current.thread.stop();
 
                         await collector.unmark(current.thread);
