@@ -97,7 +97,7 @@ describe('resident', () => {
         });
     });
 
-    class ImAct extends Immutable<Number> {
+    class ImAct extends Immutable {
         isRunning = false;
 
         selectors = jest.fn(() => [new TypeCase(Number, () => {})]);

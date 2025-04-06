@@ -53,5 +53,5 @@ export interface Api extends Parent {
      * If TypeCases are provided, the message will be matched against them
      * first and the result provided.
      */
-    receive<T>(cases?: Case<Message, T>[]): Promise<T>;
+    receive<T>(cases?: Case<T>[]): Promise<T>;
 }

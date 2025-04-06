@@ -148,7 +148,7 @@ export class JSThread implements SharedThread {
         });
     }
 
-    async receive<T = Message>(cases: Case<Message, T>[] = []): Promise<T> {
+    async receive<T = Message>(cases: Case<T>[] = []): Promise<T> {
         this._assertValid();
         let msg = await Future.fromCallback<T>(cb => {
             this.vm.events.dispatchActorEvent(

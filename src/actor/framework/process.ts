@@ -58,9 +58,7 @@ const defaultCases = [new Default(identity)];
  *
  * TODO: drop messages that do not match any cases.
  */
-export const receive = async <T>(
-    cases: Case<Message, T>[] = defaultCases
-): Promise<T> =>
+export const receive = async <T>(cases: Case<T>[] = defaultCases): Promise<T> =>
     new Promise(resolve => {
         let matcher = new CaseFunction(cases || defaultCases);
         let receiver = async (msg: Message) => {

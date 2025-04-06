@@ -52,7 +52,7 @@ export abstract class AbstractResident implements Resident {
 
     async stop() {}
 
-    async receive<T>(cases: Case<Message, T>[] = []) {
+    async receive<T>(cases: Case<T>[] = []) {
         return this.runtime.receive(cases);
     }
 
@@ -76,12 +76,12 @@ export abstract class Mutable extends AbstractResident {}
  *
  * @typeparam T - The type of messages the actor is interested in receiving.
  */
-export abstract class Immutable<T> extends AbstractResident {
+export abstract class Immutable extends AbstractResident {
     /**
      * selectors provides the list of TypeCase classes that will be applied to
      * all incoming messages.
      */
-    selectors(): Case<T, Promise<void> | void>[] {
+    selectors(): Case<Promise<void> | void>[] {
         return [];
     }
 
