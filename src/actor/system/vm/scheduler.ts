@@ -2,13 +2,20 @@ import { SharedThread, ThreadState } from './thread/shared';
 
 export const ERR_THREAD_DEQUEUED = 'ERR_THREAD_DEQUEUED';
 
+export const TASK_TYPE_SPAWN = 1;
+export const TASK_TYPE_TELL = 2;
+export const TASK_TYPE_RECEIVE = 3;
+
 /**
  * PendingTask tuple type.
  */
 export type PendingTask = [SharedThread, (err?: Error) => void];
 
+export type TaskType = number;
+
 export class Task {
     constructor(
+        public type: TaskType,
         public thread: SharedThread,
         public abort: (err: Error) => void,
         public exec: () => Promise<void>
@@ -85,15 +92,19 @@ export class Scheduler {
 
         this.isRunning = true;
 
+        let findNext = (task: Task) =>
+            task.thread.state === ThreadState.IDLE ||
+            (task.type === TASK_TYPE_TELL &&
+                task.thread.state === ThreadState.MSG_WAIT);
+
         let idx;
-        while (
-            (idx = this.queue.findIndex(
-                task => task.thread.state === ThreadState.IDLE
-            )) !== -1
-        ) {
+        while ((idx = this.queue.findIndex(findNext)) !== -1) {
             let task = this.queue.splice(idx, 1)[0];
 
-            task.thread.state = ThreadState.RUNNING;
+            // Allow waiting threads to send messages to themselves but
+            // nothing else.
+            if (task.thread.state != ThreadState.MSG_WAIT)
+                task.thread.state = ThreadState.RUNNING;
 
             // TODO: disatch event
             task.exec()

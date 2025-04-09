@@ -16,7 +16,12 @@ import {
     Spawnable
 } from '../../../../template';
 import { Address, ADDRESS_DISCARD } from '../../../../address';
-import { Task } from '../../scheduler';
+import {
+    Task,
+    TASK_TYPE_RECEIVE,
+    TASK_TYPE_SPAWN,
+    TASK_TYPE_TELL
+} from '../../scheduler';
 import { Actor, Message } from '../../../..';
 import { VM } from '../../';
 import { SharedThread, ThreadState } from '.';
@@ -124,7 +129,7 @@ export class JSThread implements SharedThread {
         this._assertValid();
         let result = await Future.fromCallback<Address>(cb => {
             this.vm.scheduler.postTask(
-                new Task(this, cb, async () => {
+                new Task(TASK_TYPE_SPAWN, this, cb, async () => {
                     let address = await this.vm.allocator.allocate(
                         this,
                         fromSpawnable(tmpl)
@@ -140,7 +145,7 @@ export class JSThread implements SharedThread {
         this._assertValid();
         await Future.fromCallback(cb => {
             this.vm.scheduler.postTask(
-                new Task(this, cb, async () => {
+                new Task(TASK_TYPE_TELL, this, cb, async () => {
                     await this.vm.sendMessage(this, addr, msg);
                     cb(null);
                 })
@@ -157,7 +162,7 @@ export class JSThread implements SharedThread {
                 EVENT_ACTOR_RECEIVE
             );
             let matcher = new CaseFunction(empty(cases) ? defaultCases : cases);
-            let task = new Task(this, cb, async () => {
+            let task = new Task(TASK_TYPE_RECEIVE, this, cb, async () => {
                 this._assertValid();
                 if (!empty(this.mailbox)) {
                     let msg = this.mailbox.shift();

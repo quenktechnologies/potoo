@@ -3,7 +3,13 @@ import { mockDeep } from 'jest-mock-extended';
 
 import { wait } from '@quenk/noni/lib/control/monad/future';
 
-import { Scheduler, Task } from '../../../../../lib/actor/system/vm/scheduler';
+import {
+    Scheduler,
+    Task,
+    TASK_TYPE_RECEIVE,
+    TASK_TYPE_SPAWN,
+    TASK_TYPE_TELL
+} from '../../../../../lib/actor/system/vm/scheduler';
 import {
     SharedThread,
     ThreadState
@@ -24,7 +30,7 @@ describe('Scheduler', () => {
 
             let execSpy = jest.fn(exec);
 
-            scheduler.postTask(new Task(thread, () => {}, execSpy));
+            scheduler.postTask(new Task(0, thread, () => {}, execSpy));
 
             expect(execSpy).toBeCalledTimes(1);
         });
@@ -40,7 +46,7 @@ describe('Scheduler', () => {
 
             let exec = jest.fn(async () => {});
 
-            scheduler.queue.push(new Task(thread, () => {}, exec));
+            scheduler.queue.push(new Task(0, thread, () => {}, exec));
 
             scheduler.run();
 
@@ -65,7 +71,7 @@ describe('Scheduler', () => {
 
                 let exec = jest.fn(async () => {});
 
-                scheduler.queue.push(new Task(thread, () => {}, exec));
+                scheduler.queue.push(new Task(0, thread, () => {}, exec));
 
                 scheduler.run();
 
@@ -84,7 +90,7 @@ describe('Scheduler', () => {
 
             let exec = jest.fn(async () => {});
 
-            scheduler.queue.push(new Task(thread, () => {}, exec));
+            scheduler.queue.push(new Task(0, thread, () => {}, exec));
 
             scheduler.isRunning = true;
 
@@ -110,7 +116,7 @@ describe('Scheduler', () => {
 
             let abort = jest.fn();
 
-            scheduler.queue.push(new Task(thread, abort, exec));
+            scheduler.queue.push(new Task(0, thread, abort, exec));
 
             scheduler.run();
 
@@ -123,6 +129,47 @@ describe('Scheduler', () => {
             expect(exec).toBeCalledTimes(1);
 
             expect(abort).toBeCalledWith(err);
+        });
+
+        it('should allow MSG_WAIT threads to tell', async () => {
+            let scheduler = new Scheduler();
+
+            let thread = mockDeep<SharedThread>();
+
+            thread.state = ThreadState.MSG_WAIT;
+
+            let exec = jest.fn(async () => {});
+
+            scheduler.queue.push(
+                new Task(TASK_TYPE_TELL, thread, () => {}, exec)
+            );
+
+            scheduler.run();
+
+            expect(exec).toBeCalled();
+
+            expect(scheduler.queue.length).toBe(0);
+        });
+
+        it('should not allow MSG_WAIT threads to do anything else', async () => {
+            let scheduler = new Scheduler();
+
+            let thread = mockDeep<SharedThread>();
+
+            thread.state = ThreadState.MSG_WAIT;
+
+            let exec = jest.fn(async () => {});
+
+            scheduler.queue.push(
+                new Task(TASK_TYPE_SPAWN, thread, () => {}, exec),
+                new Task(TASK_TYPE_RECEIVE, thread, () => {}, exec)
+            );
+
+            scheduler.run();
+
+            expect(exec).not.toBeCalled();
+
+            expect(scheduler.queue.length).toBe(2);
         });
     });
 });
