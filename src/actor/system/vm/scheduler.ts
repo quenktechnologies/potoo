@@ -94,16 +94,14 @@ export class Scheduler {
 
         let findNext = (task: Task) =>
             task.thread.state === ThreadState.IDLE ||
-            (task.type === TASK_TYPE_TELL &&
-                task.thread.state === ThreadState.MSG_WAIT);
+            (task.thread.state === ThreadState.MSG_WAIT &&
+                task.type !== TASK_TYPE_RECEIVE);
 
         let idx;
         while ((idx = this.queue.findIndex(findNext)) !== -1) {
             let task = this.queue.splice(idx, 1)[0];
 
-            // Allow waiting threads to send messages to themselves but
-            // nothing else.
-            if (task.thread.state != ThreadState.MSG_WAIT)
+            if (task.thread.state === ThreadState.IDLE)
                 task.thread.state = ThreadState.RUNNING;
 
             // TODO: disatch event
