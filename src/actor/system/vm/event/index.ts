@@ -5,6 +5,7 @@ import { LogLevelValue } from '../log';
 export const EVENT_MESSGAE_SEND = 'message-send';
 export const EVENT_MESSAGE_BOUNCE = 'message-bounce';
 export const EVENT_MESSAGE_DROPPED = 'message-dropped';
+export const EVENT_MESSAGE_CONSUMED = 'message-consumed';
 export const EVENT_ACTOR_ALLOCATED = 'actor-allocated';
 export const EVENT_ACTOR_STARTED = 'actor-started';
 export const EVENT_ACTOR_STOPPED = 'actor-stopped';
@@ -92,6 +93,16 @@ export class MessageDropEvent extends MessageEvent {
     type = EVENT_MESSAGE_DROPPED;
 
     level = LogLevelValue.warn;
+}
+
+/**
+ * MessageConsumedEvent is triggered when an actor has consumed a message it
+ * received.
+ */
+export class MessageConsumeEvent extends MessageEvent {
+    type = EVENT_MESSAGE_CONSUMED;
+
+    level = LogLevelValue.debug;
 }
 
 /**

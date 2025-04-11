@@ -10,8 +10,10 @@ import { EventType, InternalEvent } from './';
 
 const eventMap = {
     message: new Map([
+        [events.EVENT_MESSGAE_SEND, events.MessageSendEvent],
+        [events.EVENT_MESSAGE_CONSUMED, events.MessageConsumeEvent],
         [events.EVENT_MESSAGE_BOUNCE, events.MessageBounceEvent],
-        [events.EVENT_MESSGAE_SEND, events.MessageSendEvent]
+        [events.EVENT_MESSAGE_DROPPED, events.MessageDropEvent]
     ]),
     actor: new Map([
         [events.EVENT_ACTOR_ALLOCATED, events.ActorAllocatedEvent],

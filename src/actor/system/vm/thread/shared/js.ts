@@ -167,6 +167,12 @@ export class JSThread implements SharedThread {
                 if (!empty(this.mailbox)) {
                     let msg = this.mailbox.shift();
                     if (matcher.test(msg)) {
+                        this.vm.events.dispatchMessageEvent(
+                            this.address,
+                            EVENT_MESSAGE_DROPPED,
+                            ADDRESS_DISCARD,
+                            msg
+                        );
                         //XXX: Setting the state to idle here allows for
                         // nested tasks.
                         this.resume();
