@@ -98,7 +98,7 @@ export class JSThread implements SharedThread {
 
     async kill(address: Address): Promise<void> {
         this._assertValid();
-        this.state = ThreadState.INVALID;
+        if (address === this.self) this.state = ThreadState.INVALID;
         await this.vm.sendKillSignal(this, address);
     }
 

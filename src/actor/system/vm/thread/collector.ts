@@ -3,6 +3,7 @@ import { evaluate, Lazy } from '@quenk/noni/lib/data/lazy';
 
 import { PVM } from '..';
 import { Thread } from '.';
+import { SharedThread, THREAD_STATE_IDLE } from './shared';
 
 /**
  * ThreadCollector is used to automatically deallocate dead threads from the
@@ -43,13 +44,18 @@ export class ThreadCollector {
      * This deallocates the thread if it has no children.
      */
     async collect(thread: Thread) {
-        if (!this.threads.has(thread)) return;
+        queueMicrotask(async () => {
+            if (!this.threads.has(thread)) return;
 
-        let { allocator } = evaluate(this.vm);
+            let { allocator } = evaluate(this.vm);
 
-        if (empty(allocator.getChildren(thread))) {
-            this.unmark(thread);
-            await allocator.deallocate(thread);
-        }
+            if (
+                empty(allocator.getChildren(thread)) &&
+                (<SharedThread>thread).state === THREAD_STATE_IDLE
+            ) {
+                this.unmark(thread);
+                await allocator.deallocate(thread);
+            }
+        });
     }
 }

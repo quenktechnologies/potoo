@@ -87,7 +87,7 @@ export const getId = (addr: Address): string =>
  */
 export const isChild = (parent: Address, child: Address): boolean =>
     (parent === ADDRESS_SYSTEM && child !== parent) ||
-    startsWith(child, `${parent}${SEPERATOR}`);
+    startsWith(child, `${parent}`);
 
 /**
  * isGroup determines if an address is a group reference.
