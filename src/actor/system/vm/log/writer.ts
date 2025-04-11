@@ -1,5 +1,3 @@
-import * as events from '../event';
-
 import { isString, Type } from '@quenk/noni/lib/data/type';
 import { Record } from '@quenk/noni/lib/data/record';
 import { interpolate } from '@quenk/noni/lib/data/string';
@@ -43,12 +41,7 @@ export interface LogWritable {
  */
 export type LogTemplates = Record<string>;
 
-const defaultTemplates: LogTemplates = {
-    [events.EVENT_MESSAGE_BOUNCE]: 'Message from {from} to {to} bounced!',
-
-    [events.EVENT_MESSGAE_SEND]:
-        'Message from {from} to {to} delivered successfully!'
-};
+const defaultTemplates: LogTemplates = {};
 
 /**
  * LogWriter provides an implementation of [[LogWritable]] for the VM.
