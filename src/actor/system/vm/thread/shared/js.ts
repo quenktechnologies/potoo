@@ -28,6 +28,7 @@ import { SharedThread, ThreadState } from '.';
 import {
     EVENT_ACTOR_RECEIVE,
     EVENT_ACTOR_STOPPED,
+    EVENT_MESSAGE_CONSUMED,
     EVENT_MESSAGE_DROPPED
 } from '../../event';
 import { isFunction } from '@quenk/noni/lib/data/type';
@@ -169,7 +170,7 @@ export class JSThread implements SharedThread {
                     if (matcher.test(msg)) {
                         this.vm.events.dispatchMessageEvent(
                             this.address,
-                            EVENT_MESSAGE_DROPPED,
+                            EVENT_MESSAGE_CONSUMED,
                             ADDRESS_DISCARD,
                             msg
                         );
