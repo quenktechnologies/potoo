@@ -7,6 +7,8 @@ import {
     Case
 } from '@quenk/noni/lib/control/match/case';
 import { identity } from '@quenk/noni/lib/data/function';
+import { isFunction } from '@quenk/noni/lib/data/type';
+import { Maybe } from '@quenk/noni/lib/data/maybe';
 
 import {
     fromSpawnable,
@@ -31,8 +33,6 @@ import {
     EVENT_MESSAGE_CONSUMED,
     EVENT_MESSAGE_DROPPED
 } from '../../event';
-import { isFunction } from '@quenk/noni/lib/data/type';
-import { Maybe } from '@quenk/noni/lib/data/maybe';
 
 const defaultCases = [new Default(identity)];
 
@@ -91,9 +91,11 @@ export class JSThread implements SharedThread {
         if (this.actor.isJust()) await this.actor.get().stop();
     }
 
-    async watch<T>(task: () => Promise<T>) {
+    async watch<T>(task: () => Promise<T> | Promise<T>) {
         this._assertValid();
-        await Future.do(task).catch(err => this.raise(err));
+        await (isFunction(task) ? Future.do(task) : task).catch(err =>
+            this.raise(err)
+        );
     }
 
     async kill(address: Address): Promise<void> {
