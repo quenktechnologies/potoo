@@ -6,6 +6,8 @@ import { Err, toError } from '@quenk/noni/lib/control/err';
 import { ADDRESS_SYSTEM, getParent } from '../../../address';
 import { Thread } from '../thread';
 import { Allocator } from '../allocator';
+import { JSThread } from '../thread/shared/js';
+import { ThreadState } from '../thread/shared';
 
 /**
  * ErrorStrategy is the interface used by threads to communicate errors that
@@ -66,7 +68,10 @@ export class SupervisorErrorStrategy implements ErrorStrategy {
             let action = trap(err);
 
             if (action === template.ACTION_IGNORE) {
-                //TODO: Should the thread be put back in the idle state?
+                //TODO: figure this out correctly.
+                if (currentThread instanceof JSThread) {
+                    currentThread.state = ThreadState.IDLE;
+                }
                 return;
             } else if (action === template.ACTION_RESTART) {
                 await allocator.reallocate(currentThread);
