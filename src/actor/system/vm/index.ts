@@ -147,7 +147,7 @@ export class PVM implements VM {
             allocator,
             new Scheduler(),
             new ThreadCollector(() => vm),
-            new SupervisorErrorStrategy(allocator),
+            new SupervisorErrorStrategy(allocator, conf.trap),
             log,
             new EventDispatcher(log),
             new ThreadRunner(() => vm),

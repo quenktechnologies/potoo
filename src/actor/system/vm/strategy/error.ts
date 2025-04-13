@@ -8,6 +8,7 @@ import { Thread } from '../thread';
 import { Allocator } from '../allocator';
 import { JSThread } from '../thread/shared/js';
 import { ThreadState } from '../thread/shared';
+import { TrapFunc } from '../../../template';
 
 /**
  * ErrorStrategy is the interface used by threads to communicate errors that
@@ -31,7 +32,10 @@ export interface ErrorStrategy {
  * if no trap function is specified.
  */
 export class SupervisorErrorStrategy implements ErrorStrategy {
-    constructor(public allocator: Allocator) {}
+    constructor(
+        public allocator: Allocator,
+        public defaultTrap: TrapFunc = () => template.ACTION_RAISE
+    ) {}
 
     async raise(src: Thread, error: Err) {
         let prevThread;
@@ -40,7 +44,7 @@ export class SupervisorErrorStrategy implements ErrorStrategy {
 
         let currentThread = src;
 
-        let allocator = this.allocator;
+        let { allocator } = this;
 
         while (true) {
             if (prevThread) {
@@ -63,7 +67,7 @@ export class SupervisorErrorStrategy implements ErrorStrategy {
 
             let tmpl = allocator.getTemplate(currentThread.address).get();
 
-            let trap = tmpl.trap ?? defaultTrap;
+            let trap = tmpl.trap ?? this.defaultTrap;
 
             let action = trap(err);
 
@@ -89,5 +93,3 @@ export class SupervisorErrorStrategy implements ErrorStrategy {
         throw toError(err);
     }
 }
-
-const defaultTrap = () => template.ACTION_RAISE;

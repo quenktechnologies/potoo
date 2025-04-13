@@ -1,3 +1,6 @@
+import { Err } from '@quenk/noni/lib/control/err';
+
+import { TrapAction } from '../../template';
 import { LogSink } from './log';
 
 /**
@@ -6,6 +9,7 @@ import { LogSink } from './log';
  */
 export interface PartialConf {
     log?: Partial<Conf['log']>;
+    trap?: Conf['trap'];
 }
 
 /**
@@ -30,4 +34,9 @@ export interface Conf {
          */
         sink: LogSink;
     };
+
+    /**
+     * trap if specified is used as the default trap handler for all actors.
+     */
+    trap?: (e: Err) => TrapAction;
 }
