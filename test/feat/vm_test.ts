@@ -13,9 +13,11 @@ import {
     EVENT_ACTOR_ALLOCATED,
     EVENT_ACTOR_RECEIVE,
     EVENT_ACTOR_STARTED,
-    EVENT_ACTOR_STOPPED
+    EVENT_ACTOR_STOPPED,
+    EVENT_MESSAGE_CONSUMED
 } from '../../lib/actor/system/vm/event';
 import { Runtime } from '../../lib/actor/system/vm/runtime';
+import { ADDRESS_SYSTEM } from '../../lib/actor/address';
 export const x = [
     {
         concern: SPAWN_CONCERN_ALLOCATED,
@@ -38,17 +40,16 @@ export const x = [
 ];
 
 describe('vm', () => {
+    let vm: PVM;
+
+    beforeEach(() => {
+        vm = PVM.create();
+    });
+
+    afterEach(async () => {
+        await vm.stop();
+    });
     describe('spawn', () => {
-        let vm: PVM;
-
-        beforeEach(() => {
-            vm = PVM.create();
-        });
-
-        afterEach(async () => {
-            await vm.stop();
-        });
-
         it('should allow send, receive, reply', async () => {
             let success = false;
 
@@ -233,6 +234,33 @@ describe('vm', () => {
                     conf.event
                 );
             }
+        });
+    });
+
+    describe('notify', () => {
+        it('should dispatch an event for the message', async () => {
+            let promise = new Promise(resolve => {
+                vm.events.addListener(
+                    ADDRESS_SYSTEM,
+                    EVENT_MESSAGE_CONSUMED,
+                    async evt => {
+                        resolve(evt);
+                    }
+                );
+            });
+
+            await vm.notify('hai');
+
+            let evt = await promise;
+
+            expect(evt).toMatchObject({
+                source: ADDRESS_SYSTEM,
+                from: ADDRESS_SYSTEM,
+                to: ADDRESS_SYSTEM,
+                message: 'hai',
+                type: 'message-consumed',
+                level: 7
+            });
         });
     });
 });

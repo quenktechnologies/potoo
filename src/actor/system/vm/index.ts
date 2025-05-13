@@ -160,8 +160,14 @@ export class PVM implements VM {
 
     async start() {}
 
-    //TODO: events.OnRootMessage.dispatch();
-    async notify() {}
+    async notify(msg: Message) {
+        await this.events.dispatchMessageEvent(
+            this.address,
+            events.EVENT_MESSAGE_CONSUMED,
+            this.address,
+            msg
+        );
+    }
 
     async stop() {
         let threads = this.allocator.getThreads();
