@@ -76,7 +76,11 @@ export class ThreadRunner {
 
         if ((<SharedRunTemplate>thread.template).run) collector.mark(thread);
 
-        await thread.start();
+        try {
+            await thread.start();
+        } catch (e) {
+            await thread.raise(<Error>e);
+        }
 
         await events.dispatchActorEvent(
             thread.address,

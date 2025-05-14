@@ -78,5 +78,27 @@ describe('ThreadRunner', () => {
                 EVENT_ACTOR_STARTED
             );
         });
+
+        it('should catch thrown errors', async () => {
+            let runner = new ThreadRunner(vm);
+
+            let thread: Thread = mockDeep<Thread>();
+
+            let msg = '';
+
+            thread.start = jest.fn(async () => {
+                throw new Error('eww');
+            });
+
+            thread.raise = jest.fn(async (err: Error) => {
+                msg = err.message;
+            });
+
+            await runner.runThread(thread);
+
+            expect(thread.start).toBeCalled();
+
+            expect(msg).toBe('eww');
+        });
     });
 });
