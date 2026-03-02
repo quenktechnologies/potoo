@@ -9,8 +9,8 @@ import { SharedThread, THREAD_STATE_IDLE } from './shared';
  * ThreadCollector is used to automatically deallocate dead threads from the
  * system.
  *
- * This applies to function actors which are deallocated automatically after t
- * hey execute. However, this deallocation is delayed until all child threads
+ * This applies to function actors which are deallocated automatically after
+ * they execute. However, this deallocation is delayed until all child threads
  * have also been deallocated for the actor.
  */
 export class ThreadCollector {

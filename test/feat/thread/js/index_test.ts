@@ -29,7 +29,7 @@ describe('js', () => {
         expect(success).toBe(true);
     });
 
-    //FIXME: fails on line 51
+    //FIXME: fails on line 52
     xit('should not mark itself invalid when killing children', async () => {
         await vm.spawn({
             id: 'parent',

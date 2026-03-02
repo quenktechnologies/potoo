@@ -7,7 +7,7 @@ import {
     Case
 } from '@quenk/noni/lib/control/match/case';
 import { identity } from '@quenk/noni/lib/data/function';
-import { isFunction } from '@quenk/noni/lib/data/type';
+import { isFunction, Type } from '@quenk/noni/lib/data/type';
 import { Maybe } from '@quenk/noni/lib/data/maybe';
 
 import {
@@ -15,6 +15,7 @@ import {
     SharedCreateTemplate,
     SharedRunTemplate,
     SharedTemplate,
+    SPAWN_CONCERN_ALLOCATED,
     Spawnable
 } from '../../../../template';
 import { Address, ADDRESS_DISCARD } from '../../../../address';
@@ -28,6 +29,7 @@ import { Actor, Message } from '../../../..';
 import { VM } from '../../';
 import { SharedThread, ThreadState } from '.';
 import {
+    EVENT_ACTOR_DEALLOCATED,
     EVENT_ACTOR_RECEIVE,
     EVENT_ACTOR_STOPPED,
     EVENT_MESSAGE_CONSUMED,
@@ -48,7 +50,8 @@ export class JSThread implements SharedThread {
         public address: Address,
         public mailbox: Message[] = [],
         public state: ThreadState = ThreadState.IDLE,
-        public actor: Maybe<Actor> = Maybe.nothing()
+        public actor: Maybe<Actor> = Maybe.nothing(),
+        public finalValue?: Type
     ) {}
 
     readonly self = this.address;
@@ -98,6 +101,10 @@ export class JSThread implements SharedThread {
         );
     }
 
+    async exit(): Promise<void> {
+        await this.kill(this.self);
+    }
+
     async kill(address: Address): Promise<void> {
         this._assertValid();
         if (address === this.self) this.state = ThreadState.INVALID;
@@ -144,6 +151,30 @@ export class JSThread implements SharedThread {
         return result;
     }
 
+    /**
+     * TODO: move to allocator
+     */
+    async fork<T>(tmpl: Spawnable): Promise<T> {
+        this._assertValid();
+        // Ensure we do not wait until the child dies.
+        let addr = await this.spawn({
+            ...fromSpawnable(tmpl),
+            spawnConcern: SPAWN_CONCERN_ALLOCATED
+        });
+
+        let mthread = this.vm.allocator.getThread(addr);
+
+        if (mthread.isNothing()) {
+            throw new Error(`Failed to find thread with address ${addr}`);
+        }
+
+        let thread = mthread.get();
+
+        await this.vm.events.monitor(thread, EVENT_ACTOR_DEALLOCATED);
+
+        return (<JSThread>thread).finalValue;
+    }
+
     async tell(addr: Address, msg: Message): Promise<void> {
         this._assertValid();
         await Future.fromCallback(cb => {
@@ -156,7 +187,7 @@ export class JSThread implements SharedThread {
         });
     }
 
-    async receive<T = Message>(cases: Case<T>[] = []): Promise<T> {
+    async receive<T>(cases: Case<T>[] = []): Promise<T> {
         this._assertValid();
         let msg = await Future.fromCallback<T>(cb => {
             this.vm.events.dispatchActorEvent(
@@ -196,5 +227,16 @@ export class JSThread implements SharedThread {
             this.vm.scheduler.postTask(task);
         });
         return msg;
+    }
+
+    async receiveUntil<T = Message>(
+        cases: Case<T>[],
+        f: (m: Message) => boolean
+    ): Promise<T> {
+        this._assertValid();
+        while (true) {
+            let msg = await this.receive(cases);
+            if (f(msg)) return msg;
+        }
     }
 }

@@ -18,6 +18,7 @@ import { Allocator } from '../../../../../../../lib/actor/system/vm/allocator';
 import { ThreadState } from '../../../../../../../lib/actor/system/vm/thread/shared';
 import { JSThread } from '../../../../../../../lib/actor/system/vm/thread/shared/js';
 import { Thread } from '../../../../../../../lib/actor/system/vm/thread';
+import { InternalEvent } from '../../../../../../../lib/actor/system/vm/event';
 
 describe('JSThread', () => {
     let platform = mockDeep<VM>();
@@ -144,6 +145,7 @@ describe('JSThread', () => {
             await thread.raise(new Error('fail'));
 
             expect(threadReceived).toBe(thread);
+            //TODO: This throws a max recursion error not the one we expect. Need to investigate.
             expect(errorReceived).toBeInstanceOf(Error);
             expect(thread.state).toBe(ThreadState.ERROR);
         });
@@ -163,6 +165,49 @@ describe('JSThread', () => {
             expect(platform.allocator.allocate).toBeCalledWith(thread, tmpl);
 
             expect(result).toBe('/child');
+        });
+    });
+
+    describe('fork', () => {
+        it('should return the value of the spawned thread', async () => {
+            let parent = new JSThread(platform, template, '/');
+
+            let child = new JSThread(platform, template, '/child');
+            child.finalValue = 12;
+
+            let tmpl = { id: '/', create: identity };
+
+            platform.allocator.allocate.mockResolvedValueOnce('/');
+
+            platform.allocator.allocate.mockResolvedValueOnce('/child');
+
+            platform.allocator.getThread.mockReturnValueOnce(Maybe.just(child));
+
+            platform.events.monitor.mockResolvedValueOnce(
+                <InternalEvent>(<unknown>{})
+            );
+
+            expect(await parent.fork(tmpl)).toBe(12);
+        });
+
+        it('should return void if the thread has no value', async () => {
+            let parent = new JSThread(platform, template, '/');
+
+            let child = new JSThread(platform, template, '/child');
+
+            let tmpl = { id: '/', create: identity };
+
+            platform.allocator.allocate.mockResolvedValueOnce('/');
+
+            platform.allocator.allocate.mockResolvedValueOnce('/child');
+
+            platform.allocator.getThread.mockReturnValueOnce(Maybe.just(child));
+
+            platform.events.monitor.mockResolvedValueOnce(
+                <InternalEvent>(<unknown>{})
+            );
+
+            expect(await parent.fork(tmpl)).toBeUndefined();
         });
     });
 
@@ -207,6 +252,31 @@ describe('JSThread', () => {
             await thread.receive();
 
             expect(thread.state).toBe(ThreadState.IDLE);
+        });
+    });
+
+    describe('receiveUntil', () => {
+        it('should receive messages until the predicate is satisfied', async () => {
+            let thread = new JSThread(platform, template, '/');
+            thread.mailbox.push('we');
+            thread.mailbox.push('jammin');
+            thread.mailbox.push('still');
+            thread.mailbox.push('!');
+
+            let result = await thread.receiveUntil([], m => m === 'jammin');
+            expect(result).toBe('jammin');
+        });
+
+        it('should keep waiting if the predicate is not satisfied', async () => {
+            let thread = new JSThread(platform, template, '/');
+            thread.mailbox.push('we');
+            thread.mailbox.push('jammin');
+            thread.mailbox.push('still');
+            thread.mailbox.push('!');
+
+            expect(thread.receiveUntil([], m => m === 'foo')).rejects.toEqual(
+                'e'
+            );
         });
     });
 

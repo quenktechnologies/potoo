@@ -3,7 +3,7 @@ import { Err } from '@quenk/noni/lib/control/error';
 import { isFunction, isString } from '@quenk/noni/lib/data/type';
 
 import { Runtime } from './system/vm/runtime';
-import { Actor } from './';
+import { Actor, Runnable } from './';
 
 export const ACTION_RAISE = -0x1;
 export const ACTION_IGNORE = 0x0;
@@ -103,6 +103,12 @@ export type CreateFunc = (runtime: Runtime) => Actor;
 export type RunFunc = (runtime: Runtime) => Promise<void>;
 
 /**
+ * CreateForkFunc is a function that creates a forked actor given the handle
+ * the system has generated.
+ */
+export type CreateForkFunc<T> = (runtime: Runtime) => Runnable<T>;
+
+/**
  * Template is an object that tells the system how to create an manage an
  * actor.
  *
@@ -148,6 +154,15 @@ export interface ProcessTemplate extends BaseTemplate {
      */
     script: Path;
 }
+
+/**
+ * ForkTemplate is used for creating forked actors.
+ */
+export interface ForkTemplate<T> extends BaseTemplate {
+    create: CreateForkFunc<T>;
+}
+
+export type Forkable<T> = ForkTemplate<T>;
 
 /**
  * Spawnable allows a CreateFunc to be used in place of a Template.

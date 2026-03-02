@@ -1,14 +1,11 @@
 import { TypeCase } from '@quenk/noni/lib/control/match/case';
 import { mockDeep } from 'jest-mock-extended';
 
-import {
-    AbstractResident,
-    Immutable
-} from '../../../../lib/actor/framework/resident';
+import { BaseLocal, Immutable, Mutable } from '../../../../lib/actor/local';
 import { Runtime } from '../../../../lib/actor/system/vm/runtime';
 
 describe('resident', () => {
-    class Act extends AbstractResident {
+    class Act extends BaseLocal {
         isRunning = false;
 
         async run() {
@@ -19,7 +16,7 @@ describe('resident', () => {
     let runtime = mockDeep<Runtime>();
     let resident: Act;
 
-    describe('AbstractResident', () => {
+    describe('BaseLocal', () => {
         beforeEach(() => {
             resident = new Act(runtime);
         });
@@ -87,28 +84,43 @@ describe('resident', () => {
                 expect(runtime.receive).toHaveBeenCalledWith(cases);
             });
         });
+    });
+
+    describe('Mutable', () => {
+        class Mut extends Mutable {
+            isRunning = false;
+            async run() {
+                this.isRunning = true;
+            }
+        }
 
         describe('start', () => {
             it('should call the run method', async () => {
+                let resident = new Mut(runtime);
                 await resident.start();
-
                 expect(resident.isRunning).toBe(true);
             });
         });
     });
 
-    class ImAct extends Immutable {
-        isRunning = false;
-
-        selectors = jest.fn(() => [new TypeCase(Number, () => {})]);
-
-        async run() {
-            this.isRunning = true;
-        }
-    }
-
     describe('Immutable', () => {
+        class ImAct extends Immutable {
+            isRunning = false;
+
+            selectors = jest.fn(() => [new TypeCase(Number, () => {})]);
+
+            async run() {
+                this.isRunning = true;
+            }
+        }
+
         describe('start', () => {
+            it('should call the run method', async () => {
+                let resident = new ImAct(runtime);
+                await resident.start();
+                expect(resident.isRunning).toBe(true);
+            });
+
             it('should start receiving', async () => {
                 let resident = new ImAct(runtime);
 

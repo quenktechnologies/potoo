@@ -33,3 +33,13 @@ export interface Actor {
      */
     stop(): Promise<void>;
 }
+
+/**
+ * Runnable is an extended actor interface used mainly by the fork machinery.
+ */
+export interface Runnable<T> extends Actor {
+    /**
+     * run is invoked by the Runnable's start() method.
+     */
+    run(): Promise<T>;
+}

@@ -115,7 +115,12 @@ export class EventDispatcher {
                 }
             };
 
-            if (type !== events.EVENT_ACTOR_STOPPED)
+            // listen for the stop event if the target is not one of the EOL
+            // events.
+            if (
+                type !== events.EVENT_ACTOR_STOPPED &&
+                type !== events.EVENT_ACTOR_DEALLOCATED
+            )
                 this.addListener(
                     thread.address,
                     events.EVENT_ACTOR_STOPPED,

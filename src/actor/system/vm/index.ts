@@ -199,6 +199,8 @@ export class PVM implements VM {
         await this.sendKillSignal(this, addr);
     }
 
+    async exit() {}
+
     async receive<T>() {
         return <Promise<T>>Future.raise(new Error('Not implemented'));
     }

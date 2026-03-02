@@ -1,9 +1,9 @@
 import { Err } from '@quenk/noni/lib/control/error';
+import { Case } from '@quenk/noni/lib/control/match/case';
 
 import { Address } from './address';
 import { Spawnable } from './template';
 import { Message } from '.';
-import { Case } from '@quenk/noni/lib/control/match/case';
 
 /**
  * Parent is any object capable of spawning a child actor.
@@ -41,6 +41,13 @@ export interface Api extends Parent {
      * An actor can only specify itself or a child as the target.
      */
     kill(target: Address): Promise<void>;
+
+    /**
+     * exit kills the actor.
+     *
+     * A value can be optionally provided to return to the parent.
+     */
+    exit<T>(value?: T): Promise<void>;
 
     /**
      * tell a message to an actor address.
