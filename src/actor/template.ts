@@ -162,7 +162,7 @@ export interface ForkTemplate<T> extends BaseTemplate {
     create: CreateForkFunc<T>;
 }
 
-export type Forkable<T> = ForkTemplate<T>;
+export type Forkable<T> = ForkTemplate<T> | CreateForkFunc<T>;
 
 /**
  * Spawnable allows a CreateFunc to be used in place of a Template.
