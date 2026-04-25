@@ -107,33 +107,27 @@ export abstract class Immutable extends BaseLocal {
  * method.
  *
  * These actors can communicate with the rest of the system if needed but
- * should limit communication with the parent as much as possible to the
- * final result.
+ * most times, should limit communication to the parent as much as possible
+ * in the form of the final value.
  *
- * A Fork is like an Immutable except it does not automatically start
- * receiving messages on start. This must be manually triggered using
- * receiveUntil() or just receive() if Mutable like behaviour is preferred.
+ * Forks can utilize receiveUntil() to block until a specific message is
+ * received. Use this im the run() method to wait for a desired condition
+ * before returning a final value.
  */
 export abstract class Fork<T> extends BaseLocal implements Runnable<T> {
-    selectors<M>(): Case<Promise<M> | M>[] {
-        return [];
-    }
-
     /**
-     * receiveUntil uses the internal selctors define to keep processing
-     * incomming messages until the conditions of the predicate function
-     * are met.
+     * receiveUntil the result of any matched case satisfies function f.
      *
-     * Use this to block the actor until it is ready to return a value.s
+     * Use this to block the actor until it is ready to return a value.
      */
-    async receiveUntil<M>(f: MessagePredicate): Promise<M> {
-        return this.runtime.receiveUntil(this.selectors(), f);
+    async receiveUntil<M>(cases: Case<M>[], f: MessagePredicate): Promise<M> {
+        return this.runtime.receiveUntil(cases, f);
     }
 
     abstract run(): Promise<T>;
 
     async start() {
         this.runtime.finalValue = await this.run();
-        this.exit();
+        await this.exit();
     }
 }

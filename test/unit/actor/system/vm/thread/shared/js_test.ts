@@ -173,19 +173,18 @@ describe('JSThread', () => {
             let parent = new JSThread(platform, template, '/');
 
             let child = new JSThread(platform, template, '/child');
+
             child.finalValue = 12;
 
             let tmpl = { id: '/', create: identity };
-
-            platform.allocator.allocate.mockResolvedValueOnce('/');
 
             platform.allocator.allocate.mockResolvedValueOnce('/child');
 
             platform.allocator.getThread.mockReturnValueOnce(Maybe.just(child));
 
-            platform.events.monitor.mockResolvedValueOnce(
-                <InternalEvent>(<unknown>{})
-            );
+            platform.events.monitor.mockResolvedValueOnce(<InternalEvent>(
+                (<unknown>{ address: '/child' })
+            ));
 
             expect(await parent.fork(tmpl)).toBe(12);
         });
@@ -197,15 +196,13 @@ describe('JSThread', () => {
 
             let tmpl = { id: '/', create: identity };
 
-            platform.allocator.allocate.mockResolvedValueOnce('/');
-
             platform.allocator.allocate.mockResolvedValueOnce('/child');
 
             platform.allocator.getThread.mockReturnValueOnce(Maybe.just(child));
 
-            platform.events.monitor.mockResolvedValueOnce(
-                <InternalEvent>(<unknown>{})
-            );
+            platform.events.monitor.mockResolvedValueOnce(<InternalEvent>(
+                (<unknown>{ address: '/child' })
+            ));
 
             expect(await parent.fork(tmpl)).toBeUndefined();
         });

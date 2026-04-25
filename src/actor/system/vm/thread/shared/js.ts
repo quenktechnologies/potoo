@@ -29,6 +29,7 @@ import { Actor, Message } from '../../../..';
 import { VM } from '../../';
 import { SharedThread, ThreadState } from '.';
 import {
+    ActorDeallocatedEvent,
     EVENT_ACTOR_DEALLOCATED,
     EVENT_ACTOR_RECEIVE,
     EVENT_ACTOR_STOPPED,
@@ -168,11 +169,16 @@ export class JSThread implements SharedThread {
             throw new Error(`Failed to find thread with address ${addr}`);
         }
 
-        let thread = mthread.get();
+        while (true) {
+            if (
+                (<ActorDeallocatedEvent>(
+                    await this.vm.events.monitor(this, EVENT_ACTOR_DEALLOCATED)
+                )).address === addr
+            )
+                break;
+        }
 
-        await this.vm.events.monitor(thread, EVENT_ACTOR_DEALLOCATED);
-
-        return (<JSThread>thread).finalValue;
+        return (<JSThread>mthread.get()).finalValue;
     }
 
     async tell(addr: Address, msg: Message): Promise<void> {
